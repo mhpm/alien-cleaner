@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "godot-mcp-pro": {
+      "command": "node",
+      "args": ["C:/Users/miche/Documents/alien-cleaner/addons/godot_mcp/server/index.js"],
+      "env": {
+        "GODOT_MCP_PORT": "6505"
+      }
+    }
+  }
+}

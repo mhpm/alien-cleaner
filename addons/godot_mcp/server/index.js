@@ -21,7 +21,7 @@ const {
 const { WebSocketServer } = require("ws");
 
 const START_PORT = parseInt(process.env.GODOT_MCP_PORT || "6505", 10);
-const MAX_PORT = 6509; // 6510-6514 are reserved by the plugin for CLI tools
+const MAX_PORT = 6514; // the plugin connects to every port in 6505-6514
 const DEFAULT_TIMEOUT_MS = 60000;
 const LONG_TIMEOUT_MS = 300000;
 const LONG_COMMANDS = new Set([

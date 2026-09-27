@@ -1,0 +1,6 @@
+{
+  "enabledMcpjsonServers": ["godot-mcp-pro"],
+  "permissions": {
+    "allow": ["mcp__godot-mcp-pro"]
+  }
+}
