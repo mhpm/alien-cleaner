@@ -18,8 +18,7 @@ y_sort_enabled = true
 [node name="Effects" type="Node2D" parent="." unique_id=99307125]
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=238865078]
-position = Vector2(72, 110)
-zoom = Vector2(2, 2)
+position = Vector2(178, 321)
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=1154622926]
 script = ExtResource("3_iywne")

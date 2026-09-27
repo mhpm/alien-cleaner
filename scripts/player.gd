@@ -4,15 +4,13 @@ extends CharacterBody2D
 ## fires faster while standing still. Special ability: Air Blast.
 
 const BLAST_RADIUS := 62.0
-const SUIT_SCALE := 0.08  # suit canvas pixels -> world units (~25 units tall)
 const BODY_Y := -10.0  # world-space height of the torso
 
 var input_dir := Vector2.ZERO
 var locked := false
 var dead := false
 
-var body: SuitRig  # astronaut built from the equipped gear
-var gun: Sprite2D  # the equipped weapon part, aimed separately
+var body: Astronaut  # reference-sheet astronaut + the equipped blaster, aimed separately
 var shadow: Sprite2D
 var shield_fx: Sprite2D
 var mat: ShaderMaterial
@@ -36,13 +34,12 @@ var shoot_t := 0.0
 var facing := 1.0
 var squash := Vector2.ONE
 var gun_angle := -PI * 0.5
-var gun_behind := false
 var recoil := 0.0
 
 
 func _ready() -> void:
 	collision_layer = 2
-	collision_mask = 1
+	collision_mask = 1 | PropData.LAYER_BODIES_ONLY
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	var cs := CollisionShape2D.new()
 	var c := CircleShape2D.new()
@@ -55,17 +52,9 @@ func _ready() -> void:
 	shadow.scale = Vector2(1.3, 1.2)
 	add_child(shadow)
 	mat = Art.flash_material()
-	body = SuitRig.new(false)
-	body.scale = Vector2.ONE * SUIT_SCALE
+	body = Astronaut.new()
 	add_child(body)
 	body.set_layer_material(mat)
-	gun = Sprite2D.new()
-	gun.texture = Art.suit_tex(SuitRig.variant("weapon"), "weapon")
-	gun.centered = false
-	gun.offset = -SuitRig.GUN_PIVOT  # rotate around the grip
-	gun.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-	gun.material = mat
-	add_child(gun)
 	shield_fx = Sprite2D.new()
 	shield_fx.texture = Art.tex("shield")
 	shield_fx.position = Vector2(0, BODY_Y)
@@ -73,6 +62,10 @@ func _ready() -> void:
 	shield_fx.visible = false
 	add_child(shield_fx)
 	refresh_upgrades()
+
+
+## Overclock power-up (survival): the blaster fires much faster while this runs.
+var frenzy_t := 0.0
 
 
 func reset_for_room(pos: Vector2) -> void:
@@ -111,10 +104,17 @@ func _physics_process(delta: float) -> void:
 	else:
 		body.modulate.a = 1.0
 	blast_t = maxf(blast_t - delta, 0.0)
+	if frenzy_t > 0.0:
+		frenzy_t -= delta
+		if randf() < delta * 14.0:
+			Game.world.burst(global_position + Vector2(randf_range(-5, 5), -6), Color("ffcd75"), 1, 25.0, 0.3, 1.5, -40.0)
 	flash_t = maxf(flash_t - delta, 0.0)
 
 	var dir := Vector2.ZERO if locked else input_dir.limit_length(1.0)
-	velocity = dir * float(s.move_speed) + knock
+	var slow := Game.world.room.slow_factor(global_position)  # sticky alien creep
+	velocity = dir * float(s.move_speed) * slow + knock
+	if slow < 1.0 and dir.length() > 0.15 and randf() < delta * 10.0:
+		Game.world.burst(global_position, Color("c75bd6"), 1, 12.0, 0.4, 1.5, -10.0)
 	knock = knock.move_toward(Vector2.ZERO, 700.0 * delta)
 	move_and_slide()
 	var moving := dir.length() > 0.15
@@ -131,7 +131,7 @@ func _physics_process(delta: float) -> void:
 		fire_t -= delta * (1.0 if not moving else 0.6)
 		if fire_t <= 0.0:
 			_shoot()
-			fire_t = float(s.fire_interval)
+			fire_t = float(s.fire_interval) * (0.4 if frenzy_t > 0.0 else 1.0)
 	else:
 		fire_t = maxf(fire_t - delta, 0.08)
 
@@ -152,13 +152,8 @@ func _muzzle_base() -> Vector2:
 	return global_position + Vector2(0, BODY_Y)
 
 
-func _gun_pivot_local() -> Vector2:
-	var p := (SuitRig.GUN_PIVOT - SuitRig.ANCHOR) * SUIT_SCALE
-	return Vector2(p.x * facing, p.y + body.position.y)
-
-
 func _gun_pivot() -> Vector2:
-	return global_position + _gun_pivot_local()
+	return body.to_global(body.grip_pos())
 
 
 func _gun_dir() -> Vector2:
@@ -170,11 +165,16 @@ func _find_target() -> Enemy:
 	var best_d := INF
 	var los: Enemy = null
 	var los_d := INF
-	for n in get_tree().get_nodes_in_group("enemies"):
+	var reach := Game.world.aim_range()  # big rooms: only aliens on screen
+	for n in Game.world.enemy_cache:
+		if not is_instance_valid(n):  # freed since the cache was refreshed
+			continue
 		var e := n as Enemy
 		if e == null or not e.targetable:
 			continue
 		var d := global_position.distance_to(e.global_position)
+		if d > reach and not e.is_boss:
+			continue
 		if d < best_d:
 			best_d = d
 			best = e
@@ -193,7 +193,7 @@ func _has_los(e: Enemy) -> bool:
 func _shoot() -> void:
 	var s := Game.stats
 	var d := _gun_dir()
-	var origin := _gun_pivot() + d * SuitRig.gun_length() * SUIT_SCALE
+	var origin := body.to_global(body.muzzle_pos())
 	var perp := d.orthogonal()
 	var shots := int(s.shots)
 	for i in shots:
@@ -207,20 +207,25 @@ func _shoot() -> void:
 	recoil = 2.5
 	var lvl := int(s.weapon)
 	Sfx.play("shoot", 0.12, -7.0 + lvl)
+	var st := WeaponData.style(Astronaut.weapon_variant())
 	var flash := AnimFx.spawn(Game.world.effects, "muzzle", "flash", origin, 0.2 + lvl * 0.03)
+	if st.color != null:
+		flash.material = Art.shot_material(Color(str(st.color)))
 	flash.create_tween().tween_property(flash, "modulate:a", 0.0, 0.06)
-	Game.world.burst(origin, Color("9fe8ff"), 2 + lvl, 45.0, 0.15, 1.5, 0.0, d, 0.5)
+	Game.world.burst(origin, Color(str(st.flash)), 2 + lvl, 45.0, 0.15, 1.5, 0.0, d, 0.5)
 
 
 func _spawn_bullet(pos: Vector2, d: Vector2) -> void:
 	var s := Game.stats
 	var tier := WeaponData.tier(int(s.weapon))
+	var st := WeaponData.style(Astronaut.weapon_variant())
 	var b := Bullet.new()
 	b.tier = tier
+	b.style = st
 	b.dir = d
-	b.speed = float(s.bullet_speed) * float(tier.speed) / 220.0
+	b.speed = float(s.bullet_speed) * float(tier.speed) / 220.0 * float(st.speed)
 	b.damage = float(s.damage) * float(tier.dmg)
-	b.pierce = int(s.pierce) + int(tier.pierce)
+	b.pierce = int(s.pierce) + int(tier.pierce) + int(st.pierce)
 	b.bounces = int(s.ricochet)
 	Game.world.effects.add_child(b)
 	b.global_position = pos
@@ -294,19 +299,16 @@ func take_damage(amount: float, from := Vector2.INF, hazard := false) -> void:
 func _die() -> void:
 	dead = true
 	shield_fx.visible = false
-	gun.visible = false
 	for b in bots:
 		b.visible = false
 	Sfx.play("hurt", 0.0)
 	var w := Game.world
 	w.burst(global_position + Vector2(0, BODY_Y), Color("f4f4f4"), 24, 110.0, 0.7, 2.5)
 	w.shake(0.8)
-	# topple over backwards and fade a little
-	var tw := create_tween()
-	tw.tween_property(body, "position:y", -8.0, 0.2).set_ease(Tween.EASE_OUT)
-	tw.parallel().tween_property(body, "rotation", -facing * 1.5, 0.45).set_trans(Tween.TRANS_BACK)
-	tw.tween_property(body, "position:y", 0.0, 0.2).set_ease(Tween.EASE_IN)
-	tw.tween_property(body, "modulate", Color(0.7, 0.7, 0.8, 0.8), 0.3)
+	# collapse (death animation from the sheet) and fade a little
+	body.rotation = 0.0
+	body.play("death")
+	body.create_tween().tween_property(body, "modulate", Color(0.7, 0.7, 0.8, 0.8), 0.6)
 	w.on_player_died()
 
 
@@ -343,43 +345,29 @@ func _animate(delta: float, moving: bool, dir: Vector2) -> void:
 		facing = signf(aim_dir.x)
 	elif moving and absf(dir.x) > 0.1:
 		facing = signf(dir.x)
-	# walk: the suit bobs and leans while the boots stay planted
-	var body_y := 0.0
+	# sprite animation: walking away from the camera shows the back view
+	if hurt_t > 0.0:
+		body.play("hurt")
+	elif moving:
+		body.play("walk_up" if dir.y < -0.6 and absf(dir.x) < 0.5 and shoot_t <= 0.0 else "walk")
+	else:
+		body.play("idle")
 	if moving:
-		walk_t += delta * 16.0
-		body_y = -absf(sin(walk_t)) * 1.3
-		body.rotation = sin(walk_t) * 0.06 * facing
+		walk_t += delta * 11.0
+		body.walk_amount = minf(1.0, body.walk_amount + delta * 8.0)
 		dust_t -= delta
 		if dust_t <= 0.0:
 			dust_t = 0.22
 			AnimFx.spawn(Game.world.decals, "dust", "puff", global_position + Vector2(-dir.x * 4.0, 0), 0.09)
 	else:
-		walk_t = 0.0
-		body.rotation = lerpf(body.rotation, 0.0, delta * 12.0)
-	if hurt_t > 0.0:
-		body.rotation = sin(hurt_t * 60.0) * 0.08
-	body.position.y = lerpf(body.position.y, body_y, delta * 20.0)
-	(body.parts["legs"] as Sprite2D).position.y = -body.position.y / SUIT_SCALE
-	var breathe := sin(t * 3.0) * 0.02
+		body.walk_amount = maxf(0.0, body.walk_amount - delta * 8.0)
+	body.walk_phase = walk_t
+	body.rotation = sin(hurt_t * 60.0) * 0.08 if hurt_t > 0.0 else 0.0
 	squash = squash.lerp(Vector2.ONE, delta * 10.0)
-	body.scale = Vector2((1.0 + breathe) * squash.x * facing, (1.0 - breathe) * squash.y) * SUIT_SCALE
+	body.scale = squash
+	body.facing = facing
 	mat.set_shader_parameter("flash", clampf(flash_t / 0.15, 0.0, 1.0))
-	# blaster: held at the grip, points where the shots go, kicks back on fire
+	# blaster: points where the shots go, kicks back on fire
 	recoil = move_toward(recoil, 0.0, delta * 18.0)
-	var gd := _gun_dir()
-	var base := SuitRig.gun_base_angle()
-	gun.position = _gun_pivot_local() - gd * recoil
-	if gd.x >= 0.0:
-		gun.scale = Vector2(SUIT_SCALE, SUIT_SCALE)
-		gun.rotation = gun_angle - base
-	else:
-		gun.scale = Vector2(SUIT_SCALE, -SUIT_SCALE)
-		gun.rotation = gun_angle + base
-	gun.modulate.a = body.modulate.a
-	var behind := gd.y < -0.5
-	if behind != gun_behind:
-		gun_behind = behind
-		if behind:
-			move_child(gun, body.get_index())
-		else:
-			move_child(body, gun.get_index())
+	body.aim = gun_angle - body.rotation
+	body.recoil = recoil / Astronaut.BODY_SCALE

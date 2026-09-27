@@ -3,7 +3,9 @@ extends Node2D
 ## Runs a world: builds rooms, spawns waves, handles CLEAN / upgrades / exit flow,
 ## and exposes game-feel helpers (shake, hitstop, particles, popups).
 
-const PLAYER_START := Vector2(80, 206)
+## Later waves of a room are sturdier; the last wave of a 3+ wave room brings elites.
+const WAVE_HP_STEP := 0.18
+const WAVE_SPEED_STEP := 0.05
 
 @onready var room: Room = $Room
 @onready var decals: Node2D = $Decals
@@ -20,6 +22,19 @@ var state_t := 0.0
 var pending := 0
 var shake_amt := 0.0
 var hitstop_until := 0
+# space station levels (StationData): sectors to clean, camera follows the player
+var station_mode := false
+var level_def: Dictionary = {}
+var sectors_clean: Array[bool] = []
+var sector := -1
+var boss_pending := ""
+var guide: GuideArrow
+var wave_i := 0  # waves spawned so far in this room / sector
+var wave_n := 0
+var follow_cam := false
+var indicators: OffscreenIndicators
+var survival: Survival  # survivor-style stage director (WorldData "survival")
+var enemy_cache: Array[Node] = []  # the "enemies" group, refreshed every physics frame
 
 
 func _ready() -> void:
@@ -31,7 +46,15 @@ func _ready() -> void:
 	player = Player.new()
 	entities.add_child(player)
 	# frame the painted room art exactly (it is authored for a portrait phone)
-	camera.position = Room.art_rect().get_center()
+	camera.position = room.art_rect().get_center()
+	guide = GuideArrow.new()
+	guide.player = player
+	guide.z_index = 20
+	add_child(guide)
+	indicators = OffscreenIndicators.new()
+	indicators.camera = camera
+	indicators.z_index = 30
+	add_child(indicators)
 	hud.setup(self)
 	Sfx.play_music()
 	_start_room()
@@ -55,53 +78,245 @@ func _start_room() -> void:
 		c.queue_free()
 	pending = 0
 	room_def = WorldData.room(Game.world_index, Game.room_index)
+	level_def = room_def
+	if survival != null:
+		survival.queue_free()
+		survival = null
+	hud.enable_survival(room_def.has("survival"))
+	if room_def.has("survival"):
+		_start_survival()
+		return
+	if room_def.has("station"):
+		_start_station()
+		return
+	station_mode = false
 	var layouts: Array = room_def.layouts
 	var lname: String = layouts[randi() % layouts.size()]
-	room.build(WorldData.LAYOUTS[lname], entities)
-	player.reset_for_room(PLAYER_START)
+	var world_def := WorldData.world(Game.world_index)
+	room.build(WorldData.LAYOUTS[lname], entities, str(world_def.get("theme", "ship")))
+	# enter from the bottom of the room, the exit door is at the top
+	player.reset_for_room(Vector2(room.room_w * 0.5, room.room_h - 18.0))
+	_camera_setup()
 	var ws: Array = room_def.get("waves", [])
 	waves = ws.duplicate()
-	hud.set_room(Game.room_index + 1, WorldData.room_count(Game.world_index))
+	_reset_waves()
+	# boss rooms with waves: the boss arrives after them
+	boss_pending = str(room_def.get("boss", "")) if not waves.is_empty() else ""
+	hud.set_room(Game.global_room(), WorldData.total_rooms())
 	hud.controls.enabled = true
 	state = "intro"
 	state_t = 0.9
-	if room_def.has("boss"):
-		var final := bool(room_def.get("final", false))
-		hud.banner("BOSS!" if final else "MINI BOSS", Color("ff5566"), 44, 1.0)
+	if room_def.has("boss") and waves.is_empty():
+		var world_boss := WorldData.is_last_room(Game.world_index, Game.room_index)
+		hud.banner("BOSS!" if world_boss else "MINI BOSS", Color("ff5566"), 44, 1.0)
 		state_t = 1.3
 	elif Game.room_index == 0:
-		hud.banner(str(WorldData.world(Game.world_index).name), Color("73eff7"), 22, 1.2)
+		var col := Color("c75bd6") if Game.world_index > 0 else Color("73eff7")
+		hud.banner(str(world_def.name), col, 22, 1.2)
+		if Game.world_index > 0:
+			state_t = 1.4
 	else:
-		hud.banner("ROOM %d" % (Game.room_index + 1), Color("f4f4f4"), 32, 0.6)
+		hud.banner("ROOM %d" % Game.global_room(), Color("f4f4f4"), 32, 0.6)
+
+
+## Small rooms: the camera frames the painted room exactly. Big rooms: it follows
+## the astronaut and never shows past the painted art.
+func _camera_setup() -> void:
+	follow_cam = room.follows_camera()
+	guide.target = Vector2.INF
+	if not follow_cam:
+		camera.position = room.art_rect().get_center()
+		for side in [SIDE_LEFT, SIDE_TOP]:
+			camera.set_limit(side, -10000000)
+		for side in [SIDE_RIGHT, SIDE_BOTTOM]:
+			camera.set_limit(side, 10000000)
+		return
+	var r := room.art_rect()
+	camera.set_limit(SIDE_LEFT, int(r.position.x))
+	camera.set_limit(SIDE_TOP, int(r.position.y))
+	camera.set_limit(SIDE_RIGHT, int(r.end.x))
+	camera.set_limit(SIDE_BOTTOM, int(r.end.y))
+	camera.position = player.global_position + Vector2(0, -10)
+	camera.reset_smoothing()
+
+
+## World-space size of what the camera shows (depends on the camera zoom and screen).
+func view_size() -> Vector2:
+	return get_viewport_rect().size / camera.zoom
+
+
+## How far the auto-aim reaches: everything in rooms that fit the screen, roughly what
+## is on screen when the camera scrolls.
+func aim_range() -> float:
+	if not follow_cam:
+		return INF
+	var v := view_size()
+	return maxf(Room.FOLLOW_AIM_RANGE, minf(v.x, v.y) * 0.5 + 40.0)
+
+
+func _reset_waves() -> void:
+	wave_i = 0
+	wave_n = waves.size()
+	hud.set_wave(0, wave_n)
+
+
+# ---------------------------------------------------------------- survival flow
+
+## Survivor-style stage: wide arena, clock, endless escalating waves (see Survival).
+func _start_survival() -> void:
+	station_mode = false
+	var sd: Dictionary = room_def.survival
+	room.build_arena(sd.get("arena", Vector2i(64, 96)), entities, randi())
+	player.reset_for_room(room.bounds().get_center() + Vector2(0, 24))
+	_camera_setup()
+	waves = []
+	wave_n = 0
+	boss_pending = ""
+	survival = Survival.new()
+	survival.setup(self, sd)
+	add_child(survival)
+	hud.controls.enabled = true
+	state = "intro"
+	state_t = 1.4
+	var world_def := WorldData.world(Game.world_index)
+	hud.banner(str(world_def.name), Color("73eff7"), 22, 1.2)
+
+
+## The final boss is down: stage clear, an exit portal opens near the player.
+func _survival_clear() -> void:
+	state = "cleared"
+	state_t = 1.6
+	hud.hide_boss()
+	hud.banner("STAGE CLEAR!", Color("a7f070"), 40, 1.3)
+	Sfx.play("clean", 0.0)
+	for p in get_tree().get_nodes_in_group("pickups"):
+		(p as Pickup).magnet = true
+	for sh in get_tree().get_nodes_in_group("enemy_shots"):
+		(sh as EnemyShot).pop()
+	room.exit_pos = room.arena_free_spot(player.global_position + Vector2(0, -60), 16.0)
+	hud.room_label.text = "CLEAR!"
+	hud.set_wave_text("TO THE PORTAL")
+
+
+# ---------------------------------------------------------------- station flow
+
+func _start_station() -> void:
+	station_mode = true
+	follow_cam = true
+	room.build_station(str(room_def.station))
+	var st: Dictionary = StationData.get_def(str(room_def.station))
+	sectors_clean.clear()
+	for i in room.sector_count():
+		sectors_clean.append(false)
+	sector = -1
+	boss_pending = ""
+	waves = []
+	player.reset_for_room(room.start_pos())
+	# the camera follows the astronaut, never showing past the map
+	var b := room.bounds()
+	camera.set_limit(SIDE_LEFT, int(b.position.x))
+	camera.set_limit(SIDE_TOP, int(b.position.y) - 40)
+	camera.set_limit(SIDE_RIGHT, int(b.end.x))
+	camera.set_limit(SIDE_BOTTOM, int(b.end.y) + 60)
+	camera.position = player.global_position
+	camera.reset_smoothing()
+	_update_station_label()
+	hud.controls.enabled = true
+	state = "explore"
+	hud.banner(str(st.name), Color("73eff7"), 24, 1.4)
+
+
+func _update_station_label() -> void:
+	var n := 0
+	for c in sectors_clean:
+		if c:
+			n += 1
+	hud.room_label.text = "SECTORS %d/%d" % [n, sectors_clean.size()]
+
+
+func _enter_sector(i: int) -> void:
+	sector = i
+	room_def = level_def.duplicate()
+	var sd: Dictionary = room.station.sectors[i]
+	room_def.merge(sd, true)
+	room_def.erase("station")
+	room_def.erase("final")  # the station ends only when every sector is clean
+	waves = (sd.get("waves", []) as Array).duplicate()
+	_reset_waves()
+	boss_pending = str(sd.get("boss", ""))
+	room.lock_sector(i)
+	hud.banner(str(sd.name), Color("ffcd75"), 22, 0.9)
+	state = "intro"
+	state_t = 0.8
+
+
+func _all_sectors_clean() -> bool:
+	return not sectors_clean.has(false)
+
+
+## Where the guide arrow points: nearest dirty sector, or the open exit.
+func _guide_target() -> Vector2:
+	if state == "exit":
+		guide.color = Color("a7f070")
+		if room.arena:
+			return room.exit_pos
+		if not station_mode:
+			return Vector2(room.room_w * 0.5, -8.0)
+		return room.to_world(room.station.exit).get_center()
+	if state != "explore":
+		return Vector2.INF
+	guide.color = Color("ffcd75")
+	var best := Vector2.INF
+	for i in sectors_clean.size():
+		if not sectors_clean[i]:
+			var c := room.sector_rect(i).get_center()
+			if best == Vector2.INF or player.global_position.distance_to(c) < player.global_position.distance_to(best):
+				best = c
+	return best
+
+
+func _spawn_boss(id: String, pos: Vector2) -> void:
+	pending += 1
+	var m := _marker(pos, 1.0, 22.0, Color("ff5566"))
+	m.finished.connect(func() -> void:
+		var b := spawn_enemy(id, pos)
+		hud.show_boss(b)
+		Sfx.play("roar", 0.0)
+		shake(0.7)
+		pending -= 1)
 
 
 func _begin_fight() -> void:
+	if survival != null:
+		state = "survive"
+		return
 	state = "fight"
-	if room_def.has("boss"):
-		var id: String = room_def.boss
-		var pos := Vector2(80, 70)
-		pending += 1
-		var m := _marker(pos, 1.0, 22.0, Color("ff5566"))
-		m.finished.connect(func() -> void:
-			var b := spawn_enemy(id, pos)
-			hud.show_boss(b)
-			Sfx.play("roar", 0.0)
-			shake(0.7)
-			pending -= 1)
-	elif not waves.is_empty():
+	if not waves.is_empty():
 		_spawn_wave(waves.pop_front())
+	elif not station_mode and room_def.has("boss"):
+		_spawn_boss(str(room_def.boss), _boss_pos())
 
 
 func _physics_process(delta: float) -> void:
+	enemy_cache = get_tree().get_nodes_in_group("enemies")
 	_read_input()
 	match state:
+		"explore":
+			var i := room.sector_at(player.global_position)
+			if i >= 0 and not sectors_clean[i]:
+				_enter_sector(i)
 		"intro":
 			state_t -= delta
 			if state_t <= 0.0:
 				_begin_fight()
 		"fight":
 			if pending == 0 and get_tree().get_nodes_in_group("enemies").is_empty():
-				if waves.is_empty():
+				if waves.is_empty() and boss_pending != "":
+					# the sector boss arrives after its waves
+					hud.banner("BOSS!", Color("ff5566"), 44, 1.0)
+					_spawn_boss(boss_pending, _boss_pos())
+					boss_pending = ""
+				elif waves.is_empty():
 					_room_cleared()
 				else:
 					state = "gap"
@@ -116,7 +331,7 @@ func _physics_process(delta: float) -> void:
 			if state_t <= 0.0:
 				_after_clear()
 		"exit":
-			if player.global_position.y < -14.0:
+			if (room.exit_reached(player.global_position) if station_mode or room.arena else player.global_position.y < -14.0):
 				_leave_room()
 
 
@@ -125,7 +340,7 @@ func _read_input() -> void:
 	var k := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	if k.length() > 0.1:
 		v = k
-	var can_move := state in ["intro", "fight", "gap", "cleared", "exit"]
+	var can_move := state in ["intro", "fight", "gap", "cleared", "exit", "explore", "survive"]
 	player.input_dir = v if can_move else Vector2.ZERO
 	if can_move and Input.is_action_just_pressed("ability"):
 		player.blast()
@@ -134,7 +349,19 @@ func _read_input() -> void:
 func _room_cleared() -> void:
 	state = "cleared"
 	state_t = 1.1
-	hud.banner("CLEAN!", Color("a7f070"), 52, 0.8)
+	if station_mode:
+		sectors_clean[sector] = true
+		room.unlock_sector()
+		_update_station_label()
+		if _all_sectors_clean():
+			hud.banner("STATION CLEAN!", Color("a7f070"), 36, 1.2)
+		else:
+			hud.banner("SECTOR CLEAN!", Color("a7f070"), 36, 0.8)
+	elif room_def.has("boss") and WorldData.is_last_room(Game.world_index, Game.room_index) \
+			and not bool(room_def.get("final", false)):
+		hud.banner("WORLD %d CLEAR!" % (Game.world_index + 1), Color("ffcd75"), 36, 1.2)
+	else:
+		hud.banner("CLEAN!", Color("a7f070"), 52, 0.8)
 	var heal := int(Game.stats.get("room_heal", 0))
 	if heal > 0 and not player.dead and Game.hp_ratio() < 1.0:
 		Game.heal(heal)
@@ -151,6 +378,9 @@ func _room_cleared() -> void:
 
 
 func _after_clear() -> void:
+	if station_mode and _all_sectors_clean() and bool(level_def.get("final", false)):
+		_victory()
+		return
 	if bool(room_def.get("final", false)):
 		_victory()
 		return
@@ -166,10 +396,16 @@ func on_upgrade_chosen(id: String) -> void:
 	player.refresh_upgrades()
 	burst(player.global_position + Vector2(0, -8), Color("ffcd75"), 24, 90.0, 0.6, 2.0)
 	ring(player.global_position + Vector2(0, -6), 24.0, Color("ffcd75"), 0.4, 2.0)
+	if survival != null and state == "survive":
+		survival.upgrade_done()
+		return
 	_open_exit()
 
 
 func _open_exit() -> void:
+	if station_mode and not _all_sectors_clean():
+		state = "explore"  # on to the next dirty sector
+		return
 	state = "exit"
 	room.open_door()
 	Sfx.play("door", 0.0)
@@ -182,6 +418,10 @@ func _leave_room() -> void:
 	var tw := hud.fade_to(1.0, 0.3)
 	tw.finished.connect(func() -> void:
 		Game.room_index += 1
+		# past the world boss: on to the next world
+		if Game.room_index >= WorldData.room_count(Game.world_index):
+			Game.world_index += 1
+			Game.room_index = 0
 		_start_room()
 		hud.fade_to(0.0, 0.35))
 
@@ -227,19 +467,39 @@ func _compose(w: Dictionary) -> Array[String]:
 	return out
 
 
+## Spawn the next wave. Wave k of a room gets +WAVE_HP_STEP*k HP and a bit of speed;
+## "elite": n (default: 1 on the last wave of rooms with 3+ waves) crowns the
+## costliest aliens of the wave.
 func _spawn_wave(w: Dictionary) -> void:
 	var list := _compose(w)
 	var pts := room.spawn_points(list.size(), player.global_position)
+	var k := wave_i
+	wave_i += 1
+	hud.set_wave(wave_i, wave_n)
+	var last := wave_i == wave_n
+	var elites := int(w.get("elite", 1 if last and wave_n >= 3 else 0))
+	if wave_n > 1:
+		if last and wave_n >= 3:
+			hud.banner("FINAL WAVE!", Color("ff9a4d"), 30, 0.7)
+		elif k > 0:
+			hud.banner("WAVE %d/%d" % [wave_i, wave_n], Color("ffcd75"), 30, 0.6)
+	var order: Array = range(list.size())
+	order.sort_custom(func(a: int, b: int) -> bool:
+		return int(EnemyData.TYPES[list[a]].cost) > int(EnemyData.TYPES[list[b]].cost))
+	var elite_idx: Array = order.slice(0, mini(elites, list.size()))
+	var hp_mult := 1.0 + WAVE_HP_STEP * k
+	var sp_mult := 1.0 + WAVE_SPEED_STEP * k
 	for i in list.size():
-		spawn_with_marker(list[i], pts[i], 0.6 + i * 0.12)
+		spawn_with_marker(list[i], pts[i], 0.6 + i * 0.12, hp_mult, sp_mult, elite_idx.has(i))
 
 
-func spawn_with_marker(id: String, pos: Vector2, delay: float) -> void:
+func spawn_with_marker(id: String, pos: Vector2, delay: float, hp_mult := 1.0, sp_mult := 1.0, elite := false) -> void:
 	pending += 1
 	var def: Dictionary = EnemyData.TYPES[id]
-	var m := _marker(pos, delay, 6.0 + float(def.radius), def.color)
+	var col: Color = Color("ffcd75") if elite else def.color
+	var m := _marker(pos, delay, 6.0 + float(def.radius) * (1.4 if elite else 1.0), col)
 	m.finished.connect(func() -> void:
-		spawn_enemy(id, pos)
+		spawn_enemy(id, pos, hp_mult, sp_mult, elite)
 		pending -= 1)
 
 
@@ -253,12 +513,17 @@ func _marker(pos: Vector2, dur: float, size: float, col: Color) -> SpawnMarker:
 	return m
 
 
-func spawn_enemy(id: String, pos: Vector2) -> Enemy:
+func spawn_enemy(id: String, pos: Vector2, hp_mult := 1.0, sp_mult := 1.0, elite := false, quiet := false) -> Enemy:
 	var e := EnemyData.create(id)
 	e.position = pos
+	if hp_mult != 1.0 or sp_mult != 1.0:
+		e.toughen(hp_mult, sp_mult)
+	if elite:
+		e.make_elite()
 	entities.add_child(e)
-	burst(pos + Vector2(0, -4), e.def.color, 10, 50.0, 0.4, 2.0)
-	Sfx.play("spawn", 0.15, -10.0)
+	if not quiet:
+		burst(pos + Vector2(0, -4), e.def.color, 10, 50.0, 0.4, 2.0)
+		Sfx.play("spawn", 0.15, -10.0)
 	return e
 
 
@@ -286,15 +551,24 @@ func enemy_killed(e: Enemy) -> void:
 		var fx := AnimFx.spawn(effects, "glob_pop", "pop", center, e.base_scale * 0.6)
 		fx.self_modulate = Color(0.45, 0.85, 1.6)
 	Sfx.play("pop", 0.15, 2.0 if boss else 0.0)
-	shake(1.0 if boss else 0.22)
-	hitstop(220 if boss else 35)
-	var coins := int(e.def.coins) + (1 if bool(Game.stats.magnet) else 0) + int(Game.stats.get("coin_bonus", 0))
-	drop_pickups(e.global_position, coins, 0.0 if boss else 0.05)
-	if e.type_id == "gloop_brute" or (not boss and randf() < 0.025):
-		var pc := Pickup.new()
-		pc.kind = "power"
-		pc.position = e.global_position
-		entities.add_child(pc)
+	# in a survival horde kills are constant: keep the jolt for bosses and elites
+	var horde := survival != null and not boss and not e.elite
+	shake(1.0 if boss else (0.06 if horde else 0.22))
+	hitstop(220 if boss else (0 if horde else 35))
+	if e.elite:
+		popup_text(center + Vector2(0, -10), "ELITE!", Color("ffcd75"), 12)
+	if survival != null:
+		survival.on_kill(e)  # XP gems, a few coins, power-ups
+	else:
+		var coins := int(e.def.coins) + (1 if bool(Game.stats.magnet) else 0) + int(Game.stats.get("coin_bonus", 0))
+		if e.elite:
+			coins += 4
+		drop_pickups(e.global_position, coins, 0.0 if boss else (0.35 if e.elite else 0.05))
+		if bool(e.def.get("power_core", false)) or (not boss and randf() < 0.025):
+			var pc := Pickup.new()
+			pc.kind = "power"
+			pc.position = e.global_position
+			entities.add_child(pc)
 	if boss:
 		hud.hide_boss()
 		ring(center, 60.0, c, 0.6, 4.0, true)
@@ -332,10 +606,11 @@ func explosion(pos: Vector2, radius: float, enemy_dmg: float, player_dmg: float)
 			e.take_damage(enemy_dmg, (e.global_position - pos).normalized() * 3.0)
 	if not player.dead and player.global_position.distance_to(pos) < radius:
 		player.take_damage(player_dmg, pos)
+	# chain reaction: explosive barrels and prop tanks nearby go off too
 	for n in get_tree().get_nodes_in_group("barrels"):
-		var b := n as Barrel
-		if b != null and not b.exploded and b.global_position.distance_to(pos) < radius + 6.0:
-			b.trigger(0.12)
+		var b := n as Node2D
+		if not bool(b.get("exploded")) and b.global_position.distance_to(pos) < radius + 6.0:
+			b.call("trigger", 0.12)
 
 
 func chain_lightning(from: Enemy, dmg: float, count: int) -> void:
@@ -473,3 +748,22 @@ func _process(delta: float) -> void:
 	shake_amt = maxf(0.0, shake_amt - delta * 2.4)
 	var s := shake_amt * shake_amt
 	camera.offset = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * 6.0 * s
+	if follow_cam:
+		var target := player.global_position + Vector2(0, -10)
+		camera.position = camera.position.lerp(target, 1.0 - exp(-7.0 * delta))
+		guide.target = _guide_target()
+	hud.set_enemies_left(get_tree().get_nodes_in_group("enemies").size() + pending
+			if state in ["fight", "gap"] else -1)
+
+
+## Boss entrance point: in a station, the far end of the sector from the player; in a
+## room, the upper part (or further down when the player stands up there).
+func _boss_pos() -> Vector2:
+	if not station_mode:
+		var top := Vector2(room.room_w * 0.5, minf(70.0, room.room_h * 0.3))
+		if follow_cam and player.global_position.distance_to(top) < 110.0:
+			return Vector2(room.room_w * 0.5, room.room_h * 0.6)
+		return top
+	var r := room.sector_rect(sector)
+	var pts := room.spawn_points(1, player.global_position)
+	return pts[0] if not pts.is_empty() else r.get_center()

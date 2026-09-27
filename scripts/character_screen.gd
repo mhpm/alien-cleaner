@@ -27,9 +27,10 @@ const C_DIM := Color("8392bb")
 
 var stage: Control
 var floor_fill: TextureRect
-var preview: SuitRig
+var preview: Sprite2D  # the reference astronaut (always the same look), breathing
 const PREVIEW_FEET := Vector2(362, 592)
 const PREVIEW_SCALE := 0.95
+const PREVIEW_ANCHOR := Vector2(103, 312)  # feet centre in preview_astronaut.png
 var slot_nodes: Dictionary = {}
 var tab_nodes: Array[Button] = []
 var card_nodes: Array[Control] = []
@@ -71,8 +72,12 @@ func _ready() -> void:
 	bg.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	stage.add_child(bg)
-	# live astronaut wearing the equipped gear
-	preview = SuitRig.new(true)
+	# the astronaut from the reference art; gear changes stats, not its look
+	preview = Sprite2D.new()
+	preview.texture = load(DIR + "preview_astronaut.png")
+	preview.centered = false
+	preview.offset = -PREVIEW_ANCHOR
+	preview.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	preview.position = PREVIEW_FEET
 	preview.scale = Vector2.ONE * PREVIEW_SCALE
 	stage.add_child(preview)
@@ -286,7 +291,6 @@ func _badge(parent: Control, center: Vector2) -> Control:
 # ---------------------------------------------------------------- refresh
 
 func _refresh() -> void:
-	preview.refresh()
 	labels.power.text = str(Game.gear_power())
 	labels.coins.text = str(Game.bank)
 	_refresh_slots()
@@ -498,9 +502,6 @@ func _equip(id: String) -> void:
 
 
 func _pop_preview() -> void:
-	preview.scale = Vector2(PREVIEW_SCALE * 1.12, PREVIEW_SCALE * 0.9)
-	var tw := preview.create_tween()
-	tw.tween_property(preview, "scale", Vector2.ONE * PREVIEW_SCALE, 0.35).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 	var s := stage.scale.x
 	var c := stage.position + (PREVIEW_FEET + Vector2(0, -140)) * s
 	for i in 16:
@@ -565,8 +566,7 @@ func _process(delta: float) -> void:
 	t += delta
 	# idle breathing on the preview (feet stay planted)
 	var b := sin(t * 2.2) * 0.012
-	if preview.scale.y <= PREVIEW_SCALE * 1.02 and preview.scale.y >= PREVIEW_SCALE * 0.98:
-		preview.scale = Vector2(PREVIEW_SCALE * (1.0 + b), PREVIEW_SCALE * (1.0 - b))
+	preview.scale = Vector2(PREVIEW_SCALE * (1.0 + b * 0.5), PREVIEW_SCALE * (1.0 + b))
 	for slot: String in slot_nodes:
 		var badge: Control = slot_nodes[slot].badge
 		if badge.visible:

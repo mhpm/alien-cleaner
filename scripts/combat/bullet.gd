@@ -14,15 +14,19 @@ var life := 1.6
 var t := 0.0
 var hit_list: Array[int] = []
 var tier: Dictionary = WeaponData.tier(1)
+var style: Dictionary = WeaponData.style("standard")  # equipped blaster's look
 var hit_r := 3.0
+var exclude: Array[RID] = []  # colliders the shot ignores (the turret that fired it)
 var base_scale := 0.2
 var sprite: AnimatedSprite2D
 
 
 func _ready() -> void:
-	hit_r = float(tier.hit_r)
-	base_scale = float(tier.scale)
+	hit_r = float(tier.hit_r) * float(style.size)
+	base_scale = float(tier.scale) * float(style.size)
 	sprite = Art.make_anim(str(tier.art), base_scale)
+	if style.color != null:
+		sprite.material = Art.shot_material(Color(str(style.color)))
 	sprite.play("fly")
 	sprite.rotation = dir.angle()
 	add_child(sprite)
@@ -36,6 +40,7 @@ func _physics_process(delta: float) -> void:
 		return
 	var motion := dir * speed * delta
 	var q := PhysicsRayQueryParameters2D.create(global_position, global_position + motion, WORLD_MASK)
+	q.exclude = exclude
 	var hit := get_world_2d().direct_space_state.intersect_ray(q)
 	if not hit.is_empty():
 		var col: Object = hit.collider
@@ -59,9 +64,11 @@ func _physics_process(delta: float) -> void:
 	var s := base_scale * grow * (1.0 + sin(t * 30.0) * 0.08)
 	sprite.scale = Vector2(s, s)
 
-	for node in get_tree().get_nodes_in_group("enemies"):
+	for node in Game.world.enemy_cache:
+		if not is_instance_valid(node):  # freed since the cache was refreshed
+			continue
 		var e := node as Enemy
-		if e == null or not e.targetable:
+		if e == null or not is_instance_valid(e) or not e.targetable:
 			continue
 		var id := e.get_instance_id()
 		if hit_list.has(id):

@@ -1,6 +1,7 @@
 class_name Barrel
 extends StaticBody2D
-## Explosive container. Two hits (or a nearby blast) and it goes boom, hurting everyone around.
+## Explosive container (red hazard drum, PropData.BARREL_TEX). Two hits (or a nearby
+## blast) and it goes boom, hurting everyone around.
 
 var hp := 2
 var exploded := false
@@ -23,11 +24,12 @@ func _ready() -> void:
 	sh.texture = Art.tex("shadow")
 	add_child(sh)
 	sprite = Sprite2D.new()
-	sprite.texture = load("res://assets/room/prop_barrel.png")
+	var theme: String = Game.world.room.theme if Game.world != null else "ship"
+	sprite.texture = PropData.pick(PropData.themed("barrel", PropData.BARREL_TEX, theme), Vector2i(position / 16.0))
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	sprite.centered = false
 	sprite.offset = Vector2(-sprite.texture.get_width() * 0.5, -sprite.texture.get_height())
-	sprite.scale = Vector2.ONE * (13.0 / sprite.texture.get_width())
+	sprite.scale = Vector2.ONE * (11.0 / sprite.texture.get_width())
 	mat = Art.flash_material()
 	sprite.material = mat
 	add_child(sprite)

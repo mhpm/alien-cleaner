@@ -12,6 +12,10 @@ var hp_bar: Bar
 var coin_label: Label
 var weapon_label: Label
 var room_label: Label
+var wave_label: Label
+var xp_bar: Bar  # survival: experience towards the next level
+var _wave_text := ""
+var _left := -2
 var boss_box: Control
 var boss_bar: Bar
 var boss_name: Label
@@ -69,6 +73,19 @@ func setup(g: GameWorld) -> void:
 	room_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	room_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	room_panel.add_child(room_label)
+	# wave progress + aliens left, just under the room panel
+	wave_label = UiTheme.label("", 10, Color("ffcd75"))
+	_place(wave_label, Vector2(0.5, 0), Vector2(-80, 4 + 70 * K), Vector2(160, 14))
+	root.add_child(wave_label)
+	xp_bar = Bar.new()
+	xp_bar.fill = Color("38b764")
+	xp_bar.font_size = 9
+	xp_bar.ratio = 0.0
+	_place(xp_bar, Vector2(0, 0), Vector2(6, 6 + 70 * K), Vector2(12, 11), true)
+	xp_bar.offset_right = -6
+	xp_bar.visible = false
+	xp_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(xp_bar)
 
 	var coin_panel := _hud_tex("coins", Vector2(1, 0), Vector2(-118, 4), Vector2(194, 70) * K)
 	root.add_child(coin_panel)
@@ -177,6 +194,54 @@ func set_room(n: int, total: int) -> void:
 	room_label.text = "ROOM %d/%d" % [n, total]
 
 
+## Survival stages: XP bar under the top panels, wave line and blaster tier below it.
+func enable_survival(on: bool) -> void:
+	xp_bar.visible = on
+	const K := 360.0 / 957.0
+	var y := 4 + 70 * K + (13.0 if on else 0.0)
+	wave_label.offset_top = y
+	wave_label.offset_bottom = y + 14
+	weapon_label.offset_top = 31 + (13.0 if on else 0.0)
+	weapon_label.offset_bottom = weapon_label.offset_top + 14
+	boss_box.offset_top = 44 + (14.0 if on else 0.0)
+	boss_box.offset_bottom = boss_box.offset_top + 34
+
+
+func set_xp(ratio: float, level: int) -> void:
+	xp_bar.ratio = clampf(ratio, 0.0, 1.0)
+	xp_bar.lag = xp_bar.ratio  # no white "damage" chunk on an XP bar
+	xp_bar.text = "LV %d" % level
+
+
+## Free text for the wave line (survival: "WAVE 3/14").
+func set_wave_text(t: String) -> void:
+	if t == _wave_text:
+		return
+	_wave_text = t
+	_left = -2
+	set_enemies_left(-1)
+
+
+## Wave i of n (0 = not started). Rooms with a single wave show nothing.
+func set_wave(i: int, n: int) -> void:
+	_wave_text = "WAVE %d/%d" % [maxi(i, 1), n] if n > 1 else ""
+	_left = -2
+	set_enemies_left(-1)
+
+
+## Aliens still to clean in this wave (-1 hides the count).
+func set_enemies_left(n: int) -> void:
+	if n == _left:
+		return
+	_left = n
+	var parts: Array[String] = []
+	if _wave_text != "":
+		parts.append(_wave_text)
+	if n > 0:
+		parts.append("%d LEFT" % n)
+	wave_label.text = "   ".join(parts)
+
+
 func _process(_delta: float) -> void:
 	if game == null:
 		return
@@ -277,10 +342,10 @@ func _center(c: Control) -> CenterContainer:
 	return cc
 
 
-func show_upgrades(ids: Array[String]) -> void:
+func show_upgrades(ids: Array[String], title := "CHOOSE AN UPGRADE", sub := "Lasts for this run") -> void:
 	var box := _open_overlay("upgrade")
-	box.add_child(UiTheme.label("CHOOSE AN UPGRADE", 24, Color("ffcd75")))
-	box.add_child(UiTheme.label("Lasts for this run", 13, Color("94b0c2")))
+	box.add_child(UiTheme.label(title, 24, Color("ffcd75")))
+	box.add_child(UiTheme.label(sub, 13, Color("94b0c2")))
 	for i in ids.size():
 		var card := _upgrade_card(ids[i])
 		box.add_child(_center(card))
@@ -360,7 +425,7 @@ func toggle_pause() -> void:
 		get_tree().paused = false
 		controls.enabled = true
 		return
-	if overlay != null or game.state not in ["intro", "fight", "gap", "cleared", "exit"]:
+	if overlay != null or game.state not in ["intro", "fight", "gap", "cleared", "exit", "explore", "survive"]:
 		return
 	var box := _open_overlay("pause", 0.75)
 	box.add_child(UiTheme.label("PAUSED", 36, Color("73eff7")))
@@ -386,7 +451,7 @@ func show_game_over() -> void:
 	box.add_child(UiTheme.label("WIPED OUT!", 44, Color("ff5566")))
 	box.add_child(UiTheme.label("The aliens made a mess of you.", 14, Color("94b0c2")))
 	box.add_child(_spacer(8))
-	box.add_child(UiTheme.label("Reached room 1-%d" % (Game.room_index + 1), 20))
+	box.add_child(UiTheme.label("Reached room %d" % Game.global_room(), 20))
 	box.add_child(UiTheme.label("+%d coins banked" % Game.run_coins, 20, Color("ffcd75")))
 	box.add_child(UiTheme.label("Bank: %d  (spend in UPGRADES)" % Game.bank, 13, Color("94b0c2")))
 	box.add_child(_spacer(12))
@@ -395,14 +460,14 @@ func show_game_over() -> void:
 
 func show_victory() -> void:
 	var box := _open_overlay("victory", 0.8)
-	box.add_child(UiTheme.label("SHIP CLEANED!", 40, Color("a7f070")))
-	box.add_child(UiTheme.label("The Slime King has been mopped up.", 14, Color("94b0c2")))
+	box.add_child(UiTheme.label("HIVE CLEANED!", 40, Color("a7f070")))
+	box.add_child(UiTheme.label("The Mothership has been shot down.", 14, Color("94b0c2")))
 	box.add_child(_spacer(8))
 	box.add_child(UiTheme.label("+%d coins banked" % Game.run_coins, 20, Color("ffcd75")))
 	box.add_child(UiTheme.label("Bank: %d" % Game.bank, 14, Color("94b0c2")))
 	box.add_child(_spacer(4))
 	box.add_child(UiTheme.label("Next area unlocked:", 14, Color("f4f4f4")))
-	box.add_child(UiTheme.label("ALIEN LABORATORY - coming soon", 16, Color("c75bd6")))
+	box.add_child(UiTheme.label("WORLD 3 - coming soon", 16, Color("c75bd6")))
 	box.add_child(_spacer(12))
 	_end_buttons(box)
 

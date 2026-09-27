@@ -58,6 +58,65 @@ const ROWS := {
 		"koooooooooooook",
 		"kkkkkkkkkkkkkkk",
 	],
+	# survival collectibles: XP gems (small / big / huge), magnet, bomb, overclock bolt
+	"gem": [
+		"..k..",
+		".klk.",
+		"klwlk",
+		"kLlLk",
+		".kLk.",
+		"..k..",
+	],
+	"gem_b": [
+		"...k...",
+		"..kck..",
+		".kcwck.",
+		"kbcwcbk",
+		".kbcbk.",
+		"..kbk..",
+		"...k...",
+	],
+	"gem_r": [
+		"...kk...",
+		"..kyyk..",
+		".kywyyk.",
+		"kyywyyok",
+		"koyyyook",
+		".kooook.",
+		"..kook..",
+		"...kk...",
+	],
+	"magnet": [
+		".kkk.kkk.",
+		"krrk.krrk",
+		"krrk.krrk",
+		"kwwk.kwwk",
+		"krrkkkrrk",
+		"krrrrrrrk",
+		".krrrrrk.",
+		"..kkkkk..",
+	],
+	"bomb": [
+		"......yk.",
+		".....ky..",
+		"...kkkk..",
+		"..kKKKKk.",
+		".kKwKKKKk",
+		".kKKKKKKk",
+		".kKKKKKKk",
+		"..kKKKKk.",
+		"...kkkk..",
+	],
+	"bolt": [
+		"...kkkk",
+		"..kyyk.",
+		".kyyk..",
+		"kyyyykk",
+		"kkkyyk.",
+		"..kyk..",
+		".kyk...",
+		".kk....",
+	],
 	"alert": [
 		"kyk",
 		"kyk",
@@ -75,12 +134,14 @@ const SPRITE_DIR := "res://assets/sprites/"
 
 var _cache: Dictionary = {}
 var _flash_shader: Shader
+var _shot_shader: Shader
 var _manifest: Dictionary = {}
 var _frames_cache: Dictionary = {}
 
 
 func _ready() -> void:
 	_flash_shader = load("res://assets/shaders/flash.gdshader")
+	_shot_shader = load("res://assets/shaders/shot_tint.gdshader")
 	var f := FileAccess.open(SPRITE_DIR + "manifest.json", FileAccess.READ)
 	if f != null:
 		_manifest = JSON.parse_string(f.get_as_text())
@@ -128,7 +189,7 @@ func frames(set_name: String) -> SpriteFrames:
 	return sf
 
 
-## Suit part (assets/suits/<variant>_<slot>.png, from tools/make_suit_parts.py) with
+## Blaster image (assets/suits/<variant>_<slot>.png, from tools/make_suit_parts.py) with
 ## mipmaps, since the high-res parts are drawn heavily scaled down in game.
 func suit_tex(variant: String, slot: String) -> Texture2D:
 	var key := "suit:%s_%s" % [variant, slot]
@@ -155,6 +216,17 @@ func make_anim(set_name: String, s: float) -> AnimatedSprite2D:
 	if names.size() > 0:
 		spr.animation = names[0]
 	return spr
+
+
+## Shared material that recolors a projectile to a blaster's colour.
+func shot_material(tint: Color) -> ShaderMaterial:
+	var key := "shot:" + tint.to_html()
+	if not _cache.has(key):
+		var m := ShaderMaterial.new()
+		m.shader = _shot_shader
+		m.set_shader_parameter("tint", tint)
+		_cache[key] = m
+	return _cache[key]
 
 
 func flash_material() -> ShaderMaterial:
@@ -258,6 +330,15 @@ func _procedural(id: String) -> Image:
 					var ny := (y - 2.0) / 2.5
 					if nx * nx + ny * ny <= 1.0:
 						img.set_pixel(x, y, Color(0, 0, 0, 0.35))
+			return img
+		"glow":
+			# soft round light (drawn additively under glowing props)
+			var img := _img(32, 32)
+			for y in 32:
+				for x in 32:
+					var d := Vector2(x - 15.5, y - 15.5).length() / 16.0
+					if d < 1.0:
+						img.set_pixel(x, y, Color(1, 1, 1, pow(1.0 - d, 2.0)))
 			return img
 		"floor0", "floor1", "floor2":
 			return _floor(int(id.substr(5)))

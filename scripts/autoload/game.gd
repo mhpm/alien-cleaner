@@ -45,6 +45,7 @@ func _default_gear() -> void:
 
 func new_run() -> void:
 	upgrades = {}
+	world_index = 0
 	room_index = 0
 	run_coins = 0
 	var mhp := 100.0 + 15.0 * int(perm.health)
@@ -182,9 +183,21 @@ func _apply_gear(s: Dictionary) -> void:
 	s.hp = s.max_hp
 
 
-## Enemy HP/damage scale with how deep the player is in the run.
+## Enemy HP/damage scale with how deep the player is in the current world
+## (WorldData "difficulty" = [start, per room]).
 func difficulty() -> float:
-	return 1.0 + room_index * 0.08
+	var d: Array = WorldData.world(world_index).get("difficulty", [1.0, 0.08])
+	return float(d[0]) + room_index * float(d[1])
+
+
+## Extra multiplier on every alien's HP and damage in the current world (world 2: 1.2).
+func enemy_mult() -> float:
+	return float(WorldData.world(world_index).get("enemy_mult", 1.0))
+
+
+## Room number across worlds (1..30).
+func global_room() -> int:
+	return WorldData.global_room(world_index, room_index)
 
 
 func hp_ratio() -> float:
@@ -233,7 +246,7 @@ func buy_perm(id: String) -> bool:
 
 func end_run() -> void:
 	bank += run_coins
-	best_room = maxi(best_room, room_index + 1)
+	best_room = maxi(best_room, global_room())
 	runs += 1
 	save()
 

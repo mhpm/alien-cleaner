@@ -4,6 +4,9 @@ Usage: python tools/slice_sprites.py <sheet.webp>
 Writes assets/sprites/<set>/<anim>_<i>.png and assets/sprites/manifest.json.
 Every frame of a set is pasted on a common canvas that is horizontally symmetric
 around the anchor (feet), so flip_h works without the body jumping.
+A frame is either a (row, x0, x1) range of the sheet or a loose png (relative to
+assets/sprites/, e.g. the enemies/<name>/ folders): "path", ("path", x0, x1) to use
+only those columns, or ("path", x0, x1, scale) to also resize it.
 """
 import json
 import os
@@ -86,6 +89,50 @@ SETS = {
     "shot4": {"anchor": "center", "flip": True, "anims": {"fly": ([(4, 364, 420), (4, 435, 496)], 12, True)}, "body": "fly"},
     "shot5": {"anchor": "center", "flip": True, "anims": {"fly": ([(4, 518, 577), (4, 603, 656)], 10, True)}, "body": "fly"},
     "muzzle": {"anchor": "center", "anims": {"flash": ([(4, 25, 46)], 16, False)}, "body": "flash"},
+    # Droid (loose frames in assets/sprites/enemies/droid01): hovering eye robot
+    "droid": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([f"enemies/droid01/enemies_00{i}.png" for i in (4, 5, 6, 7, 8)], 10, True),
+            "charge": (["enemies/droid01/enemies_001.png"], 1, False),
+        },
+        "body": "walk",
+    },
+    "droid_shot": {"anchor": "center", "flip": True,
+                   "anims": {"fly": (["enemies/droid01/enemies_012.png"], 1, True)}, "body": "fly"},
+    "droid_pop": {"anchor": "center",
+                  "anims": {"pop": (["enemies/droid01/enemies_010.png"], 1, False)}, "body": "pop"},
+    # UFO (loose frames in assets/sprites/enemies/ufo01). 090 holds the firing UFO,
+    # its laser and a portal side by side: cut by columns.
+    "ufo": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([f"enemies/ufo01/enemies_0{i}.png" for i in (91, 93, 97, 98)], 8, True),
+            "attack": ([("enemies/ufo01/enemies_090.png", 0, 86, 1.1)], 1, False),
+        },
+        "body": "walk",
+    },
+    "ufo_shot": {"anchor": "center",
+                 "anims": {"fly": ([("enemies/ufo01/enemies_090.png", 86, 148)], 1, True)}, "body": "fly"},
+    "ufo_portal": {"anchor": "center",
+                   "anims": {"open": ([("enemies/ufo01/enemies_090.png", 148, 211)], 1, False)}, "body": "open"},
+    "ufo_alien": {"anchor": "bbox",
+                  "anims": {"walk": (["enemies/ufo01/enemies_099.png"], 1, True)}, "body": "walk"},
+    # Octopus (loose frames in assets/sprites/enemies/octopus01). attack.png holds the
+    # octopus and its orb side by side; die.png is the puddle it leaves (splat).
+    "octopus": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([f"enemies/octopus01/enemies_04{i}.png" for i in (2, 3, 4, 3)], 7, True),
+            "attack": ([("enemies/octopus01/attack.png", 0, 78)], 1, False),
+            "splat": (["enemies/octopus01/die.png"], 1, False),
+        },
+        "body": "walk",
+    },
+    "octopus_shot": {"anchor": "center",
+                     "anims": {"fly": ([("enemies/octopus01/attack.png", 78, 146)], 1, True)}, "body": "fly"},
+    "octopus_pop": {"anchor": "center",
+                    "anims": {"pop": (["enemies/octopus01/enemies_051.png"], 1, False)}, "body": "pop"},
     "glob": {
         "anchor": "center",
         "anims": {"fly": ([(7, 709, 782)], 1, True)},
@@ -127,9 +174,21 @@ def main(sheet_path, out_dir):
         frames = {}
         for anim, (ranges, fps, loop) in spec["anims"].items():
             lst = []
-            for row, x0, x1 in ranges:
-                y0, y1 = ROWS[row]
-                img = trim(sheet.crop((x0, y0 - 2, x1, y1 + 2)))
+            for r in ranges:
+                if isinstance(r, str) or isinstance(r[0], str):
+                    path, *cols = (r,) if isinstance(r, str) else r
+                    img = Image.open(os.path.join(out_dir, path)).convert("RGBA")
+                    if cols:
+                        img = img.crop((cols[0], 0, cols[1], img.height))
+                    if len(cols) > 2:
+                        img = img.resize((round(img.width * cols[2]), round(img.height * cols[2])), Image.LANCZOS)
+                    a = np.asarray(img).copy()
+                    a[a[:, :, 3] < 48] = 0
+                    img = trim(Image.fromarray(a))
+                else:
+                    row, x0, x1 = r
+                    y0, y1 = ROWS[row]
+                    img = trim(sheet.crop((x0, y0 - 2, x1, y1 + 2)))
                 if spec.get("flip"):
                     img = img.transpose(Image.FLIP_LEFT_RIGHT)
                 lst.append((img, anchor_of(img, spec["anchor"])))

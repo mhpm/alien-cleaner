@@ -273,6 +273,206 @@
    }
   }
  },
+ "droid": {
+  "size": [
+   88,
+   109
+  ],
+  "anchor": [
+   44,
+   109
+  ],
+  "body_h": 104.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 10,
+    "loop": true
+   },
+   "charge": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   }
+  }
+ },
+ "droid_shot": {
+  "size": [
+   154,
+   51
+  ],
+  "anchor": [
+   77,
+   25.5
+  ],
+  "body_h": 51.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "droid_pop": {
+  "size": [
+   72,
+   70
+  ],
+  "anchor": [
+   36,
+   35.0
+  ],
+  "body_h": 70.0,
+  "anims": {
+   "pop": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   }
+  }
+ },
+ "ufo": {
+  "size": [
+   108,
+   97
+  ],
+  "anchor": [
+   54,
+   97
+  ],
+  "body_h": 92.0,
+  "anims": {
+   "walk": {
+    "frames": 4,
+    "fps": 8,
+    "loop": true
+   },
+   "attack": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   }
+  }
+ },
+ "ufo_shot": {
+  "size": [
+   62,
+   46
+  ],
+  "anchor": [
+   31,
+   23.0
+  ],
+  "body_h": 46.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "ufo_portal": {
+  "size": [
+   62,
+   109
+  ],
+  "anchor": [
+   31,
+   54.5
+  ],
+  "body_h": 109.0,
+  "anims": {
+   "open": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   }
+  }
+ },
+ "ufo_alien": {
+  "size": [
+   70,
+   91
+  ],
+  "anchor": [
+   35,
+   91
+  ],
+  "body_h": 91.0,
+  "anims": {
+   "walk": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "octopus": {
+  "size": [
+   94,
+   97
+  ],
+  "anchor": [
+   47,
+   97
+  ],
+  "body_h": 97.0,
+  "anims": {
+   "walk": {
+    "frames": 4,
+    "fps": 7,
+    "loop": true
+   },
+   "attack": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "splat": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   }
+  }
+ },
+ "octopus_shot": {
+  "size": [
+   66,
+   51
+  ],
+  "anchor": [
+   33,
+   25.5
+  ],
+  "body_h": 51.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "octopus_pop": {
+  "size": [
+   78,
+   77
+  ],
+  "anchor": [
+   39,
+   38.5
+  ],
+  "body_h": 77.0,
+  "anims": {
+   "pop": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   }
+  }
+ },
  "glob": {
   "size": [
    74,

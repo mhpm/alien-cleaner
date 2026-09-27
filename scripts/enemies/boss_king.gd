@@ -200,7 +200,8 @@ func _summon() -> void:
 		types = ["mini_slime", "runner", "spitter"]
 	for i in types.size():
 		var pos := global_position + Vector2.from_angle(TAU * i / types.size() + randf()) * 34.0
-		pos = pos.clamp(Vector2(12, 12), Vector2(Room.W - 12.0, Room.H - 40.0))
+		var bb := Game.world.room.bounds()
+		pos = pos.clamp(bb.position + Vector2(12, 12), bb.end - Vector2(12, 40))
 		Game.world.spawn_with_marker(types[i], pos, 0.5 + i * 0.1)
 
 

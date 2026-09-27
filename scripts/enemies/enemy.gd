@@ -39,6 +39,8 @@ var trail_t := 0.0
 var hurt_t := 0.0
 var tint := Color.WHITE
 var art := ""
+var _ufo_attacks := 0
+var elite := false  # tougher golden variant with a crown (final waves)
 
 
 func setup(id: String) -> void:
@@ -46,20 +48,40 @@ func setup(id: String) -> void:
 	def = EnemyData.TYPES[id]
 	var mult := Game.difficulty()
 	is_boss = bool(def.get("boss", false))
-	max_hp = float(def.hp) * (1.0 if is_boss else mult)
+	var world_mult := Game.enemy_mult()  # world 2 aliens are 20% tougher
+	max_hp = float(def.hp) * (1.0 if is_boss else mult) * world_mult
 	hp = max_hp
 	radius = float(def.radius)
 	speed = float(def.speed)
-	contact_damage = float(def.damage) * (1.0 + (mult - 1.0) * 0.5)
+	contact_damage = float(def.damage) * (1.0 + (mult - 1.0) * 0.5) * world_mult
 	base_scale = float(def.scale)
 	art = str(def.art)
 	tint = def.get("tint", Color.WHITE)
 
 
+## Wave escalation: later waves are sturdier. Call before the alien enters the tree.
+func toughen(hp_mult: float, speed_mult: float) -> void:
+	max_hp *= hp_mult
+	hp = max_hp
+	speed *= speed_mult
+
+
+## Elite: bigger, golden, crowned, much tougher and richer. Call before add_child.
+func make_elite() -> void:
+	elite = true
+	max_hp *= 2.2
+	hp = max_hp
+	speed *= 1.1
+	contact_damage *= 1.25
+	base_scale *= 1.3
+	radius *= 1.2
+	tint = Color(1.3, 1.1, 0.55)
+
+
 func _ready() -> void:
 	add_to_group("enemies")
 	collision_layer = 4
-	collision_mask = 1
+	collision_mask = 1 | PropData.LAYER_BODIES_ONLY
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	var cs := CollisionShape2D.new()
 	var c := CircleShape2D.new()
@@ -78,12 +100,33 @@ func _ready() -> void:
 	mat = Art.flash_material()
 	sprite.material = mat
 	add_child(sprite)
+	if elite:
+		_elite_fx()
 	alert = Sprite2D.new()
 	alert.texture = Art.tex("alert")
 	alert.visible = false
 	add_child(alert)
 	phase = randf() * TAU
 	_init_ai()
+
+
+## Golden aura under the elite and a little crown on its head.
+func _elite_fx() -> void:
+	var g := Sprite2D.new()
+	g.texture = Art.tex("glow")
+	g.modulate = Color(1.0, 0.8, 0.25, 0.45)
+	g.scale = Vector2(radius * 2.6 / 14.0, radius * 1.4 / 24.0) * 1.6
+	var add := CanvasItemMaterial.new()
+	add.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	g.material = add
+	add_child(g)
+	move_child(g, 0)
+	var crown := Sprite2D.new()
+	crown.texture = Art.tex("crown")
+	crown.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	crown.scale = Vector2.ONE * (0.8 / base_scale)
+	crown.position = Vector2(0, -tex_h * 0.95)
+	sprite.add_child(crown)
 
 
 func hit_center() -> Vector2:
@@ -141,10 +184,14 @@ func _can_target() -> bool:
 
 func _separation() -> Vector2:
 	var sep := Vector2.ZERO
-	for n in get_tree().get_nodes_in_group("enemies"):
+	for n in Game.world.enemy_cache:
+		if not is_instance_valid(n):  # freed since the cache was refreshed
+			continue
 		if n == self:
 			continue
 		var o := n as Enemy
+		if not is_instance_valid(o):
+			continue
 		var d := global_position - o.global_position
 		var min_d := (radius + o.radius) * 0.8
 		var l := d.length()
@@ -170,6 +217,8 @@ func _animate(delta: float) -> void:
 		wob = 0.0
 	hurt_t = maxf(0.0, hurt_t - delta)
 	var anim := "hurt" if hurt_t > 0.0 and sprite.sprite_frames.has_animation("hurt") else "walk"
+	if hurt_t <= 0.0 and sprite.sprite_frames.has_animation(state):
+		anim = state  # e.g. the droid's "charge", the UFO's "attack"
 	if sprite.animation != anim:
 		sprite.play(anim)
 	sprite.speed_scale = 0.0 if still else (0.6 if slow_t > 0.0 else 1.0)
@@ -256,6 +305,15 @@ func _init_ai() -> void:
 		"spitter":
 			state = "move"
 			state_t = randf_range(1.2, 2.0)
+		"droid":
+			state = "move"
+			state_t = randf_range(1.4, 2.2)
+		"ufo":
+			state = "move"
+			state_t = randf_range(1.2, 2.0)
+		"octopus":
+			state = "move"
+			state_t = randf_range(1.6, 2.4)
 		_:
 			state = "chase"
 
@@ -266,6 +324,12 @@ func _ai(delta: float) -> Vector2:
 			return _ai_runner(delta)
 		"spitter":
 			return _ai_spitter(delta)
+		"droid":
+			return _ai_droid(delta)
+		"ufo":
+			return _ai_ufo(delta)
+		"octopus":
+			return _ai_octopus(delta)
 	return _ai_chaser()
 
 
@@ -347,5 +411,156 @@ func _ai_spitter(delta: float) -> Vector2:
 				squash = Vector2(0.8, 1.2)
 				state = "move"
 				state_t = randf_range(1.8, 2.6)
+			return Vector2.ZERO
+	return Vector2.ZERO
+
+
+## Droid: hovers at mid range, strafes, then charges its eye and fires a double
+## plasma shot. Floats a little above the floor (still hurts on contact).
+func _ai_droid(delta: float) -> Vector2:
+	state_t -= delta
+	air = 3.0 + sin(t * 3.2 + phase) * 1.5
+	var to_p := _to_player()
+	var d := to_p.length()
+	match state:
+		"move":
+			if state_t <= 0.0:
+				state = "charge"
+				state_t = 0.6
+				alert.visible = true
+				Sfx.play("alert", 0.1, -8.0)
+			var v := Vector2.ZERO
+			if d < 60.0:
+				v = -to_p.normalized()
+			elif d > 100.0:
+				v = to_p.normalized()
+			else:
+				v = to_p.normalized().orthogonal() * (1.0 if sin(t * 0.7 + phase) > 0.0 else -1.0) * 0.7
+			return v * speed
+		"charge":
+			face = signf(to_p.x) if to_p.x != 0.0 else face
+			sprite.position.x = sin(t * 70.0) * 0.5
+			if randf() < 0.5:
+				Game.world.burst(hit_center(), Color("73eff7"), 1, 18.0, 0.2, 1.5)
+			if state_t <= 0.0:
+				sprite.position.x = 0.0
+				alert.visible = false
+				var dir := (player().global_position + Vector2(0, -6) - hit_center()).normalized()
+				Game.world.spawn_enemy_shot(hit_center() + dir * 5.0, dir * 95.0, contact_damage, "droid")
+				Sfx.play("shoot", 0.15, -6.0)
+				knock -= dir * 60.0
+				squash = Vector2(0.85, 1.15)
+				state = "move"
+				state_t = randf_range(1.8, 2.8)
+			return Vector2.ZERO
+	return Vector2.ZERO
+
+
+## UFO: flies high (no contact damage) circling the player, zaps a green laser, and
+## every third attack opens a floor portal that drops a Greenie (max 3 alive).
+func _ai_ufo(delta: float) -> Vector2:
+	state_t -= delta
+	air = 10.0 + sin(t * 2.4 + phase) * 2.0
+	var to_p := _to_player()
+	var d := to_p.length()
+	match state:
+		"move":
+			if state_t <= 0.0:
+				_ufo_attacks += 1
+				var summon := _ufo_attacks % 3 == 0 and _greenies() < 3
+				state = "summon" if summon else "attack"
+				state_t = 0.8 if summon else 0.45
+				if summon:
+					_ufo_portal()
+				else:
+					alert.visible = true
+					Sfx.play("alert", 0.1, -8.0)
+			var v := to_p.normalized().orthogonal() * (1.0 if sin(phase) > 0.0 else -1.0)
+			if d < 70.0:
+				v -= to_p.normalized()
+			elif d > 110.0:
+				v += to_p.normalized()
+			return v.normalized() * speed
+		"attack":
+			face = signf(to_p.x) if to_p.x != 0.0 else face
+			if state_t <= 0.0:
+				alert.visible = false
+				var dir := (player().global_position + Vector2(0, -6) - hit_center()).normalized()
+				Game.world.spawn_enemy_shot(hit_center() + dir * 6.0, dir * 110.0, contact_damage, "ufo")
+				Sfx.play("zap", 0.15, -6.0)
+				squash = Vector2(1.15, 0.9)
+				state = "move"
+				state_t = randf_range(1.6, 2.4)
+			return Vector2.ZERO
+		"summon":
+			if state_t <= 0.0:
+				state = "move"
+				state_t = randf_range(1.4, 2.0)
+			return Vector2.ZERO
+	return Vector2.ZERO
+
+
+func _greenies() -> int:
+	var n := 0
+	for e in get_tree().get_nodes_in_group("enemies"):
+		if (e as Enemy).type_id == "ufo_alien":
+			n += 1
+	return n
+
+
+## A green portal opens on the floor below the UFO and a Greenie (or `id`) pops out.
+func _ufo_portal(id := "ufo_alien", at := Vector2.INF) -> void:
+	var pos := global_position + Vector2(randf_range(-10.0, 10.0), 8.0) if at == Vector2.INF else at
+	var bb := Game.world.room.bounds().grow(-12.0)
+	pos = pos.clamp(bb.position, bb.end)
+	var w := Game.world
+	var fx := AnimFx.spawn(w.decals, "ufo_portal", "open", pos, 0.2, PI * 0.5)
+	fx.animation_finished.disconnect(fx.queue_free)  # the tween below frees it
+	fx.scale = Vector2(0.05, 0.2)
+	var tw := fx.create_tween()
+	tw.tween_property(fx, "scale", Vector2(0.16, 0.2), 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_interval(0.5)
+	tw.tween_property(fx, "scale", Vector2(0.0, 0.2), 0.2)
+	tw.tween_callback(fx.queue_free)
+	Sfx.play("spawn", 0.1, -6.0)
+	get_tree().create_timer(0.35).timeout.connect(func() -> void:
+		if not dead and not w.player.dead:
+			w.spawn_enemy(id, pos))
+
+
+## Octopus: swims in pulses (a push, then a glide) keeping mid range, then puffs up
+## and fires a fan of 3 slow energy orbs. Leaves a blue puddle when cleaned.
+func _ai_octopus(delta: float) -> Vector2:
+	state_t -= delta
+	var to_p := _to_player()
+	var d := to_p.length()
+	match state:
+		"move":
+			if state_t <= 0.0:
+				state = "attack"
+				state_t = 0.55
+				alert.visible = true
+				Sfx.play("alert", 0.1, -8.0)
+			# jellyfish stroke: squeeze on the push, stretch while gliding
+			var pulse := maxf(0.0, sin(t * 4.0 + phase))
+			squash = Vector2(1.0 + pulse * 0.12, 1.0 - pulse * 0.1)
+			var v := to_p.normalized()
+			if d < 55.0:
+				v = -v
+			elif d < 90.0:
+				v = v.orthogonal() * (1.0 if sin(t * 0.5 + phase) > 0.0 else -1.0)
+			return v * speed * (0.3 + pulse * 1.4)
+		"attack":
+			face = signf(to_p.x) if to_p.x != 0.0 else face
+			squash = Vector2(1.0 + (0.55 - state_t) * 0.35, 1.0 + (0.55 - state_t) * 0.2)
+			if state_t <= 0.0:
+				alert.visible = false
+				var dir := (player().global_position + Vector2(0, -6) - hit_center()).normalized()
+				for a: float in [-0.35, 0.0, 0.35]:
+					Game.world.spawn_enemy_shot(hit_center() + dir * 5.0, dir.rotated(a) * 70.0, contact_damage, "octopus")
+				Sfx.play("spit", 0.1, -4.0)
+				squash = Vector2(0.8, 1.2)
+				state = "move"
+				state_t = randf_range(2.2, 3.0)
 			return Vector2.ZERO
 	return Vector2.ZERO
