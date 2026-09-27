@@ -1,0 +1,351 @@
+class_name Enemy
+extends CharacterBody2D
+## Base alien: health, hit reactions, knockback, freeze/stun, contact damage.
+## Small aliens pick their behaviour from EnemyData `ai`; bosses override `_ai`.
+
+var type_id := ""
+var def: Dictionary = {}
+var hp := 10.0
+var max_hp := 10.0
+var radius := 6.0
+var speed := 20.0
+var contact_damage := 10.0
+var is_boss := false
+var targetable := false
+var dead := false
+
+var sprite: AnimatedSprite2D
+var shadow: Sprite2D
+var alert: Sprite2D
+var mat: ShaderMaterial
+var flash_t := 0.0
+var knock := Vector2.ZERO
+var frozen_t := 0.0
+var slow_t := 0.0
+var stun_t := 0.0
+var t := 0.0
+var phase := 0.0
+var state := ""
+var state_t := 0.0
+var aim := Vector2.ZERO
+var hit_wall := false
+var spawn_t := 0.3
+var tex_h := 16.0
+var base_scale := 1.0
+var squash := Vector2.ONE
+var face := 1.0
+var air := 0.0
+var trail_t := 0.0
+var hurt_t := 0.0
+var tint := Color.WHITE
+var art := ""
+
+
+func setup(id: String) -> void:
+	type_id = id
+	def = EnemyData.TYPES[id]
+	var mult := Game.difficulty()
+	is_boss = bool(def.get("boss", false))
+	max_hp = float(def.hp) * (1.0 if is_boss else mult)
+	hp = max_hp
+	radius = float(def.radius)
+	speed = float(def.speed)
+	contact_damage = float(def.damage) * (1.0 + (mult - 1.0) * 0.5)
+	base_scale = float(def.scale)
+	art = str(def.art)
+	tint = def.get("tint", Color.WHITE)
+
+
+func _ready() -> void:
+	add_to_group("enemies")
+	collision_layer = 4
+	collision_mask = 1
+	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
+	var cs := CollisionShape2D.new()
+	var c := CircleShape2D.new()
+	c.radius = maxf(radius * 0.7, 3.0)
+	cs.shape = c
+	cs.position = Vector2(0, -2)
+	add_child(cs)
+	shadow = Sprite2D.new()
+	shadow.texture = Art.tex("shadow")
+	shadow.scale = Vector2.ONE * (radius * 2.2 / 12.0)
+	add_child(shadow)
+	sprite = Art.make_anim(art, 0.0)
+	sprite.play("walk")
+	sprite.frame = randi() % sprite.sprite_frames.get_frame_count("walk")
+	tex_h = Art.body_height(art)
+	mat = Art.flash_material()
+	sprite.material = mat
+	add_child(sprite)
+	alert = Sprite2D.new()
+	alert.texture = Art.tex("alert")
+	alert.visible = false
+	add_child(alert)
+	phase = randf() * TAU
+	_init_ai()
+
+
+func hit_center() -> Vector2:
+	return global_position + Vector2(0, -tex_h * base_scale * 0.5 - air)
+
+
+func player() -> Player:
+	return Game.world.player
+
+
+func _physics_process(delta: float) -> void:
+	if dead:
+		return
+	t += delta
+	flash_t = maxf(0.0, flash_t - delta)
+	if spawn_t > 0.0:
+		spawn_t -= delta
+		if spawn_t <= 0.0:
+			targetable = _can_target()
+	var vel := Vector2.ZERO
+	if frozen_t > 0.0:
+		frozen_t -= delta
+		if frozen_t <= 0.0:
+			Game.world.burst(hit_center(), Color("c0f4ff"), 8, 50.0, 0.3, 2.0)
+	elif stun_t > 0.0:
+		stun_t -= delta
+	elif spawn_t <= 0.0:
+		vel = _ai(delta)
+	if slow_t > 0.0:
+		slow_t -= delta
+		vel *= 0.5
+	vel += _separation()
+	velocity = vel + knock
+	knock = knock.move_toward(Vector2.ZERO, 520.0 * delta)
+	var fast_knock := knock.length() > 140.0
+	move_and_slide()
+	hit_wall = get_slide_collision_count() > 0
+	if hit_wall and fast_knock and not is_boss:
+		# slammed into a wall by knockback: bonus damage
+		knock = Vector2.ZERO
+		take_damage(float(Game.stats.damage) * 0.5, Vector2.ZERO)
+		Game.world.burst(global_position, Color(1, 1, 1, 0.8), 6, 50.0, 0.25, 2.0)
+		Game.world.shake(0.2)
+		if dead:
+			return
+	if absf(vel.x) > 1.0:
+		face = signf(vel.x)
+	_animate(delta)
+	_contact()
+
+
+func _can_target() -> bool:
+	return true
+
+
+func _separation() -> Vector2:
+	var sep := Vector2.ZERO
+	for n in get_tree().get_nodes_in_group("enemies"):
+		if n == self:
+			continue
+		var o := n as Enemy
+		var d := global_position - o.global_position
+		var min_d := (radius + o.radius) * 0.8
+		var l := d.length()
+		if l < min_d and l > 0.01:
+			sep += d / l * (min_d - l) * 8.0
+	return sep
+
+
+func _contact() -> void:
+	if air > 4.0 or spawn_t > 0.0 or frozen_t > 0.0:
+		return
+	var p := player()
+	if p.dead:
+		return
+	if (p.global_position - global_position).length() < radius + 5.0:
+		p.take_damage(contact_damage, global_position)
+
+
+func _animate(delta: float) -> void:
+	var wob := sin(t * 9.0 + phase) * 0.05
+	var still := frozen_t > 0.0 or stun_t > 0.0
+	if still:
+		wob = 0.0
+	hurt_t = maxf(0.0, hurt_t - delta)
+	var anim := "hurt" if hurt_t > 0.0 and sprite.sprite_frames.has_animation("hurt") else "walk"
+	if sprite.animation != anim:
+		sprite.play(anim)
+	sprite.speed_scale = 0.0 if still else (0.6 if slow_t > 0.0 else 1.0)
+	var target := Vector2(base_scale * (1.0 + wob), base_scale * (1.0 - wob)) * squash
+	squash = squash.lerp(Vector2.ONE, delta * 10.0)
+	if spawn_t > 0.0:
+		var k := 1.0 - spawn_t / 0.3
+		target *= clampf(k * 1.3, 0.0, 1.2)
+	sprite.scale = target
+	sprite.flip_h = face < 0.0
+	sprite.position.y = -air
+	mat.set_shader_parameter("flash", clampf(flash_t / 0.12, 0.0, 1.0))
+	if frozen_t > 0.0:
+		sprite.self_modulate = Color(0.6, 0.85, 1.4)
+	elif slow_t > 0.0:
+		sprite.self_modulate = Color(0.8, 0.95, 1.2)
+	elif stun_t > 0.0:
+		sprite.self_modulate = Color(1.1, 1.1, 0.8)
+	else:
+		sprite.self_modulate = tint
+	alert.position = Vector2(0, -tex_h * base_scale - 4.0 - air)
+	shadow.scale = Vector2.ONE * (radius * 2.2 / 12.0) * clampf(1.0 - air / 150.0, 0.4, 1.0)
+
+
+# ---------------------------------------------------------------- damage & status
+
+func take_damage(amount: float, dir := Vector2.ZERO, crit := false) -> void:
+	if dead or (not targetable and spawn_t <= 0.0 and air > 4.0):
+		return
+	hp -= amount
+	flash_t = 0.12
+	hurt_t = 0.18
+	squash = Vector2(1.2, 0.85)
+	if dir != Vector2.ZERO:
+		knock += dir.normalized() * float(Game.stats.knockback) * float(def.kb) * minf(1.0, dir.length())
+	Game.world.popup_damage(hit_center() + Vector2(randf_range(-4, 4), -6), amount, crit)
+	if hp <= 0.0:
+		die()
+
+
+func push(v: Vector2) -> void:
+	knock += v * float(def.kb) * (0.3 if is_boss else 1.0)
+
+
+func stun(dur: float) -> void:
+	if is_boss:
+		return
+	stun_t = maxf(stun_t, dur)
+
+
+func freeze(dur: float) -> void:
+	if is_boss:
+		slow_t = maxf(slow_t, dur)
+	else:
+		if frozen_t <= 0.0:
+			Sfx.play("freeze", 0.1, -6.0)
+		frozen_t = maxf(frozen_t, dur)
+	Game.world.burst(hit_center(), Color("c0f4ff"), 6, 40.0, 0.3, 1.5)
+
+
+func die() -> void:
+	if dead:
+		return
+	dead = true
+	targetable = false
+	remove_from_group("enemies")
+	_on_death()
+	Game.world.enemy_killed(self)
+	queue_free()
+
+
+func _on_death() -> void:
+	pass
+
+
+# ---------------------------------------------------------------- AI
+
+func _init_ai() -> void:
+	match str(def.ai):
+		"runner":
+			state = "wander"
+			state_t = randf_range(1.0, 1.6)
+			aim = Vector2.from_angle(randf() * TAU)
+		"spitter":
+			state = "move"
+			state_t = randf_range(1.2, 2.0)
+		_:
+			state = "chase"
+
+
+func _ai(delta: float) -> Vector2:
+	match str(def.ai):
+		"runner":
+			return _ai_runner(delta)
+		"spitter":
+			return _ai_spitter(delta)
+	return _ai_chaser()
+
+
+func _to_player() -> Vector2:
+	return player().global_position - global_position
+
+
+func _ai_chaser() -> Vector2:
+	var to_p := _to_player()
+	return to_p.normalized() * speed * (0.8 + 0.25 * sin(t * 5.0 + phase))
+
+
+func _ai_runner(delta: float) -> Vector2:
+	state_t -= delta
+	match state:
+		"wander":
+			if state_t <= 0.0:
+				state = "windup"
+				state_t = 0.55
+				aim = _to_player().normalized()
+				alert.visible = true
+				Sfx.play("alert", 0.1, -6.0)
+			return aim * speed
+		"windup":
+			sprite.position.x = sin(t * 60.0) * 0.8
+			face = signf(aim.x) if aim.x != 0.0 else face
+			if state_t <= 0.0:
+				state = "dash"
+				state_t = 0.5
+				alert.visible = false
+				sprite.position.x = 0.0
+				squash = Vector2(1.3, 0.7)
+				Sfx.play("dash", 0.1, -6.0)
+			return Vector2.ZERO
+		"dash":
+			trail_t -= delta
+			if trail_t <= 0.0:
+				trail_t = 0.04
+				Game.world.burst(global_position + Vector2(0, -3), Color("ef7d57"), 1, 5.0, 0.25, 2.0)
+			if state_t <= 0.0 or (hit_wall and state_t < 0.45):
+				if hit_wall:
+					Game.world.burst(global_position, Color(1, 1, 1, 0.7), 5, 40.0, 0.25, 2.0)
+				state = "rest"
+				state_t = 0.45
+			return aim * 150.0
+		"rest":
+			if state_t <= 0.0:
+				state = "wander"
+				state_t = randf_range(0.9, 1.6)
+				aim = _to_player().normalized().rotated(randf_range(-1.2, 1.2))
+			return Vector2.ZERO
+	return Vector2.ZERO
+
+
+func _ai_spitter(delta: float) -> Vector2:
+	state_t -= delta
+	var to_p := _to_player()
+	var d := to_p.length()
+	match state:
+		"move":
+			if state_t <= 0.0:
+				state = "windup"
+				state_t = 0.45
+			var v := Vector2.ZERO
+			if d < 55.0:
+				v = -to_p.normalized()
+			elif d > 95.0:
+				v = to_p.normalized()
+			else:
+				v = to_p.normalized().orthogonal() * (1.0 if sin(phase) > 0.0 else -1.0) * 0.6
+			return v * speed
+		"windup":
+			squash = Vector2(1.0 + (0.45 - state_t), 1.0 + (0.45 - state_t) * 0.6)
+			face = signf(to_p.x) if to_p.x != 0.0 else face
+			if state_t <= 0.0:
+				var dir := (player().global_position + Vector2(0, -6) - hit_center()).normalized()
+				Game.world.spawn_enemy_shot(hit_center(), dir * 75.0, contact_damage)
+				Sfx.play("spit", 0.1, -4.0)
+				squash = Vector2(0.8, 1.2)
+				state = "move"
+				state_t = randf_range(1.8, 2.6)
+			return Vector2.ZERO
+	return Vector2.ZERO

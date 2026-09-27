@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://c5njjueyrptc4"]
+
+[ext_resource type="Script" uid="uid://crjulis3tmc2w" path="res://scripts/game.gd" id="1_lnu2h"]
+[ext_resource type="Script" uid="uid://cvonsh4r7pl3o" path="res://scripts/room.gd" id="2_lbhrr"]
+[ext_resource type="Script" uid="uid://bu01ic4bshmhr" path="res://scripts/ui/hud.gd" id="3_iywne"]
+
+[node name="GameWorld" type="Node2D" unique_id=1398701788]
+script = ExtResource("1_lnu2h")
+
+[node name="Room" type="Node2D" parent="." unique_id=212066992]
+script = ExtResource("2_lbhrr")
+
+[node name="Decals" type="Node2D" parent="." unique_id=1899662322]
+
+[node name="Entities" type="Node2D" parent="." unique_id=856975292]
+y_sort_enabled = true
+
+[node name="Effects" type="Node2D" parent="." unique_id=99307125]
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=238865078]
+position = Vector2(72, 110)
+zoom = Vector2(2, 2)
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=1154622926]
+script = ExtResource("3_iywne")

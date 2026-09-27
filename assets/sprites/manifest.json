@@ -1,0 +1,312 @@
+{
+ "player": {
+  "size": [
+   92,
+   80
+  ],
+  "anchor": [
+   46,
+   80
+  ],
+  "body_h": 75.0,
+  "anims": {
+   "idle": {
+    "frames": 4,
+    "fps": 5,
+    "loop": true
+   },
+   "walk": {
+    "frames": 4,
+    "fps": 9,
+    "loop": true
+   },
+   "walk_up": {
+    "frames": 4,
+    "fps": 9,
+    "loop": true
+   },
+   "shoot": {
+    "frames": 2,
+    "fps": 14,
+    "loop": false
+   },
+   "hurt": {
+    "frames": 2,
+    "fps": 10,
+    "loop": false
+   },
+   "death": {
+    "frames": 3,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "green": {
+  "size": [
+   94,
+   81
+  ],
+  "anchor": [
+   47,
+   81
+  ],
+  "body_h": 79.5,
+  "anims": {
+   "walk": {
+    "frames": 8,
+    "fps": 10,
+    "loop": true
+   },
+   "hurt": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "splat": {
+    "frames": 3,
+    "fps": 12,
+    "loop": false
+   }
+  }
+ },
+ "pink": {
+  "size": [
+   82,
+   79
+  ],
+  "anchor": [
+   41,
+   79
+  ],
+  "body_h": 77.5,
+  "anims": {
+   "walk": {
+    "frames": 8,
+    "fps": 10,
+    "loop": true
+   },
+   "splat": {
+    "frames": 4,
+    "fps": 12,
+    "loop": false
+   }
+  }
+ },
+ "blue": {
+  "size": [
+   68,
+   84
+  ],
+  "anchor": [
+   34,
+   84
+  ],
+  "body_h": 81.0,
+  "anims": {
+   "walk": {
+    "frames": 8,
+    "fps": 10,
+    "loop": true
+   }
+  }
+ },
+ "bullet": {
+  "size": [
+   58,
+   34
+  ],
+  "anchor": [
+   29,
+   17.0
+  ],
+  "body_h": 31.0,
+  "anims": {
+   "fly": {
+    "frames": 3,
+    "fps": 14,
+    "loop": true
+   }
+  }
+ },
+ "impact": {
+  "size": [
+   62,
+   56
+  ],
+  "anchor": [
+   31,
+   28.0
+  ],
+  "body_h": 55.0,
+  "anims": {
+   "pop": {
+    "frames": 3,
+    "fps": 20,
+    "loop": false
+   }
+  }
+ },
+ "dust": {
+  "size": [
+   108,
+   53
+  ],
+  "anchor": [
+   54,
+   53
+  ],
+  "body_h": 41.0,
+  "anims": {
+   "puff": {
+    "frames": 5,
+    "fps": 14,
+    "loop": false
+   }
+  }
+ },
+ "shot1": {
+  "size": [
+   46,
+   31
+  ],
+  "anchor": [
+   23,
+   15.5
+  ],
+  "body_h": 31.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "shot2": {
+  "size": [
+   58,
+   34
+  ],
+  "anchor": [
+   29,
+   17.0
+  ],
+  "body_h": 31.5,
+  "anims": {
+   "fly": {
+    "frames": 2,
+    "fps": 12,
+    "loop": true
+   }
+  }
+ },
+ "shot3": {
+  "size": [
+   62,
+   55
+  ],
+  "anchor": [
+   31,
+   27.5
+  ],
+  "body_h": 55.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "shot4": {
+  "size": [
+   62,
+   56
+  ],
+  "anchor": [
+   31,
+   28.0
+  ],
+  "body_h": 55.5,
+  "anims": {
+   "fly": {
+    "frames": 2,
+    "fps": 12,
+    "loop": true
+   }
+  }
+ },
+ "shot5": {
+  "size": [
+   60,
+   63
+  ],
+  "anchor": [
+   30,
+   31.5
+  ],
+  "body_h": 61.0,
+  "anims": {
+   "fly": {
+    "frames": 2,
+    "fps": 10,
+    "loop": true
+   }
+  }
+ },
+ "muzzle": {
+  "size": [
+   22,
+   22
+  ],
+  "anchor": [
+   11,
+   11.0
+  ],
+  "body_h": 22.0,
+  "anims": {
+   "flash": {
+    "frames": 1,
+    "fps": 16,
+    "loop": false
+   }
+  }
+ },
+ "glob": {
+  "size": [
+   74,
+   37
+  ],
+  "anchor": [
+   37,
+   18.5
+  ],
+  "body_h": 37.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "glob_pop": {
+  "size": [
+   112,
+   70
+  ],
+  "anchor": [
+   56,
+   35.0
+  ],
+  "body_h": 67.0,
+  "anims": {
+   "pop": {
+    "frames": 3,
+    "fps": 16,
+    "loop": false
+   }
+  }
+ }
+}
