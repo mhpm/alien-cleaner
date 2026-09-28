@@ -62,6 +62,12 @@ const ARENA_FLOOR_TILE := 32.0
 const ARENA_VENT_CHANCE := 0.015
 const ARENA_WALL := 22.5  # wall thickness in world units (90 art px)
 const ARENA_ART_SCALE := 0.25  # wall art px -> world
+## painted arenas (WorldData survival "art"): one picture of the whole walled room,
+## made bigger by its tool; its .json gives the art size and the walkable floor in px
+const ART_ARENAS := {
+	# world 2: tools/arena2_ref.webp -> python tools/make_hive_arena.py
+	"hive": {"bg": "arena_hive_bg.webp", "data": "arena_hive.json", "scale": 0.55},
+}
 var grid: Array = []
 var toxic: Dictionary = {}  # Vector2i -> splat texture
 var toxic_until: Dictionary = {}  # Vector2i -> anim_t when a temporary flood dries up
@@ -110,6 +116,8 @@ var sector_i := -1  # sector currently sealed (-1 = none)
 var arena := false
 var floor_layer: TileMapLayer
 var arena_tex: Dictionary = {}
+var arena_bg: Texture2D  # painted arena picture (null = tiled floor and walls)
+var arena_bg_rect := Rect2()  # where it is drawn, world units (floor origin = 0,0)
 var exit_pos := Vector2.INF  # arena exit portal (appears when the stage is clean)
 var portal_tex: Texture2D
 
@@ -167,7 +175,8 @@ func _art() -> Dictionary:
 		return {"tex": st_tex, "rect": bounds(), "door": to_world(station.exit),
 			"light": to_world(station.get("light", Rect2(station.exit.position.x + 10.0, station.exit.position.y - 20.0, station.exit.size.x - 20.0, 8.0)))}
 	if arena:
-		return {"tex": null, "rect": bounds().grow(ARENA_WALL), "door": Rect2(), "light": Rect2()}
+		return {"tex": arena_bg, "rect": arena_bg_rect if arena_bg != null else bounds().grow(ARENA_WALL),
+			"door": Rect2(), "light": Rect2()}
 	var t: Dictionary = ART_THEMES[theme]
 	var sc: Vector2 = t.scale
 	var o: Vector2 = t.origin
@@ -359,7 +368,7 @@ func flood_toxic(c: Vector2i, secs: float) -> void:
 
 ## Build a wide open arena of `size` tiles: quiet floor plates and walls all round,
 ## no obstacles, so the astronaut and the horde move freely.
-func build_arena(size: Vector2i, _entities: Node2D, seed_v: int) -> void:
+func build_arena(size: Vector2i, _entities: Node2D, seed_v: int, art := "") -> void:
 	_clear_station()
 	for n in spawned:
 		if is_instance_valid(n):
@@ -377,16 +386,37 @@ func build_arena(size: Vector2i, _entities: Node2D, seed_v: int) -> void:
 	exit_pos = Vector2.INF
 	door_open = false
 	door_k = 0.0
+	arena_bg = null
 	cols = size.x
 	rows = size.y
 	room_w = cols * TILE
 	room_h = rows * TILE
+	if art != "":
+		_painted_arena(art)
 	_build_walls()
 	_build_baked()
-	var rng := RandomNumberGenerator.new()
-	rng.seed = seed_v
-	_arena_floor(rng)
+	if arena_bg == null:
+		var rng := RandomNumberGenerator.new()
+		rng.seed = seed_v
+		_arena_floor(rng)
+	elif floor_layer != null:
+		floor_layer.visible = false
 	queue_redraw()
+
+
+## Painted arena: the room is the picture's floor rectangle, walls follow its edges.
+func _painted_arena(id: String) -> void:
+	var d: Dictionary = ART_ARENAS[id]
+	var info: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(ARENA + str(d.data)))
+	var s := float(d.scale)
+	var fl: Array = info.floor
+	var sz: Array = info.size
+	room_w = (float(fl[2]) - float(fl[0])) * s
+	room_h = (float(fl[3]) - float(fl[1])) * s
+	cols = ceili(room_w / TILE)
+	rows = ceili(room_h / TILE)
+	arena_bg = load(ARENA + str(d.bg))
+	arena_bg_rect = Rect2(-Vector2(float(fl[0]), float(fl[1])) * s, Vector2(float(sz[0]), float(sz[1])) * s)
 
 
 func _leave_arena() -> void:
@@ -446,6 +476,10 @@ func arena_free_spot(p: Vector2, clear := 12.0) -> Vector2:
 
 
 func _draw_arena() -> void:
+	if arena_bg != null:
+		draw_texture_rect(arena_bg, arena_bg_rect, false)
+		_draw_arena_extras()
+		return
 	var s := ARENA_ART_SCALE
 	var t := ARENA_WALL
 	var wt := 90.0
@@ -464,6 +498,11 @@ func _draw_arena() -> void:
 			draw_set_transform(o, 0.0, Vector2(s if cx == 0 else -s, s if cy == 0 else -s))
 			draw_texture_rect(arena_tex.corner, Rect2(0, 0, wt, wt), false)
 	draw_set_transform(Vector2.ZERO)
+	_draw_arena_extras()
+
+
+## Toxic slime and the exit portal, over either kind of arena.
+func _draw_arena_extras() -> void:
 	for c: Vector2i in toxic:
 		var tt: Texture2D = toxic[c]
 		var glow := 0.85 + sin(anim_t * 3.0 + c.x + c.y) * 0.15

@@ -5,14 +5,11 @@ signal hp_changed
 signal coins_changed
 
 const SAVE_PATH := "user://save.cfg"
+const BASE_HP := 70.0
 const PERM := {
-	"health": {"name": "Suit Plating", "desc": "+15 max health", "max": 5, "cost": 20},
-	"power": {"name": "Suds Pressure", "desc": "+10% cleaning power", "max": 5, "cost": 25},
+	"health": {"name": "Suit Plating", "desc": "+20 max health", "max": 5, "cost": 20},
+	"power": {"name": "Suds Pressure", "desc": "+12% cleaning power", "max": 5, "cost": 25},
 	"speed": {"name": "Jet Boots", "desc": "+6% move speed", "max": 5, "cost": 20},
-	# Infected mode (scripts/infected.gd): level 1 unlocks it, each level after adds
-	# 2 s of mutation and +15% mutant power
-	"infected": {"name": "Infected Mode", "desc": "Fill the meter, then MUTATE!",
-			"desc2": "+2s and +15% mutant power", "max": 5, "cost": 60},
 }
 
 # persistent
@@ -20,6 +17,13 @@ var bank := 0
 var perm := {"health": 0, "power": 0, "speed": 0, "infected": 0}
 var best_room := 0
 var runs := 0
+## world select: worlds beaten (world i is playable once i worlds are), longest time
+## survived per world (seconds), world chests already opened, lifetime XP gems (crew level)
+var worlds_cleared := 0
+var best_time: Dictionary = {}
+var chests: Array = []
+var total_xp := 0
+var menu_scene := "res://scenes/world_select.tscn"  # where the game / gear screen return
 ## equipment: owned item levels ({id: level}) and the item worn in each slot
 var gear_owned: Dictionary = {}
 var gear_equipped: Dictionary = {}
@@ -47,15 +51,17 @@ func _default_gear() -> void:
 			gear_equipped[slot] = id
 
 
-func new_run() -> void:
+func new_run(world_i := -1) -> void:
 	upgrades = {}
-	world_index = 0
+	if world_i >= 0:
+		world_index = world_i
 	room_index = 0
 	run_coins = 0
-	var mhp := 100.0 + 15.0 * int(perm.health)
+	# a fresh crew member is fragile: the shop's Suit Plating is what keeps you alive
+	var mhp := BASE_HP + 20.0 * int(perm.health)
 	stats = {
 		"max_hp": mhp, "hp": mhp,
-		"damage": 10.0 * (1.0 + 0.1 * int(perm.power)),
+		"damage": 10.0 * (1.0 + 0.12 * int(perm.power)),
 		"fire_interval": 0.42, "bullet_speed": 220.0,
 		"move_speed": 80.0 * (1.0 + 0.06 * int(perm.speed)),
 		"shots": 1, "spread": 0, "ricochet": 0, "pierce": 0,
@@ -66,6 +72,10 @@ func new_run() -> void:
 		"hazard_mult": 1.0, "coin_bonus": 0, "surge": false, "room_heal": 0,
 		"infected": int(perm.infected),
 	}
+	# mutation levels (MUTATION LAB) also make the crew permanently stronger
+	var mut := int(perm.infected)
+	stats.damage = float(stats.damage) * (1.0 + MutationData.atk_bonus(mut))
+	stats.move_speed = float(stats.move_speed) * (1.0 + MutationData.speed_bonus(mut))
 	_apply_gear(stats)
 
 
@@ -249,6 +259,40 @@ func buy_perm(id: String) -> bool:
 	return true
 
 
+## Record how long this world was survived (seconds) and whether it was beaten.
+func record_world(secs: float, cleared: bool) -> void:
+	var k := str(world_index)
+	best_time[k] = maxf(float(best_time.get(k, 0.0)), secs)
+	if cleared:
+		worlds_cleared = maxi(worlds_cleared, world_index + 1)
+
+
+## Coins for beating the current world: the full bonus the first time, a third after.
+func clear_bonus(first: bool) -> int:
+	var n := 150 * (world_index + 1)
+	if not first:
+		n = roundi(n / 3.0)
+	bank += n
+	save()
+	return n
+
+
+func world_unlocked(i: int) -> bool:
+	return i <= worlds_cleared
+
+
+## Crew level from lifetime XP gems: [level, progress 0..1 to the next one].
+func crew_level() -> Array:
+	var lv := 1
+	var need := 60
+	var xp := total_xp
+	while xp >= need:
+		xp -= need
+		lv += 1
+		need = 60 + (lv - 1) * 40
+	return [lv, float(xp) / float(need)]
+
+
 func end_run() -> void:
 	bank += run_coins
 	best_room = maxi(best_room, global_room())
@@ -260,8 +304,13 @@ func save() -> void:
 	var cfg := ConfigFile.new()
 	cfg.set_value("meta", "bank", bank)
 	cfg.set_value("meta", "perm", perm)
+	cfg.set_value("meta", "mutation_phases", 1)
 	cfg.set_value("meta", "best_room", best_room)
 	cfg.set_value("meta", "runs", runs)
+	cfg.set_value("worlds", "cleared", worlds_cleared)
+	cfg.set_value("worlds", "best_time", best_time)
+	cfg.set_value("worlds", "chests", chests)
+	cfg.set_value("meta", "total_xp", total_xp)
 	cfg.set_value("gear", "owned", gear_owned)
 	cfg.set_value("gear", "equipped", gear_equipped)
 	cfg.set_value("settings", "music", Sfx.music_enabled)
@@ -277,8 +326,15 @@ func load_save() -> void:
 	var p: Dictionary = cfg.get_value("meta", "perm", {})
 	for k: String in perm:
 		perm[k] = int(p.get(k, 0))
+	# the lab went from 10 mutation levels to 5 phases
+	if int(cfg.get_value("meta", "mutation_phases", 0)) == 0:
+		perm.infected = MutationData.from_old_level(int(perm.infected))
 	best_room = int(cfg.get_value("meta", "best_room", 0))
 	runs = int(cfg.get_value("meta", "runs", 0))
+	worlds_cleared = int(cfg.get_value("worlds", "cleared", 0))
+	best_time = cfg.get_value("worlds", "best_time", {})
+	chests = cfg.get_value("worlds", "chests", [])
+	total_xp = int(cfg.get_value("meta", "total_xp", 0))
 	var owned: Dictionary = cfg.get_value("gear", "owned", {})
 	var equipped: Dictionary = cfg.get_value("gear", "equipped", {})
 	for k: String in owned:

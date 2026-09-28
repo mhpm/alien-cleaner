@@ -3,7 +3,7 @@ extends Control
 ## The art is laid out on a 941x1672 "stage" scaled to cover the screen; buttons are
 ## crops of the same art (tools/make_menu_assets.py) so they can react to touches.
 
-const GAME_SCENE := "res://scenes/game.tscn"
+const WORLD_SCENE := "res://scenes/world_select.tscn"
 const ART_SIZE := Vector2(941, 1672)
 const BUTTONS := {
 	"play": Rect2(208, 1098, 528, 148),
@@ -19,7 +19,6 @@ var stage: Control
 var buttons: Dictionary = {}
 var bank_label: Label
 var info_label: Label
-var shop: Control = null
 var toast: Label
 var sparkles: Array[Vector3] = []
 
@@ -32,7 +31,7 @@ func _ready() -> void:
 	_build()
 	resized.connect(_fit_stage)
 	_fit_stage()
-	Sfx.play_music()
+	Sfx.play_music("menu")
 
 
 func _build() -> void:
@@ -115,6 +114,7 @@ func _on_button(id: String) -> void:
 		"settings", "gear":
 			_open_settings()
 		"characters":
+			Game.menu_scene = "res://scenes/main_menu.tscn"
 			get_tree().change_scene_to_file("res://scenes/character.tscn")
 		"achievements":
 			_show_toast("ACHIEVEMENTS COMING SOON!")
@@ -134,7 +134,7 @@ func _show_toast(text: String) -> void:
 func _refresh() -> void:
 	bank_label.text = str(Game.bank)
 	if Game.runs > 0:
-		info_label.text = "BEST: ROOM 1-%d    RUNS: %d" % [Game.best_room, Game.runs]
+		info_label.text = "WORLDS CLEARED: %d/%d    RUNS: %d" % [Game.worlds_cleared, WorldData.WORLDS.size(), Game.runs]
 	else:
 		info_label.text = "DRAG TO MOVE - CLEANING IS AUTOMATIC!"
 
@@ -164,131 +164,22 @@ func _draw() -> void:
 		draw_rect(Rect2(p - Vector2(0.5, r), Vector2(1.0, r * 2.0)), Color(1, 1, 1, a * 0.8))
 
 
+## PLAY opens the world select (pick a world, shop, gear...).
 func _play() -> void:
-	Game.new_run()
 	var fade := ColorRect.new()
 	fade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	fade.color = Color(0.03, 0.04, 0.08, 0.0)
 	add_child(fade)
 	var tw := fade.create_tween()
 	tw.tween_property(fade, "color:a", 1.0, 0.25)
-	tw.tween_callback(func() -> void: get_tree().change_scene_to_file(GAME_SCENE))
+	tw.tween_callback(func() -> void: get_tree().change_scene_to_file(WORLD_SCENE))
 
 
-# ---------------------------------------------------------------- settings
+# ---------------------------------------------------------------- overlays
 
 func _open_settings() -> void:
-	var panel := _overlay()
-	var box: VBoxContainer = panel.get_child(1)
-	box.add_child(UiTheme.title("SETTINGS", 30, Color("73eff7")))
-	var music := UiTheme.button("", Color("3b5dc9"), 20, Vector2(240, 54))
-	var sfx := UiTheme.button("", Color("3b5dc9"), 20, Vector2(240, 54))
-	var refresh := func() -> void:
-		music.text = "MUSIC: " + ("ON" if Sfx.music_enabled else "OFF")
-		sfx.text = "SOUND FX: " + ("ON" if Sfx.sfx_enabled else "OFF")
-	refresh.call()
-	music.pressed.connect(func() -> void:
-		Sfx.set_music_enabled(not Sfx.music_enabled)
-		Game.save()
-		refresh.call())
-	sfx.pressed.connect(func() -> void:
-		Sfx.sfx_enabled = not Sfx.sfx_enabled
-		Game.save()
-		refresh.call())
-	for b: Button in [music, sfx]:
-		var cc := CenterContainer.new()
-		cc.add_child(b)
-		box.add_child(cc)
-	var close := UiTheme.button("BACK", Color("566c86"), 18, Vector2(180, 46))
-	close.pressed.connect(panel.queue_free)
-	var cc2 := CenterContainer.new()
-	cc2.add_child(close)
-	box.add_child(cc2)
+	MenuPanels.settings(self)
 
-
-func _overlay() -> Control:
-	var o := Control.new()
-	o.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(o)
-	var bg := ColorRect.new()
-	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	bg.color = Color(0.03, 0.04, 0.09, 0.88)
-	o.add_child(bg)
-	var box := VBoxContainer.new()
-	box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	box.alignment = BoxContainer.ALIGNMENT_CENTER
-	box.add_theme_constant_override("separation", 14)
-	o.add_child(box)
-	return o
-
-
-# ---------------------------------------------------------------- shop
 
 func _open_shop() -> void:
-	if shop != null:
-		shop.queue_free()
-	shop = Control.new()
-	shop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(shop)
-	var bg := ColorRect.new()
-	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	bg.color = Color(0.03, 0.04, 0.09, 0.9)
-	shop.add_child(bg)
-	var box := VBoxContainer.new()
-	box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	box.alignment = BoxContainer.ALIGNMENT_CENTER
-	box.add_theme_constant_override("separation", 12)
-	shop.add_child(box)
-	box.add_child(UiTheme.title("CREW UPGRADES", 28, Color("73eff7")))
-	box.add_child(UiTheme.label("Bank: %d coins" % Game.bank, 16, Color("ffcd75")))
-	for id: String in Game.PERM:
-		box.add_child(_shop_row(id))
-	var close := UiTheme.button("BACK", Color("566c86"), 18, Vector2(180, 46))
-	close.pressed.connect(func() -> void:
-		shop.queue_free()
-		shop = null
-		_refresh())
-	var cc := CenterContainer.new()
-	cc.add_child(close)
-	box.add_child(cc)
-
-
-func _shop_row(id: String) -> Control:
-	var def: Dictionary = Game.PERM[id]
-	var lvl := int(Game.perm[id])
-	var maxed := lvl >= int(def.max)
-	var cc := CenterContainer.new()
-	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(320, 0)
-	var sb := UiTheme.box(Color("29366f"), Color("1a1c2c"))
-	sb.set_content_margin_all(10)
-	panel.add_theme_stylebox_override("panel", sb)
-	cc.add_child(panel)
-	var h := HBoxContainer.new()
-	h.add_theme_constant_override("separation", 10)
-	panel.add_child(h)
-	var v := VBoxContainer.new()
-	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	h.add_child(v)
-	var n := UiTheme.label(str(def.name), 17, Color("f4f4f4"))
-	n.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	v.add_child(n)
-	var d := UiTheme.label(str(def.get("desc2", def.desc)) if lvl > 0 else str(def.desc), 12, Color("94b0c2"))
-	d.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	v.add_child(d)
-	var pips := ""
-	for i in int(def.max):
-		pips += "#" if i < lvl else "-"
-	var p := UiTheme.label("[" + pips + "]", 14, Color("a7f070"))
-	p.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	v.add_child(p)
-	var cost := Game.perm_cost(id)
-	var b := UiTheme.button("MAX" if maxed else str(cost), Color("38b764"), 16, Vector2(84, 44))
-	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	b.disabled = maxed or Game.bank < cost
-	b.pressed.connect(func() -> void:
-		if Game.buy_perm(id):
-			Sfx.play("upgrade", 0.0)
-			_open_shop())
-	h.add_child(b)
-	return cc
+	MenuPanels.shop(self, Game.PERM.keys(), "CREW UPGRADES", _refresh)

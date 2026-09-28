@@ -1,27 +1,30 @@
 class_name Infected
 extends Node2D
-## Infected mode (crew upgrade "Infected Mode" in the shop, Game.perm.infected = level 1-5).
+## Infected mode (MUTATION LAB, Game.perm.infected = mutation phase 1-5, MutationData).
 ## Cleaning aliens fills the infection meter (ring around the ability button); when it is
 ## full the ability button mutates the astronaut into the tentacle monster
-## (assets/sprites/infected, cut by tools/slice_sprites.py) for duration() seconds:
-## faster, tougher, faster plasma-comet shots, an automatic tentacle slash, tentacles
-## erupting under aliens, homing eye missiles, a slime aura and a rolling dash on the
-## ability button. Lives under the Player, which asks it for multipliers and animations.
+## of its mutation phase (MutationData.sprite_set, e.g. assets/sprites/mutant1) for
+## duration() seconds. The mutant cannot shoot: it fights up close with an automatic
+## tentacle strike (it lunges at aliens within reach, 4 directions, every third strike
+## of a combo is a heavy blow), is faster and tougher, and rolls on the ability button. Lives under the Player, which asks it for multipliers and animations.
+## Powers by phase (MutationData constants): 2 eruptions + faster meter, 3 eye missiles +
+## toxic aura, 4 double eruptions/missiles + regeneration, 5 shock roll, frenzy (kills
+## extend it) and apex form (bigger, golden, triple missiles, double wave).
 
-const DURATION := 10.0  # + 2 s per extra level
 const TRANSFORM_TIME := 1.15
 const BURST_AT := 0.32  # seconds before the end of the transformation: shockwave
 const REVERT_TIME := 0.35
-const SLASH_TIME := 0.28
-const SLASH_RANGE := 36.0
+const SLASH_TIME := 0.25  # one strike (4 frames at 16 fps)
+const SLASH_CD := 0.32  # between strikes
+const SLASH_RANGE := 34.0  # strikes aliens this close...
+const LUNGE_RANGE := 70.0  # ...and jumps at the ones this close
+const LUNGE_TIME := 0.12
+const LUNGE_SPEED := 300.0
 const DASH_TIME := 0.24
 const DASH_SPEED := 330.0
 const DASH_CD := 0.9
 const MAGENTA := Color("ff3df0")
 const GOO := Color("c42bd6")
-## mutant plasma comets (inf_shot); damage is multiplied by power()
-const SHOT_TIER := {"name": "Mutant Plasma", "art": "inf_shot", "scale": 0.085, "dmg": 1.0,
-		"hit_r": 5.0, "speed": 265.0, "pierce": 1}
 
 var player: Player
 var level := 0
@@ -35,6 +38,11 @@ var time_left := 0.0
 var slash_cd := 0.0
 var slash_t := 0.0
 var slash_hit := false
+var atk_dir := "down"  # direction of the current strike: down / up / left / right
+var atk_vec := Vector2.DOWN
+var combo := 0  # strikes in a row (every 3rd is a heavy blow)
+var combo_t := 0.0
+var lunge_t := 0.0
 var erupt_cd := 1.0
 var missile_cd := 1.5
 var dash_cd := 0.0
@@ -69,12 +77,16 @@ func unlocked() -> bool:
 
 
 func duration() -> float:
-	return DURATION + 2.0 * (level - 1)
+	return MutationData.duration(level)
 
 
 ## Damage multiplier of everything the mutant does.
 func power() -> float:
-	return 1.6 + 0.15 * (level - 1)
+	return MutationData.power(level)
+
+
+func has(power_lv: int) -> bool:
+	return level >= power_lv
 
 
 func can_transform() -> bool:
@@ -83,10 +95,6 @@ func can_transform() -> bool:
 
 func speed_mult() -> float:
 	return 1.4 if active else 1.0
-
-
-func fire_mult() -> float:
-	return 0.45 if active else 1.0
 
 
 func damage_taken_mult() -> float:
@@ -101,22 +109,30 @@ func untouchable() -> bool:
 ## Animation the mutant must show over the normal idle/walk choice ("" = none).
 func override_anim() -> String:
 	if transforming or reverting:
-		return "transform"  # driven here (forwards / backwards)
+		return "idle"
 	if dash_t > 0.0:
 		return "dash"
 	if slash_t > 0.0:
-		return "slash"
+		# combo poses (punch, uppercut, low sweep) when the set has them, in turn
+		if Art.frames(player.body.form).has_animation("combo_1"):
+			return "combo_%d" % ((combo - 1) % 3 + 1)
+		return "attack_" + atk_dir
 	return ""
 
 
+## Velocity that overrides the joystick (rolling, lunging at an alien), or INF.
 func dash_velocity() -> Vector2:
-	return dash_dir * DASH_SPEED if dash_t > 0.0 else Vector2.INF
+	if dash_t > 0.0:
+		return dash_dir * DASH_SPEED
+	if lunge_t > 0.0:
+		return atk_vec * LUNGE_SPEED
+	return Vector2.INF
 
 
 func add_charge(v: float) -> void:
 	if not unlocked() or active or transforming or reverting:
 		return
-	charge = minf(1.0, charge + v)
+	charge = minf(1.0, charge + v * (1.3 if has(MutationData.HUNGRY) else 1.0))
 	if charge >= 1.0 and not announced:
 		announced = true
 		Game.world.hud.banner("MUTATION READY!", MAGENTA, 26, 0.7)
@@ -124,6 +140,8 @@ func add_charge(v: float) -> void:
 
 
 func on_kill(e: Enemy) -> void:
+	if active and has(MutationData.FRENZY):
+		time_left = minf(time_left + 0.4, duration() + 4.0)  # blood frenzy
 	if e.is_boss:
 		add_charge(0.35)
 	elif e.elite:
@@ -143,8 +161,8 @@ func transform() -> void:
 	charge = 0.0
 	announced = false
 	player.locked = true
-	player.body.set_form("infected")
-	player.body.play("transform")
+	player.body.set_form(MutationData.sprite_set(level))
+	player.body.play("idle")
 	var w := Game.world
 	Sfx.play("mutate", 0.0)
 	Sfx.play("roar", 0.05, -6.0)
@@ -155,10 +173,20 @@ func transform() -> void:
 
 func _transform_burst() -> void:
 	burst_done = true
+	if has(MutationData.APEX):  # apex form: a second wave right after
+		get_tree().create_timer(0.35, false).timeout.connect(func() -> void:
+			if active or transforming:
+				_wave(1.3))
+	_wave(1.0)
+
+
+## Transformation shockwave (scale > 1: the apex form's second, bigger wave).
+func _wave(scale_k: float) -> void:
 	var w := Game.world
 	var c := _center()
-	w.ring(c, 95.0, MAGENTA, 0.55, 5.0, true)
-	w.ring(c, 60.0, Color.WHITE, 0.3, 3.0)
+	var rad := 95.0 * scale_k
+	w.ring(c, rad, _aura_color(), 0.55, 5.0, true)
+	w.ring(c, 60.0 * scale_k, Color.WHITE, 0.3, 3.0)
 	w.burst(c, MAGENTA, 44, 190.0, 0.6, 2.5)
 	w.burst(c, Color.WHITE, 14, 90.0, 0.3, 2.0)
 	_goo_splash(c, 16, 150.0)
@@ -166,8 +194,9 @@ func _transform_burst() -> void:
 	w.hitstop(140)
 	Sfx.play("explode", 0.05)
 	Sfx.play("roar", 0.05, 0.0)
-	w.hud.banner("INFECTED!", MAGENTA, 46, 0.9)
-	w.hud.tint_flash(Color(1.0, 0.3, 1.0), 0.45, 0.5)
+	if scale_k <= 1.0:
+		w.hud.banner("APEX FORM!" if has(MutationData.APEX) else "INFECTED!", _aura_color(), 46, 0.9)
+		w.hud.tint_flash(Color(1.0, 0.3, 1.0), 0.45, 0.5)
 	for i in 8:
 		_erupt(player.global_position + Vector2.from_angle(TAU * i / 8.0 + 0.2) * Vector2(52, 40), 0.0)
 	var dmg := float(Game.stats.damage) * 3.0 * power()
@@ -176,14 +205,21 @@ func _transform_burst() -> void:
 		if e == null or not is_instance_valid(e) or not e.targetable:
 			continue
 		var d := e.global_position - player.global_position
-		if d.length() < 95.0 + e.radius:
+		if d.length() < rad + e.radius:
 			e.take_damage(dmg, d.normalized() * 1.5)
 			e.push(d.normalized() * 260.0)
 			e.stun(0.9)
 	for n in get_tree().get_nodes_in_group("enemy_shots"):
 		var shot := n as EnemyShot
-		if shot != null and shot.global_position.distance_to(c) < 95.0:
+		if shot != null and shot.global_position.distance_to(c) < rad:
 			shot.pop()
+
+
+## Mutant glow: magenta, flashing gold at APEX FORM.
+func _aura_color() -> Color:
+	if has(MutationData.APEX):
+		return MAGENTA.lerp(Color("ffcd75"), 0.5 + 0.5 * sin(t * 4.0))
+	return MAGENTA
 
 
 func _finish_transform() -> void:
@@ -197,18 +233,35 @@ func _finish_transform() -> void:
 	missile_cd = 0.9
 	dash_cd = 0.0
 	player.body.play("idle")
+	if has(MutationData.BROOD):
+		_spawn_brood(4 if has(MutationData.APEX) else 3)
+
+
+## BROOD BURST: spiky eyeball spawn burst out of the mutant and ram aliens while it lasts.
+func _spawn_brood(n: int) -> void:
+	for i in n:
+		var b := InfBrood.new()
+		b.inf = self
+		b.slot = TAU * i / n
+		b.damage = float(Game.stats.damage) * 1.5 * power()
+		Game.world.effects.add_child(b)
+		b.global_position = _center()
+	Game.world.burst(_center(), Color("a7f070"), 14, 110.0, 0.4, 2.0)
+
+
+func _clear_brood() -> void:
+	for b in get_tree().get_nodes_in_group("inf_brood"):
+		(b as InfBrood).pop()
 
 
 func _revert() -> void:
 	active = false
+	_clear_brood()
 	reverting = true
 	state_t = REVERT_TIME
 	slash_t = 0.0
 	dash_t = 0.0
 	player.locked = true
-	var spr := player.body.body
-	spr.play_backwards("transform")
-	spr.frame = 2
 	var w := Game.world
 	w.burst(_center(), MAGENTA, 18, 90.0, 0.4, 2.0)
 	Sfx.play("charge", 0.0, -8.0)
@@ -235,6 +288,7 @@ func end_now() -> void:
 	active = false
 	transforming = false
 	reverting = false
+	_clear_brood()
 	slash_t = 0.0
 	dash_t = 0.0
 	roll = 0.0
@@ -251,15 +305,25 @@ func _physics_process(delta: float) -> void:
 	if player == null or player.dead:
 		return
 	t += delta
-	aura.modulate.a = move_toward(aura.modulate.a, (0.55 + sin(t * 6.0) * 0.15) if (active or transforming) else 0.0, delta * 3.0)
-	aura.scale = Vector2(2.4, 1.3) * (1.0 + sin(t * 6.0) * 0.06) * (1.6 if transforming else 1.0)
+	# the glow grows brighter and wider with the mutation level
+	var glow := 0.4 + 0.035 * level
+	var ac := _aura_color()
+	aura.modulate = Color(ac.r, ac.g, ac.b, move_toward(aura.modulate.a, (glow + sin(t * 6.0) * 0.15) if (active or transforming) else 0.0, delta * 3.0))
+	aura.scale = Vector2(2.4, 1.3) * MutationData.look_scale(level) * (1.0 + sin(t * 6.0) * 0.06) * (1.6 if transforming else 1.0)
 	_tick_erupts(delta)
+	if transforming or reverting:
+		# the body wobbles and flickers magenta while it changes
+		var k := sin(t * 42.0)
+		player.squash = Vector2(1.0 + k * 0.14, 1.0 - k * 0.14)
+		var fl := Color(1.8, 0.6, 1.8) if fmod(t, 0.12) < 0.06 else Color.WHITE
+		player.body.modulate = Color(fl.r, fl.g, fl.b, player.body.modulate.a)
 	if transforming:
 		state_t -= delta
 		_drip(delta, 0.03)
 		if not burst_done and state_t <= BURST_AT:
 			_transform_burst()
 		if state_t <= 0.0:
+			player.body.modulate = Color(1, 1, 1, player.body.modulate.a)
 			_finish_transform()
 		return
 	if reverting:
@@ -280,15 +344,48 @@ func _physics_process(delta: float) -> void:
 	dash_cd = maxf(0.0, dash_cd - delta)
 	_update_dash(delta)
 	_update_slash(delta)
-	erupt_cd -= delta
-	if erupt_cd <= 0.0:
-		erupt_cd = maxf(0.7, 1.4 - 0.1 * (level - 1))
-		_auto_erupt()
-	missile_cd -= delta
-	if missile_cd <= 0.0:
-		missile_cd = 2.2 - 0.15 * (level - 1)
-		_fire_missiles()
+	if has(MutationData.ERUPTION):
+		erupt_cd -= delta
+		if erupt_cd <= 0.0:
+			erupt_cd = maxf(0.7, 1.5 - 0.08 * level)
+			_auto_erupt()
+	if has(MutationData.MISSILES):
+		missile_cd -= delta
+		if missile_cd <= 0.0:
+			missile_cd = maxf(1.2, 2.3 - 0.1 * level)
+			_fire_missiles()
+	if has(MutationData.AURA):
+		_toxic_aura(delta)
+	if has(MutationData.REGEN):
+		Game.heal(float(Game.stats.max_hp) * 0.03 * delta)
+		if randf() < delta * 4.0:
+			Game.world.burst(_center() + Vector2(randf_range(-6, 6), 4), Color("a7f070"), 1, 20.0, 0.5, 2.0, -40.0)
 	_drip(delta, 0.09)
+
+
+var aura_t := 0.0
+
+
+## TOXIC AURA: every 0.5 s aliens close to the mutant take damage; spores drift around.
+func _toxic_aura(delta: float) -> void:
+	if randf() < delta * 10.0:
+		var a := randf() * TAU
+		Game.world.burst(player.global_position + Vector2.from_angle(a) * Vector2(34, 22), Color("a7f070"), 1, 10.0, 0.6, 2.0, -15.0)
+	aura_t -= delta
+	if aura_t > 0.0:
+		return
+	aura_t = 0.5
+	var dmg := float(Game.stats.damage) * 0.6 * power()
+	var hit := false
+	for n in Game.world.enemy_cache:
+		var e := n as Enemy
+		if e == null or not is_instance_valid(e) or not e.targetable:
+			continue
+		if e.global_position.distance_to(player.global_position) < 38.0 + e.radius:
+			e.take_damage(dmg, Vector2.ZERO)
+			hit = true
+	if hit:
+		Game.world.ring(player.global_position + Vector2(0, -4), 38.0, Color(0.65, 0.94, 0.44, 0.5), 0.3, 1.5)
 
 
 func _center() -> Vector2:
@@ -299,52 +396,72 @@ func _center() -> Vector2:
 
 func _update_slash(delta: float) -> void:
 	slash_cd -= delta
+	lunge_t = maxf(0.0, lunge_t - delta)
+	combo_t -= delta
+	if combo_t <= 0.0:
+		combo = 0
 	if slash_t > 0.0:
 		slash_t -= delta
-		if not slash_hit and slash_t <= SLASH_TIME - 0.1:
+		if not slash_hit and slash_t <= SLASH_TIME * 0.5:  # the swing lands on frame 2-3
 			_slash_hit()
 		return
 	if slash_cd > 0.0 or dash_t > 0.0:
 		return
-	var e := _nearest(SLASH_RANGE)
+	var e := _nearest(LUNGE_RANGE)
 	if e == null:
 		return
+	var to := e.global_position - player.global_position
+	atk_vec = to.normalized() if to.length() > 0.1 else Vector2(player.facing, 0)
+	atk_dir = _dir4(atk_vec)
+	if absf(atk_vec.x) > 0.2:
+		player.facing = signf(atk_vec.x)
+	if to.length() > SLASH_RANGE:
+		lunge_t = LUNGE_TIME  # jump at it
 	slash_t = SLASH_TIME
 	slash_hit = false
-	slash_cd = 0.75
-	var dx := e.global_position.x - player.global_position.x
-	if absf(dx) > 1.0:
-		player.facing = signf(dx)
-	player.shoot_t = 0.0
-	Sfx.play("slash", 0.1, -3.0)
+	slash_cd = SLASH_CD + SLASH_TIME
+	combo += 1
+	combo_t = 0.9
+	Sfx.play("slash", 0.12, -2.0 if combo % 3 == 0 else -5.0)
+
+
+static func _dir4(v: Vector2) -> String:
+	if absf(v.x) >= absf(v.y):
+		return "right" if v.x >= 0.0 else "left"
+	return "down" if v.y >= 0.0 else "up"
 
 
 func _slash_hit() -> void:
 	slash_hit = true
 	var w := Game.world
-	var f := player.facing
-	var c := player.global_position + Vector2(f * 16.0, -10.0)
-	var dmg := float(Game.stats.damage) * 2.2 * power()
+	var heavy := combo % 3 == 0
+	var reach := 26.0 * (1.35 if heavy else 1.0)
+	var c := player.global_position + Vector2(0, -8) + atk_vec * 15.0
+	var dmg := float(Game.stats.damage) * 2.0 * power() * (2.0 if heavy else 1.0)
 	var hit := false
 	for n in w.enemy_cache:
 		var e := n as Enemy
 		if e == null or not is_instance_valid(e) or not e.targetable:
 			continue
 		var d := e.hit_center() - c
-		if d.length() < 26.0 + e.radius:
-			var dir := Vector2(f, 0).lerp(d.normalized(), 0.5).normalized()
-			e.take_damage(dmg, dir * 1.5)
-			e.push(dir * 180.0)
-			w.burst(e.hit_center(), MAGENTA, 8, 90.0, 0.3, 2.0)
+		if d.length() < reach + e.radius:
+			var dir := atk_vec.lerp(d.normalized(), 0.4).normalized()
+			e.take_damage(dmg, dir * (2.5 if heavy else 1.5))
+			e.push(dir * (320.0 if heavy else 170.0))
+			if heavy:
+				e.stun(0.5)
+			w.burst(e.hit_center(), MAGENTA, 12 if heavy else 7, 110.0, 0.3, 2.0, 0.0, dir, 0.8)
 			hit = true
 	for n in get_tree().get_nodes_in_group("enemy_shots"):
 		var shot := n as EnemyShot
-		if shot != null and shot.global_position.distance_to(c) < 26.0:
+		if shot != null and shot.global_position.distance_to(c) < reach:
 			shot.pop()
+	if heavy:
+		w.ring(c, reach, MAGENTA, 0.22, 3.0)
 	if hit:
-		w.hitstop(30)
-		w.shake(0.25)
-		Sfx.play("hit", 0.1, 0.0)
+		w.hitstop(55 if heavy else 25)
+		w.shake(0.4 if heavy else 0.18)
+		Sfx.play("hit", 0.1, 2.0 if heavy else 0.0)
 
 
 # ---------------------------------------------------------------- rolling dash
@@ -395,6 +512,9 @@ func _update_dash(delta: float) -> void:
 	if dash_t <= 0.0:
 		roll = 0.0
 		w.shake(0.15)
+		if has(MutationData.SHOCK_ROLL):  # shock roll: a ring of spikes where the roll ends
+			for i in 6:
+				_erupt(player.global_position + Vector2.from_angle(TAU * i / 6.0) * Vector2(30, 22), float(Game.stats.damage) * 1.5 * power())
 
 
 ## Fading magenta copy of the current frame (dash trail).
@@ -428,7 +548,7 @@ func _auto_erupt() -> void:
 			pool.append(e)
 	if pool.is_empty():
 		return
-	var count := 1 + (1 if level >= 3 else 0) + (1 if level >= 5 else 0)
+	var count := (2 if has(MutationData.BROOD) else 1) + (1 if has(MutationData.FRENZY) else 0)
 	pool.shuffle()
 	for i in mini(count, pool.size()):
 		var pos := pool[i].global_position
@@ -475,7 +595,7 @@ func _erupt(pos: Vector2, dmg: float) -> void:
 func _fire_missiles() -> void:
 	if _nearest(Game.world.aim_range()) == null:
 		return
-	var n := 2 if level >= 4 else 1
+	var n := 3 if has(MutationData.APEX) else (2 if has(MutationData.BROOD) else 1)
 	for i in n:
 		var m := InfMissile.new()
 		m.damage = float(Game.stats.damage) * 3.0 * power()

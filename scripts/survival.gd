@@ -14,13 +14,14 @@ extends Node
 ## the player (walk into them or shoot them).
 
 const WAVE_SECS := 30.0
-const MAX_ALIVE := 70
+const MAX_ALIVE := 95
+const DMG_PER_MIN := 0.1  # alien damage ramp (+10% per minute)
 const CRATE_EVERY := 30.0
 const MAX_CRATES := 3
 const PICKUP_RANGE := 26.0  # XP gems fly to you from this close (the magnet upgrade: more)
 ## chance per cleaned alien to drop each power-up
 const DROPS := {
-	"carrot": 0.012, "heart": 0.005, "frenzy": 0.003, "boots": 0.003, "triple": 0.003,
+	"carrot": 0.007, "heart": 0.003, "frenzy": 0.003, "boots": 0.003, "triple": 0.003,
 	"rage": 0.003, "magnet": 0.0025, "bomb": 0.0025, "freeze": 0.0025, "shield": 0.002,
 	"power": 0.003,
 }
@@ -49,6 +50,7 @@ var crates: Array[Node] = []
 var leash_t := 0.0
 var xp_sfx_t := 0.0
 var kills := 0
+var gems := 0  # XP gem value collected this run (victory screen)
 
 
 func setup(w: GameWorld, d: Dictionary) -> void:
@@ -139,8 +141,10 @@ func _start_wave(i: int) -> void:
 			world.hud.banner("SURROUNDED!", Color("ff5566"), 30, 0.8)
 			_ring(str(w.id), int(w.count))
 		"boss":
-			world.hud.banner("MINI BOSS!", Color("ff5566"), 36, 1.0)
-			world._spawn_boss(str(w.id), _ring_pos(130.0))
+			var n := int(w.get("count", 1))
+			world.hud.banner("MINI BOSS!" if n == 1 else "%d MINI BOSSES!" % n, Color("ff5566"), 36, 1.0)
+			for k in n:
+				world._spawn_boss(str(w.id), _ring_pos(130.0), _boss_hp_mult(), _dmg_mult())
 		_:
 			if i > 0:
 				world.hud.banner("WAVE %d" % (i + 1), Color("ffcd75"), 32, 0.6)
@@ -152,7 +156,7 @@ func _send_final() -> void:
 	final_sent = true
 	world.hud.banner("FINAL BOSS!", Color("ff5566"), 40, 1.2)
 	Sfx.play("roar", 0.0)
-	world._spawn_boss(str(def.boss), _ring_pos(130.0))
+	world._spawn_boss(str(def.boss), _ring_pos(130.0), _boss_hp_mult(), _dmg_mult())
 
 
 func _check_final() -> void:
@@ -208,12 +212,26 @@ func _spawn(delta: float) -> void:
 		alive += 1
 
 
+## Clock the toughness ramps read (world 2 starts where world 1 ended).
+func _ramp_t() -> float:
+	return t + float(def.get("t_offset", 0.0))
+
+
 func _hp_mult() -> float:
-	return 1.0 + t / 60.0 * float(def.get("hp_per_min", 0.3))
+	return 1.0 + _ramp_t() / 60.0 * float(def.get("hp_per_min", 0.3))
+
+
+## Bosses grow with the clock too (a bit slower than the horde).
+func _boss_hp_mult() -> float:
+	return 1.0 + _ramp_t() / 60.0 * float(def.get("hp_per_min", 0.3)) * 0.75
+
+
+func _dmg_mult() -> float:
+	return 1.0 + _ramp_t() / 60.0 * DMG_PER_MIN
 
 
 func _spawn_one(id: String, pos: Vector2, elite := false) -> Enemy:
-	return world.spawn_enemy(id, pos, _hp_mult(), 1.0 + minf(t / 60.0 * 0.03, 0.25), elite, true)
+	return world.spawn_enemy(id, pos, _hp_mult(), 1.0 + minf(_ramp_t() / 60.0 * 0.03, 0.25), elite, true, _dmg_mult())
 
 
 ## A spot `r` away from the player inside the arena (tries a few angles).
@@ -259,7 +277,7 @@ func _ring(id: String, count: int) -> void:
 	var b := world.room.bounds().grow(-14.0)
 	for i in count:
 		var pos := (p + Vector2.from_angle(TAU * i / count) * minf(world.view_size().x * 0.5 - 12.0, 150.0)).clamp(b.position, b.end)
-		world.spawn_with_marker(id, pos, 0.7, _hp_mult())
+		world.spawn_with_marker(id, pos, 0.7, _hp_mult(), 1.0, false, _dmg_mult())
 
 
 ## Aliens left far behind reappear around the player (the horde never thins out).
@@ -399,6 +417,8 @@ func collect(kind: String, value: int, _pos: Vector2) -> void:
 	var pp := p.global_position
 	if kind == "xp":
 		add_xp(value)
+		Game.total_xp += value
+		gems += value
 		if xp_sfx_t <= 0.0:
 			xp_sfx_t = 0.06
 			Sfx.play("coin", 0.15, -16.0)

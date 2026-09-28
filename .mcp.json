@@ -6,6 +6,15 @@
       "env": {
         "GODOT_MCP_PORT": "6505"
       }
+    },
+    "aseprite": {
+      "command": "uv",
+      "args": ["--directory", "C:/Users/miche/Documents/aseprite-mcp-server", "run", "aseprite-mcp"],
+      "env": {
+        "ASEPRITE_PATH": "C:/Program Files/Aseprite/Aseprite.exe",
+        "ASEPRITE_MCP_WORKSPACE": "C:/Users/miche/Documents/alien-cleaner",
+        "ASEPRITE_MCP_TIMEOUT": "120"
+      }
     }
   }
 }

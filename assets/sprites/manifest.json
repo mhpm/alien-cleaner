@@ -1,4 +1,216 @@
 {
+ "mutant1": {
+  "size": [
+   84,
+   63
+  ],
+  "anchor": [
+   42,
+   60.0
+  ],
+  "body_h": 57.5,
+  "anims": {
+   "idle": {
+    "frames": 6,
+    "fps": 6,
+    "loop": true
+   },
+   "walk_down": {
+    "frames": 4,
+    "fps": 10,
+    "loop": true
+   },
+   "walk_up": {
+    "frames": 4,
+    "fps": 10,
+    "loop": true
+   },
+   "walk_left": {
+    "frames": 8,
+    "fps": 11,
+    "loop": true
+   },
+   "walk_right": {
+    "frames": 8,
+    "fps": 11,
+    "loop": true
+   },
+   "combo_1": {
+    "frames": 4,
+    "fps": 16,
+    "loop": false
+   },
+   "combo_2": {
+    "frames": 4,
+    "fps": 16,
+    "loop": false
+   },
+   "combo_3": {
+    "frames": 4,
+    "fps": 16,
+    "loop": false
+   }
+  }
+ },
+ "mutant2": {
+  "size": [
+   88,
+   65
+  ],
+  "anchor": [
+   44,
+   61.0
+  ],
+  "body_h": 57.0,
+  "anims": {
+   "idle": {
+    "frames": 6,
+    "fps": 9,
+    "loop": true
+   },
+   "walk_down": {
+    "frames": 8,
+    "fps": 14,
+    "loop": true
+   },
+   "walk_up": {
+    "frames": 4,
+    "fps": 12,
+    "loop": true
+   },
+   "walk_left": {
+    "frames": 8,
+    "fps": 14,
+    "loop": true
+   },
+   "walk_right": {
+    "frames": 8,
+    "fps": 14,
+    "loop": true
+   },
+   "combo_1": {
+    "frames": 4,
+    "fps": 16,
+    "loop": false
+   },
+   "combo_2": {
+    "frames": 4,
+    "fps": 16,
+    "loop": false
+   },
+   "combo_3": {
+    "frames": 4,
+    "fps": 16,
+    "loop": false
+   }
+  }
+ },
+ "mutant3": {
+  "size": [
+   78,
+   65
+  ],
+  "anchor": [
+   39,
+   61.0
+  ],
+  "body_h": 56.0,
+  "anims": {
+   "idle": {
+    "frames": 6,
+    "fps": 8,
+    "loop": true
+   },
+   "walk_down": {
+    "frames": 8,
+    "fps": 14,
+    "loop": true
+   },
+   "walk_up": {
+    "frames": 4,
+    "fps": 12,
+    "loop": true
+   },
+   "walk_left": {
+    "frames": 8,
+    "fps": 14,
+    "loop": true
+   },
+   "walk_right": {
+    "frames": 8,
+    "fps": 14,
+    "loop": true
+   },
+   "combo_1": {
+    "frames": 4,
+    "fps": 16,
+    "loop": false
+   },
+   "combo_2": {
+    "frames": 4,
+    "fps": 16,
+    "loop": false
+   },
+   "combo_3": {
+    "frames": 4,
+    "fps": 16,
+    "loop": false
+   }
+  }
+ },
+ "mutant4": {
+  "size": [
+   132,
+   100
+  ],
+  "anchor": [
+   66,
+   96.0
+  ],
+  "body_h": 87.5,
+  "anims": {
+   "idle": {
+    "frames": 6,
+    "fps": 9,
+    "loop": true
+   },
+   "walk_down": {
+    "frames": 8,
+    "fps": 14,
+    "loop": true
+   },
+   "walk_up": {
+    "frames": 4,
+    "fps": 12,
+    "loop": true
+   },
+   "walk_left": {
+    "frames": 8,
+    "fps": 14,
+    "loop": true
+   },
+   "walk_right": {
+    "frames": 8,
+    "fps": 14,
+    "loop": true
+   },
+   "combo_1": {
+    "frames": 4,
+    "fps": 16,
+    "loop": false
+   },
+   "combo_2": {
+    "frames": 4,
+    "fps": 16,
+    "loop": false
+   },
+   "combo_3": {
+    "frames": 4,
+    "fps": 16,
+    "loop": false
+   }
+  }
+ },
  "infected": {
   "size": [
    366,

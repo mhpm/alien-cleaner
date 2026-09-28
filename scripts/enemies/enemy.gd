@@ -10,6 +10,7 @@ var max_hp := 10.0
 var radius := 6.0
 var speed := 20.0
 var contact_damage := 10.0
+var aggro := 1.0  # how fast the AI's timers run (world "enemy_mult")
 var is_boss := false
 var targetable := false
 var dead := false
@@ -48,11 +49,12 @@ func setup(id: String) -> void:
 	def = EnemyData.TYPES[id]
 	var mult := Game.difficulty()
 	is_boss = bool(def.get("boss", false))
-	var world_mult := Game.enemy_mult()  # world 2 aliens are 20% tougher
+	var world_mult := Game.enemy_mult()  # world 2: every alien +30% HP, damage, speed, attacks
 	max_hp = float(def.hp) * (1.0 if is_boss else mult) * world_mult
 	hp = max_hp
 	radius = float(def.radius)
-	speed = float(def.speed)
+	speed = float(def.speed) * world_mult
+	aggro = world_mult
 	contact_damage = float(def.damage) * (1.0 + (mult - 1.0) * 0.5) * world_mult
 	base_scale = float(def.scale)
 	art = str(def.art)
@@ -60,10 +62,11 @@ func setup(id: String) -> void:
 
 
 ## Wave escalation: later waves are sturdier. Call before the alien enters the tree.
-func toughen(hp_mult: float, speed_mult: float) -> void:
+func toughen(hp_mult: float, speed_mult: float, dmg_mult := 1.0) -> void:
 	max_hp *= hp_mult
 	hp = max_hp
 	speed *= speed_mult
+	contact_damage *= dmg_mult
 
 
 ## Elite: bigger, golden, crowned, much tougher and richer. Call before add_child.
@@ -154,7 +157,7 @@ func _physics_process(delta: float) -> void:
 	elif stun_t > 0.0:
 		stun_t -= delta
 	elif spawn_t <= 0.0:
-		vel = _ai(delta)
+		vel = _ai(delta * aggro)  # aggro > 1: attack timers and windups run faster
 	if slow_t > 0.0:
 		slow_t -= delta
 		vel *= 0.5

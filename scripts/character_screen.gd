@@ -3,7 +3,6 @@ extends Control
 ## Laid out on the painted art (assets/ui/character/bg.webp, 1024x1536) scaled to
 ## fit; every live element sits on the exact rect of its painted counterpart.
 
-const MENU_SCENE := "res://scenes/main_menu.tscn"
 const ART := Vector2(1024, 1536)
 const DIR := "res://assets/ui/character/"
 
@@ -86,7 +85,7 @@ func _ready() -> void:
 	_fit()
 	selected = str(Game.gear_equipped[tab])
 	_refresh()
-	Sfx.play_music()
+	Sfx.play_music("menu")
 
 
 func _fit() -> void:
@@ -566,7 +565,7 @@ func _toast(text: String) -> void:
 
 
 func _back() -> void:
-	get_tree().change_scene_to_file(MENU_SCENE)
+	get_tree().change_scene_to_file(Game.menu_scene)
 
 
 func _process(delta: float) -> void:

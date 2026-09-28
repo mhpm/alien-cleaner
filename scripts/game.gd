@@ -4,7 +4,8 @@ extends Node2D
 ## and exposes game-feel helpers (shake, hitstop, particles, popups).
 
 ## Later waves of a room are sturdier; the last wave of a 3+ wave room brings elites.
-const WAVE_HP_STEP := 0.18
+const WAVE_HP_STEP := 0.22
+const ROOM_BUDGET_MULT := 1.35  # rooms: more aliens per "budget" wave than the data says
 const WAVE_SPEED_STEP := 0.05
 
 @onready var room: Room = $Room
@@ -56,7 +57,7 @@ func _ready() -> void:
 	indicators.z_index = 30
 	add_child(indicators)
 	hud.setup(self)
-	Sfx.play_music()
+	Sfx.play_music("level")
 	_start_room()
 
 
@@ -166,7 +167,7 @@ func _reset_waves() -> void:
 func _start_survival() -> void:
 	station_mode = false
 	var sd: Dictionary = room_def.survival
-	room.build_arena(sd.get("arena", Vector2i(64, 96)), entities, randi())
+	room.build_arena(sd.get("arena", Vector2i(64, 96)), entities, randi(), str(sd.get("art", "")))
 	player.reset_for_room(room.bounds().get_center() + Vector2(0, 24))
 	_camera_setup()
 	waves = []
@@ -179,7 +180,7 @@ func _start_survival() -> void:
 	state = "intro"
 	state_t = 1.4
 	var world_def := WorldData.world(Game.world_index)
-	hud.banner(str(world_def.name), Color("73eff7"), 22, 1.2)
+	hud.banner(str(world_def.name), Color("c75bd6") if Game.world_index > 0 else Color("73eff7"), 22, 1.2)
 
 
 ## The final boss is down: stage clear, an exit portal opens near the player.
@@ -275,11 +276,11 @@ func _guide_target() -> Vector2:
 	return best
 
 
-func _spawn_boss(id: String, pos: Vector2) -> void:
+func _spawn_boss(id: String, pos: Vector2, hp_mult := 1.0, dmg_mult := 1.0) -> void:
 	pending += 1
 	var m := _marker(pos, 1.0, 22.0, Color("ff5566"))
 	m.finished.connect(func() -> void:
-		var b := spawn_enemy(id, pos)
+		var b := spawn_enemy(id, pos, hp_mult, 1.0, false, false, dmg_mult)
 		hud.show_boss(b)
 		Sfx.play("roar", 0.0)
 		shake(0.7)
@@ -429,14 +430,26 @@ func _leave_room() -> void:
 func _victory() -> void:
 	state = "won"
 	hud.controls.enabled = false
+	var info := {}
+	var first := Game.worlds_cleared <= Game.world_index
+	if survival != null:
+		info = {"time": survival.t, "kills": survival.kills, "gems": survival.gems}
+		Game.record_world(survival.t, true)
+	info.coins = Game.run_coins
+	info.first = first
+	info.next = first and Game.world_index + 1 < WorldData.WORLDS.size()
+	info.chest = not Game.chests.has(Game.world_index)
 	Game.end_run()
+	info.bonus = Game.clear_bonus(first)
 	Sfx.play("victory", 0.0)
-	hud.show_victory()
+	hud.show_victory(info)
 
 
 func on_player_died() -> void:
 	state = "dead"
 	hud.controls.enabled = false
+	if survival != null:
+		Game.record_world(survival.t, false)
 	Game.end_run()
 	get_tree().create_timer(1.3).timeout.connect(func() -> void:
 		Sfx.play("gameover", 0.0)
@@ -453,7 +466,7 @@ func _compose(w: Dictionary) -> Array[String]:
 			for i in int(fixed[id]):
 				out.append(id)
 	if w.has("budget"):
-		var budget := int(w.budget)
+		var budget := ceili(int(w.budget) * ROOM_BUDGET_MULT)
 		var pool: Array = w.get("pool", WorldData.ALL)
 		var guard := 0
 		while budget > 0 and guard < 60:
@@ -493,13 +506,13 @@ func _spawn_wave(w: Dictionary) -> void:
 		spawn_with_marker(list[i], pts[i], 0.6 + i * 0.12, hp_mult, sp_mult, elite_idx.has(i))
 
 
-func spawn_with_marker(id: String, pos: Vector2, delay: float, hp_mult := 1.0, sp_mult := 1.0, elite := false) -> void:
+func spawn_with_marker(id: String, pos: Vector2, delay: float, hp_mult := 1.0, sp_mult := 1.0, elite := false, dmg_mult := 1.0) -> void:
 	pending += 1
 	var def: Dictionary = EnemyData.TYPES[id]
 	var col: Color = Color("ffcd75") if elite else def.color
 	var m := _marker(pos, delay, 6.0 + float(def.radius) * (1.4 if elite else 1.0), col)
 	m.finished.connect(func() -> void:
-		spawn_enemy(id, pos, hp_mult, sp_mult, elite)
+		spawn_enemy(id, pos, hp_mult, sp_mult, elite, false, dmg_mult)
 		pending -= 1)
 
 
@@ -513,11 +526,11 @@ func _marker(pos: Vector2, dur: float, size: float, col: Color) -> SpawnMarker:
 	return m
 
 
-func spawn_enemy(id: String, pos: Vector2, hp_mult := 1.0, sp_mult := 1.0, elite := false, quiet := false) -> Enemy:
+func spawn_enemy(id: String, pos: Vector2, hp_mult := 1.0, sp_mult := 1.0, elite := false, quiet := false, dmg_mult := 1.0) -> Enemy:
 	var e := EnemyData.create(id)
 	e.position = pos
-	if hp_mult != 1.0 or sp_mult != 1.0:
-		e.toughen(hp_mult, sp_mult)
+	if hp_mult != 1.0 or sp_mult != 1.0 or dmg_mult != 1.0:
+		e.toughen(hp_mult, sp_mult, dmg_mult)
 	if elite:
 		e.make_elite()
 	entities.add_child(e)
@@ -529,7 +542,7 @@ func spawn_enemy(id: String, pos: Vector2, hp_mult := 1.0, sp_mult := 1.0, elite
 
 func spawn_enemy_shot(pos: Vector2, vel: Vector2, dmg: float, tex := "glob") -> void:
 	var s := EnemyShot.new()
-	s.vel = vel
+	s.vel = vel * (1.0 + (Game.enemy_mult() - 1.0) * 0.5)  # world 2: faster globs too
 	s.damage = dmg
 	s.tex_id = tex
 	s.position = pos

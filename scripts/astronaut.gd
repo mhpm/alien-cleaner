@@ -6,8 +6,10 @@ extends Node2D
 ## + weapons.json (grip / tip in image pixels). Origin = feet. The blaster is always
 ## drawn in front of the body, except while walking up (back view): then it goes behind.
 ## Used by the Player and by the CHARACTER screen preview.
-## set_form("infected") swaps in the mutant (Infected mode, assets/sprites/infected): its
-## arm is the cannon, so the blaster hides, and its idle is animated.
+## set_form(<mutant set>) swaps in the mutant of the current mutation phase
+## (MutationData.sprite_set, e.g. "mutant1"): it fights bare-handed, so the blaster
+## hides; its sets have their own left / right / up / down frames (`directional`, never
+## flipped) and an animated idle.
 
 const WEAPONS_PATH := "res://assets/suits/weapons.json"
 const BODY_SCALE := 0.34  # sprite frame px -> world units (~25 units tall)
@@ -28,6 +30,7 @@ var _grip := Vector2.ZERO
 var _tip := Vector2.ZERO
 var form := "player"
 var body_scale := BODY_SCALE
+var directional := false  # the set has walk_left/right/up/down (no flip_h)
 
 
 func _ready() -> void:
@@ -62,14 +65,16 @@ static func weapons_data() -> Dictionary:
 	return _weapons
 
 
-## "player" (reference-sheet astronaut) or "infected" (the mutant, drawn at the same height).
+## "player" (reference-sheet astronaut) or a mutant set (a bit taller than the astronaut).
 func set_form(f: String) -> void:
 	form = f
 	body.sprite_frames = Art.frames(f)
 	body.offset = Art.anchor_offset(f)
+	directional = body.sprite_frames.has_animation("walk_left")
 	body_scale = BODY_SCALE
 	if f != "player":
-		body_scale = BODY_SCALE * Art.body_height("player") / Art.body_height(f) * 1.3
+		# always the astronaut's height, whatever the mutation level
+		body_scale = BODY_SCALE * Art.body_height("player") / Art.body_height(f)
 	body.animation = &""
 	play("idle")
 	_pose()
@@ -98,9 +103,6 @@ func grip_pos() -> Vector2:
 
 
 func muzzle_pos() -> Vector2:
-	if form != "player":
-		# the mutant fires from its arm cannon
-		return body.position + Vector2(facing * 6.0, -11.0) + Vector2.from_angle(aim) * 7.0
 	return gun.position + Vector2.from_angle(aim) * GUN_LEN * BODY_SCALE
 
 
@@ -112,14 +114,18 @@ func _process(delta: float) -> void:
 func _pose() -> void:
 	if body == null:
 		return
-	body.flip_h = facing < 0.0
+	# directional sets have their own left / right frames; their idle and combo poses
+	# face right and are mirrored
+	var one_way := body.animation == &"idle" or str(body.animation).begins_with("combo_")
+	body.flip_h = facing < 0.0 and (not directional or one_way)
 	# walking: a hop per step with a little squash on landing; standing: slow breathing
 	var step := absf(sin(walk_phase))
 	var hop := -step * 1.8 * walk_amount
 	var land := (1.0 - step) * 0.08 * walk_amount
 	var breath := sin(breathe_t * 2.6) * 0.018 * (1.0 - walk_amount)
 	body.position = Vector2(0, hop)
-	body.rotation = sin(walk_phase) * 0.06 * walk_amount * facing
+	# directional sets have real walk frames in every direction: no procedural sway
+	body.rotation = 0.0 if directional else sin(walk_phase) * 0.06 * walk_amount * facing
 	body.scale = Vector2(1.0 + land - breath * 0.4, 1.0 - land + breath) * body_scale
 	var dir := Vector2.from_angle(aim)
 	var s := GUN_LEN / (_tip - _grip).length() * BODY_SCALE

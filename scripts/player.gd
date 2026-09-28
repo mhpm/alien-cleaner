@@ -191,11 +191,12 @@ func _physics_process(delta: float) -> void:
 	# the blaster swings quickly toward the aim; shots always leave along the barrel
 	gun_angle = lerp_angle(gun_angle, aim_dir.angle(), 1.0 - exp(-28.0 * delta))
 
-	if target != null and not locked:
+	var mutated := infected.active or infected.transforming or infected.reverting
+	if target != null and not locked and not mutated:  # the mutant fights bare-handed
 		fire_t -= delta * (1.0 if not moving else 0.6)
 		if fire_t <= 0.0:
 			_shoot()
-			fire_t = float(s.fire_interval) * (0.4 if has_buff("frenzy") else 1.0) * infected.fire_mult()
+			fire_t = float(s.fire_interval) * (0.4 if has_buff("frenzy") else 1.0)
 	else:
 		fire_t = maxf(fire_t - delta, 0.08)
 
@@ -273,11 +274,6 @@ func _shoot() -> void:
 	Sfx.play("shoot", 0.12, -7.0 + lvl)
 	var st := WeaponData.style(Astronaut.weapon_variant())
 	var flash := AnimFx.spawn(Game.world.effects, "muzzle", "flash", origin, 0.2 + lvl * 0.03)
-	if infected.active:
-		flash.material = Art.shot_material(Infected.MAGENTA)
-		flash.scale *= 1.4
-		Game.world.burst(origin, Infected.MAGENTA, 3, 50.0, 0.18, 2.0, 0.0, d, 0.5)
-		return
 	if st.color != null:
 		flash.material = Art.shot_material(Color(str(st.color)))
 	flash.create_tween().tween_property(flash, "modulate:a", 0.0, 0.06)
@@ -290,13 +286,6 @@ func _spawn_bullet(pos: Vector2, d: Vector2) -> void:
 	var st := WeaponData.style(Astronaut.weapon_variant())
 	var b := Bullet.new()
 	var mult := 1.0
-	if infected.active:
-		# mutant plasma comets instead of the blaster's shots
-		tier = Infected.SHOT_TIER
-		st = WeaponData.style("standard")
-		mult = infected.power() * float(WeaponData.tier(int(s.weapon)).dmg)
-		b.pop_art = "inf_burst"
-		b.pop_color = Infected.MAGENTA
 	b.tier = tier
 	b.style = st
 	b.dir = d
@@ -428,26 +417,30 @@ func _update_bots(delta: float) -> void:
 func _animate(delta: float, moving: bool, dir: Vector2) -> void:
 	hurt_t = maxf(0.0, hurt_t - delta)
 	shoot_t = maxf(0.0, shoot_t - delta)
-	if shoot_t > 0.0 and absf(aim_dir.x) > 0.05:
-		facing = signf(aim_dir.x)
-	elif moving and absf(dir.x) > 0.1:
-		facing = signf(dir.x)
-	# sprite animation: walking away from the camera shows the back view
 	var mutant := infected.override_anim()
-	if mutant != "":
-		body.play(mutant)
-	elif body.form != "player":
-		# the mutant has no hurt frames; it shows its arm cannon while firing in place
-		if moving:
+	if body.directional:
+		# the mutant: its own frames for each direction (no flip), strikes over walking
+		if moving and absf(dir.x) > 0.1 and mutant == "":
+			facing = signf(dir.x)
+		if mutant.begins_with("attack_") or mutant.begins_with("combo_") or mutant == "idle":
+			body.play(mutant)
+		elif moving or mutant == "dash":
+			var mv := dir if dir.length() > 0.15 else infected.dash_dir
+			body.play("walk_" + Infected._dir4(mv))
+		else:
+			body.play("idle")
+	else:
+		if shoot_t > 0.0 and absf(aim_dir.x) > 0.05:
+			facing = signf(aim_dir.x)
+		elif moving and absf(dir.x) > 0.1:
+			facing = signf(dir.x)
+		# sprite animation: walking away from the camera shows the back view
+		if hurt_t > 0.0:
+			body.play("hurt")
+		elif moving:
 			body.play("walk_up" if dir.y < -0.6 and absf(dir.x) < 0.5 and shoot_t <= 0.0 else "walk")
 		else:
-			body.play("shoot" if shoot_t > 0.25 else "idle")
-	elif hurt_t > 0.0:
-		body.play("hurt")
-	elif moving:
-		body.play("walk_up" if dir.y < -0.6 and absf(dir.x) < 0.5 and shoot_t <= 0.0 else "walk")
-	else:
-		body.play("idle")
+			body.play("idle")
 	if moving:
 		walk_t += delta * 11.0
 		body.walk_amount = minf(1.0, body.walk_amount + delta * 8.0)

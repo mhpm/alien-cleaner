@@ -169,7 +169,7 @@ func _land() -> void:
 	w.burst(global_position, Color("a7f070"), 26, 110.0, 0.5, 2.5, 150.0)
 	var p := player()
 	if not p.dead and p.global_position.distance_to(global_position) < LAND_R:
-		p.take_damage(22.0, global_position)
+		p.take_damage(28.0 * contact_damage / 22.0, global_position)
 	w.add_puddle(global_position, 18.0)
 	if _enraged():
 		_ring(10, randf() * TAU, 65.0)
@@ -187,7 +187,7 @@ func _slam() -> void:
 	w.ring(global_position, SLAM_R * 0.6, Color.WHITE, 0.3, 2.0)
 	var p := player()
 	if not p.dead and p.global_position.distance_to(global_position) < SLAM_R:
-		p.take_damage(25.0, global_position)
+		p.take_damage(32.0 * contact_damage / 22.0, global_position)
 	_ring(16, 0.0, 70.0)
 
 

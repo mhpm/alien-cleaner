@@ -3,7 +3,6 @@ extends CanvasLayer
 ## Minimal gameplay HUD (health, coins, room, boss bar) plus all overlays:
 ## upgrade choice, pause (run stats + active upgrades), game over and victory.
 
-const MENU_SCENE := "res://scenes/main_menu.tscn"
 
 var game: GameWorld
 var root: Control
@@ -897,18 +896,23 @@ func show_game_over() -> void:
 	_end_buttons(box)
 
 
-func show_victory() -> void:
-	var box := _open_overlay("victory", 0.8)
-	box.add_child(UiTheme.title("HIVE CLEANED!", 40, Color("a7f070")))
-	box.add_child(UiTheme.label("The Mothership has been shot down.", 14, Color("94b0c2")))
-	box.add_child(_spacer(8))
-	box.add_child(UiTheme.label("+%d coins banked" % Game.run_coins, 20, Color("ffcd75")))
-	box.add_child(UiTheme.label("Bank: %d" % Game.bank, 14, Color("94b0c2")))
-	box.add_child(_spacer(4))
-	box.add_child(UiTheme.label("Next area unlocked:", 14, Color("f4f4f4")))
-	box.add_child(UiTheme.label("WORLD 3 - coming soon", 16, Color("c75bd6")))
-	box.add_child(_spacer(12))
-	_end_buttons(box)
+## "WORLD n CLEARED!" (VictoryScreen): stats and rewards, animated.
+func show_victory(info: Dictionary) -> void:
+	_close_overlay()
+	overlay_kind = "victory"
+	controls.enabled = false
+	get_tree().paused = true
+	var v := VictoryScreen.new()
+	v.setup(info)
+	v.menu_pressed.connect(_to_menu)
+	v.next_pressed.connect(func() -> void:
+		get_tree().paused = false
+		Game.new_run(Game.world_index + 1)
+		Game.room_index = 0
+		get_tree().reload_current_scene())
+	overlay = v
+	root.add_child(v)
+	root.move_child(v, fade.get_index())
 
 
 func _end_buttons(box: VBoxContainer) -> void:
@@ -928,7 +932,7 @@ func _spacer(h: float) -> Control:
 
 func _restart() -> void:
 	get_tree().paused = false
-	Game.new_run()
+	Game.new_run(Game.world_index)
 	get_tree().reload_current_scene()
 
 
@@ -936,4 +940,4 @@ func _to_menu() -> void:
 	if game.state not in ["dead", "won"]:
 		Game.end_run()
 	get_tree().paused = false
-	get_tree().change_scene_to_file(MENU_SCENE)
+	get_tree().change_scene_to_file(Game.menu_scene)

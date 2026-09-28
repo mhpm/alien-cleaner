@@ -114,6 +114,10 @@ func _ready() -> void:
 # Frames come from tools/slice_sprites.py: every set shares one canvas whose
 # anchor (feet or center) sits on the horizontal middle, so flip_h is safe.
 
+func has_set(set_name: String) -> bool:
+	return _manifest.has(set_name)
+
+
 func sheet(set_name: String) -> Dictionary:
 	return _manifest[set_name]
 

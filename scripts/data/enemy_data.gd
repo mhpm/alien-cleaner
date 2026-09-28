@@ -46,27 +46,27 @@ const TYPES := {
 		"color": Color("a7f070"), "kb": 1.4,
 	},
 	"gloop_brute": {
-		"name": "GLOOP BRUTE", "hp": 380.0, "speed": 30.0, "damage": 15.0, "coins": 25, "cost": 0,
+		"name": "GLOOP BRUTE", "hp": 560.0, "speed": 34.0, "damage": 20.0, "coins": 25, "cost": 0,
 		"radius": 17.0, "art": "pink", "scale": 0.58, "ai": "boss",
 		"color": Color("c75bd6"), "kb": 0.12, "boss": true, "tint": Color(0.9, 0.62, 1.3), "power_core": true,
 		"script": "res://scripts/enemies/boss_brute.gd",
 	},
 	"slime_king": {
-		"name": "THE SLIME KING", "hp": 850.0, "speed": 45.0, "damage": 18.0, "coins": 60, "cost": 0,
+		"name": "THE SLIME KING", "hp": 1000.0, "speed": 48.0, "damage": 22.0, "coins": 60, "cost": 0,
 		"radius": 21.0, "art": "green", "scale": 0.72, "ai": "boss",
 		"color": Color("a7f070"), "kb": 0.05, "boss": true,
 		"script": "res://scripts/enemies/boss_king.gd",
 	},
 	# world 2 mini boss (room 20): giant hive octopus
 	"brood_mother": {
-		"name": "BROOD MOTHER", "hp": 900.0, "speed": 26.0, "damage": 16.0, "coins": 40, "cost": 0,
+		"name": "BROOD MOTHER", "hp": 1400.0, "speed": 30.0, "damage": 20.0, "coins": 40, "cost": 0,
 		"radius": 17.0, "art": "octopus", "scale": 0.6, "ai": "boss",
 		"color": Color("c75bd6"), "kb": 0.1, "boss": true, "tint": Color(1.25, 0.6, 1.25), "power_core": true,
 		"script": "res://scripts/enemies/boss_brood.gd",
 	},
 	# world 2 final boss (room 30): the alien mothership
 	"mothership": {
-		"name": "THE MOTHERSHIP", "hp": 1700.0, "speed": 32.0, "damage": 18.0, "coins": 100, "cost": 0,
+		"name": "THE MOTHERSHIP", "hp": 2400.0, "speed": 34.0, "damage": 22.0, "coins": 100, "cost": 0,
 		"radius": 20.0, "art": "ufo", "scale": 0.62, "ai": "boss",
 		"color": Color("a7f070"), "kb": 0.0, "boss": true, "tint": Color(1.15, 0.85, 0.85),
 		"script": "res://scripts/enemies/boss_mothership.gd",

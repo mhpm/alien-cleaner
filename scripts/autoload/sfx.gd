@@ -1,5 +1,6 @@
 extends Node
-## Tiny chiptune synth: every sound effect and the music loop are generated at startup.
+## Tiny chiptune synth for every sound effect (generated at startup) plus the music:
+## assets/music/main-music.mp3 on the title / menus, levels.mp3 in every level.
 
 const RATE := 22050
 
@@ -7,8 +8,15 @@ var sounds: Dictionary = {}
 var players: Array[AudioStreamPlayer] = []
 var next_player := 0
 var last_play: Dictionary = {}
+const MUSIC := {
+	"menu": "res://assets/music/main-music.mp3",
+	"level": "res://assets/music/levels.mp3",
+}
+const MUSIC_DB := -9.0
+
 var music_player: AudioStreamPlayer
-var music_stream: AudioStreamWAV
+var music_track := ""
+var music_tween: Tween
 var sfx_enabled := true
 var music_enabled := true
 
@@ -20,7 +28,7 @@ func _ready() -> void:
 		add_child(p)
 		players.append(p)
 	music_player = AudioStreamPlayer.new()
-	music_player.volume_db = -13.0
+	music_player.volume_db = MUSIC_DB
 	add_child(music_player)
 	_build_sounds()
 
@@ -48,14 +56,44 @@ func set_music_enabled(on: bool) -> void:
 		music_player.stop()
 
 
-func play_music() -> void:
-	if not music_enabled:
+## Plays `track` ("menu" or "level"; "" = keep the current one), fading out whatever
+## else was on. Moving between screens that share a track does not restart it.
+func play_music(track := "") -> void:
+	if track != "":
+		if track != music_track:
+			music_track = track
+			if music_player.playing:
+				_fade_to(track)
+				return
+	if not music_enabled or music_track == "":
 		return
-	if music_stream == null:
-		music_stream = _build_music()
 	if not music_player.playing:
-		music_player.stream = music_stream
-		music_player.play()
+		_start(music_track)
+
+
+func _fade_to(track: String) -> void:
+	if music_tween != null:
+		music_tween.kill()
+	music_tween = create_tween()
+	music_tween.tween_property(music_player, "volume_db", -40.0, 0.4)
+	music_tween.tween_callback(func() -> void:
+		if music_enabled:
+			_start(track)
+		else:
+			music_player.stop())
+
+
+func _start(track: String) -> void:
+	if music_tween != null:
+		music_tween.kill()
+	var st: AudioStream = load(str(MUSIC[track]))
+	if st is AudioStreamMP3:
+		(st as AudioStreamMP3).loop = true
+	music_player.stream = st
+	music_player.volume_db = -30.0
+	music_player.play()
+	music_tween = create_tween()
+	music_tween.tween_property(music_player, "volume_db", MUSIC_DB, 0.6)
 
 
 # ---------------------------------------------------------------- synthesis
@@ -193,62 +231,3 @@ func _zap() -> PackedFloat32Array:
 		var k := float(i) / n
 		out[i] = (_osc("sq", ph) * 0.6 + (randf() * 2.0 - 1.0) * 0.4) * (1.0 - k) * 0.22
 	return out
-
-
-func _midi(n: int) -> float:
-	return 440.0 * pow(2.0, (n - 69) / 12.0)
-
-
-func _note(buf: PackedFloat32Array, start: float, dur: float, freq: float, wave: String, vol: float, decay: float) -> void:
-	var i0 := int(start * RATE)
-	var n := int(dur * RATE)
-	var ph := 0.0
-	for i in n:
-		var idx := i0 + i
-		if idx >= buf.size():
-			return
-		var k := float(i) / n
-		ph += freq / RATE
-		buf[idx] += _osc(wave, ph) * pow(1.0 - k, decay) * vol * minf(1.0, i / (RATE * 0.005))
-
-
-func _build_music() -> AudioStreamWAV:
-	# 4 bars at 128 bpm: Am - F - G - E, bass on 8ths, arp on 16ths, light drums.
-	var beat := 60.0 / 128.0
-	var bars := 4
-	var total := beat * 4.0 * bars
-	var buf := PackedFloat32Array()
-	buf.resize(int(total * RATE))
-	var roots := [45, 41, 43, 40]
-	var chords := [[69, 72, 76], [65, 69, 72], [67, 71, 74], [64, 68, 71]]
-	var arp_pat := [0, 1, 2, 1, 0, 2, 1, 2]
-	for bar in bars:
-		var t0 := bar * beat * 4.0
-		var root: int = roots[bar]
-		var chord: Array = chords[bar]
-		for e in 8:
-			var n := root + (12 if e % 2 == 1 else 0)
-			_note(buf, t0 + e * beat * 0.5, beat * 0.45, _midi(n), "tri", 0.34, 0.6)
-		for s in 16:
-			var cn: int = chord[arp_pat[s % 8]]
-			_note(buf, t0 + s * beat * 0.25, beat * 0.22, _midi(cn + 12), "pulse", 0.05, 1.6)
-		for b in 4:
-			var tb := t0 + b * beat
-			# kick
-			var ki := int(tb * RATE)
-			var kn := int(0.12 * RATE)
-			var ph := 0.0
-			for i in kn:
-				if ki + i >= buf.size():
-					break
-				var k := float(i) / kn
-				ph += lerpf(150.0, 40.0, k) / RATE
-				buf[ki + i] += sin(ph * TAU) * (1.0 - k) * 0.5
-			# hat on off-beat
-			var hi := int((tb + beat * 0.5) * RATE)
-			var hn := int(0.03 * RATE)
-			for i in hn:
-				if hi + i >= buf.size():
-					break
-				buf[hi + i] += (randf() * 2.0 - 1.0) * (1.0 - float(i) / hn) * 0.12
-	return _wav(buf, true)

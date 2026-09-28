@@ -1,7 +1,9 @@
 class_name WorldData
 extends RefCounted
-## World -> Rooms -> Waves. Worlds play back to back (world 1 = rooms 1-10, world 2 =
-## rooms 11-30); the room marked "final" ends the run. Per world: "theme" (prop art /
+## World -> Rooms -> Waves. Each world is picked on the world select and played as one
+## survival stage; beating it ("final") ends the run and unlocks the next. World select:
+## "pic" (assets/ui/world/, tools/make_world_select_assets.py) and "chest" (coins in the
+## world chest, opened once after beating the world). Per world: "theme" (prop art /
 ## floor, see PropData.THEME_TEX), "enemy_mult" (HP & damage of every alien, bosses too)
 ## and "difficulty" [start, per room] for the HP/damage ramp inside the world.
 ## Layouts are ASCII tile grids sized for the world's painted room (Room.ART_THEMES):
@@ -18,11 +20,14 @@ extends RefCounted
 ##         hive: E alien egg (hatches when you get close)  I pillar  L lamp  S spire
 ##               w sticky creep (slows you)  OO teleporter pad (floor decal)
 ##               X object painted into the hive room art (collision comes from the art)
-## Survival stage (world 1): {"survival": {...}} - see scripts/survival.gd. "arena" size in
+## Survival stage (worlds 1 and 2): {"survival": {...}} - see scripts/survival.gd. "arena" size in
 ## tiles, "duration" (s) until the final "boss", "hp_per_min" alien toughness ramp,
 ## "waves" (one per 30 s): "pool", "alive" (aliens on the field), "rate" (spawns/s),
-## "elite" (chance), optional "event": "swarm" / "ring" (+ "id", "count") or "boss" (+ "id");
-## "final": the spawn settings while the final boss is out.
+## "elite" (chance), optional "event": "swarm" / "ring" (+ "id", "count") or "boss" (+ "id",
+## optional "count"; bosses scale with the clock, see Survival._boss_hp_mult);
+## "final": the spawn settings while the final boss is out. "art": painted arena
+## (Room.ART_ARENAS; "arena" is then only a fallback size), "t_offset": seconds the
+## toughness ramps start at (world 2 carries on from the end of world 1).
 ## The 12x27 world-1 room layouts below are kept for room-style levels.
 ## Wave: {"fixed": {type: count}} and/or {"budget": n, "pool": [types]} (random by enemy
 ## cost); optional "elite": n golden elites (default: 1 on the last wave of a room with
@@ -188,59 +193,62 @@ const HIVE_ROOMS := ["hive_entry", "nest", "biolab", "sludge", "overgrown_cargo"
 const WORLDS := [
 	{
 		"name": "INFESTED SPACESHIP", "theme": "ship", "enemy_mult": 1.0, "difficulty": [1.0, 0.08],
+		"pic": "world_1.png", "chest": 300,
 		"rooms": [
 			# 1: survival stage - a wide arena, 14 waves of 30 s that keep getting harder,
 			# the Gloop Brute at wave 6 and the Slime King when the clock hits 7:00
-			{"survival": {
-				"arena": Vector2i(64, 96), "duration": 420.0, "hp_per_min": 0.32,
+			{"final": true, "survival": {
+				"arena": Vector2i(64, 96), "duration": 420.0, "hp_per_min": 0.45,
 				"boss": "slime_king",
-				"final": {"pool": ["slime", "runner", "spitter"], "alive": 16, "rate": 1.5},
+				"final": {"pool": ["slime", "runner", "spitter", "droid"], "alive": 26, "rate": 2.4},
 				"waves": [
-					{"pool": ["slime"], "alive": 10, "rate": 1.2},
-					{"pool": ["slime"], "alive": 16, "rate": 1.8},
-					{"pool": ["slime", "runner"], "alive": 20, "rate": 2.0, "event": "swarm", "id": "runner", "count": 12},
-					{"pool": EARLY, "alive": 24, "rate": 2.2},
-					{"pool": MID, "alive": 28, "rate": 2.5, "event": "ring", "id": "slime", "count": 20},
-					{"pool": EARLY, "alive": 16, "rate": 1.5, "event": "boss", "id": "gloop_brute"},
-					{"pool": ["slime", "runner", "spitter", "droid", "ufo"], "alive": 30, "rate": 2.8, "elite": 0.02},
-					{"pool": ["slime", "runner", "spitter", "droid", "ufo"], "alive": 34, "rate": 3.0, "elite": 0.03, "event": "swarm", "id": "runner", "count": 20},
-					{"pool": ALL, "alive": 38, "rate": 3.2, "elite": 0.03},
-					{"pool": ALL, "alive": 42, "rate": 3.4, "elite": 0.04, "event": "ring", "id": "slime", "count": 28},
-					{"pool": ALL, "alive": 46, "rate": 3.6, "elite": 0.05},
-					{"pool": ALL, "alive": 50, "rate": 3.8, "elite": 0.05, "event": "swarm", "id": "droid", "count": 14},
-					{"pool": ALL, "alive": 54, "rate": 4.0, "elite": 0.06, "event": "ring", "id": "runner", "count": 30},
-					{"pool": ALL, "alive": 58, "rate": 4.2, "elite": 0.08},
+					{"pool": ["slime"], "alive": 14, "rate": 1.8},
+					{"pool": ["slime", "runner"], "alive": 22, "rate": 2.4},
+					{"pool": ["slime", "runner"], "alive": 26, "rate": 2.8, "event": "swarm", "id": "runner", "count": 16},
+					{"pool": EARLY, "alive": 30, "rate": 3.0, "event": "ring", "id": "slime", "count": 18},
+					{"pool": MID, "alive": 36, "rate": 3.3, "elite": 0.02, "event": "ring", "id": "slime", "count": 26},
+					{"pool": EARLY, "alive": 24, "rate": 2.4, "event": "boss", "id": "gloop_brute"},
+					{"pool": ["slime", "runner", "spitter", "droid", "ufo"], "alive": 40, "rate": 3.6, "elite": 0.03, "event": "swarm", "id": "runner", "count": 20},
+					{"pool": ["slime", "runner", "spitter", "droid", "ufo"], "alive": 44, "rate": 3.8, "elite": 0.04, "event": "swarm", "id": "runner", "count": 28},
+					{"pool": ALL, "alive": 50, "rate": 4.0, "elite": 0.04, "event": "ring", "id": "slime", "count": 26},
+					{"pool": ALL, "alive": 54, "rate": 4.2, "elite": 0.05, "event": "ring", "id": "slime", "count": 36},
+					{"pool": ALL, "alive": 32, "rate": 3.0, "elite": 0.05, "event": "boss", "id": "gloop_brute", "count": 2},
+					{"pool": ALL, "alive": 62, "rate": 4.6, "elite": 0.06, "event": "swarm", "id": "droid", "count": 20},
+					{"pool": ALL, "alive": 68, "rate": 4.8, "elite": 0.07, "event": "ring", "id": "runner", "count": 36},
+					{"pool": ALL, "alive": 74, "rate": 5.0, "elite": 0.09, "event": "swarm", "id": "runner", "count": 30},
 				],
 			}},
 		],
 	},
 	{
-		# rooms 11-30: aliens get +20% HP and damage on top of the ramp, which picks up
-		# where world 1 ended
-		"name": "THE HIVE", "theme": "hive", "enemy_mult": 1.2, "difficulty": [1.72, 0.04],
+		# world 2: a survival stage in the painted hive arena. Picked from the world
+		# select with a fresh crew, so the horde starts as if 2.5 minutes in ("t_offset")
+		# and every alien, boss included, is 30% stronger, faster and quicker to attack
+		# ("enemy_mult").
+		"name": "THE HIVE", "theme": "hive", "enemy_mult": 1.3, "difficulty": [1.0, 0.0],
+		"pic": "world_2.png", "chest": 600,
 		"rooms": [
-			{"layouts": ["hive_entry"], "waves": [{"fixed": {"slime": 3, "runner": 2}}, {"budget": 5, "pool": HIVE}]},  # 11: the hive - mind the eggs
-			{"layouts": HIVE_ROOMS, "waves": [{"budget": 8, "pool": HIVE}]},  # 12
-			{"layouts": HIVE_ROOMS, "waves": [{"fixed": {"droid": 2, "ufo_alien": 2}}, {"budget": 6, "pool": HIVE}], "upgrade": true},  # 13
-			{"layouts": HIVE_ROOMS, "waves": [{"budget": 8, "pool": HIVE}, {"budget": 7, "pool": HIVE}]},  # 14
-			{"layouts": HIVE_ROOMS, "waves": [{"fixed": {"octopus": 2, "ufo": 1}}, {"budget": 8, "pool": HIVE}], "upgrade": true},  # 15
-			{"layouts": HIVE_ROOMS, "waves": [{"budget": 10, "pool": HIVE}, {"budget": 6, "pool": HIVE}]},  # 16
-			{"layouts": HIVE_ROOMS, "waves": [{"budget": 9, "pool": HIVE}, {"budget": 9, "pool": HIVE}], "upgrade": true},  # 17
-			{"layouts": HIVE_ROOMS, "waves": [{"budget": 10, "pool": HIVE}, {"budget": 10, "pool": HIVE}]},  # 18
-			{"layouts": HIVE_ROOMS, "waves": [{"budget": 11, "pool": HIVE}, {"budget": 11, "pool": HIVE}], "upgrade": true},  # 19
-			# 20: mini boss
-			{"layouts": ["brood_lair"], "boss": "brood_mother", "upgrade": true},
-			{"layouts": HIVE_ROOMS, "waves": [{"budget": 10, "pool": HIVE}, {"budget": 10, "pool": HIVE}]},  # 21
-			{"layouts": HIVE_ROOMS, "waves": [{"budget": 11, "pool": HIVE}, {"budget": 11, "pool": HIVE}], "upgrade": true},  # 22
-			{"layouts": HIVE_ROOMS, "waves": [{"budget": 12, "pool": HIVE}, {"budget": 10, "pool": HIVE}]},  # 23
-			{"layouts": HIVE_ROOMS, "waves": [{"budget": 12, "pool": HIVE}, {"budget": 12, "pool": HIVE}], "upgrade": true},  # 24
-			{"layouts": HIVE_ROOMS, "waves": [{"budget": 13, "pool": HIVE}, {"budget": 12, "pool": HIVE}]},  # 25
-			{"layouts": HIVE_ROOMS, "waves": [{"budget": 13, "pool": HIVE}, {"budget": 13, "pool": HIVE}], "upgrade": true},  # 26
-			{"layouts": HIVE_ROOMS, "waves": [{"budget": 14, "pool": HIVE}, {"budget": 13, "pool": HIVE}]},  # 27
-			{"layouts": HIVE_ROOMS, "waves": [{"budget": 14, "pool": HIVE}, {"budget": 14, "pool": HIVE}], "upgrade": true},  # 28
-			{"layouts": HIVE_ROOMS, "waves": [{"budget": 15, "pool": HIVE}, {"budget": 15, "pool": HIVE}], "upgrade": true},  # 29
-			# 30: final boss - the end of world 2 (and of the run)
-			{"layouts": ["mothership_dock"], "boss": "mothership", "final": true},
+			{"final": true, "survival": {
+				"arena": Vector2i(56, 75), "art": "hive", "duration": 420.0, "hp_per_min": 0.45,
+				"t_offset": 150.0, "boss": "mothership",
+				"final": {"pool": HIVE, "alive": 30, "rate": 2.8},
+				"waves": [
+					{"pool": ["slime", "runner", "ufo_alien"], "alive": 20, "rate": 2.4},
+					{"pool": ["slime", "runner", "spitter", "ufo_alien"], "alive": 28, "rate": 3.0, "event": "swarm", "id": "ufo_alien", "count": 20},
+					{"pool": MID, "alive": 32, "rate": 3.2, "elite": 0.03, "event": "ring", "id": "runner", "count": 22},
+					{"pool": HIVE, "alive": 36, "rate": 3.4, "elite": 0.04, "event": "swarm", "id": "runner", "count": 24},
+					{"pool": HIVE, "alive": 40, "rate": 3.6, "elite": 0.04, "event": "ring", "id": "octopus", "count": 14},
+					{"pool": MID, "alive": 28, "rate": 2.6, "elite": 0.04, "event": "boss", "id": "brood_mother"},
+					{"pool": HIVE, "alive": 46, "rate": 4.0, "elite": 0.05, "event": "swarm", "id": "ufo_alien", "count": 30},
+					{"pool": HIVE, "alive": 50, "rate": 4.2, "elite": 0.05, "event": "ring", "id": "slime", "count": 34},
+					{"pool": HIVE, "alive": 54, "rate": 4.4, "elite": 0.06, "event": "swarm", "id": "droid", "count": 20},
+					{"pool": HIVE, "alive": 58, "rate": 4.6, "elite": 0.06, "event": "ring", "id": "runner", "count": 36},
+					{"pool": HIVE, "alive": 34, "rate": 3.2, "elite": 0.06, "event": "boss", "id": "gloop_brute", "count": 2},
+					{"pool": HIVE, "alive": 66, "rate": 5.0, "elite": 0.07, "event": "swarm", "id": "octopus", "count": 16},
+					{"pool": HIVE, "alive": 72, "rate": 5.2, "elite": 0.08, "event": "ring", "id": "runner", "count": 40},
+					{"pool": HIVE, "alive": 80, "rate": 5.5, "elite": 0.1, "event": "boss", "id": "brood_mother"},
+				],
+			}},
 		],
 	},
 ]

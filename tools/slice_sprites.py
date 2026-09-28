@@ -7,6 +7,7 @@ around the anchor (feet), so flip_h works without the body jumping.
 A frame is either a (row, x0, x1) range of the sheet or a loose png (relative to
 assets/sprites/, e.g. the enemies/<name>/ folders): "path", ("path", x0, x1) to use
 only those columns, or ("path", x0, x1, scale) to also resize it.
+An anim is (frames, fps, loop) or (frames, fps, loop, True) to mirror its frames.
 """
 import json
 import os
@@ -41,12 +42,106 @@ def inf(*ids):
     return [INF % i if isinstance(i, str) else (INF % i[0], *i[1:]) for i in ids]
 
 
+# Mutant phase 1 in 64x64 pixel art (tools/make_infected_phase1.py -> fase 1/pixel64/): idle,
+# sideways walk (faces right), walk down/up and the 3 combo strikes (4 frames each:
+# wind-up, hit, trail, recover). No attack_<dir>: the combo poses replace them.
+M1P = "mutations_player/fase 1/pixel64/%s_%d.png"
+
+
+def m1p(anim, n):
+    return [M1P % (anim, i) for i in range(n)]
+
+
+M2P = "mutations_player/fase 2/pixel64/%s_%d.png"
+
+
+def m2p(anim, n):
+    return [M2P % (anim, i) for i in range(n)]
+
+
+# Phases 3+ (tools/make_infected_rig.py <n> -> fase <n>/pixel<size>/, rigged from loose
+# parts; phase 3 is 64x64, phase 4 on 100x100)
+def rig_set(n, size):
+    def f(anim, k):
+        return ["mutations_player/fase %d/pixel%d/%s_%d.png" % (n, size, anim, i) for i in range(k)]
+    return f
+
+
+m3p = rig_set(3, 64)
+m4p = rig_set(4, 100)
+
+
 SETS = {
+    "mutant1": {
+        "anchor": "boots_blue",
+        "anims": {
+            "idle": (m1p("idle", 6), 6, True),
+            "walk_down": (m1p("walk_down", 4), 10, True),
+            "walk_up": (m1p("walk_up", 4), 10, True),
+            "walk_left": (m1p("walk", 8), 11, True, True),
+            "walk_right": (m1p("walk", 8), 11, True),
+            # 16 fps = Infected.SLASH_TIME (0.25 s per strike)
+            "combo_1": (m1p("combo_1", 4), 16, False),
+            "combo_2": (m1p("combo_2", 4), 16, False),
+            "combo_3": (m1p("combo_3", 4), 16, False),
+        },
+        "body": "idle",
+    },
+    # Phase 2 (tools/make_infected_phase2.py -> fase 2/pixel64/): aggressive idle, run
+    # (also used walking down: the side view is 3/4 toward the camera), back view and 3
+    # new strikes (thrust, overhead slam, rising hook).
+    "mutant2": {
+        "anchor": "boots_blue",
+        "anims": {
+            "idle": (m2p("idle", 6), 9, True),
+            "walk_down": (m2p("run", 8), 14, True),
+            "walk_up": (m2p("walk_up", 4), 12, True),
+            "walk_left": (m2p("run", 8), 14, True, True),
+            "walk_right": (m2p("run", 8), 14, True),
+            "combo_1": (m2p("combo_1", 4), 16, False),
+            "combo_2": (m2p("combo_2", 4), 16, False),
+            "combo_3": (m2p("combo_3", 4), 16, False),
+        },
+        "body": "idle",
+    },
+    # Phase 3: heavy idle, run, back view and 3 strikes (left punch, wide claw sweep,
+    # jump + ground slam).
+    "mutant3": {
+        "anchor": "boots_blue",
+        "anims": {
+            "idle": (m3p("idle", 6), 8, True),
+            "walk_down": (m3p("run", 8), 14, True),
+            "walk_up": (m3p("walk_up", 4), 12, True),
+            "walk_left": (m3p("run", 8), 14, True, True),
+            "walk_right": (m3p("run", 8), 14, True),
+            "combo_1": (m3p("combo_1", 4), 16, False),
+            "combo_2": (m3p("combo_2", 4), 16, False),
+            "combo_3": (m3p("combo_3", 4), 16, False),
+        },
+        "body": "idle",
+    },
+    # Phase 4: low guard idle, run, back view and 3 strikes (rising rake, shoulder ram,
+    # claw slam with ground spikes).
+    "mutant4": {
+        "anchor": "boots_blue",
+        "anims": {
+            "idle": (m4p("idle", 6), 9, True),
+            "walk_down": (m4p("run", 8), 14, True),
+            "walk_up": (m4p("walk_up", 4), 12, True),
+            "walk_left": (m4p("run", 8), 14, True, True),
+            "walk_right": (m4p("run", 8), 14, True),
+            "combo_1": (m4p("combo_1", 4), 16, False),
+            "combo_2": (m4p("combo_2", 4), 16, False),
+            "combo_3": (m4p("combo_3", 4), 16, False),
+        },
+        "body": "idle",
+    },
     "infected": {
         "anchor": "boots",
         "anims": {
             "idle": (inf("010", "005", "006", "007", "008", "004", "009"), 8, True),
-            "walk": (inf("017", "018", "019", "020", "021", "024", "022", "023"), 13, True),
+            # drawn facing left in the sheet (the rest face right): mirrored
+            "walk": (inf("017", "018", "019", "020", "021", "024", "022", "023"), 13, True, True),
             "walk_up": (inf("016", "027", "028", "029", "030", "025", "026", "031"), 13, True),
             "shoot": (inf("035"), 1, False),
             "slash": (inf("053", "050", "052", "049", "051"), 18, False),
@@ -196,6 +291,15 @@ def anchor_of(img, mode):
         ys, xs = np.nonzero(dark)
         low = ys >= ys.max() - 10
         return (float(np.median(xs[low])), float(ys.max() + 1))
+    if mode == "boots_blue":
+        # the navy boots at the bottom (slash trails reach far to the sides)
+        rgba = np.asarray(img).astype(int)
+        r, g, b = rgba[:, :, 0], rgba[:, :, 1], rgba[:, :, 2]
+        navy = a & (b > 50) & (b > r + 25) & (r < 90) & (g < 110)
+        navy[: int(h * 0.7)] = False
+        ys, xs = np.nonzero(navy)
+        low = ys >= ys.max() - 12
+        return (float(np.median(xs[low])), float(ys.max() + 1))
     if mode == "center":
         return (w / 2.0, h / 2.0)
     return (w / 2.0, h)
@@ -209,7 +313,7 @@ def main(sheet_path, out_dir):
     manifest = {}
     for set_name, spec in SETS.items():
         frames = {}
-        for anim, (ranges, fps, loop) in spec["anims"].items():
+        for anim, (ranges, fps, loop, *mirror) in spec["anims"].items():
             lst = []
             for r in ranges:
                 if isinstance(r, str) or isinstance(r[0], str):
@@ -226,7 +330,7 @@ def main(sheet_path, out_dir):
                     row, x0, x1 = r
                     y0, y1 = ROWS[row]
                     img = trim(sheet.crop((x0, y0 - 2, x1, y1 + 2)))
-                if spec.get("flip"):
+                if spec.get("flip") or (mirror and mirror[0]):
                     img = img.transpose(Image.FLIP_LEFT_RIGHT)
                 lst.append((img, anchor_of(img, spec["anchor"])))
             frames[anim] = (lst, fps, loop)
