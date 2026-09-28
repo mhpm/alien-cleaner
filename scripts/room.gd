@@ -56,18 +56,12 @@ const FOLLOW_AIM_RANGE := 175.0
 # ---- survival arena (WorldData "survival"): a wide open floor of plate tiles walled in
 # by the walls of the big room art (assets/arena/ from tools/make_arena_tiles.py)
 const ARENA := "res://assets/arena/"
-## how often each floor_atlas.png column is laid: plain / cracked plates, planet
-## emblem (only in the middle), glowing vent, grate, hazard plate, grille
-const ARENA_TILES := [5.0, 5.0, 1.4, 2.4, 2.4, 0.0, 0.22, 0.3, 0.1, 0.18]
+## floor cells of tools/arena_floor_ref.webp (floor_atlas.png + .json: plain plates first,
+## then plates with a vent grille); each floor tile covers ARENA_FLOOR_TILE world units
+const ARENA_FLOOR_TILE := 32.0
+const ARENA_VENT_CHANCE := 0.015
 const ARENA_WALL := 22.5  # wall thickness in world units (90 art px)
 const ARENA_ART_SCALE := 0.25  # wall art px -> world
-## sparse decoration scattered in small clusters: [prop id, weight]
-const ARENA_DECOR := [
-	["lamp_post", 3.0], ["planter", 2.0], ["crystal", 2.0], ["crate", 2.0], ["canister", 1.5],
-	["machine", 1.0], ["console", 1.0], ["tube", 1.0], ["generator", 1.0], ["mushroom", 1.0],
-	["dish", 0.6], ["robot", 0.6],
-]
-
 var grid: Array = []
 var toxic: Dictionary = {}  # Vector2i -> splat texture
 var toxic_until: Dictionary = {}  # Vector2i -> anim_t when a temporary flood dries up
@@ -363,9 +357,9 @@ func flood_toxic(c: Vector2i, secs: float) -> void:
 
 # ---------------------------------------------------------------- survival arena
 
-## Build a wide open arena of `size` tiles: random floor plates, walls all round, a
-## few scattered props and barrels (stable per seed), nothing in the middle.
-func build_arena(size: Vector2i, entities: Node2D, seed_v: int) -> void:
+## Build a wide open arena of `size` tiles: quiet floor plates and walls all round,
+## no obstacles, so the astronaut and the horde move freely.
+func build_arena(size: Vector2i, _entities: Node2D, seed_v: int) -> void:
 	_clear_station()
 	for n in spawned:
 		if is_instance_valid(n):
@@ -392,7 +386,6 @@ func build_arena(size: Vector2i, entities: Node2D, seed_v: int) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_v
 	_arena_floor(rng)
-	_arena_props(entities, rng)
 	queue_redraw()
 
 
@@ -407,6 +400,10 @@ func _leave_arena() -> void:
 
 
 func _arena_floor(rng: RandomNumberGenerator) -> void:
+	var info: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(ARENA + "floor_atlas.json"))
+	var plain := int(info.plain)
+	var vents := int(info.vent)
+	var acols := int(info.cols)
 	if floor_layer == null:
 		floor_layer = TileMapLayer.new()
 		var ts := TileSet.new()
@@ -414,79 +411,23 @@ func _arena_floor(rng: RandomNumberGenerator) -> void:
 		var src := TileSetAtlasSource.new()
 		src.texture = load(ARENA + "floor_atlas.png")
 		src.texture_region_size = Vector2i(64, 64)
-		for i in ARENA_TILES.size():
-			src.create_tile(Vector2i(i, 0))
+		for i in plain + vents:
+			src.create_tile(Vector2i(i % acols, int(i / float(acols))))
 		ts.add_source(src, 0)
 		floor_layer.tile_set = ts
-		floor_layer.scale = Vector2.ONE * (TILE / 64.0)
+		floor_layer.scale = Vector2.ONE * (ARENA_FLOOR_TILE / 64.0)
 		floor_layer.show_behind_parent = true  # under the decals Room draws
 		floor_layer.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 		floor_layer.texture_repeat = CanvasItem.TEXTURE_REPEAT_DISABLED
 		add_child(floor_layer)
 	floor_layer.visible = true
 	floor_layer.clear()
-	var total := 0.0
-	for wgt: float in ARENA_TILES:
-		total += wgt
-	for y in rows:
-		for x in cols:
-			var r := rng.randf() * total
-			var pick := 0
-			for i in ARENA_TILES.size():
-				r -= float(ARENA_TILES[i])
-				if r <= 0.0:
-					pick = i
-					break
-			floor_layer.set_cell(Vector2i(x, y), 0, Vector2i(pick, 0))
-	floor_layer.set_cell(Vector2i(floori(cols * 0.5), floori(rows * 0.5)), 0, Vector2i(5, 0))  # planet emblem
-
-
-func _arena_props(entities: Node2D, rng: RandomNumberGenerator) -> void:
-	var used: Dictionary = {}
-	var mid := Vector2(cols, rows) * 0.5
-	var wsum := 0.0
-	for d: Array in ARENA_DECOR:
-		wsum += float(d[1])
-	var clusters := int(cols * rows / 95.0)
-	var tries := 0
-	while clusters > 0 and tries < 400:
-		tries += 1
-		var c := Vector2i(rng.randi_range(2, cols - 3), rng.randi_range(2, rows - 3))
-		if Vector2(c).distance_to(mid) < 7.0 or used.has(c):
-			continue
-		clusters -= 1
-		for k in rng.randi_range(1, 3):
-			var cell := c + Vector2i(rng.randi_range(-2, 2), rng.randi_range(-1, 1))
-			if used.has(cell) or used.has(cell + Vector2i.RIGHT) or cell.x < 1 or cell.x >= cols - 2 or cell.y < 1 or cell.y >= rows - 1:
-				continue
-			var r := rng.randf() * wsum
-			var id := "crate"
-			for d: Array in ARENA_DECOR:
-				r -= float(d[1])
-				if r <= 0.0:
-					id = str(d[0])
-					break
-			used[cell] = true
-			var wide: bool = id in PropData.WIDE
-			if wide:
-				used[cell + Vector2i.RIGHT] = true
-			_add_prop(entities, id, cell, Vector2(cell.x * TILE + (16 if wide else 8), cell.y * TILE + 14))
-	# explosive barrels in pairs, handy against the crowd
-	for i in int(cols * rows / 240.0):
-		var c := Vector2i(rng.randi_range(2, cols - 3), rng.randi_range(2, rows - 3))
-		if Vector2(c).distance_to(mid) < 5.0 or used.has(c) or used.has(c + Vector2i.RIGHT):
-			continue
-		for k in 2:
-			used[c + Vector2i(k, 0)] = true
-			var b := Barrel.new()
-			b.position = Vector2((c.x + k) * TILE + 8, c.y * TILE + 14)
-			entities.add_child(b)
-			spawned.append(b)
-	# oil stains and old splats
-	for i in int(cols * rows / 45.0):
-		var pos := Vector2(rng.randf_range(8, room_w - 8), rng.randf_range(8, room_h - 8))
-		var tex := PropData.pick(PropData.GRIME_TEX, Vector2i(i, i * 3))
-		grime.append([pos, tex, rng.randf_range(-0.5, 0.5), rng.randf_range(0.8, 1.4)])
+	for y in ceili(room_h / ARENA_FLOOR_TILE):
+		for x in ceili(room_w / ARENA_FLOOR_TILE):
+			var i := rng.randi_range(0, plain - 1)
+			if vents > 0 and rng.randf() < ARENA_VENT_CHANCE:
+				i = plain + rng.randi_range(0, vents - 1)
+			floor_layer.set_cell(Vector2i(x, y), 0, Vector2i(i % acols, int(i / float(acols))))
 
 
 ## A free floor spot (no prop within `clear` units) near `p`, inside the arena.
@@ -522,12 +463,6 @@ func _draw_arena() -> void:
 			var o := Vector2(-t if cx == 0 else room_w + t, -t if cy == 0 else room_h + t)
 			draw_set_transform(o, 0.0, Vector2(s if cx == 0 else -s, s if cy == 0 else -s))
 			draw_texture_rect(arena_tex.corner, Rect2(0, 0, wt, wt), false)
-	draw_set_transform(Vector2.ZERO)
-	for g: Array in grime:
-		var tex: Texture2D = g[1]
-		var sz := Vector2(20, 20.0 * tex.get_height() / tex.get_width()) * float(g[3])
-		draw_set_transform(g[0], float(g[2]), Vector2.ONE)
-		draw_texture_rect(tex, Rect2(-sz * 0.5, sz), false, Color(1, 1, 1, 0.45))
 	draw_set_transform(Vector2.ZERO)
 	for c: Vector2i in toxic:
 		var tt: Texture2D = toxic[c]

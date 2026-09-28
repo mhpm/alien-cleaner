@@ -6,6 +6,8 @@ extends Node2D
 ## + weapons.json (grip / tip in image pixels). Origin = feet. The blaster is always
 ## drawn in front of the body, except while walking up (back view): then it goes behind.
 ## Used by the Player and by the CHARACTER screen preview.
+## set_form("infected") swaps in the mutant (Infected mode, assets/sprites/infected): its
+## arm is the cannon, so the blaster hides, and its idle is animated.
 
 const WEAPONS_PATH := "res://assets/suits/weapons.json"
 const BODY_SCALE := 0.34  # sprite frame px -> world units (~25 units tall)
@@ -24,6 +26,8 @@ var walk_amount := 0.0  # 0 standing .. 1 walking
 var breathe_t := 0.0
 var _grip := Vector2.ZERO
 var _tip := Vector2.ZERO
+var form := "player"
+var body_scale := BODY_SCALE
 
 
 func _ready() -> void:
@@ -58,10 +62,23 @@ static func weapons_data() -> Dictionary:
 	return _weapons
 
 
+## "player" (reference-sheet astronaut) or "infected" (the mutant, drawn at the same height).
+func set_form(f: String) -> void:
+	form = f
+	body.sprite_frames = Art.frames(f)
+	body.offset = Art.anchor_offset(f)
+	body_scale = BODY_SCALE
+	if f != "player":
+		body_scale = BODY_SCALE * Art.body_height("player") / Art.body_height(f) * 1.3
+	body.animation = &""
+	play("idle")
+	_pose()
+
+
 func play(anim: String) -> void:
 	if body.animation == anim:
 		return
-	if anim == "idle":
+	if anim == "idle" and form == "player":
 		# standing: a single frame holding the blaster; breathing is procedural
 		body.animation = "idle"
 		body.stop()
@@ -81,6 +98,9 @@ func grip_pos() -> Vector2:
 
 
 func muzzle_pos() -> Vector2:
+	if form != "player":
+		# the mutant fires from its arm cannon
+		return body.position + Vector2(facing * 6.0, -11.0) + Vector2.from_angle(aim) * 7.0
 	return gun.position + Vector2.from_angle(aim) * GUN_LEN * BODY_SCALE
 
 
@@ -100,7 +120,7 @@ func _pose() -> void:
 	var breath := sin(breathe_t * 2.6) * 0.018 * (1.0 - walk_amount)
 	body.position = Vector2(0, hop)
 	body.rotation = sin(walk_phase) * 0.06 * walk_amount * facing
-	body.scale = Vector2(1.0 + land - breath * 0.4, 1.0 - land + breath) * BODY_SCALE
+	body.scale = Vector2(1.0 + land - breath * 0.4, 1.0 - land + breath) * body_scale
 	var dir := Vector2.from_angle(aim)
 	var s := GUN_LEN / (_tip - _grip).length() * BODY_SCALE
 	var base := (_tip - _grip).angle()
@@ -110,7 +130,7 @@ func _pose() -> void:
 	gun.rotation = aim + (base if flip else -base)
 	var hand := Vector2(HAND.x * facing, HAND.y * (1.0 - land + breath))
 	gun.position = hand * BODY_SCALE + Vector2(0, hop) - dir * recoil * BODY_SCALE
-	gun.visible = body.animation != "death"
+	gun.visible = body.animation != "death" and form == "player"
 	# only when walking up (back view) is the blaster hidden behind the body
 	var behind := body.animation == "walk_up"
 	if (gun.get_index() < body.get_index()) != behind:

@@ -32,7 +32,35 @@ GREEN = [(5, 14, 94), (5, 113, 189), (5, 201, 279), (5, 294, 368), (5, 381, 446)
 PINK = [(6, 23, 96), (6, 112, 188), (6, 202, 276), (6, 298, 372), (6, 382, 458), (6, 466, 538), (6, 550, 625), (6, 637, 710)]
 BLUE = [(7, 18, 84), (7, 106, 170), (7, 193, 258), (7, 281, 346), (7, 371, 437), (7, 458, 522), (7, 545, 607), (7, 626, 694)]
 
+# Infected mode (loose frames in assets/sprites/enviroment/infected player_elements,
+# cut from "infected player.png"; frames face right, anchored on the boots)
+INF = "enviroment/infected player_elements/infected player_%s.png"
+
+
+def inf(*ids):
+    return [INF % i if isinstance(i, str) else (INF % i[0], *i[1:]) for i in ids]
+
+
 SETS = {
+    "infected": {
+        "anchor": "boots",
+        "anims": {
+            "idle": (inf("010", "005", "006", "007", "008", "004", "009"), 8, True),
+            "walk": (inf("017", "018", "019", "020", "021", "024", "022", "023"), 13, True),
+            "walk_up": (inf("016", "027", "028", "029", "030", "025", "026", "031"), 13, True),
+            "shoot": (inf("035"), 1, False),
+            "slash": (inf("053", "050", "052", "049", "051"), 18, False),
+            "dash": (inf(("055", 120, 332)), 1, False),
+            "transform": (inf("071", "066", "062", "070", "060", "058", "061"), 9, False),
+        },
+        "body": "idle",
+    },
+    "inf_shot": {"anchor": "center", "anims": {"fly": (inf("097", "154"), 12, True)}, "body": "fly"},
+    "inf_orb": {"anchor": "center", "anims": {"pulse": (inf("163", "100", "098"), 14, True)}, "body": "pulse"},
+    "inf_missile": {"anchor": "center", "anims": {"fly": (inf("111"), 1, True)}, "body": "fly"},
+    "inf_burst": {"anchor": "center", "anims": {"pop": (inf("149"), 1, False)}, "body": "pop"},
+    "inf_erupt": {"anchor": "bottom", "anims": {"erupt": (inf("150", "141", "115", "136"), 12, False)}, "body": "erupt"},
+    "inf_goo": {"anchor": "center", "anims": {"bits": (inf("041", "057", "073", "099", "112", "124", "080", "082"), 1, False)}, "body": "bits"},
     "player": {
         "anchor": "helmet",
         "anims": {
@@ -159,6 +187,15 @@ def anchor_of(img, mode):
         top = a[: int(h * 0.4)]
         xs = np.nonzero(top.any(axis=0))[0]
         return ((xs.min() + xs.max() + 1) / 2.0, h)
+    if mode == "boots":
+        # the near-black boots at the bottom of the body (energy arcs, dust and
+        # tentacles around it would shift a bounding-box anchor)
+        rgba = np.asarray(img).astype(int)
+        dark = a & (rgba[:, :, 0] < 45) & (rgba[:, :, 1] < 45) & (rgba[:, :, 2] < 90) & (rgba[:, :, 2] >= rgba[:, :, 0])
+        dark[: int(h * 0.7)] = False
+        ys, xs = np.nonzero(dark)
+        low = ys >= ys.max() - 10
+        return (float(np.median(xs[low])), float(ys.max() + 1))
     if mode == "center":
         return (w / 2.0, h / 2.0)
     return (w / 2.0, h)

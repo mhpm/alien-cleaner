@@ -9,11 +9,15 @@ const PERM := {
 	"health": {"name": "Suit Plating", "desc": "+15 max health", "max": 5, "cost": 20},
 	"power": {"name": "Suds Pressure", "desc": "+10% cleaning power", "max": 5, "cost": 25},
 	"speed": {"name": "Jet Boots", "desc": "+6% move speed", "max": 5, "cost": 20},
+	# Infected mode (scripts/infected.gd): level 1 unlocks it, each level after adds
+	# 2 s of mutation and +15% mutant power
+	"infected": {"name": "Infected Mode", "desc": "Fill the meter, then MUTATE!",
+			"desc2": "+2s and +15% mutant power", "max": 5, "cost": 60},
 }
 
 # persistent
 var bank := 0
-var perm := {"health": 0, "power": 0, "speed": 0}
+var perm := {"health": 0, "power": 0, "speed": 0, "infected": 0}
 var best_room := 0
 var runs := 0
 ## equipment: owned item levels ({id: level}) and the item worn in each slot
@@ -60,6 +64,7 @@ func new_run() -> void:
 		"knockback": 60.0, "blast_cooldown": 6.0, "shield": false,
 		"weapon": 1,
 		"hazard_mult": 1.0, "coin_bonus": 0, "surge": false, "room_heal": 0,
+		"infected": int(perm.infected),
 	}
 	_apply_gear(stats)
 
@@ -216,7 +221,7 @@ func heal(n: float) -> void:
 
 func take_upgrade(id: String) -> void:
 	upgrades[id] = int(upgrades.get(id, 0)) + 1
-	UpgradeData.apply(id, stats)
+	UpgradeData.apply(id, stats, int(upgrades[id]))
 	hp_changed.emit()
 
 

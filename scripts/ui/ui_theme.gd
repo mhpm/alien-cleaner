@@ -1,6 +1,10 @@
 class_name UiTheme
 extends RefCounted
 ## Shared chunky UI style (outlined labels, pixel-ish buttons).
+## FONT (Minecraft pixel font, imported with antialiasing/hinting/subpixel off) is the
+## default for every Label/Button/draw_string; crispest at multiples of 8.
+
+const FONT: FontFile = preload("res://fonts/minecraft/Minecraft.ttf")
 
 static var _theme: Theme
 
@@ -9,6 +13,7 @@ static func build() -> Theme:
 	if _theme != null:
 		return _theme
 	var th := Theme.new()
+	th.default_font = FONT
 	th.default_font_size = 16
 	th.set_color("font_color", "Label", Color("f4f4f4"))
 	th.set_color("font_outline_color", "Label", Color("1a1c2c"))
@@ -65,6 +70,18 @@ static func label(text: String, size := 16, color := Color("f4f4f4")) -> Label:
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return l
+
+
+## Big heading, shrunk (if needed) to fit max_w.
+static func title(text: String, size := 40, color := Color("f4f4f4"), max_w := 340.0) -> Label:
+	return label(text, fit_size(FONT, text, size, max_w), color)
+
+
+## Largest size <= size at which text fits in max_w px (one line).
+static func fit_size(font: Font, text: String, size: int, max_w: float) -> int:
+	while size > 8 and font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x > max_w:
+		size -= 1
+	return size
 
 
 static func icon(tex_id: String, px: float) -> TextureRect:

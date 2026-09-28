@@ -1,11 +1,8 @@
 class_name Pickup
 extends Node2D
-## Coin or heart that pops out of a cleaned alien and flies to the player.
-## Survival stages add: "xp" gems (value = XP), and the power-ups "magnet" (pulls every
-## gem and coin), "bomb" (blasts the aliens around you) and "frenzy" (overclocked
-## blaster for a few seconds). Their effects live in Survival.collect().
-
-const SURVIVAL_KINDS := ["xp", "magnet", "bomb", "frenzy"]
+## Something that pops out of a cleaned alien (or a supply crate) and flies to the
+## player: coins, hearts, power cores, and in survival stages XP gems and power-ups.
+## Art and names come from CollectibleData; survival effects live in Survival.collect().
 
 var kind := "coin"
 var value := 1
@@ -17,34 +14,41 @@ var t := 0.0
 var speed := 0.0
 var sprite: Sprite2D
 var shadow: Sprite2D
+var base := 1.0  # sprite scale
+var glow: Sprite2D
+
+
+func is_powerup() -> bool:
+	return kind not in ["coin", "heart", "xp"]
 
 
 func _ready() -> void:
 	add_to_group("pickups")
 	shadow = Sprite2D.new()
 	shadow.texture = Art.tex("shadow")
-	shadow.scale = Vector2(0.55, 0.6)
 	add_child(shadow)
-	sprite = Sprite2D.new()
-	match kind:
-		"power":
-			sprite.texture = Art.frame_tex("shot3", "fly", 0)
-			sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-			sprite.scale = Vector2.ONE * 0.2
-			shadow.scale = Vector2(0.9, 0.8)
-		"xp":
-			sprite.texture = Art.tex("gem" if value < 3 else ("gem_b" if value < 10 else "gem_r"))
-			sprite.scale = Vector2.ONE * 1.4
-			shadow.scale = Vector2(0.4, 0.45)
-		"magnet", "bomb":
-			sprite.texture = Art.tex(kind)
-		"frenzy":
-			sprite.texture = Art.tex("bolt")
-		_:
-			sprite.texture = Art.tex("coin" if kind == "coin" else "heart")
-	add_child(sprite)
-	if kind in ["magnet", "bomb", "frenzy"]:
+	if is_powerup():
 		add_to_group("powerups")
+		# a soft coloured halo so power-ups read in a crowd
+		glow = Sprite2D.new()
+		glow.texture = Art.tex("glow")
+		var col: Color = CollectibleData.ITEMS.get(kind, {}).get("color", Color("73eff7"))
+		glow.modulate = Color(col, 0.55)
+		glow.scale = Vector2(0.8, 0.8)
+		glow.position = Vector2(0, -7)
+		var add := CanvasItemMaterial.new()
+		add.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+		glow.material = add
+		add_child(glow)
+	sprite = Sprite2D.new()
+	sprite.texture = CollectibleData.tex(kind, value)
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	sprite.centered = true
+	base = CollectibleData.scale_for(kind, value)
+	sprite.scale = Vector2.ONE * base
+	add_child(sprite)
+	var sw := sprite.texture.get_width() * base
+	shadow.scale = Vector2(sw / 11.0, 0.6)
 	vz = randf_range(55.0, 95.0) * (0.5 if kind == "xp" else 1.0)
 	vel = Vector2.from_angle(randf() * TAU) * randf_range(10.0, 45.0) * (0.6 if kind == "xp" else 1.0)
 
@@ -63,7 +67,7 @@ func _physics_process(delta: float) -> void:
 	var b := Game.world.room.bounds().grow(-4.0)
 	position = position.clamp(b.position, b.end)
 	var d := p.global_position + Vector2(0, -4) - global_position
-	var mr := 60.0 if bool(Game.stats.magnet) else 16.0
+	var mr := 16.0 + 22.0 * int(Game.stats.get("magnet_lvl", 0))
 	if kind == "xp" and Game.world.survival != null:
 		mr = Game.world.survival.pickup_range()
 	if not p.dead and t > 0.35 and (magnet or d.length() < mr):
@@ -73,24 +77,23 @@ func _physics_process(delta: float) -> void:
 		if d.length() < 5.0:
 			_collect()
 			return
-	sprite.position.y = -z - 3.0 + (sin(t * 5.0) * 0.6 if z == 0.0 else 0.0)
+	var h := sprite.texture.get_height() * base
+	sprite.position.y = -z - h * 0.5 - 1.0 + (sin(t * 5.0) * 0.6 if z == 0.0 else 0.0)
 	if kind == "coin":
-		sprite.scale.x = maxf(0.25, absf(cos(t * 5.0)))
-	elif kind == "power":
-		sprite.scale = Vector2.ONE * 0.2 * (1.0 + sin(t * 8.0) * 0.12)
-		sprite.position.y -= 4.0
-		if randf() < 0.3:
-			Game.world.burst(global_position + Vector2(0, -7), Color("73eff7"), 1, 20.0, 0.4, 1.5, -30.0)
-	elif kind in ["magnet", "bomb", "frenzy"]:
-		# power-ups bob, glow and sparkle so they read in a crowd
-		sprite.scale = Vector2.ONE * (1.25 + sin(t * 6.0) * 0.12)
+		sprite.scale = Vector2(base * maxf(0.25, absf(cos(t * 5.0))), base)
+	elif is_powerup():
+		# power-ups bob, pulse and sparkle
+		sprite.scale = Vector2.ONE * base * (1.0 + sin(t * 6.0) * 0.08)
 		sprite.position.y -= 3.0
+		glow.position.y = sprite.position.y
+		glow.modulate.a = 0.45 + sin(t * 6.0) * 0.15
 		if randf() < 0.2:
-			Game.world.burst(global_position + Vector2(randf_range(-4, 4), -8), Color("ffcd75"), 1, 15.0, 0.4, 1.5, -25.0)
+			var col: Color = glow.modulate
+			Game.world.burst(global_position + Vector2(randf_range(-4, 4), -8), Color(col, 1.0), 1, 15.0, 0.4, 1.5, -25.0)
 
 
 func _collect() -> void:
-	if kind in SURVIVAL_KINDS:
+	if kind not in ["coin", "heart", "power"]:
 		if Game.world.survival != null:
 			Game.world.survival.collect(kind, value, global_position)
 		queue_free()

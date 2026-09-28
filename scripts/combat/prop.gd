@@ -29,6 +29,7 @@ var mat: ShaderMaterial
 var flash_t := 0.0
 var t := 0.0
 var turret := "idle"  # idle / charge / active / cool
+var deploy_secs := 0.0  # turret dropped by a power-up: fires right away, then vanishes
 var turret_t := 0.0
 var fire_t := 0.0
 
@@ -239,8 +240,12 @@ func _turret(delta: float) -> void:
 	var w := Game.world
 	if w == null:
 		return
-	var fighting: bool = w.state in ["fight", "gap"]
+	var fighting: bool = w.state in ["fight", "gap", "survive"]
 	var near := not w.player.dead and w.player.global_position.distance_to(global_position) < TURRET_WAKE
+	if deploy_secs > 0.0 and turret == "idle":
+		turret = "active"
+		turret_t = deploy_secs
+		fire_t = 0.3
 	match turret:
 		"idle":
 			if fighting and near:
@@ -266,6 +271,16 @@ func _turret(delta: float) -> void:
 				if e != null:
 					_turret_shoot(w, e)
 					fire_t = TURRET_RATE
+			if deploy_secs > 0.0 and (turret_t <= 0.0 or not fighting):
+				# a dropped turret powers down and beams away
+				exploded = true
+				collision_layer = 0
+				w.burst(global_position + Vector2(0, -10), Color("73eff7"), 12, 50.0, 0.4, 2.0, -30.0)
+				var tw := create_tween()
+				tw.tween_property(self, "modulate:a", 0.0, 0.4)
+				tw.tween_callback(queue_free)
+				set_process(false)
+				return
 			if turret_t <= 0.0 or not fighting:
 				turret = "cool"
 				turret_t = TURRET_COOL
@@ -326,7 +341,7 @@ func _draw() -> void:
 	draw_set_transform(c, 0.0, Vector2(1.0, 0.55))
 	match turret:
 		"idle":
-			if Game.world.state in ["fight", "gap"]:
+			if Game.world.state in ["fight", "gap", "survive"]:
 				var a := 0.35 + sin(t * 4.0) * 0.15
 				draw_arc(Vector2.ZERO, TURRET_WAKE, 0.0, TAU, 32, Color(0.45, 0.94, 0.97, a), 1.0)
 		"charge":

@@ -8,19 +8,28 @@ extends Node
 ##   "boss"   a mini boss joins the fight
 ## When the clock reaches "duration" the final "boss" arrives; cleaning it clears the
 ## stage. Aliens drop XP gems: each level up offers an upgrade. Power-ups (heart,
-## magnet, bomb, frenzy, power core) drop from aliens and from supply crates that keep
-## turning up near the player (walk into them or shoot them).
+## gravity well, nuke, cryo wave, overclock, jet boots, triple shot, double damage,
+## shield, super star, UFO buddies, turret drop, golden carrot, power core...; see
+## CollectibleData) drop from aliens and from supply crates that keep turning up near
+## the player (walk into them or shoot them).
 
 const WAVE_SECS := 30.0
 const MAX_ALIVE := 70
 const CRATE_EVERY := 30.0
 const MAX_CRATES := 3
 const PICKUP_RANGE := 26.0  # XP gems fly to you from this close (the magnet upgrade: more)
-const FRENZY_SECS := 8.0
 ## chance per cleaned alien to drop each power-up
-const DROPS := {"heart": 0.012, "magnet": 0.004, "bomb": 0.005, "frenzy": 0.005, "power": 0.006}
+const DROPS := {
+	"carrot": 0.012, "heart": 0.005, "frenzy": 0.003, "boots": 0.003, "triple": 0.003,
+	"rage": 0.003, "magnet": 0.0025, "bomb": 0.0025, "freeze": 0.0025, "shield": 0.002,
+	"power": 0.003,
+}
 ## what a supply crate holds (weights)
-const CRATE_LOOT := {"heart": 3.0, "magnet": 2.0, "bomb": 2.0, "frenzy": 2.0, "power": 1.5}
+const CRATE_LOOT := {
+	"medkit": 2.0, "heart_max": 1.0, "magnet": 2.0, "bomb": 2.0, "freeze": 1.5, "frenzy": 2.0,
+	"boots": 1.5, "triple": 2.0, "rage": 2.0, "shield": 1.5, "star": 1.0, "ufo": 1.5,
+	"turret": 1.5, "golden_carrot": 0.6, "power": 1.2, "gold": 1.0,
+}
 
 var world: GameWorld
 var def: Dictionary = {}
@@ -70,7 +79,7 @@ func need(lv: int) -> int:
 
 
 func pickup_range() -> float:
-	return PICKUP_RANGE * (2.4 if bool(Game.stats.magnet) else 1.0)
+	return PICKUP_RANGE * (1.0 + 0.6 * int(Game.stats.get("magnet_lvl", 0)))
 
 
 func _physics_process(delta: float) -> void:
@@ -279,10 +288,13 @@ func on_kill(e: Enemy) -> void:
 	if e.elite:
 		val *= 5
 	if e.is_boss:
-		for i in 8:
+		_drop("xp", pos, 40)
+		for i in 6:
 			_drop("xp", pos, 6)
 		_drop("power", pos)
 		_drop("magnet", pos)
+		_drop("golden_carrot", pos)
+		_drop("gold", pos)
 		world.drop_pickups(pos, int(e.def.coins), 0.0)
 		return
 	_drop("xp", pos, val)
@@ -290,7 +302,7 @@ func on_kill(e: Enemy) -> void:
 		world.drop_pickups(pos, 1, 0.0)
 	if e.elite:
 		_drop(_weighted(CRATE_LOOT), pos)
-		world.drop_pickups(pos, 3, 0.0)
+		_drop("gold", pos)
 		return
 	for k: String in DROPS:
 		if randf() < float(DROPS[k]):
@@ -318,10 +330,12 @@ func _weighted(table: Dictionary) -> String:
 	return table.keys()[0]
 
 
-## A supply crate burst open: coins and one power-up.
+## A supply crate burst open: coins and one power-up (sometimes two).
 func crate_loot(pos: Vector2) -> void:
 	world.drop_pickups(pos, 3, 0.0)
 	_drop(_weighted(CRATE_LOOT), pos)
+	if randf() < 0.25:
+		_drop(_weighted(CRATE_LOOT), pos)
 
 
 func _drop_crate() -> void:
@@ -380,28 +394,88 @@ func upgrade_done() -> void:
 		get_tree().create_timer(0.3).timeout.connect(_offer)
 
 
-func collect(kind: String, value: int, pos: Vector2) -> void:
+func collect(kind: String, value: int, _pos: Vector2) -> void:
+	var p := world.player
+	var pp := p.global_position
+	if kind == "xp":
+		add_xp(value)
+		if xp_sfx_t <= 0.0:
+			xp_sfx_t = 0.06
+			Sfx.play("coin", 0.15, -16.0)
+		return
+	var item: Dictionary = CollectibleData.ITEMS.get(kind, {})
+	var col: Color = item.get("color", Color.WHITE)
+	world.popup_text(pp + Vector2(0, -30), str(item.get("name", kind.to_upper())), col, 13)
+	world.ring(pp + Vector2(0, -6), 22.0, col, 0.35, 2.0)
+	if CollectibleData.is_buff(kind):
+		p.add_buff(kind, float(item.buff))
+		Sfx.play("upgrade", 0.0, -3.0)
+		if kind in ["shield", "star"]:
+			Sfx.play("shield", 0.0)
+		return
 	match kind:
-		"xp":
-			add_xp(value)
-			if xp_sfx_t <= 0.0:
-				xp_sfx_t = 0.06
-				Sfx.play("coin", 0.15, -16.0)
+		"gold":
+			Game.add_coins(10)
+			Sfx.play("coin", 0.0)
+			world.burst(pp, Color("ffcd75"), 12, 60.0, 0.4, 2.0, -40.0)
+		"carrot":
+			Game.heal(12.0)
+			Sfx.play("heal", 0.1)
+		"medkit":
+			Game.heal(float(Game.stats.max_hp) * 0.5)
+			Sfx.play("heal", 0.0)
+			world.burst(pp + Vector2(0, -8), Color("ff5566"), 14, 60.0, 0.5, 2.0, -30.0)
+		"heart_max":
+			Game.stats.max_hp = float(Game.stats.max_hp) + 15.0
+			Game.heal(15.0)
+			Sfx.play("heal", 0.0)
+			world.burst(pp + Vector2(0, -8), Color("ff5566"), 20, 80.0, 0.5, 2.0, -30.0)
+		"golden_carrot":
+			add_xp(need(level) - xp)
+			Sfx.play("victory", 0.0, -6.0)
+			world.burst(pp + Vector2(0, -8), Color("ffcd75"), 30, 110.0, 0.6, 2.5, -20.0)
 		"magnet":
 			for n in get_tree().get_nodes_in_group("pickups"):
 				var pk := n as Pickup
 				if pk != null and pk.kind in ["xp", "coin"]:
 					pk.magnet = true
-			world.hud.banner("MAGNET!", Color("ff5566"), 30, 0.5)
 			Sfx.play("shield", 0.0)
-			world.ring(pos, 40.0, Color("ff5566"), 0.4, 3.0)
+			world.ring(pp, 60.0, col, 0.5, 3.0)
 		"bomb":
-			_bomb(world.player.global_position)
-		"frenzy":
-			world.player.frenzy_t = FRENZY_SECS
-			world.hud.banner("OVERCLOCK!", Color("ffcd75"), 30, 0.5)
-			Sfx.play("upgrade", 0.0)
-			world.ring(pos + Vector2(0, -6), 26.0, Color("ffcd75"), 0.4, 3.0, true)
+			_bomb(pp)
+		"freeze":
+			_freeze(pp)
+		"turret":
+			_deploy_turret(pp)
+	Game.hp_changed.emit()
+
+
+## How far screen-wide power-ups reach (a bit past the visible screen).
+func _screen_reach() -> float:
+	return maxf(180.0, world.view_size().length() * 0.5 + 20.0)
+
+
+## Cryo wave: every alien on screen freezes solid for a few seconds.
+func _freeze(c: Vector2) -> void:
+	Sfx.play("freeze", 0.0)
+	world.ring(c, _screen_reach(), Color("c0f4ff"), 0.6, 4.0, true)
+	world.burst(c, Color("c0f4ff"), 40, 180.0, 0.7, 3.0)
+	for n in world.enemy_cache:
+		if not is_instance_valid(n):
+			continue
+		var e := n as Enemy
+		if e != null and not e.dead and e.global_position.distance_to(c) < _screen_reach():
+			e.freeze(1.5 if e.is_boss else 4.0)
+
+
+## Turret drop: an auto turret lands next to the player and fires on its own for a while.
+func _deploy_turret(c: Vector2) -> void:
+	var pos := world.room.arena_free_spot(c + Vector2(18, 4), 12.0)
+	var tur := Prop.new().setup("turret", Vector2i(pos / Room.TILE), pos, "arena")
+	tur.deploy_secs = 12.0
+	world.entities.add_child(tur)
+	world.burst(pos + Vector2(0, -8), Color("73eff7"), 16, 70.0, 0.4, 2.0)
+	Sfx.play("door", 0.0, -4.0)
 
 
 ## Screen-clearing bomb: every alien near the player takes a massive hit.
@@ -409,17 +483,17 @@ func _bomb(c: Vector2) -> void:
 	Sfx.play("explode", 0.0, 2.0)
 	world.shake(1.0)
 	world.hitstop(90)
-	world.ring(c, 170.0, Color("ffcd75"), 0.5, 5.0, true)
+	world.ring(c, _screen_reach(), Color("a7f070"), 0.5, 5.0, true)
 	world.ring(c, 110.0, Color.WHITE, 0.35, 3.0)
 	world.burst(c, Color("ffcd75"), 40, 200.0, 0.6, 3.0)
 	world.burst(c, Color("ef7d57"), 30, 140.0, 0.7, 3.0)
-	world.hud.banner("BOOM!", Color("ffcd75"), 40, 0.4)
+	world.hud.banner("NUKE!", Color("a7f070"), 40, 0.4)
 	for n in world.enemy_cache:
 		if not is_instance_valid(n):  # freed since the cache was refreshed
 			continue
 		var e := n as Enemy
 		if e == null or e.dead or not e.targetable:
 			continue
-		if e.global_position.distance_to(c) < 180.0:
+		if e.global_position.distance_to(c) < _screen_reach():
 			var dmg := e.max_hp * 0.12 if e.is_boss else e.max_hp * 3.0
 			e.take_damage(dmg, (e.global_position - c).normalized() * 3.0)

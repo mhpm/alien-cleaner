@@ -1,4 +1,160 @@
 {
+ "infected": {
+  "size": [
+   366,
+   245
+  ],
+  "anchor": [
+   183,
+   233.0
+  ],
+  "body_h": 115.0,
+  "anims": {
+   "idle": {
+    "frames": 7,
+    "fps": 8,
+    "loop": true
+   },
+   "walk": {
+    "frames": 8,
+    "fps": 13,
+    "loop": true
+   },
+   "walk_up": {
+    "frames": 8,
+    "fps": 13,
+    "loop": true
+   },
+   "shoot": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "slash": {
+    "frames": 5,
+    "fps": 18,
+    "loop": false
+   },
+   "dash": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "transform": {
+    "frames": 7,
+    "fps": 9,
+    "loop": false
+   }
+  }
+ },
+ "inf_shot": {
+  "size": [
+   168,
+   124
+  ],
+  "anchor": [
+   84,
+   62.0
+  ],
+  "body_h": 123.5,
+  "anims": {
+   "fly": {
+    "frames": 2,
+    "fps": 12,
+    "loop": true
+   }
+  }
+ },
+ "inf_orb": {
+  "size": [
+   128,
+   105
+  ],
+  "anchor": [
+   64,
+   52.5
+  ],
+  "body_h": 104.0,
+  "anims": {
+   "pulse": {
+    "frames": 3,
+    "fps": 14,
+    "loop": true
+   }
+  }
+ },
+ "inf_missile": {
+  "size": [
+   324,
+   118
+  ],
+  "anchor": [
+   162,
+   59.0
+  ],
+  "body_h": 118.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "inf_burst": {
+  "size": [
+   132,
+   120
+  ],
+  "anchor": [
+   66,
+   60.0
+  ],
+  "body_h": 120.0,
+  "anims": {
+   "pop": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   }
+  }
+ },
+ "inf_erupt": {
+  "size": [
+   240,
+   262
+  ],
+  "anchor": [
+   120,
+   262
+  ],
+  "body_h": 173.5,
+  "anims": {
+   "erupt": {
+    "frames": 4,
+    "fps": 12,
+    "loop": false
+   }
+  }
+ },
+ "inf_goo": {
+  "size": [
+   34,
+   35
+  ],
+  "anchor": [
+   17,
+   17.5
+  ],
+  "body_h": 30.0,
+  "anims": {
+   "bits": {
+    "frames": 8,
+    "fps": 1,
+    "loop": false
+   }
+  }
+ },
  "player": {
   "size": [
    92,

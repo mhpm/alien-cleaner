@@ -1,7 +1,26 @@
 class_name Stain
 extends Node2D
 ## Slime left on the floor (an alien's splat animation, or a tinted blob).
-## Sparkles away when the room is CLEAN.
+## Fades away LIFE seconds after it lands (or sparkles away when the room is CLEAN).
+
+const LIFE := 2.0
+const FADE := 0.5
+
+var fading := false
+
+
+func _ready() -> void:
+	get_tree().create_timer(LIFE - FADE, false).timeout.connect(_fade_out)
+
+
+func _fade_out() -> void:
+	if fading or not is_inside_tree():
+		return
+	fading = true
+	var tw := create_tween()
+	tw.tween_property(self, "modulate:a", 0.0, FADE)
+	tw.tween_callback(queue_free)
+
 
 func setup(col: Color, s: float) -> void:
 	var spr := Sprite2D.new()
@@ -21,6 +40,9 @@ func setup_splat(art: String, s: float, flip: bool, tint: Color) -> void:
 
 
 func clean() -> void:
+	if fading:
+		return
+	fading = true
 	var tw := create_tween()
 	tw.tween_interval(randf_range(0.0, 0.5))
 	tw.tween_callback(func() -> void:

@@ -127,6 +127,12 @@ func _label(parent: Control, r: Rect2, text: String, fs: int, col := C_TEXT,
 	return l
 
 
+## Sets text, shrinking the font from fs so it fits the label's width.
+func _fit_text(l: Label, text: String, fs: int) -> void:
+	l.text = text
+	l.add_theme_font_size_override("font_size", UiTheme.fit_size(UiTheme.FONT, text, fs, l.size.x - 6))
+
+
 func _icon(parent: Control, path: String, r: Rect2) -> TextureRect:
 	var i := TextureRect.new()
 	if path != "":
@@ -408,7 +414,8 @@ func _refresh_cards() -> void:
 			_label(bar, Rect2(0, 0, 139, 44), "Equipped", 22, C_TEXT, HORIZONTAL_ALIGNMENT_CENTER)
 			_icon(b, DIR + "icon_check.png", Rect2(118, 128, 36, 36))
 		else:
-			_label(b, Rect2(0, 150, 163, 28), GearData.item_name(id), 19, C_TEXT, HORIZONTAL_ALIGNMENT_CENTER)
+			var nl := _label(b, Rect2(0, 150, 163, 28), "", 19, C_TEXT, HORIZONTAL_ALIGNMENT_CENTER)
+			_fit_text(nl, GearData.item_name(id), 19)
 			if owned:
 				var eb := _button(b, Rect2(8, 184, 147, 44), _box(Color("2f6fd6"), Color("153575"), 4, 8),
 						_box(Color("2a5fb8"), Color("153575"), 4, 8))
@@ -428,7 +435,7 @@ func _refresh_detail() -> void:
 	var id := selected
 	var owned := Game.is_owned(id)
 	var lvl := Game.gear_level(id)
-	labels.detail_title.text = GearData.item_name(id).to_upper()
+	_fit_text(labels.detail_title, GearData.item_name(id).to_upper(), 30)
 	detail_icon.texture = load(GearData.icon_path(id))
 	labels.desc.text = GearData.description(id)
 	# preview what the next purchase gives
@@ -453,8 +460,8 @@ func _refresh_detail() -> void:
 		detail_btn.modulate = Color(0.75, 0.75, 0.75)
 	else:
 		detail_level.text = "Lv.%d > %d" % [lvl, lvl + 1]
-		_label(detail_btn, Rect2(10, 0, 110, 64), "UPGRADE", 22, Color.WHITE)
-		_price_row(detail_btn, Rect2(96, 0, 138, 64), _fmt(GearData.upgrade_cost(id, lvl)), 28)
+		_fit_text(_label(detail_btn, Rect2(8, 0, 112, 64), "", 20, Color.WHITE), "UPGRADE", 20)
+		_price_row(detail_btn, Rect2(118, 0, 112, 64), _fmt(GearData.upgrade_cost(id, lvl)), 24)
 		if Game.bank < GearData.upgrade_cost(id, lvl):
 			detail_btn.modulate = Color(0.65, 0.65, 0.65)
 

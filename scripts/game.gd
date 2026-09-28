@@ -396,8 +396,8 @@ func on_upgrade_chosen(id: String) -> void:
 	player.refresh_upgrades()
 	burst(player.global_position + Vector2(0, -8), Color("ffcd75"), 24, 90.0, 0.6, 2.0)
 	ring(player.global_position + Vector2(0, -6), 24.0, Color("ffcd75"), 0.4, 2.0)
-	if survival != null and state == "survive":
-		survival.upgrade_done()
+	if survival != null:
+		survival.upgrade_done()  # survival: the level-up choice never opens the exit
 		return
 	_open_exit()
 
@@ -557,6 +557,7 @@ func enemy_killed(e: Enemy) -> void:
 	hitstop(220 if boss else (0 if horde else 35))
 	if e.elite:
 		popup_text(center + Vector2(0, -10), "ELITE!", Color("ffcd75"), 12)
+	player.infected.on_kill(e)  # fills the infection meter
 	if survival != null:
 		survival.on_kill(e)  # XP gems, a few coins, power-ups
 	else:
@@ -577,17 +578,19 @@ func enemy_killed(e: Enemy) -> void:
 				burst(center + Vector2(randf_range(-16, 16), randf_range(-12, 12)), c, 20, 110.0, 0.5, 2.5, 120.0))
 	if bool(Game.stats.death_explode) and not boss:
 		var pos := center
-		var dmg := float(Game.stats.damage) * 1.5
+		var lv := int(Game.stats.get("explode_lvl", 1))
+		var dmg := float(Game.stats.damage) * (1.5 + 0.5 * (lv - 1))
+		var rad := 26.0 + 5.0 * (lv - 1)
 		get_tree().create_timer(0.08).timeout.connect(func() -> void:
-			_slime_burst(pos, dmg))
+			_slime_burst(pos, dmg, rad))
 
 
-func _slime_burst(pos: Vector2, dmg: float) -> void:
-	ring(pos, 26.0, Color("a7f070"), 0.3, 2.0, true)
+func _slime_burst(pos: Vector2, dmg: float, rad := 26.0) -> void:
+	ring(pos, rad, Color("a7f070"), 0.3, 2.0, true)
 	burst(pos, Color("a7f070"), 10, 80.0, 0.35, 2.0)
 	for n in get_tree().get_nodes_in_group("enemies"):
 		var e := n as Enemy
-		if e != null and e.targetable and e.global_position.distance_to(pos) < 26.0 + e.radius:
+		if e != null and e.targetable and e.global_position.distance_to(pos) < rad + e.radius:
 			e.take_damage(dmg, (e.global_position - pos).normalized())
 
 

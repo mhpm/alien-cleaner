@@ -92,6 +92,22 @@ def interp_rows(a, box):
             a[y, x] = (left * (1 - k) + right * k).astype(np.uint8)
 
 
+def glow_only(img: Image.Image, floor: float = 120.0) -> Image.Image:
+    """Keep only the glowing lines of a touch control (neon ring, arrows, knob rim, comet)
+    and turn the painted room behind them into a faint translucent tint."""
+    a = np.asarray(img.convert("RGBA")).astype(np.float32)
+    rgb, alpha = a[..., :3], a[..., 3]
+    r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
+    bright = np.maximum(g, b)
+    blueish = np.clip((b - r - 20.0) / 50.0, 0.0, 1.0)
+    glow = np.clip((bright - floor) / 70.0, 0.0, 1.0) * np.maximum(blueish, np.clip((r + g + b - 600.0) / 90.0, 0.0, 1.0))
+    base = np.array([20.0, 60.0, 90.0])  # the translucent fill
+    out = np.empty_like(a)
+    out[..., :3] = rgb * glow[..., None] + base * (1.0 - glow[..., None])
+    out[..., 3] = np.where(alpha > 0, np.maximum(glow * 255.0, 60.0), 0.0) * (alpha / 255.0)
+    return Image.fromarray(np.clip(out, 0, 255).astype(np.uint8), "RGBA")
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     random.seed(11)
@@ -132,6 +148,14 @@ def main():
                 ja[knob, :3] = (18, 44, 66)
                 ja[knob, 3] = 150
                 img = Image.fromarray(ja, "RGBA")
+            img = glow_only(img, 175.0 if name == "blast" else 120.0)
+            if name == "knob":  # a clean glassy disc inside the bright rim
+                ka = np.asarray(img).copy()
+                h, w = ka.shape[:2]
+                yy, xx = np.mgrid[0:h, 0:w]
+                inner = (xx - w / 2) ** 2 + (yy - h / 2) ** 2 <= (w * 0.40) ** 2
+                ka[inner] = (60, 170, 200, 90)
+                img = Image.fromarray(ka, "RGBA")
             img.save(os.path.join(OUT, f"hud_{name}.png"))
         else:
             crop.save(os.path.join(OUT, f"hud_{name}.png"))

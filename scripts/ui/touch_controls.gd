@@ -1,7 +1,8 @@
 class_name TouchControls
 extends Control
 ## Floating virtual joystick (touch anywhere) + Air Blast button bottom-right.
-## Works with mouse via "emulate touch from mouse".
+## Works with mouse via "emulate touch from mouse". With Infected mode the button wears
+## a magenta ring: the infection meter, "MUTATE!" when full, the mutation time left.
 
 signal ability_pressed
 
@@ -25,6 +26,8 @@ var enabled := true:
 			output = Vector2.ZERO
 var output := Vector2.ZERO
 var cooldown := 0.0  # 0 = is_ready, 1 = just used
+var infect_state := 0  # 0 locked, 1 charging, 2 ready to mutate, 3 mutated
+var infect := 0.0  # meter (charging) or mutation time left (mutated), 0..1
 var joy_touch := -1
 var joy_center := Vector2.ZERO
 var joy_knob := Vector2.ZERO
@@ -101,6 +104,10 @@ func _draw() -> void:
 	var is_ready := cooldown <= 0.0
 	var pulse := (0.5 + 0.5 * sin(t * 5.0)) if is_ready else 0.0
 	var tint := Color.WHITE if is_ready else Color(0.55, 0.6, 0.75)
+	if infect_state == 3:
+		tint = Color(1.0, 0.5, 1.0) if is_ready else Color(0.6, 0.35, 0.7)
+	elif infect_state == 2:
+		tint = Color(1.0, 0.6 + pulse * 0.3, 1.0)
 	var d := BTN_R * 2.0 * (1.0 + pulse * 0.03)
 	draw_texture_rect(tex_btn, Rect2(b - Vector2.ONE * d * 0.5, Vector2.ONE * d), false, tint)
 	if not is_ready:
@@ -113,3 +120,26 @@ func _draw() -> void:
 			draw_colored_polygon(pts, Color(0.02, 0.04, 0.12, 0.6))
 	if btn_flash > 0.0:
 		draw_circle(b, BTN_R + 10.0 * (1.0 - btn_flash), Color(1, 1, 1, btn_flash * 0.5))
+	if infect_state > 0:
+		_draw_infection(b)
+
+
+func _draw_infection(b: Vector2) -> void:
+	const MAG := Color("ff3df0")
+	var r := BTN_R + 5.0
+	draw_arc(b, r, 0.0, TAU, 48, Color(0.15, 0.03, 0.2, 0.75), 5.0)
+	if infect > 0.0:
+		draw_arc(b, r, -PI * 0.5, -PI * 0.5 + TAU * clampf(infect, 0.0, 1.0), 48, MAG, 4.0)
+	if infect_state == 2:
+		var p := 0.5 + 0.5 * sin(t * 8.0)
+		draw_arc(b, r + 4.0 + p * 4.0, 0.0, TAU, 48, Color(MAG, 0.5 - p * 0.3), 3.0)
+		_label(b + Vector2(0, -r - 10.0), "MUTATE!", MAG.lerp(Color.WHITE, p * 0.5))
+	elif infect_state == 3:
+		_label(b + Vector2(0, -r - 10.0), "ROLL", MAG)
+
+
+func _label(pos: Vector2, text: String, col: Color) -> void:
+	var f := get_theme_default_font()
+	var at := pos - Vector2(60.0, -5.0)
+	draw_string_outline(f, at, text, HORIZONTAL_ALIGNMENT_CENTER, 120.0, 12, 4, Color("1a1c2c"))
+	draw_string(f, at, text, HORIZONTAL_ALIGNMENT_CENTER, 120.0, 12, col)

@@ -19,6 +19,8 @@ var hit_r := 3.0
 var exclude: Array[RID] = []  # colliders the shot ignores (the turret that fired it)
 var base_scale := 0.2
 var sprite: AnimatedSprite2D
+var pop_art := "impact"  # one-shot fx set played where the shot ends
+var pop_color := Color("73eff7")
 
 
 func _ready() -> void:
@@ -98,6 +100,13 @@ func _hit_enemy(e: Enemy) -> void:
 
 func _pop() -> void:
 	if Game.world != null:
-		AnimFx.spawn(Game.world.effects, "impact", "pop", global_position, 0.1 + hit_r * 0.012, randf() * TAU)
-		Game.world.burst(global_position, Color("73eff7"), 4, 40.0, 0.25, 1.5)
+		var fx := AnimFx.spawn(Game.world.effects, pop_art, "pop", global_position, 0.1 + hit_r * 0.012, randf() * TAU)
+		if pop_art != "impact":
+			# single-frame bursts: grow and fade instead of holding the frame
+			fx.scale *= 0.6
+			var tw := fx.create_tween()
+			tw.tween_property(fx, "scale", fx.scale * 1.4, 0.15)
+			tw.parallel().tween_property(fx, "modulate:a", 0.0, 0.15)
+			tw.tween_callback(fx.queue_free)
+		Game.world.burst(global_position, pop_color, 4, 40.0, 0.25, 1.5)
 	queue_free()

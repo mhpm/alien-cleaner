@@ -180,7 +180,7 @@ func _play() -> void:
 func _open_settings() -> void:
 	var panel := _overlay()
 	var box: VBoxContainer = panel.get_child(1)
-	box.add_child(UiTheme.label("SETTINGS", 30, Color("73eff7")))
+	box.add_child(UiTheme.title("SETTINGS", 30, Color("73eff7")))
 	var music := UiTheme.button("", Color("3b5dc9"), 20, Vector2(240, 54))
 	var sfx := UiTheme.button("", Color("3b5dc9"), 20, Vector2(240, 54))
 	var refresh := func() -> void:
@@ -239,7 +239,7 @@ func _open_shop() -> void:
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", 12)
 	shop.add_child(box)
-	box.add_child(UiTheme.label("CREW UPGRADES", 28, Color("73eff7")))
+	box.add_child(UiTheme.title("CREW UPGRADES", 28, Color("73eff7")))
 	box.add_child(UiTheme.label("Bank: %d coins" % Game.bank, 16, Color("ffcd75")))
 	for id: String in Game.PERM:
 		box.add_child(_shop_row(id))
@@ -273,7 +273,7 @@ func _shop_row(id: String) -> Control:
 	var n := UiTheme.label(str(def.name), 17, Color("f4f4f4"))
 	n.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	v.add_child(n)
-	var d := UiTheme.label(str(def.desc), 12, Color("94b0c2"))
+	var d := UiTheme.label(str(def.get("desc2", def.desc)) if lvl > 0 else str(def.desc), 12, Color("94b0c2"))
 	d.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	v.add_child(d)
 	var pips := ""
