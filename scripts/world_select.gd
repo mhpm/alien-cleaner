@@ -27,6 +27,9 @@ const BUTTONS := {
 	"plus_coins": Rect2(882, 34, 42, 42),
 }
 const WORLD_RECT := Rect2(118, 398, 740, 614)
+## BOSS CHALLENGE button (drawn in code, right of the chest): only once the world is cleared
+const BOSS_RECT := Rect2(626, 1004, 296, 176)
+const RED := Color("ff4f6a")
 const SHOP_IDS := ["health", "power", "speed"]
 const CYAN := Color("73eff7")
 const GREEN := Color("a7f070")
@@ -52,6 +55,9 @@ var toast: Label
 var drag_from := Vector2.INF
 var sparkles: Array[Vector3] = []
 var stars: Control
+var boss_btn: Button
+var boss_pic: TextureRect
+var boss_best: Label
 
 
 func _ready() -> void:
@@ -78,6 +84,7 @@ func _build() -> void:
 	add_child(stage)
 	var bg := _tex_rect(load(DIR + "bg.webp"), Rect2(Vector2.ZERO, ART_SIZE))
 	stage.add_child(bg)
+	UiTheme.add_backdrop(self, stage, bg.texture)
 	stars = Control.new()
 	stars.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	stars.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -204,6 +211,8 @@ func _build() -> void:
 		stage.add_child(dot)
 		badges[id] = dot
 
+	_build_boss_button()
+
 	toast = UiTheme.label("", 16, Color("ffcd75"))
 	toast.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	toast.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
@@ -215,6 +224,72 @@ func _build() -> void:
 		var sp := Vector3(randf() * ART_SIZE.x, 110.0 + randf() * 880.0, randf())
 		if not WORLD_RECT.grow(-40.0).has_point(Vector2(sp.x, sp.y)):
 			sparkles.append(sp)
+
+
+## BOSS CHALLENGE: a red neon card with the world's final boss, "BOSS / CHALLENGE" and
+## the best time. Starts a run that goes straight to the boss fight.
+func _build_boss_button() -> void:
+	boss_btn = Button.new()
+	boss_btn.position = BOSS_RECT.position
+	boss_btn.size = BOSS_RECT.size
+	boss_btn.pivot_offset = BOSS_RECT.size * 0.5
+	boss_btn.focus_mode = Control.FOCUS_NONE
+	for st in ["normal", "hover", "pressed", "focus", "disabled"]:
+		boss_btn.add_theme_stylebox_override(st, StyleBoxEmpty.new())
+	var f := NeonFrame.new()
+	f.color = RED
+	f.fill_top = Color(0.22, 0.04, 0.1, 0.92)
+	f.fill_bottom = Color(0.07, 0.02, 0.06, 0.92)
+	f.cut = 22.0
+	f.glow = 3
+	f.pulse = true
+	f.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	f.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	boss_btn.add_child(f)
+	boss_pic = TextureRect.new()
+	boss_pic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	boss_pic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	boss_pic.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	boss_pic.position = Vector2(10, 18)
+	boss_pic.size = Vector2(118, 140)
+	boss_pic.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	boss_btn.add_child(boss_pic)
+	var title := _label("BOSS", 44, RED)
+	title.add_theme_color_override("font_outline_color", Color("2a0610"))
+	title.position = Vector2(126, 14)
+	title.size = Vector2(160, 52)
+	boss_btn.add_child(title)
+	var sub := _label("CHALLENGE", 26, Color("ffcd75"))
+	sub.position = Vector2(126, 64)
+	sub.size = Vector2(160, 36)
+	boss_btn.add_child(sub)
+	boss_best = UiTheme.body("", 22, Color("f4d7de"))
+	boss_best.position = Vector2(126, 108)
+	boss_best.size = Vector2(160, 50)
+	boss_best.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	boss_btn.add_child(boss_best)
+	boss_btn.button_down.connect(func() -> void: boss_btn.scale = Vector2(0.95, 0.95))
+	boss_btn.button_up.connect(func() -> void: boss_btn.scale = Vector2.ONE)
+	boss_btn.pressed.connect(func() -> void:
+		Sfx.play("select", 0.0)
+		_start(true))
+	stage.add_child(boss_btn)
+
+
+func _show_boss_button() -> void:
+	if boss_btn == null:
+		return
+	var open := Game.worlds_cleared > sel
+	boss_btn.visible = open
+	if not open:
+		return
+	var rooms: Array = WorldData.world(sel).rooms
+	var sd: Dictionary = (rooms[0] as Dictionary).get("survival", {})
+	var boss := str(sd.get("boss", ""))
+	if EnemyData.TYPES.has(boss):
+		boss_pic.texture = Art.frames(str(EnemyData.TYPES[boss].art)).get_frame_texture("walk", 0)
+	var best := float(Game.boss_best.get(str(sel), 0.0))
+	boss_best.text = "Best %dm %02ds" % [floori(best / 60.0), int(best) % 60] if best > 0.0 else "Beat the boss!"
 
 
 func _tex_rect(tex: Texture2D, r: Rect2) -> TextureRect:
@@ -262,13 +337,11 @@ func _nav_icon(id: String, tex: Texture2D, sz: Vector2, text: String) -> void:
 	b.add_child(l)
 
 
-## Scale the art to cover the screen (portrait phones of any aspect), centered.
+## Fit the whole art inside the safe area (any phone aspect), centered.
 func _fit_stage() -> void:
 	if stage == null:
 		return
-	var s := maxf(size.x / ART_SIZE.x, size.y / ART_SIZE.y)
-	stage.scale = Vector2(s, s)
-	stage.position = (size - ART_SIZE * s) * 0.5
+	UiTheme.fit_stage(self, stage, ART_SIZE)
 
 
 # ---------------------------------------------------------------- state
@@ -319,6 +392,7 @@ func _show_world(fade := true) -> void:
 	_fit(start_label, "WORLD %d" % (sel + 1) if open else "LOCKED")
 	(buttons.start as TextureButton).modulate = Color.WHITE if open else Color(0.45, 0.45, 0.5)
 	_show_chest()
+	_show_boss_button()
 
 
 func _apply_world(tex: Texture2D, open: bool) -> void:
@@ -407,11 +481,12 @@ func _overlay_open() -> bool:
 	return toast != null and toast.get_index() < get_child_count() - 1
 
 
-func _start() -> void:
+## Starts the selected world; `rush` = BOSS CHALLENGE (straight to its final boss).
+func _start(rush := false) -> void:
 	if not Game.world_unlocked(sel):
 		_toast("Clear WORLD %d first!" % sel)
 		return
-	Game.new_run(sel)
+	Game.new_run(sel, rush)
 	Game.room_index = 0
 	var fade := ColorRect.new()
 	fade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

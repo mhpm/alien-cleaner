@@ -152,9 +152,7 @@ func _label(text: String, fs: int, col: Color, r: Rect2) -> Label:
 
 ## Fit the panel to the screen width (or height), centred.
 func _fit() -> void:
-	var s := minf(size.x / ART.x, size.y / ART.y) * 1.04
-	stage.scale = Vector2(s, s)
-	stage.position = (size - ART * s) * 0.5
+	UiTheme.fit_stage(self, stage, ART, false, 1.04)
 
 
 func _tw() -> Tween:
@@ -196,6 +194,16 @@ func _rewards() -> Array:
 	var chip_text := "WORLD %d UNLOCKED!" % (nxt + 1) if chip_ok else (
 			"MORE WORLDS COMING SOON!" if nxt >= WorldData.WORLDS.size() else "WORLD %d ALREADY OPEN" % (nxt + 1))
 	var chest_ok := bool(info.get("chest", false))
+	if bool(info.get("rush", false)):
+		# BOSS CHALLENGE: the record instead of the world chip and chest
+		var rec := bool(info.get("record", false))
+		var best := float(info.get("best", 0.0))
+		return [
+			[int(info.get("bonus", 0)), "+%d CHALLENGE COINS!" % int(info.get("bonus", 0)), true],
+			[int(info.get("gems", 0)), "+%d XP GEMS FOR YOUR CREW" % int(info.get("gems", 0)), true],
+			[1 if rec else 0, "NEW RECORD!" if rec else "BEST: %dm %02ds" % [floori(best / 60.0), int(best) % 60], rec],
+			[1, "BOSS CHALLENGE CLEARED!", true],
+		]
 	return [
 		[int(info.get("bonus", 0)), "+%d BONUS COINS!" % int(info.get("bonus", 0)), true],
 		[int(info.get("gems", 0)), "+%d XP GEMS FOR YOUR CREW" % int(info.get("gems", 0)), true],

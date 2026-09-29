@@ -4,10 +4,10 @@ Usage: python tools/make_lab_assets.py
 - assets/ui/lab/bg.webp: the art with its live parts erased (bank amount, the hint
   box, the mode name and stat lines, the progress fill and count, each card's price
   and check / lock, the MUTATE subtitle and the big mutant on the pedestal).
-- assets/ui/lab/look_<n>.png (1-5): the 5 mutation phases, from
-  tools/mutation_looks/phase_<n>.png. The painted portraits are cleared off the cards;
+- assets/ui/lab/look_<n>.png (1-5): the 5 mutation guns, from
+  assets/sprites/mutations_player/mutation_guns/guns_elements/gun_<n>.png. The painted portraits are cleared off the cards;
   the screen draws these instead (on the cards and large on the pedestal).
-- The art has 2 rows of 5 cards (10 levels); the lab now sells 5 phases, so each column
+- The art has 2 rows of 5 cards (10 levels); the lab now sells 5 guns, so each column
   becomes one card a bit taller than the painted ones (the top of the row-1 card with
   "Lv n", its middle stretched, the bottom of the row-2 card with the price band) and
   the space left below is cleared for the power-name plates the screen draws.
@@ -27,7 +27,8 @@ COLS = [(50, 208), (220, 378), (390, 546), (555, 718), (732, 893)]
 ROWS = [(977, 1194), (1208, 1430)]
 BUTTONS = {"close": (30, 48, 100, 114), "back": (98, 1492, 392, 1622), "mutate": (458, 1466, 868, 1642)}
 HERO = (330, 300, 612, 592)  # the painted mutant on the pedestal
-LOOKS = os.path.join(HERE, "mutation_looks", "phase_%d.png")
+LOOKS = os.path.join(HERE, "..", "assets", "sprites", "mutations_player", "mutation_guns",
+                     "guns_elements", "gun_%d.png")
 PHASES = 5
 TALL = (ROWS[0][0], 1240)        # one card per column (mirrored in lab_screen.gd)
 BELOW = (1246, 1436)             # cleared for the power plates

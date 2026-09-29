@@ -8,6 +8,9 @@ A frame is either a (row, x0, x1) range of the sheet or a loose png (relative to
 assets/sprites/, e.g. the enemies/<name>/ folders): "path", ("path", x0, x1) to use
 only those columns, or ("path", x0, x1, scale) to also resize it.
 An anim is (frames, fps, loop) or (frames, fps, loop, True) to mirror its frames.
+
+  python tools/slice_sprites.py <sheet.webp> --only big_red,big_red_ball
+re-slices just those sets and keeps the rest of manifest.json as it is.
 """
 import json
 import os
@@ -33,6 +36,9 @@ GREEN = [(5, 14, 94), (5, 113, 189), (5, 201, 279), (5, 294, 368), (5, 381, 446)
 PINK = [(6, 23, 96), (6, 112, 188), (6, 202, 276), (6, 298, 372), (6, 382, 458), (6, 466, 538), (6, 550, 625), (6, 637, 710)]
 BLUE = [(7, 18, 84), (7, 106, 170), (7, 193, 258), (7, 281, 346), (7, 371, 437), (7, 458, 522), (7, 545, 607), (7, 626, 694)]
 
+BR = "enemies/big-red/big-red_elements/big-red_%03d.png"
+HQ = "enemies/bosses/boss_2_elements/boss_2_%03d.png"
+
 # Infected mode (loose frames in assets/sprites/enviroment/infected player_elements,
 # cut from "infected player.png"; frames face right, anchored on the boots)
 INF = "enviroment/infected player_elements/infected player_%s.png"
@@ -42,100 +48,29 @@ def inf(*ids):
     return [INF % i if isinstance(i, str) else (INF % i[0], *i[1:]) for i in ids]
 
 
-# Mutant phase 1 in 64x64 pixel art (tools/make_infected_phase1.py -> fase 1/pixel64/): idle,
-# sideways walk (faces right), walk down/up and the 3 combo strikes (4 frames each:
-# wind-up, hit, trail, recover). No attack_<dir>: the combo poses replace them.
-M1P = "mutations_player/fase 1/pixel64/%s_%d.png"
+# The mutant (Infected mode): the astronaut's own frames with the mutated helmet of its
+# phase (tools/make_mutant_player.py <n> -> mutations_player/fase <n>/player/). Same
+# animations as "player", so it walks, flips and holds the gun like the astronaut.
+def mutp(n, anim, k):
+    return ["mutations_player/fase %d/player/%s_%d.png" % (n, anim, i) for i in range(k)]
 
 
-def m1p(anim, n):
-    return [M1P % (anim, i) for i in range(n)]
-
-
-M2P = "mutations_player/fase 2/pixel64/%s_%d.png"
-
-
-def m2p(anim, n):
-    return [M2P % (anim, i) for i in range(n)]
-
-
-# Phases 3+ (tools/make_infected_rig.py <n> -> fase <n>/pixel<size>/, rigged from loose
-# parts; phase 3 is 64x64, phase 4 on 100x100)
-def rig_set(n, size):
-    def f(anim, k):
-        return ["mutations_player/fase %d/pixel%d/%s_%d.png" % (n, size, anim, i) for i in range(k)]
-    return f
-
-
-m3p = rig_set(3, 64)
-m4p = rig_set(4, 100)
+def mutant_set(n):
+    return {
+        "anchor": "helmet",
+        "anims": {
+            "idle": (mutp(n, "idle", 4), 5, True),
+            "walk": (mutp(n, "walk", 4), 9, True),
+            "walk_up": (mutp(n, "walk_up", 4), 9, True),
+            "shoot": (mutp(n, "shoot", 2), 14, False),
+            "hurt": (mutp(n, "hurt", 2), 10, False),
+        },
+        "body": "idle",
+    }
 
 
 SETS = {
-    "mutant1": {
-        "anchor": "boots_blue",
-        "anims": {
-            "idle": (m1p("idle", 6), 6, True),
-            "walk_down": (m1p("walk_down", 4), 10, True),
-            "walk_up": (m1p("walk_up", 4), 10, True),
-            "walk_left": (m1p("walk", 8), 11, True, True),
-            "walk_right": (m1p("walk", 8), 11, True),
-            # 16 fps = Infected.SLASH_TIME (0.25 s per strike)
-            "combo_1": (m1p("combo_1", 4), 16, False),
-            "combo_2": (m1p("combo_2", 4), 16, False),
-            "combo_3": (m1p("combo_3", 4), 16, False),
-        },
-        "body": "idle",
-    },
-    # Phase 2 (tools/make_infected_phase2.py -> fase 2/pixel64/): aggressive idle, run
-    # (also used walking down: the side view is 3/4 toward the camera), back view and 3
-    # new strikes (thrust, overhead slam, rising hook).
-    "mutant2": {
-        "anchor": "boots_blue",
-        "anims": {
-            "idle": (m2p("idle", 6), 9, True),
-            "walk_down": (m2p("run", 8), 14, True),
-            "walk_up": (m2p("walk_up", 4), 12, True),
-            "walk_left": (m2p("run", 8), 14, True, True),
-            "walk_right": (m2p("run", 8), 14, True),
-            "combo_1": (m2p("combo_1", 4), 16, False),
-            "combo_2": (m2p("combo_2", 4), 16, False),
-            "combo_3": (m2p("combo_3", 4), 16, False),
-        },
-        "body": "idle",
-    },
-    # Phase 3: heavy idle, run, back view and 3 strikes (left punch, wide claw sweep,
-    # jump + ground slam).
-    "mutant3": {
-        "anchor": "boots_blue",
-        "anims": {
-            "idle": (m3p("idle", 6), 8, True),
-            "walk_down": (m3p("run", 8), 14, True),
-            "walk_up": (m3p("walk_up", 4), 12, True),
-            "walk_left": (m3p("run", 8), 14, True, True),
-            "walk_right": (m3p("run", 8), 14, True),
-            "combo_1": (m3p("combo_1", 4), 16, False),
-            "combo_2": (m3p("combo_2", 4), 16, False),
-            "combo_3": (m3p("combo_3", 4), 16, False),
-        },
-        "body": "idle",
-    },
-    # Phase 4: low guard idle, run, back view and 3 strikes (rising rake, shoulder ram,
-    # claw slam with ground spikes).
-    "mutant4": {
-        "anchor": "boots_blue",
-        "anims": {
-            "idle": (m4p("idle", 6), 9, True),
-            "walk_down": (m4p("run", 8), 14, True),
-            "walk_up": (m4p("walk_up", 4), 12, True),
-            "walk_left": (m4p("run", 8), 14, True, True),
-            "walk_right": (m4p("run", 8), 14, True),
-            "combo_1": (m4p("combo_1", 4), 16, False),
-            "combo_2": (m4p("combo_2", 4), 16, False),
-            "combo_3": (m4p("combo_3", 4), 16, False),
-        },
-        "body": "idle",
-    },
+    "mutant1": mutant_set(1),
     "infected": {
         "anchor": "boots",
         "anims": {
@@ -256,6 +191,59 @@ SETS = {
                      "anims": {"fly": ([("enemies/octopus01/attack.png", 78, 146)], 1, True)}, "body": "fly"},
     "octopus_pop": {"anchor": "center",
                     "anims": {"pop": (["enemies/octopus01/enemies_051.png"], 1, False)}, "body": "pop"},
+    # Big Red (loose frames in assets/sprites/enemies/big-red/big-red_elements): the
+    # red one-eyed brute and the world 1 boss. 002 and 005 hold two poses side by side,
+    # 013 the shooting pose with its fireball (cut off: the fireball is big_red_ball).
+    "big_red": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([(BR % 1, 0, 244, 0.88), (BR % 5, 200, 398), (BR % 5, 0, 200), BR % 3, (BR % 5, 0, 200), (BR % 5, 200, 398)], 4, True),
+            "angry": ([BR % 4, BR % 6, BR % 7, (BR % 2, 0, 196)], 6, True),
+            "hurt": ([(BR % 2, 196, 406)], 1, False),
+            "fury": ([BR % 8, BR % 9, BR % 11, BR % 9], 10, True),
+            "shoot": ([(BR % 13, 0, 174)], 1, False),
+            "roar": ([BR % 68], 1, False),
+            "death": ([BR % i for i in (68, 69, 71, 78, 80, 82)], 6, False),
+            "splat": ([BR % 95], 1, False),
+        },
+        "body": "walk",
+    },
+    "big_red_ball": {"anchor": "center",
+                     "anims": {"fly": ([BR % i for i in (17, 34, 37, 40)], 12, True)}, "body": "fly"},
+    "big_red_blob": {"anchor": "center",
+                     "anims": {"fly": ([BR % i for i in (63, 64, 67, 42)], 10, True)}, "body": "fly"},
+    "big_red_drop": {"anchor": "center",
+                     "anims": {"fly": ([BR % i for i in (72, 75, 81, 84)], 10, True)}, "body": "fly"},
+    # HIVE QUEEN, world 2 final boss (loose frames in assets/sprites/enemies/bosses/
+    # boss_2_elements, sheet boss_2.png): looks around and blinks, spits acid balls,
+    # grows crystals when furious, drools goo eggs, melts into goo and crystals.
+    "hive_queen": {
+        "anchor": "feet",
+        "anims": {
+            "walk": ([HQ % i for i in (2, 3, 8, 4, 9, 2, 5)], 5, True),
+            "spit": ([HQ % i for i in (11, 13, 12)], 10, False),
+            "roar": ([HQ % 7], 1, False),
+            "angry": ([HQ % 1], 1, False),
+            "crystal": ([HQ % i for i in (49, 50, 54)], 8, True),
+            "crystal_spit": ([HQ % 51], 1, False),
+            "drool": ([HQ % i for i in (91, 92, 93, 94)], 6, True),
+            "death": ([HQ % i for i in (114, 115, 116, 117, 120, 127)], 6, False),
+        },
+        "body": "walk",
+    },
+    "hive_acid": {"anchor": "center", "anims": {"fly": ([HQ % 23, HQ % 20], 10, True)}, "body": "fly"},
+    "hive_crystal": {"anchor": "center", "anims": {"fly": ([HQ % 64, HQ % 66], 8, True)}, "body": "fly"},
+    "hive_shard": {"anchor": "center", "anims": {"fly": ([HQ % 52, HQ % 56], 8, True)}, "body": "fly"},
+    "hive_burst": {"anchor": "center", "anims": {"pop": ([HQ % 55], 1, False)}, "body": "pop"},
+    "hive_drop": {"anchor": "center", "anims": {"fly": ([HQ % i for i in (97, 101, 102)], 10, True)}, "body": "fly"},
+    # goo egg the queen drools: pulses, then hatches greenies (enemies/hive_egg.gd)
+    "hive_egg": {
+        "anchor": "bbox",
+        "anims": {"walk": ([HQ % i for i in (99, 104, 106, 104)], 4, True), "splat": ([HQ % 108], 1, False)},
+        "body": "walk",
+    },
+    # crystal guard that shields the queen (enemies/hive_guard.gd)
+    "hive_guard": {"anchor": "feet", "anims": {"walk": ([HQ % 55], 1, True)}, "body": "walk"},
     "glob": {
         "anchor": "center",
         "anims": {"fly": ([(7, 709, 782)], 1, True)},
@@ -300,18 +288,29 @@ def anchor_of(img, mode):
         ys, xs = np.nonzero(navy)
         low = ys >= ys.max() - 12
         return (float(np.median(xs[low])), float(ys.max() + 1))
+    if mode == "feet":
+        # centre of the legs along the bottom rows: a spit or crystals beside the body
+        # would shift a bounding-box anchor
+        rows = a[int(h * 0.85):]
+        xs = np.nonzero(rows.any(axis=0))[0]
+        return ((xs.min() + xs.max() + 1) / 2.0, h)
     if mode == "center":
         return (w / 2.0, h / 2.0)
     return (w / 2.0, h)
 
 
-def main(sheet_path, out_dir):
+def main(sheet_path, out_dir, only=None):
     sheet = Image.open(sheet_path).convert("RGBA")
     arr = np.asarray(sheet).copy()
     arr[arr[:, :, 3] < 48] = 0  # drop faint halo pixels
     sheet = Image.fromarray(arr)
     manifest = {}
+    if only:
+        with open(os.path.join(out_dir, "manifest.json")) as f:
+            manifest = json.load(f)
     for set_name, spec in SETS.items():
+        if only and set_name not in only:
+            continue
         frames = {}
         for anim, (ranges, fps, loop, *mirror) in spec["anims"].items():
             lst = []
@@ -360,4 +359,7 @@ def main(sheet_path, out_dir):
 
 if __name__ == "__main__":
     here = os.path.dirname(os.path.abspath(__file__))
-    main(sys.argv[1], os.path.join(here, "..", "assets", "sprites"))
+    only = None
+    if "--only" in sys.argv:
+        only = set(sys.argv[sys.argv.index("--only") + 1].split(","))
+    main(sys.argv[1], os.path.join(here, "..", "assets", "sprites"), only)

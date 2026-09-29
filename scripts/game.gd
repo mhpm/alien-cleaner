@@ -36,6 +36,8 @@ var follow_cam := false
 var indicators: OffscreenIndicators
 var survival: Survival  # survivor-style stage director (WorldData "survival")
 var enemy_cache: Array[Node] = []  # the "enemies" group, refreshed every physics frame
+const GRID_CELL := 16.0
+var enemy_grid: Dictionary = {}  # Vector2i cell -> aliens in it (same refresh): cheap neighbour lookups
 
 
 func _ready() -> void:
@@ -142,6 +144,19 @@ func _camera_setup() -> void:
 
 
 ## World-space size of what the camera shows (depends on the camera zoom and screen).
+## Buckets the aliens by GRID_CELL so each one only checks its neighbours (Enemy
+## separation): hordes of 150+ would otherwise cost n^2 checks every frame.
+func _build_enemy_grid() -> void:
+	enemy_grid.clear()
+	for n in enemy_cache:
+		var e := n as Node2D
+		var c := Vector2i((e.global_position / GRID_CELL).floor())
+		var bucket: Array = enemy_grid.get(c, [])
+		if bucket.is_empty():
+			enemy_grid[c] = bucket
+		bucket.append(e)
+
+
 func view_size() -> Vector2:
 	return get_viewport_rect().size / camera.zoom
 
@@ -300,6 +315,7 @@ func _begin_fight() -> void:
 
 func _physics_process(delta: float) -> void:
 	enemy_cache = get_tree().get_nodes_in_group("enemies")
+	_build_enemy_grid()
 	_read_input()
 	match state:
 		"explore":
@@ -431,6 +447,20 @@ func _victory() -> void:
 	state = "won"
 	hud.controls.enabled = false
 	var info := {}
+	if Game.boss_rush and survival != null:
+		# BOSS CHALLENGE: fight time, record, challenge coins; the world's own rewards stay put
+		var secs := survival.fight_time()
+		info = {"time": secs, "kills": survival.kills, "gems": survival.gems, "rush": true}
+		info.record = Game.record_boss(secs)
+		info.best = float(Game.boss_best.get(str(Game.world_index), secs))
+		info.coins = Game.run_coins
+		info.next = false
+		info.chest = false
+		Game.end_run()
+		info.bonus = Game.boss_bonus(bool(info.record))
+		Sfx.play("victory", 0.0)
+		hud.show_victory(info)
+		return
 	var first := Game.worlds_cleared <= Game.world_index
 	if survival != null:
 		info = {"time": survival.t, "kills": survival.kills, "gems": survival.gems}
@@ -448,7 +478,7 @@ func _victory() -> void:
 func on_player_died() -> void:
 	state = "dead"
 	hud.controls.enabled = false
-	if survival != null:
+	if survival != null and not Game.boss_rush:
 		Game.record_world(survival.t, false)
 	Game.end_run()
 	get_tree().create_timer(1.3).timeout.connect(func() -> void:
@@ -540,13 +570,14 @@ func spawn_enemy(id: String, pos: Vector2, hp_mult := 1.0, sp_mult := 1.0, elite
 	return e
 
 
-func spawn_enemy_shot(pos: Vector2, vel: Vector2, dmg: float, tex := "glob") -> void:
+func spawn_enemy_shot(pos: Vector2, vel: Vector2, dmg: float, tex := "glob") -> EnemyShot:
 	var s := EnemyShot.new()
 	s.vel = vel * (1.0 + (Game.enemy_mult() - 1.0) * 0.5)  # world 2: faster globs too
 	s.damage = dmg
 	s.tex_id = tex
 	s.position = pos
 	effects.add_child(s)
+	return s
 
 
 # ---------------------------------------------------------------- combat events

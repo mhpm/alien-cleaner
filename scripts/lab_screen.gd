@@ -1,19 +1,20 @@
 extends Control
-## MUTATION LAB (LAB on the world select): buy the 5 mutation phases (MutationData).
-## Painted art tools/mutation_lab_ref.webp -> tools/make_lab_assets.py -> assets/ui/lab/,
-## laid out on a 941x1672 stage like the other menus. Tap a card to preview that level
-## (its look on the pedestal, its stats and new power); MUTATE always buys the next
-## level, with a big transformation effect. Owned cards glow green, the next one
+## MUTATION LAB (LAB on the world select): buy the 5 mutation guns (MutationData) that
+## the mutant fires in Infected Mode. Painted art tools/mutation_lab_ref.webp ->
+## tools/make_lab_assets.py -> assets/ui/lab/, laid out on a 941x1672 stage like the
+## other menus. Tap a card to preview that gun (floating over the pedestal, its stats);
+## MUTATE always buys the next one, with a big transformation effect. Owned cards glow green, the next one
 ## pulses, later ones wait behind a lock.
 
 const DIR := "res://assets/ui/lab/"
 const ART_SIZE := Vector2(941, 1672)
 const COLS := [Vector2(50, 208), Vector2(220, 378), Vector2(390, 546), Vector2(555, 718), Vector2(732, 893)]
 const ROWS := [Vector2(977, 1240)]  # one card per column (tools/make_lab_assets.py)
-const PLATES := Vector2(1256, 1426)  # under each card: the power that phase unlocks
+const PLATES := Vector2(1256, 1426)  # under each card: that gun's name
 const BTN := {"close": Rect2(30, 48, 70, 66), "back": Rect2(98, 1492, 294, 130), "mutate": Rect2(458, 1466, 410, 176)}
 const PEDESTAL := Vector2(471, 596)  # feet of the look on the pedestal
-const LOOK_SCALE := 0.8  # look px -> art px on the pedestal (later levels are bigger)
+const LOOK_SCALE := 1.25  # gun px -> art px on the pedestal (later guns are bigger)
+const HOVER := 40.0  # the gun floats this high over the pedestal
 const LOOK_MAX_H := 330.0  # tallest look on the pedestal (stays under the bank box)
 const BAR := Rect2(207, 918, 557, 29)
 const MAG := Color("ff3df0")
@@ -68,14 +69,14 @@ func _build() -> void:
 	stage.size = ART_SIZE
 	stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(stage)
-	stage.add_child(_tex(load(DIR + "bg.webp"), Rect2(Vector2.ZERO, ART_SIZE)))
+	_tex(load(DIR + "bg.webp"), Rect2(Vector2.ZERO, ART_SIZE))
+	UiTheme.add_backdrop(self, stage, load(DIR + "bg.webp"))
 	lock_tex = AtlasTexture.new()
 	lock_tex.atlas = load("res://assets/ui/world/btn_talents.png")
 	lock_tex.region = Rect2(52, 28, 72, 80)
 	# the look on the pedestal (and a dark copy as its shadow on the platform)
 	look_shadow = _tex(null, Rect2())
 	look_shadow.modulate = Color(0, 0, 0, 0.45)
-	stage.add_child(look_shadow)
 	look = _tex(null, Rect2())
 
 	bank_label = _label(Rect2(478, 206, 150, 44), 34, GOLD, HORIZONTAL_ALIGNMENT_LEFT)
@@ -109,9 +110,9 @@ func _build() -> void:
 			card_marks.append(m)
 			var pl := _label(Rect2(c.x + 8, PLATES.x + 52, c.y - c.x - 16, PLATES.y - PLATES.x - 64), 24, Color.WHITE)
 			pl.autowrap_mode = TextServer.AUTOWRAP_WORD
-			pl.text = str(MutationData.LEVELS[k].power)
+			pl.text = str(MutationData.LEVELS[k].name)
 			plate_labels.append(pl)
-			var pb := Button.new()  # the plate selects its phase too
+			var pb := Button.new()  # the plate selects its gun too
 			pb.flat = true
 			pb.focus_mode = Control.FOCUS_NONE
 			pb.position = Vector2(c.x, PLATES.x)
@@ -186,9 +187,7 @@ func _fit(l: Label, text: String) -> void:
 func _fit_stage() -> void:
 	if stage == null:
 		return
-	var s := maxf(size.x / ART_SIZE.x, size.y / ART_SIZE.y)
-	stage.scale = Vector2(s, s)
-	stage.position = (size - ART_SIZE * s) * 0.5
+	UiTheme.fit_stage(self, stage, ART_SIZE)
 
 
 # ---------------------------------------------------------------- state
@@ -219,9 +218,9 @@ func _refresh() -> void:
 			plate_labels[i].add_theme_color_override("font_color", Color("8a96b8"))
 	_show_level(sel)
 	if lv >= MutationData.MAX:
-		_fit(mutate_label, "FULLY MUTATED!")
+		_fit(mutate_label, "ALL GUNS OWNED!")
 	else:
-		_fit(mutate_label, "LV %d  -  %d COINS" % [lv + 1, MutationData.cost(lv + 1)])
+		_fit(mutate_label, "GUN %d  -  %d COINS" % [lv + 1, MutationData.cost(lv + 1)])
 	(buttons.mutate as TextureButton).self_modulate = Color.WHITE if MutationData.can_buy() else Color(0.6, 0.65, 0.6)
 
 
@@ -237,19 +236,19 @@ func _show_level(n: int) -> void:
 	look_shadow.size = look.size * Vector2(1.0, 0.18)
 	look_shadow.position = PEDESTAL - Vector2(look.size.x * 0.5, look_shadow.size.y * 0.55)
 	var tag := "OWNED" if n <= lv else ("NEXT" if n == lv + 1 else "LOCKED")
-	_fit(name_label, "Lv %d  %s  (%s)" % [n, str(d.power), tag])
+	_fit(name_label, "Lv %d  %s  (%s)" % [n, str(d.name), tag])
 	name_label.add_theme_color_override("font_color", GREEN if n <= lv else (MAG.lerp(Color.WHITE, 0.3)))
-	# totals at this level (green: what buying up to it would add)
+	# the gun's stats (green: not owned yet)
 	var col := Color.WHITE if n <= lv else GREEN
 	var lines := [
-		"+%d%% ATK   (every run)" % roundi(MutationData.atk_bonus(n) * 100.0),
-		"+%d%% mutant power   %.1fs mutation" % [roundi((MutationData.power(n) / MutationData.power(1) - 1.0) * 100.0), MutationData.duration(n)],
-		"+%.1f%% speed   (every run)" % (MutationData.speed_bonus(n) * 100.0),
+		"Damage x%.1f per shot" % float(d.dmg),
+		"%.1f shots/s   pierces %d" % [1.0 / float(d.rate), int(d.pierce)],
+		"Mutation lasts %.1fs" % MutationData.duration(n),
 	]
 	for i in 3:
 		_fit(stat_labels[i], lines[i])
 		stat_labels[i].add_theme_color_override("font_color", col)
-	_fit(hint1, "NEW POWER: " + str(d.power))
+	_fit(hint1, "MUTATION GUN: " + str(d.name))
 	_fit(hint2, str(d.desc))
 
 
@@ -277,7 +276,7 @@ func _mutate() -> void:
 	var lv := MutationData.level()
 	if lv >= MutationData.MAX:
 		_select(MutationData.MAX)
-		_pop_text("FULLY MUTATED!", GOLD)
+		_pop_text("ALL GUNS OWNED!", GOLD)
 		return
 	if not MutationData.buy():
 		Sfx.play("hurt", 0.0, -6.0)
@@ -301,7 +300,7 @@ func _mutate() -> void:
 	_burst(feet + Vector2(0, -look.size.y * 0.5), MAG, 60, 900.0)
 	_burst(feet + Vector2(0, -look.size.y * 0.5), GREEN, 30, 600.0)
 	_burst(_card_rect(n).get_center(), GREEN, 26, 500.0)
-	_pop_text("NEW POWER: %s!" % str(MutationData.LEVELS[n].power), MAG.lerp(Color.WHITE, 0.25))
+	_pop_text("NEW GUN: %s!" % str(MutationData.LEVELS[n].name), MAG.lerp(Color.WHITE, 0.25))
 	var st := create_tween()
 	var p := stage.position
 	for i in 8:
@@ -345,13 +344,13 @@ func _process(delta: float) -> void:
 	punch = maxf(0.0, punch - delta * 4.0)
 	# the look floats and breathes on the pedestal; a new pick / mutation punches in
 	var bob := sin(t * 1.8) * 6.0
-	look.position = PEDESTAL - Vector2(look.size.x * 0.5, look.size.y) + Vector2(0, bob - 8.0)
+	look.position = PEDESTAL - Vector2(look.size.x * 0.5, look.size.y) + Vector2(0, bob - HOVER)
 	var br := 1.0 + sin(t * 2.6) * 0.015
 	var pk := 1.0 + punch * 0.12
 	look.scale = Vector2(pk / br, pk * br)
 	var lv := MutationData.level()
 	look.modulate = Color.WHITE.lerp(Color(2.2, 1.2, 2.2), flash) if sel <= lv + 1 else Color(0.35, 0.3, 0.45)
-	# the selected card's mutant idles, owned ones breathe slowly
+	# the selected card's gun bobs, owned ones breathe slowly
 	for i in card_looks.size():
 		var cl := card_looks[i]
 		var on := i + 1 == sel
@@ -413,12 +412,12 @@ func _draw_fx() -> void:
 		fx.draw_rect(r, col, false, w)
 		if n <= lv:
 			_draw_check(Vector2(r.end.x - 30, r.end.y - 26))
-		# power plate under the card, framed in the card's colour
+		# gun plate under the card, framed in the card's colour
 		var pr := Rect2(r.position.x, PLATES.x, r.size.x, PLATES.y - PLATES.x)
 		fx.draw_rect(pr, Color("0b1029"))
 		fx.draw_rect(Rect2(pr.position, Vector2(pr.size.x, 40)), col.darkened(0.55))
 		fx.draw_rect(pr, col, false, 4.0 if n != sel else 6.0)
-		fx.draw_string(UiTheme.FONT, pr.position + Vector2(0, 30), "POWER", HORIZONTAL_ALIGNMENT_CENTER,
+		fx.draw_string(UiTheme.FONT, pr.position + Vector2(0, 30), "GUN", HORIZONTAL_ALIGNMENT_CENTER,
 				pr.size.x, 22, Color(1, 1, 1, 0.85))
 	# sparks
 	for s in sparks:

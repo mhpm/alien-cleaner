@@ -51,6 +51,7 @@ func _btn_center() -> Vector2:
 func _input(event: InputEvent) -> void:
 	if not enabled:
 		return
+	event = make_input_local(event)  # we sit inside the HUD's safe area, not at the screen origin
 	if event is InputEventScreenTouch:
 		var te := event as InputEventScreenTouch
 		if te.pressed:

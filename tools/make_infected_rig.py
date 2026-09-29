@@ -1,8 +1,8 @@
 """Fases 3+ del mutante animadas con un esqueleto hecho de sus piezas sueltas.
 
-python tools/make_infected_rig.py <fase>      (3, 4, ...)
+python tools/make_infected_rig.py <fase>      (4; la fase 3 usa make_infected_poses.py)
 Cada fase (PHASES) trae su hoja de piezas (tools/infected_phase<n>_parts.webp), su
-tamaño final (`size`: 64 la fase 3, 100 desde la 4) y, por pieza, el recorte en la hoja,
+tamaño final (`size`, 100) y, por pieza, el recorte en la hoja,
 la escala, la posición en su dibujo completo de referencia y la articulación sobre la
 que gira. Cada frame se arma en alta resolución girando las piezas y se reduce al tamaño
 final con una paleta común (utilidades de make_infected_phase1/2). Cada pieza se reduce
@@ -274,63 +274,6 @@ def back_view(rig: Rig, layout: list) -> list:
     return frames
 
 
-# ---------------------------------------------------------------- fase 3
-
-def p3_idle(rig: Rig) -> list:
-    body = [(0, 4), (0, 7), (0, 10), (0, 10), (0, 7), (0, 4)]
-    head = [(0, 0, 0), (2, 0, -2), (4, 2, -4), (2, 3, -3), (0, 1, 0), (-2, 0, 1)]
-    claw = [(0, 0, 6), (2, -3, 10), (3, -5, 14), (2, -4, 9), (0, -1, 4), (0, 0, 5)]
-    arm = [(0, 0, 0), (-2, 2, -4), (-3, 3, -6), (-2, 2, -4), (0, 0, -1), (0, 0, 0)]
-    mass = [(0, 0, 0), (0, -2, 2), (-1, -3, 3), (0, -2, 2), (0, 0, 0), (0, 1, -1)]
-    glow = [0.0, 0.3, 0.8, 0.5, 0.2, 0.0]
-    return [rig.frame({"body": body[i], "head": head[i], "claw": claw[i], "arm": arm[i],
-                       "mass": mass[i], "eyeball": (0, 0, 20 * i)}, glow[i]) for i in range(6)]
-
-
-def p3_run(rig: Rig) -> list:
-    return run_cycle(rig, lambda i, sw: {"eyeball": (0, 0, i * 30)})
-
-
-def p3_combos(rig: Rig) -> list:
-    return [
-        # 1: puñetazo del brazo izquierdo — el hombro gira y el puño sale al frente
-        combo(rig,
-              {"body": (-8, 6), "arm": (-6, 0, -30), "claw": (-4, 0, 15), "head": (-3, 0, 4),
-               "leg_front": (-4, 0, 6)},
-              {"body": (10, 4), "arm": (38, 12, 72), "claw": (-6, 2, 20), "head": (6, 2, -6),
-               "leg_front": (10, 0, -14), "leg_back": (-6, 0, 10)},
-              {"body": (5, 5), "arm": (15, -5, 45), "claw": (-2, 0, 10), "head": (3, 1, -3),
-               "leg_front": (5, 0, -7)},
-              arc(rig, (196, 196), 11, -60, 60, 5), (2, 0)),
-        # 2: barrido amplio de la garra — de arriba atrás hasta abajo delante
-        combo(rig,
-              {"body": (-6, 2), "claw": (-10, -18, 80), "head": (-4, 0, 6), "arm": (0, 0, 10),
-               "mass": (0, -3, 4)},
-              {"body": (8, 8), "claw": (10, 8, -45), "head": (5, 3, -5), "arm": (-4, 0, -10),
-               "leg_front": (8, 0, -10), "leg_back": (-4, 0, 6)},
-              {"body": (4, 6), "claw": (6, 5, -25), "head": (2, 2, -3), "leg_front": (4, 0, -5)},
-              arc(rig, (160, 185), 22, -120, 70, 6), (2, 1)),
-        # 3: salto y golpe al suelo con las dos manos — onda de choque
-        combo(rig,
-              {"body": (0, -40), "claw": (0, -10, 70), "arm": (0, -6, 60), "head": (0, 0, 5),
-               "leg_front": (4, -44, 10), "leg_back": (-4, -40, -10), "hips": (0, -40, 0),
-               "mass": (0, -4, 6)},
-              {"body": (4, 14), "claw": (8, 10, -50), "arm": (10, 8, -60), "head": (3, 4, -6),
-               "leg_front": (-6, 0, 12), "leg_back": (6, 0, -12), "hips": (0, 8, 0)},
-              {"body": (2, 8), "claw": (4, 6, -25), "arm": (4, 4, -30), "head": (1, 2, -3),
-               "hips": (0, 4, 0)},
-              shockwave(rig, (150, 300), 26, 5, 3), (0, 0)),
-    ]
-
-
-def p3_back(rig: Rig) -> list:
-    head = rig.parts["head"][0]
-    crown = rig.piece("head", (0, 0, head.width, int(head.height * 0.42)), True)
-    claw = rig.piece("claw").transpose(Image.FLIP_LEFT_RIGHT)
-    return back_view(rig, [("back_claw", claw, 2, 26), ("back_mass", rig.piece("mass"), 26, 22),
-                           ("back_crown", crown, 18, 1)])
-
-
 # ---------------------------------------------------------------- fase 4
 
 def p4_idle(rig: Rig) -> list:
@@ -399,27 +342,6 @@ def p4_back(rig: Rig) -> list:
 # ---------------------------------------------------------------- fases
 
 PHASES = {
-    3: {
-        "src": os.path.join(ROOT, "tools", "infected_phase3_parts.webp"),
-        "ref": (275, 316),   # tools/infected_phase3_ref.png
-        "size": 64,
-        # pieza: (recorte x, y, w, h), escala, posición en la referencia, articulación
-        "parts": {
-            "mass": ((37, 185, 404, 468), 0.33, (2, 62), (95, 150)),
-            "leg_back": ((974, 800, 269, 257), 0.33, (151, 232), (182, 238)),
-            "hips": ((574, 791, 349, 202), 0.33, (88, 212), (146, 222)),
-            "leg_front": ((237, 795, 269, 257), 0.33, (45, 229), (100, 236)),
-            "torso": ((574, 502, 349, 277), 0.34, (87, 150), (146, 200)),
-            "claw": ((1022, 294, 395, 496), 0.33, (140, 125), (152, 176)),
-            "eyeball": ((943, 603, 177, 186), 0.22, (133, 157), (152, 176)),
-            "arm": ((314, 451, 231, 325), 0.35, (24, 153), (82, 162)),
-            "head": ((554, 33, 458, 445), 0.37, (73, 2), (150, 150)),
-        },
-        "order": ["mass", "leg_back", "hips", "leg_front", "torso", "claw", "eyeball", "arm", "head"],
-        "upper": {"mass", "torso", "claw", "eyeball", "arm", "head"},
-        "follow": {"eyeball": "claw"},       # la bola con ojo es la hombrera de la garra
-        "idle": p3_idle, "run": p3_run, "combos": p3_combos, "back": p3_back,
-    },
     4: {
         "src": os.path.join(ROOT, "tools", "infected_phase4_parts.webp"),
         "ref": (295, 358),   # tools/mutation_looks/phase_4.png
@@ -495,4 +417,4 @@ def main(n: int) -> None:
 
 
 if __name__ == "__main__":
-    main(int(sys.argv[1]) if len(sys.argv) > 1 else 3)
+    main(int(sys.argv[1]) if len(sys.argv) > 1 else 4)

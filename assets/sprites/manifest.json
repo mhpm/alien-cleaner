@@ -1,212 +1,38 @@
 {
  "mutant1": {
   "size": [
-   84,
-   63
+   86,
+   87
   ],
   "anchor": [
-   42,
-   60.0
+   43,
+   87
   ],
-  "body_h": 57.5,
+  "body_h": 83.0,
   "anims": {
    "idle": {
-    "frames": 6,
-    "fps": 6,
+    "frames": 4,
+    "fps": 5,
     "loop": true
    },
-   "walk_down": {
+   "walk": {
     "frames": 4,
-    "fps": 10,
-    "loop": true
-   },
-   "walk_up": {
-    "frames": 4,
-    "fps": 10,
-    "loop": true
-   },
-   "walk_left": {
-    "frames": 8,
-    "fps": 11,
-    "loop": true
-   },
-   "walk_right": {
-    "frames": 8,
-    "fps": 11,
-    "loop": true
-   },
-   "combo_1": {
-    "frames": 4,
-    "fps": 16,
-    "loop": false
-   },
-   "combo_2": {
-    "frames": 4,
-    "fps": 16,
-    "loop": false
-   },
-   "combo_3": {
-    "frames": 4,
-    "fps": 16,
-    "loop": false
-   }
-  }
- },
- "mutant2": {
-  "size": [
-   88,
-   65
-  ],
-  "anchor": [
-   44,
-   61.0
-  ],
-  "body_h": 57.0,
-  "anims": {
-   "idle": {
-    "frames": 6,
     "fps": 9,
     "loop": true
    },
-   "walk_down": {
-    "frames": 8,
-    "fps": 14,
-    "loop": true
-   },
    "walk_up": {
     "frames": 4,
-    "fps": 12,
-    "loop": true
-   },
-   "walk_left": {
-    "frames": 8,
-    "fps": 14,
-    "loop": true
-   },
-   "walk_right": {
-    "frames": 8,
-    "fps": 14,
-    "loop": true
-   },
-   "combo_1": {
-    "frames": 4,
-    "fps": 16,
-    "loop": false
-   },
-   "combo_2": {
-    "frames": 4,
-    "fps": 16,
-    "loop": false
-   },
-   "combo_3": {
-    "frames": 4,
-    "fps": 16,
-    "loop": false
-   }
-  }
- },
- "mutant3": {
-  "size": [
-   78,
-   65
-  ],
-  "anchor": [
-   39,
-   61.0
-  ],
-  "body_h": 56.0,
-  "anims": {
-   "idle": {
-    "frames": 6,
-    "fps": 8,
-    "loop": true
-   },
-   "walk_down": {
-    "frames": 8,
-    "fps": 14,
-    "loop": true
-   },
-   "walk_up": {
-    "frames": 4,
-    "fps": 12,
-    "loop": true
-   },
-   "walk_left": {
-    "frames": 8,
-    "fps": 14,
-    "loop": true
-   },
-   "walk_right": {
-    "frames": 8,
-    "fps": 14,
-    "loop": true
-   },
-   "combo_1": {
-    "frames": 4,
-    "fps": 16,
-    "loop": false
-   },
-   "combo_2": {
-    "frames": 4,
-    "fps": 16,
-    "loop": false
-   },
-   "combo_3": {
-    "frames": 4,
-    "fps": 16,
-    "loop": false
-   }
-  }
- },
- "mutant4": {
-  "size": [
-   132,
-   100
-  ],
-  "anchor": [
-   66,
-   96.0
-  ],
-  "body_h": 87.5,
-  "anims": {
-   "idle": {
-    "frames": 6,
     "fps": 9,
     "loop": true
    },
-   "walk_down": {
-    "frames": 8,
+   "shoot": {
+    "frames": 2,
     "fps": 14,
-    "loop": true
-   },
-   "walk_up": {
-    "frames": 4,
-    "fps": 12,
-    "loop": true
-   },
-   "walk_left": {
-    "frames": 8,
-    "fps": 14,
-    "loop": true
-   },
-   "walk_right": {
-    "frames": 8,
-    "fps": 14,
-    "loop": true
-   },
-   "combo_1": {
-    "frames": 4,
-    "fps": 16,
     "loop": false
    },
-   "combo_2": {
-    "frames": 4,
-    "fps": 16,
-    "loop": false
-   },
-   "combo_3": {
-    "frames": 4,
-    "fps": 16,
+   "hurt": {
+    "frames": 2,
+    "fps": 10,
     "loop": false
    }
   }
@@ -874,6 +700,297 @@
     "frames": 3,
     "fps": 16,
     "loop": false
+   }
+  }
+ },
+ "big_red": {
+  "size": [
+   254,
+   223
+  ],
+  "anchor": [
+   127,
+   223
+  ],
+  "body_h": 205.0,
+  "anims": {
+   "walk": {
+    "frames": 6,
+    "fps": 4,
+    "loop": true
+   },
+   "angry": {
+    "frames": 4,
+    "fps": 6,
+    "loop": true
+   },
+   "hurt": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "fury": {
+    "frames": 4,
+    "fps": 10,
+    "loop": true
+   },
+   "shoot": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "roar": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "death": {
+    "frames": 6,
+    "fps": 6,
+    "loop": false
+   },
+   "splat": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   }
+  }
+ },
+ "big_red_ball": {
+  "size": [
+   274,
+   162
+  ],
+  "anchor": [
+   137,
+   81.0
+  ],
+  "body_h": 133.0,
+  "anims": {
+   "fly": {
+    "frames": 4,
+    "fps": 12,
+    "loop": true
+   }
+  }
+ },
+ "big_red_blob": {
+  "size": [
+   32,
+   30
+  ],
+  "anchor": [
+   16,
+   15.0
+  ],
+  "body_h": 29.0,
+  "anims": {
+   "fly": {
+    "frames": 4,
+    "fps": 10,
+    "loop": true
+   }
+  }
+ },
+ "big_red_drop": {
+  "size": [
+   38,
+   47
+  ],
+  "anchor": [
+   19,
+   23.5
+  ],
+  "body_h": 32.0,
+  "anims": {
+   "fly": {
+    "frames": 4,
+    "fps": 10,
+    "loop": true
+   }
+  }
+ },
+ "hive_queen": {
+  "size": [
+   212,
+   180
+  ],
+  "anchor": [
+   106,
+   180
+  ],
+  "body_h": 153.0,
+  "anims": {
+   "walk": {
+    "frames": 7,
+    "fps": 5,
+    "loop": true
+   },
+   "spit": {
+    "frames": 3,
+    "fps": 10,
+    "loop": false
+   },
+   "roar": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "angry": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "crystal": {
+    "frames": 3,
+    "fps": 8,
+    "loop": true
+   },
+   "crystal_spit": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "drool": {
+    "frames": 4,
+    "fps": 6,
+    "loop": true
+   },
+   "death": {
+    "frames": 6,
+    "fps": 6,
+    "loop": false
+   }
+  }
+ },
+ "hive_acid": {
+  "size": [
+   118,
+   101
+  ],
+  "anchor": [
+   59,
+   50.5
+  ],
+  "body_h": 94.5,
+  "anims": {
+   "fly": {
+    "frames": 2,
+    "fps": 10,
+    "loop": true
+   }
+  }
+ },
+ "hive_crystal": {
+  "size": [
+   38,
+   68
+  ],
+  "anchor": [
+   19,
+   34.0
+  ],
+  "body_h": 66.5,
+  "anims": {
+   "fly": {
+    "frames": 2,
+    "fps": 8,
+    "loop": true
+   }
+  }
+ },
+ "hive_shard": {
+  "size": [
+   28,
+   45
+  ],
+  "anchor": [
+   14,
+   22.5
+  ],
+  "body_h": 38.0,
+  "anims": {
+   "fly": {
+    "frames": 2,
+    "fps": 8,
+    "loop": true
+   }
+  }
+ },
+ "hive_burst": {
+  "size": [
+   106,
+   136
+  ],
+  "anchor": [
+   53,
+   68.0
+  ],
+  "body_h": 136.0,
+  "anims": {
+   "pop": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   }
+  }
+ },
+ "hive_drop": {
+  "size": [
+   28,
+   39
+  ],
+  "anchor": [
+   14,
+   19.5
+  ],
+  "body_h": 38.0,
+  "anims": {
+   "fly": {
+    "frames": 3,
+    "fps": 10,
+    "loop": true
+   }
+  }
+ },
+ "hive_egg": {
+  "size": [
+   136,
+   87
+  ],
+  "anchor": [
+   68,
+   87
+  ],
+  "body_h": 84.5,
+  "anims": {
+   "walk": {
+    "frames": 4,
+    "fps": 4,
+    "loop": true
+   },
+   "splat": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   }
+  }
+ },
+ "hive_guard": {
+  "size": [
+   128,
+   136
+  ],
+  "anchor": [
+   64,
+   136
+  ],
+  "body_h": 136.0,
+  "anims": {
+   "walk": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
    }
   }
  }

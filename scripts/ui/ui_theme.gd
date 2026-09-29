@@ -7,6 +7,32 @@ extends RefCounted
 const FONT: FontFile = preload("res://fonts/minecraft/Minecraft.ttf")
 
 static var _theme: Theme
+static var _body: Font
+
+
+## Smooth (non-pixel) font for descriptions and small body text: the pixel FONT is for
+## titles and big important labels only. System sans (Roboto on Android).
+static func body_font() -> Font:
+	if _body == null:
+		var f := SystemFont.new()
+		f.font_names = PackedStringArray(["Nunito", "Roboto", "Segoe UI", "Helvetica Neue", "Arial", "sans-serif"])
+		f.font_weight = 600
+		f.antialiasing = TextServer.FONT_ANTIALIASING_GRAY
+		f.hinting = TextServer.HINTING_LIGHT
+		_body = f
+	return _body
+
+
+## Label in the smooth body font (wraps when given a width).
+static func body(text: String, size := 11, color := Color("d6e6ff")) -> Label:
+	var l := label(text, size, color)
+	l.add_theme_font_override("font", body_font())
+	l.add_theme_constant_override("outline_size", 0)
+	l.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.55))
+	l.add_theme_constant_override("shadow_offset_x", 0)
+	l.add_theme_constant_override("shadow_offset_y", 1)
+	l.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	return l
 
 
 static func build() -> Theme:
@@ -93,3 +119,69 @@ static func icon(tex_id: String, px: float) -> TextureRect:
 	r.size = Vector2(px, px)
 	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return r
+
+
+## Part of the screen free of notches, rounded corners and system bars, in viewport
+## (canvas) units. On desktop it is the whole viewport.
+static func safe_rect(c: Control) -> Rect2:
+	var full := Rect2(Vector2.ZERO, c.get_viewport_rect().size)
+	if not OS.has_feature("mobile"):
+		return full
+	var win := Vector2(DisplayServer.window_get_size())
+	var area := Rect2(DisplayServer.get_display_safe_area())
+	if win.x <= 0.0 or win.y <= 0.0 or area.size.x <= 0.0 or area.size.y <= 0.0:
+		return full
+	area.position -= Vector2(DisplayServer.window_get_position())
+	var k := full.size / win
+	var r := full.intersection(Rect2(area.position * k, area.size * k))
+	return r if r.size.x > 0.0 and r.size.y > 0.0 else full
+
+
+## Insets (left, top, right, bottom) of the safe area, to use as a full-rect Control's offsets.
+static func safe_insets(c: Control) -> Vector4:
+	var full := c.get_viewport_rect().size
+	var r := safe_rect(c)
+	return Vector4(r.position.x, r.position.y, full.x - r.end.x, full.y - r.end.y)
+
+
+## Scales `stage` (painted art drawn 1:1 at `art` px) so all of it fits inside the safe
+## area, centred (or pinned to its top). Screens more elongated than the art get bands,
+## filled by add_backdrop(). Returns the scale.
+static func fit_stage(host: Control, stage: Control, art: Vector2, pin_top := false, zoom := 1.0) -> float:
+	var safe := safe_rect(host)
+	var s := minf(safe.size.x / art.x, safe.size.y / art.y) * zoom
+	stage.scale = Vector2(s, s)
+	stage.position = safe.position + (safe.size - art * s) * 0.5
+	if pin_top:
+		stage.position.y = safe.position.y
+	var bd: Variant = stage.get_meta("backdrop") if stage.has_meta("backdrop") else null
+	if bd is CanvasItem:
+		(bd as CanvasItem).queue_redraw()
+	return s
+
+
+## Fills the screen around a fitted stage by stretching the edge rows/columns of its
+## background art into the leftover bands, so the art seems to continue to the screen edge.
+static func add_backdrop(host: Control, stage: Control, tex: Texture2D) -> Control:
+	var bd := Control.new()
+	bd.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	bd.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bd.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	host.add_child(bd)
+	host.move_child(bd, 0)
+	stage.set_meta("backdrop", bd)
+	bd.draw.connect(func() -> void:
+		var ts := tex.get_size()
+		var r := Rect2(stage.position, stage.size * stage.scale)
+		var e := 4.0  # source strip thickness (texture px)
+		var full := bd.size
+		if r.position.x > 0.0:
+			bd.draw_texture_rect_region(tex, Rect2(0, r.position.y, r.position.x + 1.0, r.size.y), Rect2(0, 0, e, ts.y))
+		if r.end.x < full.x:
+			bd.draw_texture_rect_region(tex, Rect2(r.end.x - 1.0, r.position.y, full.x - r.end.x + 1.0, r.size.y), Rect2(ts.x - e, 0, e, ts.y))
+		if r.position.y > 0.0:
+			bd.draw_texture_rect_region(tex, Rect2(0, 0, full.x, r.position.y + 1.0), Rect2(0, 0, ts.x, e))
+		if r.end.y < full.y:
+			bd.draw_texture_rect_region(tex, Rect2(0, r.end.y - 1.0, full.x, full.y - r.end.y + 1.0), Rect2(0, ts.y - e, ts.x, e)))
+	host.resized.connect(bd.queue_redraw)
+	return bd

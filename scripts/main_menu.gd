@@ -45,6 +45,7 @@ func _build() -> void:
 	bg.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	stage.add_child(bg)
+	UiTheme.add_backdrop(self, stage, bg.texture)
 
 	for id: String in BUTTONS:
 		var r: Rect2 = BUTTONS[id]
@@ -89,13 +90,11 @@ func _stage_label(r: Rect2, font_size: int, col: Color) -> Label:
 	return l
 
 
-## Scale the art to cover the screen (portrait phones of any aspect), centered.
+## Fit the whole art inside the safe area (any phone aspect), centered.
 func _fit_stage() -> void:
 	if stage == null:
 		return
-	var s := maxf(size.x / ART_SIZE.x, size.y / ART_SIZE.y)
-	stage.scale = Vector2(s, s)
-	stage.position = (size - ART_SIZE * s) * 0.5
+	UiTheme.fit_stage(self, stage, ART_SIZE)
 
 
 func _press_fx(b: TextureButton, down: bool) -> void:

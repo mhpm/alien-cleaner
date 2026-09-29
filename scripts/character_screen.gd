@@ -71,6 +71,7 @@ func _ready() -> void:
 	bg.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	stage.add_child(bg)
+	UiTheme.add_backdrop(self, stage, bg.texture)
 	# the astronaut from the reference art; gear changes stats, not its look
 	preview = Sprite2D.new()
 	preview.texture = load(DIR + "preview_astronaut.png")
@@ -89,10 +90,8 @@ func _ready() -> void:
 
 
 func _fit() -> void:
-	var s := minf(size.x / ART.x, size.y / ART.y)
-	stage.scale = Vector2(s, s)
-	# pinned to the top (top bar under the thumb-free area); extra height becomes floor
-	stage.position = Vector2((size.x - ART.x * s) * 0.5, 0.0)
+	# pinned to the top of the safe area (top bar under the thumb-free area); extra height becomes floor
+	var s := UiTheme.fit_stage(self, stage, ART, true)
 	var bottom := stage.position.y + ART.y * s
 	floor_fill.position = Vector2(0, bottom - 2.0)
 	floor_fill.size = Vector2(size.x, maxf(0.0, size.y - bottom + 2.0))

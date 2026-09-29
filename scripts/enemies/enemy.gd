@@ -41,6 +41,7 @@ var hurt_t := 0.0
 var tint := Color.WHITE
 var art := ""
 var _ufo_attacks := 0
+var _sep := Vector2.ZERO  # last separation push (refreshed every other frame)
 var elite := false  # tougher golden variant with a crown (final waves)
 
 
@@ -100,8 +101,7 @@ func _ready() -> void:
 	sprite.play("walk")
 	sprite.frame = randi() % sprite.sprite_frames.get_frame_count("walk")
 	tex_h = Art.body_height(art)
-	mat = Art.flash_material()
-	sprite.material = mat
+	mat = Art.flash_material()  # only on the sprite while it flashes (plain sprites batch)
 	add_child(sprite)
 	if elite:
 		_elite_fx()
@@ -161,7 +161,10 @@ func _physics_process(delta: float) -> void:
 	if slow_t > 0.0:
 		slow_t -= delta
 		vel *= 0.5
-	vel += _separation()
+	# crowds: each alien re-checks its neighbours every other frame (halves the cost)
+	if (Engine.get_physics_frames() + get_instance_id()) % 2 == 0:
+		_sep = _separation()
+	vel += _sep
 	velocity = vel + knock
 	knock = knock.move_toward(Vector2.ZERO, 520.0 * delta)
 	var fast_knock := knock.length() > 140.0
@@ -185,21 +188,31 @@ func _can_target() -> bool:
 	return true
 
 
+## Push away from overlapping aliens (only the 3x3 cells around, GameWorld.enemy_grid;
+## in a packed horde the first SEP_MAX overlaps are enough).
+const SEP_MAX := 6
+
+
 func _separation() -> Vector2:
 	var sep := Vector2.ZERO
-	for n in Game.world.enemy_cache:
-		if not is_instance_valid(n):  # freed since the cache was refreshed
-			continue
-		if n == self:
-			continue
-		var o := n as Enemy
-		if not is_instance_valid(o):
-			continue
-		var d := global_position - o.global_position
-		var min_d := (radius + o.radius) * 0.8
-		var l := d.length()
-		if l < min_d and l > 0.01:
-			sep += d / l * (min_d - l) * 8.0
+	var hits := 0
+	var grid := Game.world.enemy_grid
+	var c := Vector2i((global_position / GameWorld.GRID_CELL).floor())
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			var bucket: Array = grid.get(c + Vector2i(dx, dy), [])
+			for n in bucket:
+				if n == self or not is_instance_valid(n):  # freed since the grid was built
+					continue
+				var o := n as Enemy
+				var d := global_position - o.global_position
+				var min_d := (radius + o.radius) * 0.8
+				var l := d.length()
+				if l < min_d and l > 0.01:
+					sep += d / l * (min_d - l) * 8.0
+					hits += 1
+					if hits >= SEP_MAX:
+						return sep
 	return sep
 
 
@@ -213,15 +226,23 @@ func _contact() -> void:
 		p.take_damage(contact_damage, global_position)
 
 
+## Animation to show now: "hurt" right after a hit, the AI state's own animation when
+## the set has one (the droid's "charge", the UFO's "attack"), else "walk".
+func _anim_name() -> String:
+	if hurt_t > 0.0 and sprite.sprite_frames.has_animation("hurt"):
+		return "hurt"
+	if sprite.sprite_frames.has_animation(state):
+		return state
+	return "walk"
+
+
 func _animate(delta: float) -> void:
 	var wob := sin(t * 9.0 + phase) * 0.05
 	var still := frozen_t > 0.0 or stun_t > 0.0
 	if still:
 		wob = 0.0
 	hurt_t = maxf(0.0, hurt_t - delta)
-	var anim := "hurt" if hurt_t > 0.0 and sprite.sprite_frames.has_animation("hurt") else "walk"
-	if hurt_t <= 0.0 and sprite.sprite_frames.has_animation(state):
-		anim = state  # e.g. the droid's "charge", the UFO's "attack"
+	var anim := _anim_name()
 	if sprite.animation != anim:
 		sprite.play(anim)
 	sprite.speed_scale = 0.0 if still else (0.6 if slow_t > 0.0 else 1.0)
@@ -233,7 +254,11 @@ func _animate(delta: float) -> void:
 	sprite.scale = target
 	sprite.flip_h = face < 0.0
 	sprite.position.y = -air
-	mat.set_shader_parameter("flash", clampf(flash_t / 0.12, 0.0, 1.0))
+	if flash_t > 0.0:
+		sprite.material = mat
+		mat.set_shader_parameter("flash", clampf(flash_t / 0.12, 0.0, 1.0))
+	elif sprite.material != null:
+		sprite.material = null
 	if frozen_t > 0.0:
 		sprite.self_modulate = Color(0.6, 0.85, 1.4)
 	elif slow_t > 0.0:

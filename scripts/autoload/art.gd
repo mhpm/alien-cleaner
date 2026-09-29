@@ -347,15 +347,18 @@ func _procedural(id: String) -> Image:
 		"stain":
 			return _stain()
 		"shield":
-			var img := _img(22, 22)
-			for y in 22:
-				for x in 22:
-					var d := Vector2(x - 10.5, y - 10.5).length()
-					if d <= 10.5 and d > 9.3:
-						img.set_pixel(x, y, Color(0.45, 0.94, 0.97, 0.9))
-					elif d <= 9.3:
-						img.set_pixel(x, y, Color(0.45, 0.94, 0.97, 0.16))
-			_line(img, Vector2(5, 7), Vector2(8, 4), Color(1, 1, 1, 0.9), 1)
+			# big, see-through bubble: thin rim, faint fill, so the player stays visible
+			var img := _img(48, 48)
+			for y in 48:
+				for x in 48:
+					var d := Vector2(x - 23.5, y - 23.5).length()
+					if d <= 23.5 and d > 22.2:
+						img.set_pixel(x, y, Color(0.45, 0.94, 0.97, 0.85))
+					elif d <= 22.2 and d > 20.8:
+						img.set_pixel(x, y, Color(0.45, 0.94, 0.97, 0.22))
+					elif d <= 20.8:
+						img.set_pixel(x, y, Color(0.45, 0.94, 0.97, 0.05))
+			_line(img, Vector2(9, 14), Vector2(14, 8), Color(1, 1, 1, 0.8), 1)
 			return img
 	push_warning("Art: unknown texture " + id)
 	return _img(4, 4)

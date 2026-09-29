@@ -6,6 +6,7 @@ extends CharacterBody2D
 
 const BLAST_RADIUS := 62.0
 const BODY_Y := -10.0  # world-space height of the torso
+const DOME_Y := -13.0  # centre of the whole astronaut (feet 0, helmet top ~-25): the Ion Shield sits here
 
 var input_dir := Vector2.ZERO
 var locked := false
@@ -13,7 +14,9 @@ var dead := false
 
 var body: Astronaut  # reference-sheet astronaut + the equipped blaster, aimed separately
 var shadow: Sprite2D
-var shield_fx: Sprite2D
+var shield_fx: Sprite2D  # the Shield power-up bubble
+var dome: Sprite2D  # Ion Shield upgrade: coloured by the hits it has left
+var martian: MartianAlly  # Martian UFO upgrade
 var mat: ShaderMaterial
 
 var fire_t := 0.5
@@ -24,8 +27,10 @@ var aim_dir := Vector2.UP
 var knock := Vector2.ZERO
 var flash_t := 0.0
 var blast_t := 0.0
-var shield_up := false
+var shield_hits := 0  # Ion Shield: hits it can still block
+var shield_max := 0
 var shield_t := 0.0
+var dome_hits: Dictionary = {}  # alien id -> msec of the last shove/burn
 var orbit_a := 0.0
 var bots: Array[Sprite2D] = []
 var bot_hits: Dictionary = {}
@@ -60,9 +65,17 @@ func _ready() -> void:
 	shield_fx = Sprite2D.new()
 	shield_fx.texture = Art.tex("shield")
 	shield_fx.position = Vector2(0, BODY_Y)
-	shield_fx.scale = Vector2(1.45, 1.45)
+	shield_fx.scale = Vector2(0.9, 0.9)  # ~21 units of radius: wraps the whole astronaut
 	shield_fx.visible = false
 	add_child(shield_fx)
+	dome = Sprite2D.new()
+	dome.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	dome.position = Vector2(0, DOME_Y)
+	var add := CanvasItemMaterial.new()
+	add.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD  # glows, the astronaut stays visible
+	dome.material = add
+	dome.visible = false
+	add_child(dome)
 	infected = Infected.new()
 	add_child(infected)
 	move_child(infected, 0)
@@ -126,8 +139,8 @@ func reset_for_room(pos: Vector2) -> void:
 	infected.end_now()
 	aim_dir = Vector2.UP
 	gun_angle = -PI * 0.5
-	if bool(Game.stats.shield):
-		shield_up = true
+	shield_hits = shield_max
+	shield_t = 0.0
 	if not buffs.is_empty():
 		buffs.clear()
 		body.modulate = Color(1, 1, 1, body.modulate.a)
@@ -145,13 +158,29 @@ func refresh_upgrades() -> void:
 			# UFO buddies (power-up)
 			b.texture = CollectibleData.tex("ufo")
 			b.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-			b.scale = Vector2.ONE * (11.0 / b.texture.get_width())
+			b.scale = Vector2.ONE * (22.0 / b.texture.get_width())
 		else:
 			b.texture = Art.tex("bot")
 		add_child(b)
 		bots.append(b)
-	if bool(Game.stats.shield) and shield_t == 0.0:
-		shield_up = true
+	# Ion Shield: a new level refills it (bigger and one more hit)
+	var sl := UpgradeData.shield_level(Game.stats)
+	var new_max := int(UpgradeData.SHIELD_LV[sl - 1].hits) if sl > 0 else 0
+	if new_max != shield_max:
+		shield_max = new_max
+		shield_hits = shield_max
+		shield_t = 0.0
+		if shield_max > 0:
+			_dome_pop()
+	# Martian UFO ally
+	var ml := int(Game.stats.get("martian", 0))
+	if ml > 0:
+		if martian == null:
+			martian = MartianAlly.new()
+			add_child(martian)
+			martian.lv = ml
+			martian.setup(self)
+		martian.set_level(ml)
 
 
 func _physics_process(delta: float) -> void:
@@ -192,21 +221,22 @@ func _physics_process(delta: float) -> void:
 	gun_angle = lerp_angle(gun_angle, aim_dir.angle(), 1.0 - exp(-28.0 * delta))
 
 	var mutated := infected.active or infected.transforming or infected.reverting
-	if target != null and not locked and not mutated:  # the mutant fights bare-handed
+	var can_fire := not mutated or (infected.active and infected.dash_t <= 0.0)
+	if target != null and not locked and can_fire:
 		fire_t -= delta * (1.0 if not moving else 0.6)
 		if fire_t <= 0.0:
-			_shoot()
-			fire_t = float(s.fire_interval) * (0.4 if has_buff("frenzy") else 1.0)
+			var frenzy := 0.4 if has_buff("frenzy") else 1.0
+			if infected.active:  # the mutant fires its mutation gun
+				_shoot_mutant()
+				fire_t = float(infected.gun().rate) * frenzy
+			else:
+				_shoot()
+				fire_t = float(s.fire_interval) * frenzy
 	else:
 		fire_t = maxf(fire_t - delta, 0.08)
 
-	if bool(s.shield) and not shield_up:
-		shield_t += delta
-		if shield_t >= float(s.get("shield_cd", 8.0)):
-			shield_up = true
-			shield_t = 0.0
-			Sfx.play("shield", 0.0, -8.0)
-	shield_fx.visible = shield_up or has_buff("shield")
+	_update_dome(delta)
+	shield_fx.visible = has_buff("shield")
 	shield_fx.modulate.a = 0.75 + sin(t * 4.0) * 0.2
 
 	_update_bots(delta)
@@ -280,6 +310,33 @@ func _shoot() -> void:
 	Game.world.burst(origin, Color(str(st.flash)), 2 + lvl, 45.0, 0.15, 1.5, 0.0, d, 0.5)
 
 
+## The mutant's mutation gun (MutationData): its own bolt, plus the run's extra shots.
+func _shoot_mutant() -> void:
+	var g := infected.gun()
+	var d := _gun_dir()
+	var origin := body.to_global(body.muzzle_pos())
+	var dirs: Array[Vector2] = [d]
+	for k in int(Game.stats.spread) + (1 if has_buff("triple") else 0):
+		dirs.append(d.rotated(0.25 * (k + 1)))
+		dirs.append(d.rotated(-0.25 * (k + 1)))
+	for sd in dirs:
+		var b := InfShot.new()
+		b.lv = infected.level
+		b.dir = sd
+		b.speed = float(g.speed)
+		b.damage = float(Game.stats.damage) * float(g.dmg) * (2.0 if has_buff("rage") else 1.0)
+		b.pierce = int(g.pierce) + int(Game.stats.pierce)
+		b.hit_r = float(g.hit)
+		b.color = Color(str(g.color))
+		Game.world.effects.add_child(b)
+		b.global_position = origin
+	shoot_t = 0.45
+	recoil = 3.5
+	Sfx.play("shoot", 0.12, -5.0 + infected.level)
+	Game.world.burst(origin, Color(str(g.color)), 3 + infected.level, 55.0, 0.15, 2.0, 0.0, d, 0.5)
+	Game.world.ring(origin, 3.0 + infected.level, Color(str(g.color)), 0.1, 1.5)
+
+
 func _spawn_bullet(pos: Vector2, d: Vector2) -> void:
 	var s := Game.stats
 	var tier := WeaponData.tier(int(s.weapon))
@@ -343,13 +400,20 @@ func take_damage(amount: float, from := Vector2.INF, hazard := false) -> void:
 	if dead or invuln > 0.0 or has_buff("shield") or has_buff("star") or infected.untouchable():
 		return
 	var w := Game.world
-	if shield_up and not hazard:
-		shield_up = false
+	if shield_hits > 0 and not hazard:
+		var col: Color = UpgradeData.SHIELD_COLORS[shield_hits - 1]
+		shield_hits -= 1
 		shield_t = 0.0
 		invuln = 0.6
 		Sfx.play("shield")
-		w.burst(global_position + Vector2(0, BODY_Y), Color("73eff7"), 16, 90.0, 0.4, 2.0)
-		w.ring(global_position + Vector2(0, BODY_Y), 20.0, Color("73eff7"), 0.25, 2.0)
+		var c := global_position + Vector2(0, DOME_Y)
+		w.ring(c, _dome_radius(), col, 0.25, 2.0)
+		if shield_hits == 0:  # shattered
+			w.burst(c, col, 22, 110.0, 0.45, 2.0)
+			w.ring(c, _dome_radius() * 1.4, col, 0.35, 3.0)
+		else:
+			w.burst(c, col, 10, 80.0, 0.35, 2.0)
+			_dome_pop()
 		return
 	var s := Game.stats
 	if hazard:
@@ -375,6 +439,7 @@ func _die() -> void:
 	infected.end_now()
 	dead = true
 	shield_fx.visible = false
+	dome.visible = false
 	for b in bots:
 		b.visible = false
 	Sfx.play("hurt", 0.0)
@@ -388,6 +453,64 @@ func _die() -> void:
 	w.on_player_died()
 
 
+func _dome_radius() -> float:
+	var sl := UpgradeData.shield_level(Game.stats)
+	return float(UpgradeData.SHIELD_LV[sl - 1].r) if sl > 0 else 0.0
+
+
+## Ion Shield: recharge one hit every "cd" seconds, colour = hits left (red = 5, the
+## strongest), size = level. From level 3 it shoves aliens off, at 5 it burns them.
+func _update_dome(delta: float) -> void:
+	var sl := UpgradeData.shield_level(Game.stats)
+	if sl <= 0:
+		dome.visible = false
+		return
+	var def: Dictionary = UpgradeData.SHIELD_LV[sl - 1]
+	if shield_hits < shield_max:
+		shield_t += delta
+		if shield_t >= float(def.cd):
+			shield_t = 0.0
+			shield_hits += 1
+			Sfx.play("shield", 0.0, -8.0)
+			_dome_pop()
+	dome.visible = shield_hits > 0
+	if not dome.visible:
+		return
+	dome.texture = UpgradeData.shield_bubble(shield_hits)
+	var k := float(def.r) * 2.0 / dome.texture.get_width()
+	dome.scale = dome.scale.lerp(Vector2.ONE * k, 1.0 - exp(-12.0 * delta))
+	dome.modulate = Color(1, 1, 1, 0.8 + sin(t * 4.0) * 0.12)
+	if sl < 3:
+		return
+	var now := Time.get_ticks_msec()
+	var c := global_position + Vector2(0, DOME_Y)
+	var col: Color = UpgradeData.SHIELD_COLORS[shield_hits - 1]
+	for n in Game.world.enemy_cache:
+		if not is_instance_valid(n):
+			continue
+		var e := n as Enemy
+		if e == null or not e.targetable:
+			continue
+		var d := e.hit_center() - c
+		if d.length() > float(def.r) + e.radius:
+			continue
+		var id := e.get_instance_id()
+		if now - int(dome_hits.get(id, 0)) < 350:
+			continue
+		dome_hits[id] = now
+		e.push(d.normalized() * 110.0)
+		if sl >= 5:
+			e.take_damage(float(Game.stats.damage) * 0.4, Vector2.ZERO)
+		Game.world.burst(c + d.normalized() * float(def.r), col, 4, 50.0, 0.25, 1.5)
+
+
+func _dome_pop() -> void:
+	var sl := UpgradeData.shield_level(Game.stats)
+	if sl <= 0 or dome == null:
+		return
+	dome.scale = Vector2.ONE * float(UpgradeData.SHIELD_LV[sl - 1].r) * 2.6 / 154.0
+
+
 func _update_bots(delta: float) -> void:
 	if bots.is_empty():
 		return
@@ -395,9 +518,11 @@ func _update_bots(delta: float) -> void:
 	var n := bots.size()
 	var now := Time.get_ticks_msec()
 	var dmg := float(Game.stats.damage) * 0.7
+	var own := int(Game.stats.orbiters)
 	for i in n:
 		var a := orbit_a + TAU * i / n
-		var p := Vector2(cos(a) * 22.0, sin(a) * 15.0 + BODY_Y)
+		var ufo := i >= own  # UFO buddies are bigger: a wider orbit and reach
+		var p := Vector2(cos(a) * (42.0 if ufo else 22.0), sin(a) * (30.0 if ufo else 15.0) + BODY_Y)
 		bots[i].position = p
 		bots[i].z_index = 1 if sin(a) > 0.0 else 0
 		var wp := global_position + p
@@ -405,7 +530,7 @@ func _update_bots(delta: float) -> void:
 			var e := node as Enemy
 			if e == null or not e.targetable:
 				continue
-			if wp.distance_to(e.hit_center()) < e.radius + 4.0:
+			if wp.distance_to(e.hit_center()) < e.radius + (9.0 if ufo else 4.0):
 				var id := e.get_instance_id()
 				if now - int(bot_hits.get(id, 0)) > 400:
 					bot_hits[id] = now
@@ -419,8 +544,10 @@ func _animate(delta: float, moving: bool, dir: Vector2) -> void:
 	shoot_t = maxf(0.0, shoot_t - delta)
 	var mutant := infected.override_anim()
 	if body.directional:
-		# the mutant: its own frames for each direction (no flip), strikes over walking
-		if moving and absf(dir.x) > 0.1 and mutant == "":
+		# the mutant: its own frames for each direction (no flip); faces what it shoots
+		if shoot_t > 0.0 and absf(aim_dir.x) > 0.05 and mutant == "":
+			facing = signf(aim_dir.x)
+		elif moving and absf(dir.x) > 0.1 and mutant == "":
 			facing = signf(dir.x)
 		if mutant.begins_with("attack_") or mutant.begins_with("combo_") or mutant == "idle":
 			body.play(mutant)

@@ -22,6 +22,9 @@ var runs := 0
 var worlds_cleared := 0
 var best_time: Dictionary = {}
 var chests: Array = []
+## BOSS CHALLENGE (world select, once a world is cleared): fastest time beating each
+## world's final boss straight away (seconds, by world index)
+var boss_best: Dictionary = {}
 var total_xp := 0
 var menu_scene := "res://scenes/world_select.tscn"  # where the game / gear screen return
 ## equipment: owned item levels ({id: level}) and the item worn in each slot
@@ -34,6 +37,7 @@ var upgrades: Dictionary = {}
 var world_index := 0
 var room_index := 0
 var run_coins := 0
+var boss_rush := false  # this run is a BOSS CHALLENGE: straight to the final boss
 var world: GameWorld = null
 
 
@@ -51,7 +55,8 @@ func _default_gear() -> void:
 			gear_equipped[slot] = id
 
 
-func new_run(world_i := -1) -> void:
+func new_run(world_i := -1, rush := false) -> void:
+	boss_rush = rush
 	upgrades = {}
 	if world_i >= 0:
 		world_index = world_i
@@ -67,15 +72,11 @@ func new_run(world_i := -1) -> void:
 		"shots": 1, "spread": 0, "ricochet": 0, "pierce": 0,
 		"freeze": 0.0, "chain": 0, "crit": 0.05, "crit_mult": 2.0,
 		"orbiters": 0, "death_explode": false, "magnet": false,
-		"knockback": 60.0, "blast_cooldown": 6.0, "shield": false,
+		"knockback": 60.0, "blast_cooldown": 6.0, "shield": false, "shield_lvl": 0, "martian": 0,
 		"weapon": 1,
 		"hazard_mult": 1.0, "coin_bonus": 0, "surge": false, "room_heal": 0,
 		"infected": int(perm.infected),
 	}
-	# mutation levels (MUTATION LAB) also make the crew permanently stronger
-	var mut := int(perm.infected)
-	stats.damage = float(stats.damage) * (1.0 + MutationData.atk_bonus(mut))
-	stats.move_speed = float(stats.move_speed) * (1.0 + MutationData.speed_bonus(mut))
 	_apply_gear(stats)
 
 
@@ -267,6 +268,24 @@ func record_world(secs: float, cleared: bool) -> void:
 		worlds_cleared = maxi(worlds_cleared, world_index + 1)
 
 
+## A BOSS CHALLENGE won in `secs`: true when it beats the world's record (saved).
+func record_boss(secs: float) -> bool:
+	var k := str(world_index)
+	var old := float(boss_best.get(k, 0.0))
+	var better := old <= 0.0 or secs < old
+	if better:
+		boss_best[k] = secs
+	return better
+
+
+## Coins for a won BOSS CHALLENGE (twice as many for a new record).
+func boss_bonus(record: bool) -> int:
+	var n := 75 * (world_index + 1) * (2 if record else 1)
+	bank += n
+	save()
+	return n
+
+
 ## Coins for beating the current world: the full bonus the first time, a third after.
 func clear_bonus(first: bool) -> int:
 	var n := 150 * (world_index + 1)
@@ -310,6 +329,7 @@ func save() -> void:
 	cfg.set_value("worlds", "cleared", worlds_cleared)
 	cfg.set_value("worlds", "best_time", best_time)
 	cfg.set_value("worlds", "chests", chests)
+	cfg.set_value("worlds", "boss_best", boss_best)
 	cfg.set_value("meta", "total_xp", total_xp)
 	cfg.set_value("gear", "owned", gear_owned)
 	cfg.set_value("gear", "equipped", gear_equipped)
@@ -334,6 +354,7 @@ func load_save() -> void:
 	worlds_cleared = int(cfg.get_value("worlds", "cleared", 0))
 	best_time = cfg.get_value("worlds", "best_time", {})
 	chests = cfg.get_value("worlds", "chests", [])
+	boss_best = cfg.get_value("worlds", "boss_best", {})
 	total_xp = int(cfg.get_value("meta", "total_xp", 0))
 	var owned: Dictionary = cfg.get_value("gear", "owned", {})
 	var equipped: Dictionary = cfg.get_value("gear", "equipped", {})

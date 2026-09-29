@@ -187,6 +187,8 @@ const LAYOUTS := {
 const ALL := ["slime", "runner", "spitter", "droid", "ufo", "octopus"]
 const EARLY := ["slime", "runner", "spitter"]
 const MID := ["slime", "runner", "spitter", "droid"]
+## late world 1: the horde brings the odd Big Red brute (1 in 7 of the chasers)
+const ALL_BR := ["slime", "slime", "slime", "runner", "runner", "runner", "big_red", "spitter", "droid", "ufo", "octopus"]
 const HIVE := ["slime", "runner", "spitter", "droid", "ufo", "octopus", "ufo_alien"]
 const HIVE_ROOMS := ["hive_entry", "nest", "biolab", "sludge", "overgrown_cargo", "spires", "pods", "reactor_core"]
 
@@ -195,27 +197,34 @@ const WORLDS := [
 		"name": "INFESTED SPACESHIP", "theme": "ship", "enemy_mult": 1.0, "difficulty": [1.0, 0.08],
 		"pic": "world_1.png", "chest": 300,
 		"rooms": [
-			# 1: survival stage - a wide arena, 14 waves of 30 s that keep getting harder,
-			# the Gloop Brute at wave 6 and the Slime King when the clock hits 7:00
+			# 1: survival stage - a wide arena, 15 waves of 30 s that keep getting harder.
+			# "total" = aliens each wave sends (events included, left-overs carry over):
+			# 2000 in all. Every 5th wave an "invasion" horde bursts in after a warning.
+			# Gloop Brutes at waves 6 and 11, Big Red brutes from wave 9, and BIG RED
+			# himself when the clock hits 7:30 (the horde is wiped and an electric fence
+			# closes the fight).
 			{"final": true, "survival": {
-				"arena": Vector2i(64, 96), "duration": 420.0, "hp_per_min": 0.45,
-				"boss": "slime_king",
-				"final": {"pool": ["slime", "runner", "spitter", "droid"], "alive": 26, "rate": 2.4},
+				"arena": Vector2i(64, 96), "duration": 450.0, "hp_per_min": 0.45,
+				"boss": "big_red_boss",
+				# during the boss fight: squads slip in through the fence (Survival._boss_help)
+				"boss_help": {"pool": ["slime", "slime", "runner"], "max": 8, "every": [18.0, 9.0], "squad": 3},
+				"final": {"pool": ["slime", "runner", "spitter", "droid"], "alive": 30, "rate": 2.6},
 				"waves": [
-					{"pool": ["slime"], "alive": 14, "rate": 1.8},
-					{"pool": ["slime", "runner"], "alive": 22, "rate": 2.4},
-					{"pool": ["slime", "runner"], "alive": 26, "rate": 2.8, "event": "swarm", "id": "runner", "count": 16},
-					{"pool": EARLY, "alive": 30, "rate": 3.0, "event": "ring", "id": "slime", "count": 18},
-					{"pool": MID, "alive": 36, "rate": 3.3, "elite": 0.02, "event": "ring", "id": "slime", "count": 26},
-					{"pool": EARLY, "alive": 24, "rate": 2.4, "event": "boss", "id": "gloop_brute"},
-					{"pool": ["slime", "runner", "spitter", "droid", "ufo"], "alive": 40, "rate": 3.6, "elite": 0.03, "event": "swarm", "id": "runner", "count": 20},
-					{"pool": ["slime", "runner", "spitter", "droid", "ufo"], "alive": 44, "rate": 3.8, "elite": 0.04, "event": "swarm", "id": "runner", "count": 28},
-					{"pool": ALL, "alive": 50, "rate": 4.0, "elite": 0.04, "event": "ring", "id": "slime", "count": 26},
-					{"pool": ALL, "alive": 54, "rate": 4.2, "elite": 0.05, "event": "ring", "id": "slime", "count": 36},
-					{"pool": ALL, "alive": 32, "rate": 3.0, "elite": 0.05, "event": "boss", "id": "gloop_brute", "count": 2},
-					{"pool": ALL, "alive": 62, "rate": 4.6, "elite": 0.06, "event": "swarm", "id": "droid", "count": 20},
-					{"pool": ALL, "alive": 68, "rate": 4.8, "elite": 0.07, "event": "ring", "id": "runner", "count": 36},
-					{"pool": ALL, "alive": 74, "rate": 5.0, "elite": 0.09, "event": "swarm", "id": "runner", "count": 30},
+					{"pool": ["slime"], "alive": 20, "total": 40},
+					{"pool": ["slime", "runner"], "alive": 26, "total": 55},
+					{"pool": ["slime", "runner"], "alive": 30, "total": 70, "event": "swarm", "id": "runner", "count": 16},
+					{"pool": EARLY, "alive": 34, "total": 80, "event": "ring", "id": "slime", "count": 18},
+					{"pool": MID, "alive": 40, "total": 200, "elite": 0.02, "invasion": 120},
+					{"pool": EARLY, "alive": 30, "total": 70, "event": "boss", "id": "gloop_brute"},
+					{"pool": ["slime", "runner", "spitter", "droid", "ufo"], "alive": 44, "total": 100, "elite": 0.03, "event": "swarm", "id": "runner", "count": 20},
+					{"pool": ["slime", "runner", "spitter", "droid", "ufo"], "alive": 48, "total": 110, "elite": 0.04, "event": "swarm", "id": "runner", "count": 28},
+					{"pool": ALL_BR, "alive": 52, "total": 120, "elite": 0.04, "event": "ring", "id": "slime", "count": 26},
+					{"pool": ALL_BR, "alive": 56, "total": 300, "elite": 0.05, "invasion": 180},
+					{"pool": ALL_BR, "alive": 36, "total": 90, "elite": 0.05, "event": "boss", "id": "gloop_brute", "count": 2},
+					{"pool": ALL_BR, "alive": 64, "total": 140, "elite": 0.06, "event": "swarm", "id": "slime", "count": 24},
+					{"pool": ALL_BR, "alive": 70, "total": 150, "elite": 0.07, "event": "ring", "id": "runner", "count": 36},
+					{"pool": ALL_BR, "alive": 76, "total": 160, "elite": 0.08, "event": "swarm", "id": "runner", "count": 30},
+					{"pool": ALL_BR, "alive": 80, "total": 315, "elite": 0.09, "invasion": 220},
 				],
 			}},
 		],
@@ -230,21 +239,22 @@ const WORLDS := [
 		"rooms": [
 			{"final": true, "survival": {
 				"arena": Vector2i(56, 75), "art": "hive", "duration": 420.0, "hp_per_min": 0.45,
-				"t_offset": 150.0, "boss": "mothership",
+				"t_offset": 150.0, "boss": "hive_queen",
+				"boss_help": {"pool": ["ufo_alien", "ufo_alien", "runner", "slime"], "max": 8, "every": [16.0, 8.0], "squad": 3},
 				"final": {"pool": HIVE, "alive": 30, "rate": 2.8},
 				"waves": [
 					{"pool": ["slime", "runner", "ufo_alien"], "alive": 20, "rate": 2.4},
 					{"pool": ["slime", "runner", "spitter", "ufo_alien"], "alive": 28, "rate": 3.0, "event": "swarm", "id": "ufo_alien", "count": 20},
 					{"pool": MID, "alive": 32, "rate": 3.2, "elite": 0.03, "event": "ring", "id": "runner", "count": 22},
 					{"pool": HIVE, "alive": 36, "rate": 3.4, "elite": 0.04, "event": "swarm", "id": "runner", "count": 24},
-					{"pool": HIVE, "alive": 40, "rate": 3.6, "elite": 0.04, "event": "ring", "id": "octopus", "count": 14},
+					{"pool": HIVE, "alive": 40, "rate": 3.6, "elite": 0.04, "event": "ring", "id": "runner", "count": 18},
 					{"pool": MID, "alive": 28, "rate": 2.6, "elite": 0.04, "event": "boss", "id": "brood_mother"},
 					{"pool": HIVE, "alive": 46, "rate": 4.0, "elite": 0.05, "event": "swarm", "id": "ufo_alien", "count": 30},
 					{"pool": HIVE, "alive": 50, "rate": 4.2, "elite": 0.05, "event": "ring", "id": "slime", "count": 34},
-					{"pool": HIVE, "alive": 54, "rate": 4.4, "elite": 0.06, "event": "swarm", "id": "droid", "count": 20},
+					{"pool": HIVE, "alive": 54, "rate": 4.4, "elite": 0.06, "event": "swarm", "id": "slime", "count": 24},
 					{"pool": HIVE, "alive": 58, "rate": 4.6, "elite": 0.06, "event": "ring", "id": "runner", "count": 36},
 					{"pool": HIVE, "alive": 34, "rate": 3.2, "elite": 0.06, "event": "boss", "id": "gloop_brute", "count": 2},
-					{"pool": HIVE, "alive": 66, "rate": 5.0, "elite": 0.07, "event": "swarm", "id": "octopus", "count": 16},
+					{"pool": HIVE, "alive": 66, "rate": 5.0, "elite": 0.07, "event": "swarm", "id": "ufo_alien", "count": 24},
 					{"pool": HIVE, "alive": 72, "rate": 5.2, "elite": 0.08, "event": "ring", "id": "runner", "count": 40},
 					{"pool": HIVE, "alive": 80, "rate": 5.5, "elite": 0.1, "event": "boss", "id": "brood_mother"},
 				],
