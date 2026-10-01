@@ -82,6 +82,29 @@ def mutant_set(n):
 
 
 SETS = {
+    # Future worlds: Orbit Warden boss / Orbit Raider horde variant share the art.
+    "orbit_warden": {
+        "anchor": "feet",
+        "anims": {
+            "walk": (["enemies/orbit_warden/idle/image_%02d.png" % i for i in (1, 2, 3, 4, 2)], 5, True),
+            "fury": (["enemies/orbit_warden/idle/image_%02d.png" % i for i in (5, 6, 7)], 7, True),
+            "hurt": (["enemies/orbit_warden/idle/image_08.png"], 1, False),
+            "charge": (["enemies/orbit_warden/cast/image_01.png"], 1, True),
+            "fire": (["enemies/orbit_warden/cast/image_%02d.png" % i for i in (2, 3, 4)], 8, True),
+            "summon": (["enemies/orbit_warden/summon/image_%02d.png" % i for i in (1, 2, 3, 4)], 5, False),
+            "splat": (["enemies/orbit_warden/idle/image_09.png"] + ["enemies/orbit_warden/die/image_%02d.png" % i for i in range(1, 8)], 7, False),
+        },
+        "body": "walk",
+    },
+    "orbit_spawn": {"anchor": "feet", "anims": {
+        "walk": (["enemies/orbit_warden/minion/image_01.png"], 1, True),
+    }, "body": "walk"},
+    "orbit_plasma": {"anchor": "center", "anims": {"fly": (
+        ["enemies/orbit_warden/orb/image_%02d.png" % i for i in (1, 2)], 7, True)}, "body": "fly"},
+    "orbit_burst": {"anchor": "center", "anims": {"pop": (
+        ["enemies/orbit_warden/burst/image_01.png"], 1, False)}, "body": "pop"},
+    "orbit_beam": {"anchor": "bottom", "anims": {"pop": (
+        ["enemies/orbit_warden/beam/image_%02d.png" % i for i in (1, 2, 1)], 8, False)}, "body": "pop"},
     "mutant1": mutant_set(1),
     "infected": {
         "anchor": "boots",

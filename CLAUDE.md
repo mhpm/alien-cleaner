@@ -1,5 +1,17 @@
 # Alien Cleanup Crew — Godot 4.7
 
+**Playground**: pantalla optativa `scenes/playground.tscn`, catálogo automático de
+enemigos y jefes; una oleada exacta seguida del jefe elegido o solo jefe. Ajuste
+`debug/playground/enabled` (oculto siempre en Release). Sesión, combate y HUD en
+`scripts/playground/`; bloquea guardados y restaura `Game` al salir. Guía
+`docs/playground.md`, prueba `tests/playground_test.tscn`.
+
+**Orbit Warden (disponible para futuros mundos)**: jefe `orbit_warden`, variante
+de horda `orbit_raider` y criatura invocada `orbit_spawn`, registrados en `EnemyData`.
+No están asignados a los mundos actuales. Arte original `tools/orbit_warden_ref.png`;
+reconstruir con `python tools/make_orbit_warden_assets.py`. Comportamiento y ejemplos
+de integración en `docs/orbit-warden.md`; prueba `tests/orbit_warden_test.tscn`.
+
 Roguelite de habitaciones para móvil en vertical (360×640, stretch `canvas_items`/`expand`, filtro nearest). Godot 4.7.2 (Forward+). Escena principal: `res://scenes/main_menu.tscn` → `res://scenes/game.tscn`.
 
 ## Arquitectura

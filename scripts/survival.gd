@@ -29,8 +29,8 @@ extends Node
 ## waves; the astronaut starts with no upgrades (they come from the XP of the helpers
 ## the boss calls in) and, after a short countdown, the final boss fight begins as if
 ## the clock had run out. `fight_time()` is what gets recorded.
-## Aliens drop XP gems (each level up offers an upgrade) and coins; the only power-up for
-## now is the gravity well (a black hole that pulls in every gem and coin on the floor).
+## Aliens drop XP gems (each level up offers an upgrade), coins, gravity wells
+## (pull in every gem and coin on the floor) and rare screen-clearing NUKE bombs.
 ## The other power-ups (CollectibleData) and the supply crates are off: turn them back
 ## on with DROPS / SUPPLY_CRATES.
 
@@ -59,8 +59,8 @@ const METEOR_DMG := 0.12  # share of max health a direct hit takes
 const CRATE_EVERY := 30.0
 const MAX_CRATES := 3
 const PICKUP_RANGE := 26.0  # XP gems fly to you from this close (the magnet upgrade: more)
-## chance per cleaned alien to drop each power-up (just the gravity well for now)
-const DROPS := {"magnet": 0.003}
+## Chance per normal cleaned alien; at most one random power-up per kill.
+const DROPS := {"magnet": 0.003, "bomb": 0.005}
 const ELITE_MAGNET := 0.35  # golden elites: coins and, often, a gravity well
 const SUPPLY_CRATES := false  # supply crates with power-ups (off for now)
 ## what a supply crate holds (weights)
@@ -776,7 +776,7 @@ func _leash() -> void:
 # ---------------------------------------------------------------- drops & XP
 
 ## Called by GameWorld when an alien is cleaned: XP gems, a few coins, now and then a
-## gravity well.
+## gravity well or NUKE bomb.
 func on_kill(e: Enemy) -> void:
 	kills += 1
 	var pos := e.global_position

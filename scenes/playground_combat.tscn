@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://b4djdimv6ahx7"]
+
+[ext_resource type="Script" path="res://scripts/playground/playground_host.gd" id="1_e5jk8"]
+
+[node name="PlaygroundCombat" type="Node" unique_id=1977392526]
+script = ExtResource("1_e5jk8")

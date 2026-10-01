@@ -3465,5 +3465,125 @@
     "loop": false
    }
   }
+ },
+ "orbit_warden": {
+  "size": [
+   316,
+   187
+  ],
+  "anchor": [
+   158,
+   187
+  ],
+  "body_h": 184.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 5,
+    "loop": true
+   },
+   "fury": {
+    "frames": 3,
+    "fps": 7,
+    "loop": true
+   },
+   "hurt": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "charge": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "fire": {
+    "frames": 3,
+    "fps": 8,
+    "loop": true
+   },
+   "summon": {
+    "frames": 4,
+    "fps": 5,
+    "loop": false
+   },
+   "splat": {
+    "frames": 8,
+    "fps": 7,
+    "loop": false
+   }
+  }
+ },
+ "orbit_spawn": {
+  "size": [
+   72,
+   78
+  ],
+  "anchor": [
+   36,
+   78
+  ],
+  "body_h": 78.0,
+  "anims": {
+   "walk": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "orbit_plasma": {
+  "size": [
+   80,
+   65
+  ],
+  "anchor": [
+   40,
+   32.5
+  ],
+  "body_h": 54.0,
+  "anims": {
+   "fly": {
+    "frames": 2,
+    "fps": 7,
+    "loop": true
+   }
+  }
+ },
+ "orbit_burst": {
+  "size": [
+   242,
+   216
+  ],
+  "anchor": [
+   121,
+   108.0
+  ],
+  "body_h": 216.0,
+  "anims": {
+   "pop": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   }
+  }
+ },
+ "orbit_beam": {
+  "size": [
+   206,
+   188
+  ],
+  "anchor": [
+   103,
+   188
+  ],
+  "body_h": 188.0,
+  "anims": {
+   "pop": {
+    "frames": 3,
+    "fps": 8,
+    "loop": false
+   }
+  }
  }
 }

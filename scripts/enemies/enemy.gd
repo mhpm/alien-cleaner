@@ -274,6 +274,8 @@ func _animate(delta: float) -> void:
 # ---------------------------------------------------------------- damage & status
 
 func take_damage(amount: float, dir := Vector2.ZERO, crit := false) -> void:
+	if Game.playground_active and (PlaygroundSession.boss_invincible if is_boss else PlaygroundSession.enemies_invincible):
+		return
 	if dead or (not targetable and spawn_t <= 0.0 and air > 4.0):
 		return
 	hp -= amount

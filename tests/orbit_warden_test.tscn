@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://b4oxwe8slr38s"]
+
+[ext_resource type="Script" path="res://tests/orbit_warden_test.gd" id="1_mgwmn"]
+
+[node name="OrbitWardenTest" type="Node" unique_id=1646891726]
+script = ExtResource("1_mgwmn")

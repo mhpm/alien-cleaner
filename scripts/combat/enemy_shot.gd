@@ -5,6 +5,7 @@ extends Node2D
 
 ## tex_id -> fly art, scale, pop art, pop scale, pop tint, burst colour
 const STYLES := {
+	"orbit_plasma": {"art": "orbit_plasma", "scale": 0.18, "pop": "orbit_burst", "pop_s": 0.12, "tint": Color.WHITE, "color": Color("c8ff3a"), "hit": 6.0},
 	"droid": {"art": "droid_shot", "scale": 0.1, "pop": "droid_pop", "pop_s": 0.12, "tint": Color.WHITE, "color": Color("73eff7")},
 	"ufo": {"art": "ufo_shot", "scale": 0.16, "pop": "droid_pop", "pop_s": 0.12, "tint": Color(0.55, 1.6, 0.45), "color": Color("a7f070")},
 	"octopus": {"art": "octopus_shot", "scale": 0.12, "pop": "octopus_pop", "pop_s": 0.11, "tint": Color.WHITE, "color": Color("41a6f6")},

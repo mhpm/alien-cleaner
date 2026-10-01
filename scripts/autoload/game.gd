@@ -39,6 +39,7 @@ var room_index := 0
 var run_coins := 0
 var boss_rush := false  # this run is a BOSS CHALLENGE: straight to the final boss
 var world: GameWorld = null
+var playground_active := false  # test runs never write persistent progression
 
 
 func _ready() -> void:
@@ -313,6 +314,8 @@ func crew_level() -> Array:
 
 
 func end_run() -> void:
+	if playground_active:
+		return
 	bank += run_coins
 	best_room = maxi(best_room, global_room())
 	runs += 1
@@ -320,6 +323,8 @@ func end_run() -> void:
 
 
 func save() -> void:
+	if playground_active:
+		return
 	var cfg := ConfigFile.new()
 	cfg.set_value("meta", "bank", bank)
 	cfg.set_value("meta", "perm", perm)

@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://cmtuuok7qt5tv"]
+
+[ext_resource type="Script" path="res://scripts/playground/playground_screen.gd" id="1_hddm4"]
+
+[node name="Playground" type="Control" unique_id=1773434502]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_hddm4")

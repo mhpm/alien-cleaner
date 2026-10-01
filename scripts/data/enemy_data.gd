@@ -4,6 +4,24 @@ extends RefCounted
 ## in enemy.gd, or a custom `script` for bosses).
 
 const TYPES := {
+    # Available for future worlds; deliberately not assigned to existing waves.
+	"orbit_warden": {
+		"name": "ORBIT WARDEN", "hp": 2600.0, "speed": 28.0, "damage": 24.0, "coins": 120, "cost": 0,
+		"radius": 21.0, "art": "orbit_warden", "scale": 0.38, "ai": "boss", "shoots": true,
+		"color": Color("c8ff3a"), "kb": 0.0, "boss": true,
+		"script": "res://scripts/enemies/boss_orbit_warden.gd",
+	},
+	"orbit_raider": {
+		"name": "Orbit Raider", "hp": 58.0, "speed": 24.0, "damage": 11.0, "coins": 5, "cost": 4,
+		"radius": 11.0, "art": "orbit_warden", "scale": 0.19, "ai": "orbit", "shoots": true,
+		"color": Color("c8ff3a"), "kb": 0.8,
+		"script": "res://scripts/enemies/orbit_raider.gd",
+	},
+	"orbit_spawn": {
+		"name": "Orbit Hatchling", "hp": 16.0, "speed": 35.0, "damage": 7.0, "coins": 1, "cost": 1,
+		"radius": 6.0, "art": "orbit_spawn", "scale": 0.24, "ai": "chaser",
+		"color": Color("c8ff3a"), "kb": 1.3,
+	},
 	"slime": {
 		"name": "Slime", "hp": 30.0, "speed": 22.0, "damage": 10.0, "coins": 2, "cost": 1,
 		"radius": 10.1, "art": "green", "scale": 0.34, "ai": "chaser",

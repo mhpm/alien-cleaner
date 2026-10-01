@@ -83,6 +83,14 @@ func _ready() -> void:
 	_fit_stage()
 	_intro()
 	Sfx.play_music("menu")
+	if PlaygroundSession.enabled():
+		var test_button := UiTheme.button("PLAYGROUND", Color("263e5f"), 15, Vector2(180, 36))
+		test_button.name = "PlaygroundButton"
+		test_button.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+		test_button.position = Vector2(get_viewport_rect().size.x * 0.5 - 90, get_viewport_rect().size.y - 50)
+		test_button.size = Vector2(180, 36)
+		test_button.pressed.connect(func() -> void: get_tree().change_scene_to_file(PlaygroundSession.PICKER))
+		add_child(test_button)
 
 
 func _tex(n: int) -> Texture2D:

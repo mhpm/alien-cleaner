@@ -1,6 +1,6 @@
 class_name CollectibleData
 extends RefCounted
-## Pickup art (assets/sprites/enviroment/collectibles_elements/, file number in `tex`)
+## Pickup art (`tex`: a numbered sheet element or a dedicated res:// texture)
 ## and what every pickup kind does. `size` = world size of the sprite's longest side.
 ## Survival power-ups (everything but coin / heart / power / xp) are applied by
 ## Survival.collect(); timed ones (`buff` seconds) become Player buffs shown in the HUD.
@@ -20,7 +20,7 @@ const ITEMS := {
 	"heart_max": {"tex": "009", "size": 12.0, "name": "HEART CORE +15 MAX", "color": Color("ff5566")},
 	"golden_carrot": {"tex": "036", "size": 12.0, "name": "GOLDEN CARROT!", "color": Color("ffcd75")},
 	"magnet": {"tex": "042", "size": 12.0, "name": "GRAVITY WELL", "color": Color("c75bd6")},
-	"bomb": {"tex": "031", "size": 12.0, "name": "NUKE!", "color": Color("a7f070")},
+	"bomb": {"tex": "res://assets/sprites/collectibles/bomb.tres", "size": 12.0, "name": "NUKE!", "color": Color("a7f070")},
 	"freeze": {"tex": "030", "size": 12.0, "name": "CRYO WAVE", "color": Color("a6e3ff")},
 	"turret": {"tex": "048", "size": 11.0, "name": "TURRET DROP", "color": Color("73eff7")},
 	"frenzy": {"tex": "027", "size": 12.0, "name": "OVERCLOCK", "color": Color("c75bd6"), "buff": 8.0},
@@ -40,7 +40,7 @@ static var _cache: Dictionary = {}
 
 static func tex_file(file: String) -> Texture2D:
 	if not _cache.has(file):
-		_cache[file] = load(DIR % file)
+		_cache[file] = load(file if file.begins_with("res://") else DIR % file)
 	return _cache[file]
 
 

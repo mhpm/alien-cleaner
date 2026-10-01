@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://csmd73fniavno"]
+
+[ext_resource type="Script" path="res://tests/playground_test.gd" id="1_5nlig"]
+
+[node name="PlaygroundTest" type="Node" unique_id=1580900794]
+script = ExtResource("1_5nlig")
