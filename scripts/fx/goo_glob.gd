@@ -7,6 +7,8 @@ extends Node2D
 ## landing point instead of leaving a puddle (the HIVE QUEEN's eggs).
 
 const DROP := {"red": "big_red_drop", "hive": "hive_drop"}
+## `flat_art` (an art set, e.g. the splitter's "splitlet") makes it throw that set's
+## "walk" sprite upright instead of a goo drop (always with `on_land`).
 const TINT := {"red": Color(1.5, 0.7, 1.1), "hive": Color(0.9, 1.5, 0.6)}
 
 var style := "red"
@@ -20,6 +22,7 @@ var puddle_r := 12.0
 var puddle_life := 5.0
 var size := 1.0
 var on_land := Callable()
+var flat_art := ""
 var t := 0.0
 var drop: AnimatedSprite2D
 var shadow: Sprite2D
@@ -31,8 +34,12 @@ func _ready() -> void:
 	shadow.texture = Art.tex("shadow")
 	shadow.modulate.a = 0.5
 	add_child(shadow)
-	drop = Art.make_anim(str(DROP[style]), 0.2 * size)
-	drop.play("fly")
+	if flat_art != "":
+		drop = Art.make_anim(flat_art, 0.2 * size)
+		drop.play("walk")
+	else:
+		drop = Art.make_anim(str(DROP[style]), 0.2 * size)
+		drop.play("fly")
 	add_child(drop)
 
 
@@ -44,7 +51,7 @@ func _physics_process(delta: float) -> void:
 	drop.position = Vector2(0, -up)
 	# the drop points along its path (the art falls downwards)
 	var vel := (to - from) / dur + Vector2(0, -cos(k * PI) * PI * height / dur)
-	drop.rotation = vel.angle() - PI * 0.5
+	drop.rotation = 0.0 if flat_art != "" else vel.angle() - PI * 0.5
 	shadow.scale = Vector2.ONE * (0.5 + 0.5 * k) * size
 	if k >= 1.0:
 		_land()
@@ -52,10 +59,10 @@ func _physics_process(delta: float) -> void:
 
 func _land() -> void:
 	var w := Game.world
-	var col: Color = GooPuddle.STYLES[style].color
+	var col: Color = Color("ff9f1c") if flat_art != "" else GooPuddle.STYLES[style].color
 	w.burst(global_position, col, 6 if acid else 4, 50.0, 0.35, 2.0, 60.0)
 	var fx := AnimFx.spawn(w.effects, "glob_pop", "pop", global_position + Vector2(0, -2), 0.12 * size)
-	fx.self_modulate = TINT[style]
+	fx.self_modulate = Color(1.6, 1.0, 0.4) if flat_art != "" else TINT[style]
 	if on_land.is_valid():
 		on_land.call(global_position)
 		queue_free()

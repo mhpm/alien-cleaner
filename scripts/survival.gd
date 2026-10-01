@@ -6,6 +6,16 @@ extends Node
 ##   "swarm"  a pack of `count` `id` charges in from one side
 ##   "ring"   `count` `id` appear in a circle around the player
 ##   "boss"   a mini boss joins the fight
+##   "pincer" two packs charge in from both sides of where you are heading
+##   "breach" `points` floor hatches around you glow, burst and pour out `count` aliens
+##   "spiral" spawn marks spin in around you one after another (VORTEX!)
+##   "escort" a golden elite `id` leads a pack of `count` `minion`s
+##   "crossfire" `count` shooters appear evenly around the screen edge
+##   "dropship" a UFO crosses the screen low over you, beaming `count` aliens down
+##   "meteor" METEOR SHOWER: `count` rocks fall on marked spots round you (they hurt you
+##            and the aliens) and some crack open with an alien inside ("hatch" chance)
+## Events take an "id" or a "pool" (random per alien) and an optional "label" banner;
+## "events": [{"at": s, "event": ...}] fires more of them later in the wave.
 ## A wave with "total" sends exactly that many aliens over its 30 s (events included;
 ## what the alive cap holds back carries over to the next wave). "invasion": n = after an
 ## INVASION INCOMING! warning, a horde of n bursts in from every side at once.
@@ -41,6 +51,11 @@ const DMG_PER_MIN := 0.05  # alien damage ramp (+5% per minute)
 const SHOOTER_SHARE := 0.2
 const INVASION_SHOOTERS := 0.08
 const MAX_SHOOTERS := 15
+const BREACH_WARN := 1.3  # seconds a breach hatch glows before bursting open
+const BREACH_RATE := 4.0  # aliens per second out of each open hatch
+const METEOR_WARN := 1.3  # seconds a meteor's spot is marked before the first rock lands
+const METEOR_R := 26.0  # blast radius
+const METEOR_DMG := 0.12  # share of max health a direct hit takes
 const CRATE_EVERY := 30.0
 const MAX_CRATES := 3
 const PICKUP_RANGE := 26.0  # XP gems fly to you from this close (the magnet upgrade: more)
@@ -85,6 +100,8 @@ var help_t := 9.0  # next boss-fight reinforcement squad
 var rush := false  # BOSS CHALLENGE run
 var rush_started := false
 var final_at := 0.0  # clock when the final boss fight began
+var timed: Array = []  # wave "events" still to come (each with "_at" = clock)
+var breaches: Array = []  # breach hatches: {pos, ev, left, warn, acc}
 
 
 func setup(w: GameWorld, d: Dictionary) -> void:
@@ -137,7 +154,9 @@ func _physics_process(delta: float) -> void:
 			var wi := mini(int(t / WAVE_SECS), waves.size() - 1)
 			if wi != wave:
 				_start_wave(wi)
+			_run_timed()
 	_spawn(delta)
+	_breaches(delta)
 	_invasion(delta)
 	_boss_help(delta)
 	leash_t -= delta
@@ -189,27 +208,85 @@ func _start_wave(i: int) -> void:
 	var w: Dictionary = waves[i]
 	quota += int(w.get("total", 0))  # plus whatever the last wave could not send
 	wave_end = (i + 1) * WAVE_SECS
-	var ev := str(w.get("event", ""))
+	for e: Dictionary in w.get("events", []):
+		var te := e.duplicate()
+		te["_at"] = i * WAVE_SECS + float(e.get("at", 0.0))
+		timed.append(te)
 	if w.has("invasion"):
 		_warn_invasion(int(w.invasion))
 		return
-	match ev:
-		"swarm":
-			world.hud.banner("SWARM!", Color("ff9a4d"), 34, 0.8)
-			_swarm(str(w.id), int(w.count))
-		"ring":
-			world.hud.banner("SURROUNDED!", Color("ff5566"), 30, 0.8)
-			_ring(str(w.id), int(w.count))
-		"boss":
-			var n := int(w.get("count", 1))
-			world.hud.banner("MINI BOSS!" if n == 1 else "%d MINI BOSSES!" % n, Color("ff5566"), 36, 1.0)
-			for k in n:
-				world._spawn_boss(str(w.id), _ring_pos(130.0), _boss_hp_mult(), _dmg_mult() * BOSS_DMG)
-		_:
-			if i > 0:
-				world.hud.banner("WAVE %d" % (i + 1), Color("ffcd75"), 32, 0.6)
-	if i > 0 and ev == "":
+	if str(w.get("event", "")) != "":
+		_event(w)
+	elif i > 0 and not w.get("events", []).any(func(e: Dictionary) -> bool: return float(e.get("at", 0.0)) <= 0.0):
+		world.hud.banner("WAVE %d" % (i + 1), Color("ffcd75"), 32, 0.6)
 		Sfx.play("alert", 0.0, -4.0)
+
+
+## Timed wave events ("events": [{"at": s, "event": ...}]) whose moment has come.
+func _run_timed() -> void:
+	var i := 0
+	while i < timed.size():
+		var e: Dictionary = timed[i]
+		if t >= float(e._at):
+			timed.remove_at(i)
+			_event(e)
+		else:
+			i += 1
+
+
+## One horde event (a wave's own "event" or one of its timed "events"). `id` = the
+## alien, or `pool` = a random pick per alien; an optional "label" replaces the banner.
+func _event(ev: Dictionary) -> void:
+	var label := str(ev.get("label", ""))
+	var count := int(ev.get("count", 1))
+	match str(ev.get("event", "")):
+		"swarm":
+			world.hud.banner(label if label != "" else "SWARM!", Color("ff9a4d"), 34, 0.8)
+			_swarm(_ev_id(ev), count, INF, ev)
+		"ring":
+			world.hud.banner(label if label != "" else "SURROUNDED!", Color("ff5566"), 30, 0.8)
+			_ring(_ev_id(ev), count)
+		"boss":
+			world.hud.banner(label if label != "" else ("MINI BOSS!" if count == 1 else "%d MINI BOSSES!" % count), Color("ff5566"), 36, 1.0)
+			for k in count:
+				world._spawn_boss(str(ev.id), _ring_pos(130.0), _boss_hp_mult(), _dmg_mult() * BOSS_DMG)
+		"pincer":
+			world.hud.banner(label if label != "" else "PINCER!", Color("ff9a4d"), 34, 0.8)
+			var a := _heading()
+			_swarm(_ev_id(ev), floori(count / 2.0), a + PI * 0.5, ev)
+			_swarm(_ev_id(ev), count - floori(count / 2.0), a - PI * 0.5, ev)
+			Sfx.play("alert", 0.0, -2.0)
+		"breach":
+			world.hud.banner(label if label != "" else "CONTAINMENT BREACH!", Color("c64dff"), 26, 1.0)
+			_breach(ev, count, int(ev.get("points", 3)))
+		"spiral":
+			world.hud.banner(label if label != "" else "VORTEX!", Color("c64dff"), 34, 0.8)
+			_spiral(ev, count)
+		"escort":
+			world.hud.banner(label if label != "" else "ELITE SQUAD!", Color("ffcd75"), 32, 0.9)
+			_escort(str(ev.id), str(ev.get("minion", "slime")), count)
+		"crossfire":
+			world.hud.banner(label if label != "" else "CROSSFIRE!", Color("5fe6ff"), 32, 0.9)
+			_crossfire(ev, count)
+		"dropship":
+			world.hud.banner(label if label != "" else "DROPSHIP!", Color("a7f070"), 32, 0.9)
+			_dropship(ev, count)
+		"meteor":
+			world.hud.banner(label if label != "" else "METEOR SHOWER!", Color("ff9a4d"), 28, 1.0)
+			_meteors(ev, count)
+
+
+func _ev_id(ev: Dictionary) -> String:
+	if ev.has("pool"):
+		var pool: Array = ev.pool
+		return str(pool[randi() % pool.size()])
+	return str(ev.get("id", "slime"))
+
+
+## Where the astronaut is heading (or a random direction when standing still).
+func _heading() -> float:
+	var dir := world.player.input_dir
+	return dir.angle() if dir.length() > 0.2 else randf() * TAU
 
 
 ## BOSS CHALLENGE: a warning banner before the countdown (no upgrades: earn them in the fight).
@@ -230,6 +307,8 @@ func _send_final() -> void:
 	final_sent = true
 	final_at = t
 	quota = 0
+	timed.clear()
+	breaches.clear()
 	invasion_left = 0
 	invasion_warn = 0.0
 	_wipe_horde()
@@ -241,6 +320,7 @@ func _send_final() -> void:
 	fence = BossFence.new().setup(c, FENCE_R)
 	world.effects.add_child(fence)
 	world.hud.banner("FINAL BOSS!", Color("ff5566"), 40, 1.2)
+	Sfx.play_music("boss")
 	Sfx.play("roar", 0.0)
 	world._spawn_boss(str(def.boss), c + Vector2(0, -FENCE_R * 0.55), _boss_hp_mult(), _dmg_mult() * BOSS_DMG)
 
@@ -525,16 +605,15 @@ func _edge_pos(angle := INF) -> Vector2:
 	return (p + Vector2.from_angle(a2) * edge_dist(a2)).clamp(b.position, b.end)
 
 
-func _swarm(id: String, count: int) -> void:
-	# from the direction the player is heading (or anywhere)
-	var dir := world.player.input_dir
-	var a := dir.angle() if dir.length() > 0.2 else randf() * TAU
+func _swarm(id: String, count: int, angle := INF, ev := {}) -> void:
+	# from the direction the player is heading (or `angle`); an event "pool" mixes the pack
+	var a := _heading() if angle == INF else angle
 	var centre := _edge_pos(a)
 	var side := (centre - world.player.global_position).normalized().orthogonal()
 	var b := world.room.bounds().grow(-14.0)
 	for i in count:
 		var pos := (centre + side * randf_range(-70.0, 70.0) + Vector2(randf_range(-12, 12), randf_range(-12, 12))).clamp(b.position, b.end)
-		_spawn_one(id, pos)
+		_spawn_one(_ev_id(ev) if ev.has("pool") else id, pos)
 	_count(count)
 
 
@@ -545,6 +624,135 @@ func _ring(id: String, count: int) -> void:
 		var pos := (p + Vector2.from_angle(TAU * i / count) * minf(world.view_size().x * 0.5 - 12.0, 150.0)).clamp(b.position, b.end)
 		world.spawn_with_marker(id, pos, 0.7, _hp_mult(), 1.0, false, _dmg_mult())
 	_count(count)
+
+
+## CONTAINMENT BREACH: `points` hatches around the astronaut glow for BREACH_WARN s,
+## then burst open and pour out `count` aliens between them, one by one.
+func _breach(ev: Dictionary, count: int, points: int) -> void:
+	var a0 := randf() * TAU
+	for k in points:
+		var a := a0 + TAU * k / points + randf_range(-0.3, 0.3)
+		var pos := _ring_pos(randf_range(105.0, 150.0), a)
+		world.telegraph_circle(pos, 16.0, BREACH_WARN)
+		breaches.append({"pos": pos, "ev": ev, "left": floori(float(count) / points) + (1 if k < count % points else 0),
+				"warn": BREACH_WARN, "acc": 0.0})
+	Sfx.play("charge", 0.0, -4.0)
+	world.hud.tint_flash(Color("c64dff"), 0.22, 0.5)
+
+
+func _breaches(delta: float) -> void:
+	var i := 0
+	while i < breaches.size():
+		var br: Dictionary = breaches[i]
+		var pos: Vector2 = br.pos
+		if float(br.warn) > 0.0:
+			br.warn = float(br.warn) - delta
+			if float(br.warn) <= 0.0:  # the hatch bursts
+				world.burst(pos, Color("a7f070"), 22, 90.0, 0.6, 3.0, 90.0)
+				world.burst(pos, Color("c64dff"), 14, 70.0, 0.5, 2.0)
+				world.ring(pos, 26.0, Color("c64dff"), 0.35, 3.0)
+				world.shake(0.35)
+				Sfx.play("land", 0.1, -4.0)
+			i += 1
+			continue
+		br.acc = float(br.acc) + delta * BREACH_RATE
+		while float(br.acc) >= 1.0 and int(br.left) > 0:
+			br.acc = float(br.acc) - 1.0
+			br.left = int(br.left) - 1
+			_spawn_one(_ev_id(br.ev), pos + Vector2(randf_range(-8, 8), randf_range(-5, 5)))
+			world.burst(pos, Color("a7f070"), 6, 50.0, 0.35, 2.0, 60.0)
+			_count(1)
+		if int(br.left) <= 0:
+			breaches.remove_at(i)
+		else:
+			i += 1
+
+
+## VORTEX: spawn marks spin in around the astronaut one after another, closing in.
+func _spiral(ev: Dictionary, count: int) -> void:
+	var p := world.player.global_position
+	var b := world.room.bounds().grow(-14.0)
+	var a0 := randf() * TAU
+	var turn := 1.0 if randf() < 0.5 else -1.0
+	var far := minf(world.view_size().x * 0.5 - 10.0, 170.0)
+	for i in count:
+		var k := float(i) / maxf(count - 1, 1)
+		var pos := (p + Vector2.from_angle(a0 + turn * k * TAU * 1.6) * lerpf(far, 70.0, k)).clamp(b.position, b.end)
+		world.spawn_with_marker(_ev_id(ev), pos, 0.5 + k * 1.6, _hp_mult(), 1.0, false, _dmg_mult())
+	_count(count)
+	Sfx.play("charge", 0.0, -6.0)
+
+
+## ELITE SQUAD: a golden `id` leads a tight pack of `count` `minion`s in from off screen.
+func _escort(id: String, minion: String, count: int) -> void:
+	var c := _edge_pos(_heading() + randf_range(-0.8, 0.8))
+	var b := world.room.bounds().grow(-14.0)
+	_spawn_one(id, c, true)
+	for i in count:
+		var pos := (c + Vector2.from_angle(TAU * i / count) * randf_range(18.0, 30.0)).clamp(b.position, b.end)
+		_spawn_one(minion, pos)
+	_count(count + 1)
+
+
+## CROSSFIRE: `count` shooters (from the event "pool") appear evenly around the edge
+## of the screen, so the fire comes from every side at once.
+func _crossfire(ev: Dictionary, count: int) -> void:
+	var p := world.player.global_position
+	var b := world.room.bounds().grow(-14.0)
+	var a0 := randf() * TAU
+	for i in count:
+		var a := a0 + TAU * i / count
+		var pos := (p + Vector2.from_angle(a) * (edge_dist(a, 0.0) - 26.0)).clamp(b.position, b.end)
+		world.spawn_with_marker(_ev_id(ev), pos, 0.9, _hp_mult(), 1.0, false, _dmg_mult())
+	_count(count)
+
+
+## DROPSHIP: a UFO flies across the screen close to the astronaut's row, beaming its
+## aliens down along the way.
+func _dropship(ev: Dictionary, count: int) -> void:
+	var p := world.player.global_position
+	var b := world.room.bounds().grow(-14.0)
+	var half := world.view_size().x * 0.5 + 50.0
+	# its row passes a little way above or below the astronaut, never on top of them
+	var y := p.y + randf_range(110.0, 160.0) * (-1.0 if randf() < 0.6 else 1.0)
+	if y < b.position.y + 20.0 or y > b.end.y:
+		y = p.y - (y - p.y)
+	y = clampf(y, b.position.y + 20.0, b.end.y)
+	var left := randf() < 0.5
+	var d := Dropship.new()
+	d.from = Vector2(p.x - half if left else p.x + half, y)
+	d.to = Vector2(p.x + half if left else p.x - half, y)
+	d.drops = count
+	d.spawn = func(at: Vector2) -> void:
+		var q := at.clamp(b.position, b.end)
+		world.spawn_with_marker(_ev_id(ev), q, 0.35, _hp_mult(), 1.0, false, _dmg_mult())
+	world.effects.add_child(d)
+	_count(count)
+
+
+## METEOR SHOWER: marked spots round the astronaut, then rocks slam into them one after
+## another; each blast hurts everyone close and some rocks hatch an alien.
+func _meteors(ev: Dictionary, count: int) -> void:
+	var b := world.room.bounds().grow(-14.0)
+	var hatched := 0
+	for i in count:
+		var pos := (world.player.global_position + Vector2.from_angle(randf() * TAU) * randf_range(10.0, 150.0)).clamp(b.position, b.end)
+		var warn := METEOR_WARN + i * 0.18
+		world.telegraph_circle(pos, METEOR_R, warn + MeteorFall.FALL)
+		var m := MeteorFall.new()
+		m.position = pos
+		m.warn = warn
+		var hatch := randf() < float(ev.get("hatch", 0.4))
+		if hatch:
+			hatched += 1
+		m.on_land = func(at: Vector2) -> void:
+			world.explosion(at, METEOR_R, 45.0, float(Game.stats.max_hp) * METEOR_DMG)
+			if hatch and not done:
+				_spawn_one(_ev_id(ev), at)
+				world.burst(at, Color("a7f070"), 10, 60.0, 0.4, 2.0)
+		world.effects.add_child(m)
+	_count(hatched)
+	Sfx.play("alert", 0.0, -2.0)
 
 
 ## Aliens left far behind reappear around the player (the horde never thins out).

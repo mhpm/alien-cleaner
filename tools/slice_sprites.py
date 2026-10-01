@@ -38,6 +38,17 @@ BLUE = [(7, 18, 84), (7, 106, 170), (7, 193, 258), (7, 281, 346), (7, 371, 437),
 
 BR = "enemies/big-red/big-red_elements/big-red_%03d.png"
 HQ = "enemies/bosses/boss_2_elements/boss_2_%03d.png"
+OC = "enemies/octopus3/image_%s.png"
+SL = "enemies/slime/%s/image_%s.png"
+TP = "enemies/tentacle plant/%s/image_%s.png"
+OW = "enemies/octo-wizard/%s/image_%s.png"
+U2 = "enemies/ufo2/image_%s.png"
+U3 = "enemies/ufo3/%s/image_%s.png"
+JP = "enemies/jelly pod/%s/image_%s.png"
+SM = "enemies/spike mine/%s/image_%s.png"
+W4 = "enemies/%s/%s/image_%02d.png"  # cut by tools/cut_sheet_enemies.py
+B3 = "enemies/bosses/boss_3_elements/image_%s.png"
+B4 = "enemies/bosses/boss_4_elements/image_%s.png"
 
 # Infected mode (loose frames in assets/sprites/enviroment/infected player_elements,
 # cut from "infected player.png"; frames face right, anchored on the boots)
@@ -191,6 +202,498 @@ SETS = {
                      "anims": {"fly": ([("enemies/octopus01/attack.png", 78, 146)], 1, True)}, "body": "fly"},
     "octopus_pop": {"anchor": "center",
                     "anims": {"pop": (["enemies/octopus01/enemies_051.png"], 1, False)}, "body": "pop"},
+    # Eyeclops (loose frames in assets/sprites/enemies/octopus3, enemies/eyeclops.gd):
+    # floating one-eyed octopus (walk), front view with its core glowing (charge), the
+    # caterpillar crawl of the lunge / wounded form (crawl) and the melt into a puddle
+    # (splat, played by the decal it leaves). orb.png = the bubble cut out of 008.
+    "eyeclops": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([OC % i for i in ("008", "009", "010", "011", "014", "016")], 8, True),
+            "charge": ([OC % i for i in ("053", "054", "055", "056", "057", "058")], 12, True),
+            "crawl": ([OC % i for i in ("024", "025", "026", "027", "028", "029")], 12, True),
+            "splat": ([OC % i for i in ("031", "040", "042", "043", "045", "049")], 9, False),
+        },
+        "body": "walk",
+    },
+    "eyeclops_orb": {"anchor": "center",
+                     "anims": {"fly": (["enemies/octopus3/orb.png"], 1, True)}, "body": "fly"},
+    # Slime Splitter (loose frames in assets/sprites/enemies/slime/{idle,attack,die},
+    # enemies/splitter.gd): wobbling orange goo with eyes (walk), pulls back (wind) and
+    # stretches an arm to fling a slimelet (fling), melts into a puddle (splat). The
+    # small one-eyed slimes it throws and bursts into are the "splitlet" set.
+    "splitter": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([SL % ("idle", i) for i in ("080", "083", "084", "085", "086")], 6, True),
+            "wind": ([SL % ("attack", "090")], 1, False),
+            "fling": ([SL % ("attack", "091")], 1, False),
+            "splat": ([SL % ("die", i) for i in ("123", "130", "131", "140")], 9, False),
+        },
+        "body": "walk",
+    },
+    "splitlet": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([SL % ("attack", i) for i in ("095", "098", "108", "111", "114")], 8, True),
+            "splat": ([(SL % ("die", "131"), 0, 999, 0.45)], 1, False),
+        },
+        "body": "walk",
+    },
+    # Tentacle Plant (loose frames in assets/sprites/enemies/tentacle plant/{idle,attack,
+    # die}, enemies/tentacle_plant.gd): creeps on its tentacles (walk = idle), opens its
+    # toothy maw (open), melts into a puddle (splat). attack/068 (maw + tongue) is not
+    # used: the tongue is drawn in code (combat/plant_tongue.gd) with the glob (074,
+    # "plant_glob") as its tip and as the spit projectile.
+    "tentacle_plant": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([TP % ("idle", i) for i in ("056", "057", "058", "059", "065")], 6, True),
+            "open": ([TP % ("attack", i) for i in ("066", "067")], 4, False),
+            "splat": ([TP % ("die", i) for i in ("089", "090", "091", "102")], 8, False),
+        },
+        "body": "walk",
+    },
+    "plant_glob": {"anchor": "center", "anims": {"fly": ([TP % ("attack", "074")], 1, True)}, "body": "fly"},
+    # Octo-Wizard (loose frames in assets/sprites/enemies/octo-wizard/{idle,attack,die},
+    # enemies/octo_wizard.gd): hooded one-eyed octopus mage that floats (walk), holds a
+    # glowing orb (orb), raises a hand for a rune (rune), spreads its arms as it blinks
+    # (blink) and melts into a puddle (splat). attack/019 holds two poses side by side
+    # (arms out | holding the orb): cut by columns. 029/034 = the orb it throws.
+    "octo_wizard": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([OW % ("idle", i) for i in ("001", "002", "003", "004", "005")], 6, True),
+            "blink": ([(OW % ("attack", "019"), 0, 167)], 1, False),
+            "orb": ([(OW % ("attack", "019"), 167, 308)], 1, False),
+            "rune": ([OW % ("attack", "022")], 1, False),
+            "splat": ([OW % ("die", i) for i in ("036", "045", "055", "057", "060")], 8, False),
+        },
+        "body": "walk",
+    },
+    "wizard_orb": {"anchor": "center",
+                   "anims": {"fly": ([OW % ("attack", "029"), OW % ("attack", "034")], 10, True)}, "body": "fly"},
+    # UFO GUNSHIP, world 4 (loose frames in assets/sprites/enemies/ufo2, enemies/ufo_gunship.gd):
+    # a big purple saucer with a side cannon. walk = hover with blinking lights, charge =
+    # the cannon glowing, fire = the shot leaving the barrel, boost = tilted with its jets
+    # blazing (the ram), splat = blows up and leaves a wreck.
+    "gunship": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([U2 % i for i in ("002", "004", "002", "008")], 6, True),
+            "charge": ([U2 % i for i in ("005",)], 1, False),
+            "fire": ([U2 % i for i in ("006", "007")], 10, False),
+            "boost": ([U2 % i for i in ("011",)], 1, False),
+            "splat": ([U2 % i for i in ("010", "014")], 5, False),
+        },
+        "body": "walk",
+    },
+    "gunship_shot": {"anchor": "center", "anims": {"fly": ([U2 % "015"], 1, True)}, "body": "fly"},
+    # UFO SCOUT, world 4 (loose frames in assets/sprites/enemies/ufo3/{idle,attack,die},
+    # enemies/ufo_scout.gd): a small pink saucer that circles you and spits comets.
+    # attack = its lights flaring, splat = cracks open and crashes.
+    "scout": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([U3 % ("idle", i) for i in ("010", "011", "012", "016", "017")], 9, True),
+            "attack": ([U3 % ("attack", i) for i in ("024", "025")], 10, True),
+            "splat": ([U3 % ("die", i) for i in ("044", "045", "046", "041")], 7, False),
+        },
+        "body": "walk",
+    },
+    "scout_shot": {"anchor": "center", "anims": {"fly": ([U3 % ("attack", i) for i in ("035", "036")], 12, True)}, "body": "fly"},
+    "scout_comet": {"anchor": "center", "anims": {"fly": ([U3 % ("attack", "028")], 1, True)}, "body": "fly"},
+    # JELLY POD, world 4 (loose frames in assets/sprites/enemies/jelly pod/{idle,attack,die},
+    # enemies/jelly_pod.gd): a jellyfish in a saucer. walk = drifting with swaying
+    # tentacles, attack = tentacles glowing (spores / sting), splat = the dome cracks and
+    # it melts into a magenta puddle.
+    "jelly_pod": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([JP % ("idle", i) for i in ("077", "078", "079", "080", "081")], 7, True),
+            "attack": ([JP % ("attack", i) for i in ("087", "088", "089")], 10, True),
+            "splat": ([JP % ("die", i) for i in ("117", "118", "120", "132", "133")], 8, False),
+        },
+        "body": "walk",
+    },
+    # SPIKE MINE, world 4 (loose frames in assets/sprites/enemies/spike mine/, enemies/spike_mine.gd):
+    # a spiked floating mine with a red eye. walk = the eye (it rolls in code), charge =
+    # the eye flaring while it arms, splat = cracks, burns and bursts into scrap.
+    "spike_mine": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([SM % ("edle and attack", "020")], 1, True),
+            "charge": ([SM % ("die", "043"), SM % ("edle and attack", "020")], 10, True),
+            "splat": ([SM % ("die", i) for i in ("040", "042", "050", "055")], 10, False),
+        },
+        "body": "walk",
+    },
+    "mine_shot": {"anchor": "center", "anims": {"fly": ([SM % ("edle and attack", i) for i in ("032", "033")], 10, True)}, "body": "fly"},
+    # world 4 sheet enemies (tools/enemies_w4_ref.webp -> tools/cut_sheet_enemies.py):
+    # idle / attack poses / "death" = the die row, played once as an effect (it ends in an
+    # explosion, so it is not a lasting splat). The attack row's projectile frames are
+    # their shots.
+    "comet_hopper": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("comet_hopper", "idle", i) for i in (1, 2, 3, 4, 5)], 8, True),
+            "attack": ([W4 % ("comet_hopper", "attack", i) for i in (1, 2, 3)], 8, False),
+            "death": ([W4 % ("comet_hopper", "die", i) for i in (1, 2, 3, 4, 5)], 10, False),
+        },
+        "body": "walk",
+    },
+    "hopper_comet": {"anchor": "center", "anims": {"fly": ([W4 % ("comet_hopper", "attack", 4)], 1, True)}, "body": "fly"},
+    "ring_bug": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("ring_bug", "idle", i) for i in (1, 2, 3, 4, 5)], 8, True),
+            "attack": ([W4 % ("ring_bug", "attack", i) for i in (1, 2)], 6, False),
+            "death": ([W4 % ("ring_bug", "die", i) for i in (1, 2, 3, 4, 5)], 10, False),
+        },
+        "body": "walk",
+    },
+    "ring_bug_ring": {"anchor": "center", "anims": {"fly": ([W4 % ("ring_bug", "attack", i) for i in (4, 3)], 10, True)}, "body": "fly"},
+    "drill_orbiter": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("drill_orbiter", "idle", i) for i in (1, 2, 3, 4, 5)], 10, True),
+            "attack": ([W4 % ("drill_orbiter", "attack", i) for i in (1, 2)], 10, True),
+            "fire": ([W4 % ("drill_orbiter", "attack", 3)], 1, False),
+            "death": ([W4 % ("drill_orbiter", "die", i) for i in (1, 2, 3, 4, 5)], 10, False),
+        },
+        "body": "walk",
+    },
+    "drill_cone": {"anchor": "center", "anims": {"fly": ([W4 % ("drill_orbiter", "attack", i) for i in (4, 5)], 12, True)}, "body": "fly"},
+    "nova_puffer": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("nova_puffer", "idle", i) for i in (1, 2, 3, 4, 5)], 7, True),
+            "attack": ([W4 % ("nova_puffer", "attack", i) for i in (1, 2)], 6, True),
+            "death": ([W4 % ("nova_puffer", "die", i) for i in (1, 2, 3, 4)], 8, False),
+        },
+        "body": "walk",
+    },
+    "nova_bubble": {"anchor": "center", "anims": {"fly": ([W4 % ("nova_puffer", "attack", i) for i in (3, 4)], 6, True)}, "body": "fly"},
+    # world 4 drones (tools/drones_w4_ref.webp -> tools/cut_sheet_enemies.py); "death" =
+    # the die row, played once as an effect.
+    "blade_drone": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("blade_drone", "idle", i) for i in (1, 2, 3, 4, 5)], 12, True),
+            "attack": ([W4 % ("blade_drone", "attack", i) for i in (1, 2)], 10, True),
+            "death": ([W4 % ("blade_drone", "die", i) for i in (1, 2, 3, 4, 5)], 10, False),
+        },
+        "body": "walk",
+    },
+    "blade_crescent": {"anchor": "center", "anims": {"fly": ([W4 % ("blade_drone", "attack", i) for i in (3, 4)], 12, True)}, "body": "fly"},
+    "tesla_drone": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("tesla_drone", "idle", i) for i in (1, 2, 3, 4, 5)], 9, True),
+            "attack": ([W4 % ("tesla_drone", "attack", i) for i in (1, 2, 3)], 10, True),
+            "death": ([W4 % ("tesla_drone", "die", i) for i in (1, 2, 3, 4)], 9, False),
+        },
+        "body": "walk",
+    },
+    "tesla_orb": {"anchor": "center", "anims": {"fly": ([W4 % ("tesla_drone", "attack", 5)], 1, True)}, "body": "fly"},
+    "crab_drone": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("crab_drone", "idle", i) for i in (1, 2, 3, 4, 5)], 9, True),
+            "attack": ([W4 % ("crab_drone", "attack", i) for i in (1, 2, 3)], 8, False),
+            "death": ([W4 % ("crab_drone", "die", i) for i in (1, 2, 3, 4)], 8, False),
+        },
+        "body": "walk",
+    },
+    "crab_rocket": {"anchor": "center", "anims": {"fly": ([W4 % ("crab_drone", "rocket", 2)], 1, True)}, "body": "fly"},
+    "prism_drone": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("prism_drone", "idle", i) for i in (1, 2, 3, 4, 5)], 8, True),
+            "attack": ([W4 % ("prism_drone", "attack", i) for i in (1, 2)], 10, True),
+            "fire": ([W4 % ("prism_drone", "attack", 3)], 1, False),
+            "death": ([W4 % ("prism_drone", "die", i) for i in (1, 2, 3, 4)], 9, False),
+        },
+        "body": "walk",
+    },
+    "prism_beam": {"anchor": "center", "anims": {"fly": ([W4 % ("prism_drone", "attack", 4)], 1, True)}, "body": "fly"},
+    # world 4, second sheet (tools/enemies_w4b_ref.webp -> cut_sheet_enemies.py). The
+    # peeper blows up ("death", played once); the others melt into a puddle ("splat", stays).
+    "meteor_peeper": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("meteor_peeper", "idle", i) for i in (1, 2, 3, 4, 3, 2)], 7, True),
+            "attack": ([W4 % ("meteor_peeper", "attack", i) for i in (1, 2, 3)], 8, False),
+            "death": ([W4 % ("meteor_peeper", "die", i) for i in (1, 2, 3, 4)], 8, False),
+        },
+        "body": "walk",
+    },
+    "bubble_brain": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("bubble_brain", "idle", i) for i in (1, 2, 3, 4)], 7, True),
+            "attack": ([W4 % ("bubble_brain", "attack", i) for i in (1, 2)], 8, False),
+            "splat": ([W4 % ("bubble_brain", "die", i) for i in (1, 2, 3, 4, 5)], 8, False),
+        },
+        "body": "walk",
+    },
+    "bell_cruiser": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("bell_cruiser", "idle", i) for i in (1, 2, 3, 4, 3, 2)], 6, True),
+            "attack": ([W4 % ("bell_cruiser", "attack", i) for i in (1, 2)], 8, False),
+            "splat": ([W4 % ("bell_cruiser", "die", i) for i in (1, 2, 3, 4)], 8, False),
+        },
+        "body": "walk",
+    },
+    "goo_hopper": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("goo_hopper", "idle", i) for i in (1, 2, 3, 4)], 7, True),
+            "attack": ([W4 % ("goo_hopper", "attack", i) for i in (1, 2)], 8, False),
+            "splat": ([W4 % ("goo_hopper", "die", i) for i in (1, 2, 3, 4)], 8, False),
+        },
+        "body": "walk",
+    },
+    "peeper_meteor": {"anchor": "center", "anims": {"fly": ([W4 % ("meteor_peeper", "shot", 1)], 1, True)}, "body": "fly"},
+    "peeper_rock": {"anchor": "center", "anims": {"fly": ([W4 % ("meteor_peeper", "shot", 2)], 1, True)}, "body": "fly"},
+    "brain_bubble": {"anchor": "center", "anims": {"fly": ([W4 % ("bubble_brain", "shot", 1)], 1, True)}, "body": "fly"},
+    "bell_bubble": {"anchor": "center", "anims": {"fly": ([W4 % ("bell_cruiser", "shot", 1)], 1, True)}, "body": "fly"},
+    # world 4, third sheet (tools/enemies_w4c_ref.webp -> cut_sheet_enemies.py)
+    "nebula_pod": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("nebula_pod", "idle", i) for i in (1, 2, 3, 4, 5)], 8, True),
+            "attack": ([W4 % ("nebula_pod", "attack", i) for i in (1, 2, 3)], 8, False),
+            "death": ([W4 % ("nebula_pod", "die", i) for i in (1, 2, 3, 4, 5)], 8, False),
+        },
+        "body": "walk",
+    },
+    "ring_eye": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("ring_eye", "idle", i) for i in (1, 2, 3, 4, 5)], 8, True),
+            "attack": ([W4 % ("ring_eye", "attack", i) for i in (1, 2)], 8, False),
+            "splat": ([W4 % ("ring_eye", "die", i) for i in (1, 2, 3, 4)], 8, False),
+        },
+        "body": "walk",
+    },
+    "puddle_radar": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("puddle_radar", "idle", i) for i in (1, 2, 3, 4, 5)], 8, True),
+            "attack": ([W4 % ("puddle_radar", "attack", i) for i in (1, 2, 3)], 8, False),
+            "splat": ([W4 % ("puddle_radar", "die", i) for i in (1, 2, 3, 4)], 8, False),
+        },
+        "body": "walk",
+    },
+    "comet_baby": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("comet_baby", "idle", i) for i in (1, 2, 3, 4, 5)], 10, True),
+            "attack": ([W4 % ("comet_baby", "attack", i) for i in (1, 2)], 8, False),
+            "splat": ([W4 % ("comet_baby", "die", i) for i in (1, 2, 3, 4)], 8, False),
+        },
+        "body": "walk",
+    },
+    "nebula_orb": {"anchor": "center", "anims": {"fly": ([W4 % ("nebula_pod", "shot", 1)], 1, True)}, "body": "fly"},
+    "ring_eye_orb": {"anchor": "center", "anims": {"fly": ([W4 % ("ring_eye", "shot", 1)], 1, True)}, "body": "fly"},
+    "radar_bubble": {"anchor": "center", "anims": {"fly": ([W4 % ("puddle_radar", "shot", 1)], 1, True)}, "body": "fly"},
+    "baby_glob": {"anchor": "center", "anims": {"fly": ([W4 % ("comet_baby", "shot", 1)], 1, True)}, "body": "fly"},
+    # world 4, fourth sheet (tools/enemies_w4d_ref.webp -> cut_sheet_enemies.py); all melt ("splat")
+    "tadpole_saucer": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("tadpole_saucer", "idle", i) for i in (1, 2, 3, 4, 5)], 8, True),
+            "attack": ([W4 % ("tadpole_saucer", "attack", i) for i in (1, 2, 3)], 8, False),
+            "splat": ([W4 % ("tadpole_saucer", "die", i) for i in (1, 2, 3, 4, 5)], 8, False),
+        },
+        "body": "walk",
+    },
+    "plasma_pupil": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("plasma_pupil", "idle", i) for i in (1, 2, 3, 4, 5)], 8, True),
+            "attack": ([W4 % ("plasma_pupil", "attack", i) for i in (1, 2)], 8, False),
+            "splat": ([W4 % ("plasma_pupil", "die", i) for i in (1, 2, 3, 4, 5)], 8, False),
+        },
+        "body": "walk",
+    },
+    "tentacle_pod": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("tentacle_pod", "idle", i) for i in (1, 2, 3, 4, 5)], 7, True),
+            "attack": ([W4 % ("tentacle_pod", "attack", i) for i in (1, 2)], 8, False),
+            "splat": ([W4 % ("tentacle_pod", "die", i) for i in (1, 2, 3, 4, 5)], 8, False),
+        },
+        "body": "walk",
+    },
+    "pearl_flyer": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("pearl_flyer", "idle", i) for i in (1, 2, 3, 4, 5)], 8, True),
+            "attack": ([W4 % ("pearl_flyer", "attack", i) for i in (1, 2)], 8, False),
+            "splat": ([W4 % ("pearl_flyer", "die", i) for i in (1, 2, 3, 4)], 8, False),
+        },
+        "body": "walk",
+    },
+    "tadpole_bubble": {"anchor": "center", "anims": {"fly": ([W4 % ("tadpole_saucer", "shot", 1)], 1, True)}, "body": "fly"},
+    "pupil_plasma": {"anchor": "center", "anims": {"fly": ([W4 % ("plasma_pupil", "shot", 1)], 1, True)}, "body": "fly"},
+    "pod_bubble": {"anchor": "center", "anims": {"fly": ([W4 % ("tentacle_pod", "shot", 1)], 1, True)}, "body": "fly"},
+    "slime_pearl": {"anchor": "center", "anims": {"fly": ([W4 % ("pearl_flyer", "shot", 1)], 1, True)}, "body": "fly"},
+    # world 4, fifth sheet (tools/enemies_w4e_ref.webp -> cut_sheet_enemies.py)
+    "martian_scout": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("martian_scout", "idle", i) for i in (1, 2, 3, 4, 5)], 8, True),
+            "attack": ([W4 % ("martian_scout", "attack", i) for i in (1, 2, 3)], 8, False),
+            "death": ([W4 % ("martian_scout", "die", i) for i in (1, 2, 3, 4, 5)], 8, False),
+        },
+        "body": "walk",
+    },
+    "cyclops_pod": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("cyclops_pod", "idle", i) for i in (1, 2, 3, 4, 5)], 8, True),
+            "attack": ([W4 % ("cyclops_pod", "attack", i) for i in (1, 2)], 8, False),
+            "death": ([W4 % ("cyclops_pod", "die", i) for i in (1, 2, 3, 4, 5)], 8, False),
+        },
+        "body": "walk",
+    },
+    "tentacle_orbiter": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("tentacle_orbiter", "idle", i) for i in (1, 2, 3, 4, 5)], 8, True),
+            "attack": ([W4 % ("tentacle_orbiter", "attack", i) for i in (1, 2, 3)], 8, False),
+            "splat": ([W4 % ("tentacle_orbiter", "die", i) for i in (1, 2, 3, 4, 5)], 8, False),
+        },
+        "body": "walk",
+    },
+    "slime_comet": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("slime_comet", "idle", i) for i in (1, 2, 3, 4, 5)], 8, True),
+            "attack": ([W4 % ("slime_comet", "attack", i) for i in (1, 2)], 8, False),
+            "splat": ([W4 % ("slime_comet", "die", i) for i in (1, 2, 3, 4, 5)], 8, False),
+        },
+        "body": "walk",
+    },
+    "martian_orb": {"anchor": "center", "anims": {"fly": ([W4 % ("martian_scout", "shot", 1)], 1, True)}, "body": "fly"},
+    "cyclops_orb": {"anchor": "center", "anims": {"fly": ([W4 % ("cyclops_pod", "shot", 1)], 1, True)}, "body": "fly"},
+    "orbiter_orb": {"anchor": "center", "anims": {"fly": ([W4 % ("tentacle_orbiter", "shot", 1)], 1, True)}, "body": "fly"},
+    "comet_slime": {"anchor": "center", "anims": {"fly": ([W4 % ("slime_comet", "shot", 1)], 1, True)}, "body": "fly"},
+    # world 4, sixth sheet (tools/enemies_w4f_ref.webp -> cut_sheet_enemies.py)
+    "blink_saucer": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("blink_saucer", "idle", i) for i in (1, 2, 3, 4, 5)], 8, True),
+            "attack": ([W4 % ("blink_saucer", "attack", i) for i in (1, 2, 3)], 8, False),
+            "death": ([W4 % ("blink_saucer", "die", i) for i in (1, 2, 3, 4, 5)], 8, False),
+        },
+        "body": "walk",
+    },
+    "bean_cruiser": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("bean_cruiser", "idle", i) for i in (1, 2, 3, 4, 5)], 8, True),
+            "attack": ([W4 % ("bean_cruiser", "attack", i) for i in (1, 2)], 8, False),
+            "splat": ([W4 % ("bean_cruiser", "die", i) for i in (1, 2, 3, 4, 5)], 8, False),
+        },
+        "body": "walk",
+    },
+    "nugget_ship": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("nugget_ship", "idle", i) for i in (1, 2, 3, 4, 5)], 8, True),
+            "attack": ([W4 % ("nugget_ship", "attack", i) for i in (1, 2)], 8, False),
+            "splat": ([W4 % ("nugget_ship", "die", i) for i in (1, 2, 3, 4, 5)], 8, False),
+        },
+        "body": "walk",
+    },
+    "goo_lantern": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("goo_lantern", "idle", i) for i in (1, 2, 3, 4, 5)], 8, True),
+            "attack": ([W4 % ("goo_lantern", "attack", i) for i in (1, 2)], 8, False),
+            "splat": ([W4 % ("goo_lantern", "die", i) for i in (1, 2, 3, 4, 5)], 8, False),
+        },
+        "body": "walk",
+    },
+    "blink_bubble": {"anchor": "center", "anims": {"fly": ([W4 % ("blink_saucer", "shot", 1)], 1, True)}, "body": "fly"},
+    "nugget_orb": {"anchor": "center", "anims": {"fly": ([W4 % ("nugget_ship", "shot", 1)], 1, True)}, "body": "fly"},
+    "lantern_bubble": {"anchor": "center", "anims": {"fly": ([W4 % ("goo_lantern", "shot", 1)], 1, True)}, "body": "fly"},
+    "jelly_spore": {"anchor": "center", "anims": {"fly": ([JP % ("attack", i) for i in ("093", "098")], 6, True)}, "body": "fly"},
+    # VOID ARCHMAGE, world 3 final boss (loose frames in assets/sprites/enemies/bosses/
+    # boss_3_elements, cut from the sheet; enemies/boss_archmage.gd): a hooded one-eyed
+    # octopus mage. walk = idle + blinking, charge = glowing eye, fury = slit eye and aura,
+    # cast -> fire = the eye beam windup (024 is cut before the beam: drawn in code),
+    # moons = crescent blades circling him, summon = halo + raised hands, stun = X eyes
+    # (dizzy: takes more damage), death = slumps and melts into a puddle.
+    "archmage": {
+        "anchor": "feet",
+        "anims": {
+            "walk": ([B3 % i for i in ("001", "006", "008", "009", "021", "003", "005", "003")], 5, True),
+            "charge": ([B3 % i for i in ("004", "131")], 8, True),
+            "fury": ([B3 % i for i in ("002", "004")], 6, True),
+            "cast": ([B3 % i for i in ("022", "023", "025")], 9, False),
+            "fire": ([(B3 % "024", 0, 175)], 1, False),
+            "moons": ([B3 % i for i in ("050", "049", "046")], 9, True),
+            "summon": ([B3 % i for i in ("077", "078")], 6, True),
+            "stun": ([B3 % "079"], 1, True),
+            "death": ([B3 % i for i in ("131", "133", "132", "134", "136", "147", "156", "157", "159", "162")], 6, False),
+        },
+        "body": "walk",
+    },
+    # the boss curled into a spiky eye with crescents: whirls and rushes (rotated in code)
+    "arch_whirl": {"anchor": "center", "anims": {"spin": ([B3 % "048"], 1, True)}, "body": "spin"},
+    "arch_orb": {"anchor": "center", "anims": {"fly": ([B3 % i for i in ("036", "033")], 8, True)}, "body": "fly"},
+    "arch_bigorb": {"anchor": "center", "anims": {"fly": ([B3 % i for i in ("029", "027")], 8, True)}, "body": "fly"},
+    "arch_blade": {"anchor": "center", "anims": {"fly": ([B3 % i for i in ("059", "061", "062")], 14, True)}, "body": "fly"},
+    "arch_ring": {"anchor": "center", "anims": {"pop": ([B3 % "056"], 1, False)}, "body": "pop"},
+    "arch_boom": {"anchor": "center", "anims": {"pop": ([B3 % i for i in ("081", "099")], 14, False)}, "body": "pop"},
+    # COMMANDER ZORP, world 4 final boss (loose frames in assets/sprites/enemies/bosses/
+    # boss_4_elements; enemies/boss_zorp.gd): a cyan alien in a big saucer. walk = idle and
+    # winking, angry, charge = an orb growing in the dome, fire = side cannon, fury =
+    # electric antennas, stun = dizzy stars, spin = whirling with rings, warp = flattened
+    # into its teleport ring, summon = with a drone, splat = cracks, weeps and crashes
+    # into a smoking wreck (stays on the floor).
+    "zorp": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([B4 % i for i in ("005", "006", "005", "007", "005", "008", "011")], 5, True),
+            "angry": ([B4 % i for i in ("004", "037", "040", "054")], 6, True),
+            "charge": ([B4 % i for i in ("012", "013")], 6, True),
+            "fire": ([B4 % "010"], 1, False),
+            "fury": ([B4 % i for i in ("001", "002")], 8, True),
+            "stun": ([B4 % "003"], 1, True),
+            "spin": ([B4 % i for i in ("055", "056", "059")], 14, True),
+            "warp": ([B4 % "057"], 1, False),
+            "summon": ([B4 % "030"], 1, False),
+            "splat": ([B4 % i for i in ("090", "092", "094", "093", "089", "096")], 5, False),
+        },
+        "body": "walk",
+    },
+    "zorp_orb": {"anchor": "center", "anims": {"fly": ([B4 % i for i in ("022", "024")], 10, True)}, "body": "fly"},
+    "zorp_big": {"anchor": "center", "anims": {"fly": ([B4 % i for i in ("016", "019")], 8, True)}, "body": "fly"},
+    "zorp_bolt": {"anchor": "center", "anims": {"fly": ([B4 % i for i in ("015", "017", "018", "023")], 12, True)}, "body": "fly"},
+    "zorp_blade": {"anchor": "center", "anims": {"fly": ([B4 % i for i in ("032", "034")], 10, True)}, "body": "fly"},
+    "zorp_warp": {"anchor": "center", "anims": {"pop": ([B4 % i for i in ("064", "061", "064")], 6, False)}, "body": "pop"},
+    "zorp_pop": {"anchor": "center", "anims": {"pop": ([B4 % i for i in ("038", "041")], 12, False)}, "body": "pop"},
+    # the drones Zorp launches (enemies/zorp_drone.gd): orbit, then dash at you and burst
+    "zorp_drone": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([B4 % i for i in ("028", "029", "031", "033")], 8, True),
+            "dash": ([B4 % i for i in ("044", "046", "049")], 12, True),
+        },
+        "body": "walk",
+    },
+    # the eyes it summons: float to you and burst (enemies/arcane_eye.gd)
+    "arcane_eye": {
+        "anchor": "bbox",
+        "anims": {"walk": ([B3 % i for i in ("088", "090", "092", "090")], 6, True)},
+        "body": "walk",
+    },
     # Big Red (loose frames in assets/sprites/enemies/big-red/big-red_elements): the
     # red one-eyed brute and the world 1 boss. 002 and 005 hold two poses side by side,
     # 013 the shooting pose with its fireball (cut off: the fireball is big_red_ball).

@@ -1,6 +1,7 @@
 extends Node
 ## Tiny chiptune synth for every sound effect (generated at startup) plus the music:
-## assets/music/main-music.mp3 on the title / menus, levels.mp3 in every level.
+## assets/music/main-music.mp3 on the title / menus, levels.mp3 in every level,
+## bosses.mp3 while a final boss is fought.
 
 const RATE := 22050
 
@@ -11,6 +12,7 @@ var last_play: Dictionary = {}
 const MUSIC := {
 	"menu": "res://assets/music/main-music.mp3",
 	"level": "res://assets/music/levels.mp3",
+	"boss": "res://assets/music/bosses.mp3",
 }
 const MUSIC_DB := -9.0
 

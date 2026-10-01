@@ -993,5 +993,2084 @@
     "loop": true
    }
   }
+ },
+ "eyeclops": {
+  "size": [
+   212,
+   255
+  ],
+  "anchor": [
+   106,
+   255
+  ],
+  "body_h": 203.0,
+  "anims": {
+   "walk": {
+    "frames": 6,
+    "fps": 8,
+    "loop": true
+   },
+   "charge": {
+    "frames": 6,
+    "fps": 12,
+    "loop": true
+   },
+   "crawl": {
+    "frames": 6,
+    "fps": 12,
+    "loop": true
+   },
+   "splat": {
+    "frames": 6,
+    "fps": 9,
+    "loop": false
+   }
+  }
+ },
+ "eyeclops_orb": {
+  "size": [
+   28,
+   29
+  ],
+  "anchor": [
+   14,
+   14.5
+  ],
+  "body_h": 29.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "splitter": {
+  "size": [
+   168,
+   132
+  ],
+  "anchor": [
+   84,
+   132
+  ],
+  "body_h": 121.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 6,
+    "loop": true
+   },
+   "wind": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "fling": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "splat": {
+    "frames": 4,
+    "fps": 9,
+    "loop": false
+   }
+  }
+ },
+ "splitlet": {
+  "size": [
+   64,
+   58
+  ],
+  "anchor": [
+   32,
+   58
+  ],
+  "body_h": 52.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 8,
+    "loop": true
+   },
+   "splat": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   }
+  }
+ },
+ "tentacle_plant": {
+  "size": [
+   158,
+   145
+  ],
+  "anchor": [
+   79,
+   145
+  ],
+  "body_h": 138.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 6,
+    "loop": true
+   },
+   "open": {
+    "frames": 2,
+    "fps": 4,
+    "loop": false
+   },
+   "splat": {
+    "frames": 4,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "plant_glob": {
+  "size": [
+   72,
+   63
+  ],
+  "anchor": [
+   36,
+   31.5
+  ],
+  "body_h": 63.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "octo_wizard": {
+  "size": [
+   194,
+   165
+  ],
+  "anchor": [
+   97,
+   165
+  ],
+  "body_h": 163.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 6,
+    "loop": true
+   },
+   "blink": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "orb": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "rune": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "splat": {
+    "frames": 5,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "wizard_orb": {
+  "size": [
+   100,
+   101
+  ],
+  "anchor": [
+   50,
+   50.5
+  ],
+  "body_h": 94.0,
+  "anims": {
+   "fly": {
+    "frames": 2,
+    "fps": 10,
+    "loop": true
+   }
+  }
+ },
+ "archmage": {
+  "size": [
+   218,
+   205
+  ],
+  "anchor": [
+   109,
+   205
+  ],
+  "body_h": 190.5,
+  "anims": {
+   "walk": {
+    "frames": 8,
+    "fps": 5,
+    "loop": true
+   },
+   "charge": {
+    "frames": 2,
+    "fps": 8,
+    "loop": true
+   },
+   "fury": {
+    "frames": 2,
+    "fps": 6,
+    "loop": true
+   },
+   "cast": {
+    "frames": 3,
+    "fps": 9,
+    "loop": false
+   },
+   "fire": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "moons": {
+    "frames": 3,
+    "fps": 9,
+    "loop": true
+   },
+   "summon": {
+    "frames": 2,
+    "fps": 6,
+    "loop": true
+   },
+   "stun": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "death": {
+    "frames": 10,
+    "fps": 6,
+    "loop": false
+   }
+  }
+ },
+ "arch_whirl": {
+  "size": [
+   146,
+   178
+  ],
+  "anchor": [
+   73,
+   89.0
+  ],
+  "body_h": 178.0,
+  "anims": {
+   "spin": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "arch_orb": {
+  "size": [
+   80,
+   78
+  ],
+  "anchor": [
+   40,
+   39.0
+  ],
+  "body_h": 64.5,
+  "anims": {
+   "fly": {
+    "frames": 2,
+    "fps": 8,
+    "loop": true
+   }
+  }
+ },
+ "arch_bigorb": {
+  "size": [
+   158,
+   132
+  ],
+  "anchor": [
+   79,
+   66.0
+  ],
+  "body_h": 127.5,
+  "anims": {
+   "fly": {
+    "frames": 2,
+    "fps": 8,
+    "loop": true
+   }
+  }
+ },
+ "arch_blade": {
+  "size": [
+   78,
+   100
+  ],
+  "anchor": [
+   39,
+   50.0
+  ],
+  "body_h": 100.0,
+  "anims": {
+   "fly": {
+    "frames": 3,
+    "fps": 14,
+    "loop": true
+   }
+  }
+ },
+ "arch_ring": {
+  "size": [
+   140,
+   128
+  ],
+  "anchor": [
+   70,
+   64.0
+  ],
+  "body_h": 128.0,
+  "anims": {
+   "pop": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   }
+  }
+ },
+ "arch_boom": {
+  "size": [
+   122,
+   150
+  ],
+  "anchor": [
+   61,
+   75.0
+  ],
+  "body_h": 131.5,
+  "anims": {
+   "pop": {
+    "frames": 2,
+    "fps": 14,
+    "loop": false
+   }
+  }
+ },
+ "arcane_eye": {
+  "size": [
+   72,
+   116
+  ],
+  "anchor": [
+   36,
+   116
+  ],
+  "body_h": 100.0,
+  "anims": {
+   "walk": {
+    "frames": 4,
+    "fps": 6,
+    "loop": true
+   }
+  }
+ },
+ "gunship": {
+  "size": [
+   178,
+   178
+  ],
+  "anchor": [
+   89,
+   178
+  ],
+  "body_h": 157.0,
+  "anims": {
+   "walk": {
+    "frames": 4,
+    "fps": 6,
+    "loop": true
+   },
+   "charge": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "fire": {
+    "frames": 2,
+    "fps": 10,
+    "loop": false
+   },
+   "boost": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "splat": {
+    "frames": 2,
+    "fps": 5,
+    "loop": false
+   }
+  }
+ },
+ "gunship_shot": {
+  "size": [
+   46,
+   51
+  ],
+  "anchor": [
+   23,
+   25.5
+  ],
+  "body_h": 51.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "scout": {
+  "size": [
+   122,
+   129
+  ],
+  "anchor": [
+   61,
+   129
+  ],
+  "body_h": 112.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 9,
+    "loop": true
+   },
+   "attack": {
+    "frames": 2,
+    "fps": 10,
+    "loop": true
+   },
+   "splat": {
+    "frames": 4,
+    "fps": 7,
+    "loop": false
+   }
+  }
+ },
+ "scout_shot": {
+  "size": [
+   54,
+   33
+  ],
+  "anchor": [
+   27,
+   16.5
+  ],
+  "body_h": 32.0,
+  "anims": {
+   "fly": {
+    "frames": 2,
+    "fps": 12,
+    "loop": true
+   }
+  }
+ },
+ "scout_comet": {
+  "size": [
+   98,
+   48
+  ],
+  "anchor": [
+   49,
+   24.0
+  ],
+  "body_h": 48.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "jelly_pod": {
+  "size": [
+   132,
+   133
+  ],
+  "anchor": [
+   66,
+   133
+  ],
+  "body_h": 130.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 7,
+    "loop": true
+   },
+   "attack": {
+    "frames": 3,
+    "fps": 10,
+    "loop": true
+   },
+   "splat": {
+    "frames": 5,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "jelly_spore": {
+  "size": [
+   62,
+   73
+  ],
+  "anchor": [
+   31,
+   36.5
+  ],
+  "body_h": 64.5,
+  "anims": {
+   "fly": {
+    "frames": 2,
+    "fps": 6,
+    "loop": true
+   }
+  }
+ },
+ "spike_mine": {
+  "size": [
+   128,
+   133
+  ],
+  "anchor": [
+   64,
+   133
+  ],
+  "body_h": 120.0,
+  "anims": {
+   "walk": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "charge": {
+    "frames": 2,
+    "fps": 10,
+    "loop": true
+   },
+   "splat": {
+    "frames": 4,
+    "fps": 10,
+    "loop": false
+   }
+  }
+ },
+ "mine_shot": {
+  "size": [
+   76,
+   50
+  ],
+  "anchor": [
+   38,
+   25.0
+  ],
+  "body_h": 48.5,
+  "anims": {
+   "fly": {
+    "frames": 2,
+    "fps": 10,
+    "loop": true
+   }
+  }
+ },
+ "zorp": {
+  "size": [
+   274,
+   197
+  ],
+  "anchor": [
+   137,
+   197
+  ],
+  "body_h": 178.0,
+  "anims": {
+   "walk": {
+    "frames": 7,
+    "fps": 5,
+    "loop": true
+   },
+   "angry": {
+    "frames": 4,
+    "fps": 6,
+    "loop": true
+   },
+   "charge": {
+    "frames": 2,
+    "fps": 6,
+    "loop": true
+   },
+   "fire": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "fury": {
+    "frames": 2,
+    "fps": 8,
+    "loop": true
+   },
+   "stun": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "spin": {
+    "frames": 3,
+    "fps": 14,
+    "loop": true
+   },
+   "warp": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "summon": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "splat": {
+    "frames": 6,
+    "fps": 5,
+    "loop": false
+   }
+  }
+ },
+ "zorp_orb": {
+  "size": [
+   74,
+   76
+  ],
+  "anchor": [
+   37,
+   38.0
+  ],
+  "body_h": 60.0,
+  "anims": {
+   "fly": {
+    "frames": 2,
+    "fps": 10,
+    "loop": true
+   }
+  }
+ },
+ "zorp_big": {
+  "size": [
+   160,
+   138
+  ],
+  "anchor": [
+   80,
+   69.0
+  ],
+  "body_h": 116.5,
+  "anims": {
+   "fly": {
+    "frames": 2,
+    "fps": 8,
+    "loop": true
+   }
+  }
+ },
+ "zorp_bolt": {
+  "size": [
+   16,
+   18
+  ],
+  "anchor": [
+   8,
+   9.0
+  ],
+  "body_h": 15.5,
+  "anims": {
+   "fly": {
+    "frames": 4,
+    "fps": 12,
+    "loop": true
+   }
+  }
+ },
+ "zorp_blade": {
+  "size": [
+   54,
+   39
+  ],
+  "anchor": [
+   27,
+   19.5
+  ],
+  "body_h": 35.0,
+  "anims": {
+   "fly": {
+    "frames": 2,
+    "fps": 10,
+    "loop": true
+   }
+  }
+ },
+ "zorp_warp": {
+  "size": [
+   184,
+   141
+  ],
+  "anchor": [
+   92,
+   70.5
+  ],
+  "body_h": 128.0,
+  "anims": {
+   "pop": {
+    "frames": 3,
+    "fps": 6,
+    "loop": false
+   }
+  }
+ },
+ "zorp_pop": {
+  "size": [
+   152,
+   141
+  ],
+  "anchor": [
+   76,
+   70.5
+  ],
+  "body_h": 128.5,
+  "anims": {
+   "pop": {
+    "frames": 2,
+    "fps": 12,
+    "loop": false
+   }
+  }
+ },
+ "zorp_drone": {
+  "size": [
+   102,
+   101
+  ],
+  "anchor": [
+   51,
+   101
+  ],
+  "body_h": 47.5,
+  "anims": {
+   "walk": {
+    "frames": 4,
+    "fps": 8,
+    "loop": true
+   },
+   "dash": {
+    "frames": 3,
+    "fps": 12,
+    "loop": true
+   }
+  }
+ },
+ "comet_hopper": {
+  "size": [
+   108,
+   106
+  ],
+  "anchor": [
+   54,
+   106
+  ],
+  "body_h": 101.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 8,
+    "loop": true
+   },
+   "attack": {
+    "frames": 3,
+    "fps": 8,
+    "loop": false
+   },
+   "death": {
+    "frames": 5,
+    "fps": 10,
+    "loop": false
+   }
+  }
+ },
+ "hopper_comet": {
+  "size": [
+   74,
+   67
+  ],
+  "anchor": [
+   37,
+   33.5
+  ],
+  "body_h": 67.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "ring_bug": {
+  "size": [
+   106,
+   104
+  ],
+  "anchor": [
+   53,
+   104
+  ],
+  "body_h": 101.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 8,
+    "loop": true
+   },
+   "attack": {
+    "frames": 2,
+    "fps": 6,
+    "loop": false
+   },
+   "death": {
+    "frames": 5,
+    "fps": 10,
+    "loop": false
+   }
+  }
+ },
+ "ring_bug_ring": {
+  "size": [
+   88,
+   84
+  ],
+  "anchor": [
+   44,
+   42.0
+  ],
+  "body_h": 70.0,
+  "anims": {
+   "fly": {
+    "frames": 2,
+    "fps": 10,
+    "loop": true
+   }
+  }
+ },
+ "drill_orbiter": {
+  "size": [
+   142,
+   106
+  ],
+  "anchor": [
+   71,
+   106
+  ],
+  "body_h": 88.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 10,
+    "loop": true
+   },
+   "attack": {
+    "frames": 2,
+    "fps": 10,
+    "loop": true
+   },
+   "fire": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "death": {
+    "frames": 5,
+    "fps": 10,
+    "loop": false
+   }
+  }
+ },
+ "drill_cone": {
+  "size": [
+   80,
+   87
+  ],
+  "anchor": [
+   40,
+   43.5
+  ],
+  "body_h": 73.0,
+  "anims": {
+   "fly": {
+    "frames": 2,
+    "fps": 12,
+    "loop": true
+   }
+  }
+ },
+ "nova_puffer": {
+  "size": [
+   124,
+   112
+  ],
+  "anchor": [
+   62,
+   112
+  ],
+  "body_h": 102.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 7,
+    "loop": true
+   },
+   "attack": {
+    "frames": 2,
+    "fps": 6,
+    "loop": true
+   },
+   "death": {
+    "frames": 4,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "nova_bubble": {
+  "size": [
+   84,
+   72
+  ],
+  "anchor": [
+   42,
+   36.0
+  ],
+  "body_h": 66.5,
+  "anims": {
+   "fly": {
+    "frames": 2,
+    "fps": 6,
+    "loop": true
+   }
+  }
+ },
+ "blade_drone": {
+  "size": [
+   146,
+   106
+  ],
+  "anchor": [
+   73,
+   106
+  ],
+  "body_h": 87.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 12,
+    "loop": true
+   },
+   "attack": {
+    "frames": 2,
+    "fps": 10,
+    "loop": true
+   },
+   "death": {
+    "frames": 5,
+    "fps": 10,
+    "loop": false
+   }
+  }
+ },
+ "blade_crescent": {
+  "size": [
+   56,
+   69
+  ],
+  "anchor": [
+   28,
+   34.5
+  ],
+  "body_h": 63.5,
+  "anims": {
+   "fly": {
+    "frames": 2,
+    "fps": 12,
+    "loop": true
+   }
+  }
+ },
+ "tesla_drone": {
+  "size": [
+   120,
+   112
+  ],
+  "anchor": [
+   60,
+   112
+  ],
+  "body_h": 90.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 9,
+    "loop": true
+   },
+   "attack": {
+    "frames": 3,
+    "fps": 10,
+    "loop": true
+   },
+   "death": {
+    "frames": 4,
+    "fps": 9,
+    "loop": false
+   }
+  }
+ },
+ "tesla_orb": {
+  "size": [
+   64,
+   35
+  ],
+  "anchor": [
+   32,
+   17.5
+  ],
+  "body_h": 35.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "crab_drone": {
+  "size": [
+   152,
+   107
+  ],
+  "anchor": [
+   76,
+   107
+  ],
+  "body_h": 85.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 9,
+    "loop": true
+   },
+   "attack": {
+    "frames": 3,
+    "fps": 8,
+    "loop": false
+   },
+   "death": {
+    "frames": 4,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "crab_rocket": {
+  "size": [
+   66,
+   25
+  ],
+  "anchor": [
+   33,
+   12.5
+  ],
+  "body_h": 25.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "prism_drone": {
+  "size": [
+   198,
+   110
+  ],
+  "anchor": [
+   99,
+   110
+  ],
+  "body_h": 90.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 8,
+    "loop": true
+   },
+   "attack": {
+    "frames": 2,
+    "fps": 10,
+    "loop": true
+   },
+   "fire": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "death": {
+    "frames": 4,
+    "fps": 9,
+    "loop": false
+   }
+  }
+ },
+ "prism_beam": {
+  "size": [
+   210,
+   90
+  ],
+  "anchor": [
+   105,
+   45.0
+  ],
+  "body_h": 90.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "meteor_peeper": {
+  "size": [
+   144,
+   110
+  ],
+  "anchor": [
+   72,
+   110
+  ],
+  "body_h": 108.5,
+  "anims": {
+   "walk": {
+    "frames": 6,
+    "fps": 7,
+    "loop": true
+   },
+   "attack": {
+    "frames": 3,
+    "fps": 8,
+    "loop": false
+   },
+   "death": {
+    "frames": 4,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "bubble_brain": {
+  "size": [
+   116,
+   119
+  ],
+  "anchor": [
+   58,
+   119
+  ],
+  "body_h": 111.5,
+  "anims": {
+   "walk": {
+    "frames": 4,
+    "fps": 7,
+    "loop": true
+   },
+   "attack": {
+    "frames": 2,
+    "fps": 8,
+    "loop": false
+   },
+   "splat": {
+    "frames": 5,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "bell_cruiser": {
+  "size": [
+   132,
+   134
+  ],
+  "anchor": [
+   66,
+   134
+  ],
+  "body_h": 131.0,
+  "anims": {
+   "walk": {
+    "frames": 6,
+    "fps": 6,
+    "loop": true
+   },
+   "attack": {
+    "frames": 2,
+    "fps": 8,
+    "loop": false
+   },
+   "splat": {
+    "frames": 4,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "goo_hopper": {
+  "size": [
+   126,
+   137
+  ],
+  "anchor": [
+   63,
+   137
+  ],
+  "body_h": 135.0,
+  "anims": {
+   "walk": {
+    "frames": 4,
+    "fps": 7,
+    "loop": true
+   },
+   "attack": {
+    "frames": 2,
+    "fps": 8,
+    "loop": false
+   },
+   "splat": {
+    "frames": 4,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "peeper_meteor": {
+  "size": [
+   72,
+   49
+  ],
+  "anchor": [
+   36,
+   24.5
+  ],
+  "body_h": 49.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "peeper_rock": {
+  "size": [
+   48,
+   47
+  ],
+  "anchor": [
+   24,
+   23.5
+  ],
+  "body_h": 47.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "brain_bubble": {
+  "size": [
+   76,
+   63
+  ],
+  "anchor": [
+   38,
+   31.5
+  ],
+  "body_h": 63.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "bell_bubble": {
+  "size": [
+   56,
+   56
+  ],
+  "anchor": [
+   28,
+   28.0
+  ],
+  "body_h": 56.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "nebula_pod": {
+  "size": [
+   102,
+   117
+  ],
+  "anchor": [
+   51,
+   117
+  ],
+  "body_h": 103.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 8,
+    "loop": true
+   },
+   "attack": {
+    "frames": 3,
+    "fps": 8,
+    "loop": false
+   },
+   "death": {
+    "frames": 5,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "ring_eye": {
+  "size": [
+   132,
+   106
+  ],
+  "anchor": [
+   66,
+   106
+  ],
+  "body_h": 105.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 8,
+    "loop": true
+   },
+   "attack": {
+    "frames": 2,
+    "fps": 8,
+    "loop": false
+   },
+   "splat": {
+    "frames": 4,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "puddle_radar": {
+  "size": [
+   146,
+   125
+  ],
+  "anchor": [
+   73,
+   125
+  ],
+  "body_h": 119.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 8,
+    "loop": true
+   },
+   "attack": {
+    "frames": 3,
+    "fps": 8,
+    "loop": false
+   },
+   "splat": {
+    "frames": 4,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "comet_baby": {
+  "size": [
+   142,
+   122
+  ],
+  "anchor": [
+   71,
+   122
+  ],
+  "body_h": 117.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 10,
+    "loop": true
+   },
+   "attack": {
+    "frames": 2,
+    "fps": 8,
+    "loop": false
+   },
+   "splat": {
+    "frames": 4,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "nebula_orb": {
+  "size": [
+   86,
+   57
+  ],
+  "anchor": [
+   43,
+   28.5
+  ],
+  "body_h": 57.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "ring_eye_orb": {
+  "size": [
+   70,
+   45
+  ],
+  "anchor": [
+   35,
+   22.5
+  ],
+  "body_h": 45.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "radar_bubble": {
+  "size": [
+   46,
+   55
+  ],
+  "anchor": [
+   23,
+   27.5
+  ],
+  "body_h": 55.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "baby_glob": {
+  "size": [
+   82,
+   54
+  ],
+  "anchor": [
+   41,
+   27.0
+  ],
+  "body_h": 54.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "tadpole_saucer": {
+  "size": [
+   110,
+   111
+  ],
+  "anchor": [
+   55,
+   111
+  ],
+  "body_h": 108.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 8,
+    "loop": true
+   },
+   "attack": {
+    "frames": 3,
+    "fps": 8,
+    "loop": false
+   },
+   "splat": {
+    "frames": 5,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "plasma_pupil": {
+  "size": [
+   100,
+   119
+  ],
+  "anchor": [
+   50,
+   119
+  ],
+  "body_h": 116.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 8,
+    "loop": true
+   },
+   "attack": {
+    "frames": 2,
+    "fps": 8,
+    "loop": false
+   },
+   "splat": {
+    "frames": 5,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "tentacle_pod": {
+  "size": [
+   114,
+   144
+  ],
+  "anchor": [
+   57,
+   144
+  ],
+  "body_h": 133.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 7,
+    "loop": true
+   },
+   "attack": {
+    "frames": 2,
+    "fps": 8,
+    "loop": false
+   },
+   "splat": {
+    "frames": 5,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "pearl_flyer": {
+  "size": [
+   132,
+   125
+  ],
+  "anchor": [
+   66,
+   125
+  ],
+  "body_h": 123.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 8,
+    "loop": true
+   },
+   "attack": {
+    "frames": 2,
+    "fps": 8,
+    "loop": false
+   },
+   "splat": {
+    "frames": 4,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "tadpole_bubble": {
+  "size": [
+   122,
+   76
+  ],
+  "anchor": [
+   61,
+   38.0
+  ],
+  "body_h": 76.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "pupil_plasma": {
+  "size": [
+   122,
+   77
+  ],
+  "anchor": [
+   61,
+   38.5
+  ],
+  "body_h": 77.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "pod_bubble": {
+  "size": [
+   86,
+   78
+  ],
+  "anchor": [
+   43,
+   39.0
+  ],
+  "body_h": 78.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "slime_pearl": {
+  "size": [
+   72,
+   86
+  ],
+  "anchor": [
+   36,
+   43.0
+  ],
+  "body_h": 86.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "martian_scout": {
+  "size": [
+   104,
+   103
+  ],
+  "anchor": [
+   52,
+   103
+  ],
+  "body_h": 100.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 8,
+    "loop": true
+   },
+   "attack": {
+    "frames": 3,
+    "fps": 8,
+    "loop": false
+   },
+   "death": {
+    "frames": 5,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "cyclops_pod": {
+  "size": [
+   92,
+   110
+  ],
+  "anchor": [
+   46,
+   110
+  ],
+  "body_h": 109.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 8,
+    "loop": true
+   },
+   "attack": {
+    "frames": 2,
+    "fps": 8,
+    "loop": false
+   },
+   "death": {
+    "frames": 5,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "tentacle_orbiter": {
+  "size": [
+   112,
+   117
+  ],
+  "anchor": [
+   56,
+   117
+  ],
+  "body_h": 111.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 8,
+    "loop": true
+   },
+   "attack": {
+    "frames": 3,
+    "fps": 8,
+    "loop": false
+   },
+   "splat": {
+    "frames": 5,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "slime_comet": {
+  "size": [
+   110,
+   97
+  ],
+  "anchor": [
+   55,
+   97
+  ],
+  "body_h": 94.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 8,
+    "loop": true
+   },
+   "attack": {
+    "frames": 2,
+    "fps": 8,
+    "loop": false
+   },
+   "splat": {
+    "frames": 5,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "martian_orb": {
+  "size": [
+   58,
+   45
+  ],
+  "anchor": [
+   29,
+   22.5
+  ],
+  "body_h": 45.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "cyclops_orb": {
+  "size": [
+   76,
+   56
+  ],
+  "anchor": [
+   38,
+   28.0
+  ],
+  "body_h": 56.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "orbiter_orb": {
+  "size": [
+   56,
+   50
+  ],
+  "anchor": [
+   28,
+   25.0
+  ],
+  "body_h": 50.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "comet_slime": {
+  "size": [
+   70,
+   75
+  ],
+  "anchor": [
+   35,
+   37.5
+  ],
+  "body_h": 75.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "blink_saucer": {
+  "size": [
+   110,
+   118
+  ],
+  "anchor": [
+   55,
+   118
+  ],
+  "body_h": 114.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 8,
+    "loop": true
+   },
+   "attack": {
+    "frames": 3,
+    "fps": 8,
+    "loop": false
+   },
+   "death": {
+    "frames": 5,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "bean_cruiser": {
+  "size": [
+   110,
+   127
+  ],
+  "anchor": [
+   55,
+   127
+  ],
+  "body_h": 125.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 8,
+    "loop": true
+   },
+   "attack": {
+    "frames": 2,
+    "fps": 8,
+    "loop": false
+   },
+   "splat": {
+    "frames": 5,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "nugget_ship": {
+  "size": [
+   120,
+   118
+  ],
+  "anchor": [
+   60,
+   118
+  ],
+  "body_h": 114.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 8,
+    "loop": true
+   },
+   "attack": {
+    "frames": 2,
+    "fps": 8,
+    "loop": false
+   },
+   "splat": {
+    "frames": 5,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "goo_lantern": {
+  "size": [
+   122,
+   131
+  ],
+  "anchor": [
+   61,
+   131
+  ],
+  "body_h": 131.0,
+  "anims": {
+   "walk": {
+    "frames": 5,
+    "fps": 8,
+    "loop": true
+   },
+   "attack": {
+    "frames": 2,
+    "fps": 8,
+    "loop": false
+   },
+   "splat": {
+    "frames": 5,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "blink_bubble": {
+  "size": [
+   60,
+   59
+  ],
+  "anchor": [
+   30,
+   29.5
+  ],
+  "body_h": 59.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "nugget_orb": {
+  "size": [
+   68,
+   69
+  ],
+  "anchor": [
+   34,
+   34.5
+  ],
+  "body_h": 69.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "lantern_bubble": {
+  "size": [
+   108,
+   67
+  ],
+  "anchor": [
+   54,
+   33.5
+  ],
+  "body_h": 67.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
  }
 }

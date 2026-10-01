@@ -87,7 +87,14 @@ func _ready() -> void:
 ## boots = speed, triple = extra diagonal shots, rage = double damage, shield = no
 ## damage, star = no damage + crush aliens on touch, ufo = two extra orbiting UFOs.
 var buffs: Dictionary = {}
+var sticky_t := 0.0  # > 0: slowed by sticky goo (Bean Cruiser), see stick()
+const STICKY_SLOW := 0.55
 var star_hit_t := 0.0
+
+
+## Sticky goo on the boots: slower for `secs` (it doesn't stack, it refreshes).
+func stick(secs: float) -> void:
+	sticky_t = maxf(sticky_t, secs)
 
 
 func has_buff(k: String) -> bool:
@@ -202,12 +209,15 @@ func _physics_process(delta: float) -> void:
 
 	var dir := Vector2.ZERO if locked else input_dir.limit_length(1.0)
 	var slow := Game.world.room.slow_factor(global_position)  # sticky alien creep
+	sticky_t = maxf(sticky_t - delta, 0.0)
+	if sticky_t > 0.0:
+		slow *= STICKY_SLOW  # stuck in Bean Cruiser goo
 	velocity = dir * float(s.move_speed) * slow * (1.45 if has_buff("boots") else 1.0) * infected.speed_mult() + knock
 	var dash_v := infected.dash_velocity()
 	if dash_v != Vector2.INF:
 		velocity = dash_v
 	if slow < 1.0 and dir.length() > 0.15 and randf() < delta * 10.0:
-		Game.world.burst(global_position, Color("c75bd6"), 1, 12.0, 0.4, 1.5, -10.0)
+		Game.world.burst(global_position, Color("a7f070") if sticky_t > 0.0 else Color("c75bd6"), 1, 12.0, 0.4, 1.5, -10.0)
 	knock = knock.move_toward(Vector2.ZERO, 700.0 * delta)
 	move_and_slide()
 	var moving := dir.length() > 0.15

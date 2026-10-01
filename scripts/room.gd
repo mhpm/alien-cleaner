@@ -67,6 +67,11 @@ const ARENA_ART_SCALE := 0.25  # wall art px -> world
 const ART_ARENAS := {
 	# world 2: tools/arena2_ref.webp -> python tools/make_hive_arena.py
 	"hive": {"bg": "arena_hive_bg.webp", "data": "arena_hive.json", "scale": 0.55},
+	# world 3: built from the tile kit assets/ui/world/world3_elements/ -> python tools/make_void_arena.py
+	"void": {"bg": "arena_void_bg.webp", "data": "arena_void.json", "scale": 0.5},
+	# world 4: an open-air deck floating in space (tools/make_space_arena.py). "sky" = the
+	# space behind it, animated by SpaceBackdrop; the deck picture is transparent round it
+	"space": {"bg": "arena_space_deck.webp", "data": "arena_space.json", "scale": 0.5, "sky": "arena_space_sky.webp"},
 }
 var grid: Array = []
 var toxic: Dictionary = {}  # Vector2i -> splat texture
@@ -118,6 +123,7 @@ var floor_layer: TileMapLayer
 var arena_tex: Dictionary = {}
 var arena_bg: Texture2D  # painted arena picture (null = tiled floor and walls)
 var arena_bg_rect := Rect2()  # where it is drawn, world units (floor origin = 0,0)
+var space: SpaceBackdrop  # outer space behind a floating deck (ART_ARENAS "sky")
 var exit_pos := Vector2.INF  # arena exit portal (appears when the stage is clean)
 var portal_tex: Texture2D
 
@@ -387,6 +393,7 @@ func build_arena(size: Vector2i, _entities: Node2D, seed_v: int, art := "") -> v
 	door_open = false
 	door_k = 0.0
 	arena_bg = null
+	_clear_space()
 	cols = size.x
 	rows = size.y
 	room_w = cols * TILE
@@ -417,12 +424,27 @@ func _painted_arena(id: String) -> void:
 	rows = ceili(room_h / TILE)
 	arena_bg = load(ARENA + str(d.bg))
 	arena_bg_rect = Rect2(-Vector2(float(fl[0]), float(fl[1])) * s, Vector2(float(sz[0]), float(sz[1])) * s)
+	if d.has("sky"):
+		var beacons: Array = []
+		for b: Array in info.get("beacons", []):
+			beacons.append((Vector2(float(b[0]), float(b[1])) - Vector2(float(fl[0]), float(fl[1]))) * s)
+		space = SpaceBackdrop.new().setup(arena_bg_rect, load(ARENA + str(d.sky)), float(info.get("sky_pad", 0.0)) * s, beacons)
+		add_child(space)
+		add_child(space.lights)
+
+
+func _clear_space() -> void:
+	if space != null and is_instance_valid(space):
+		space.lights.queue_free()
+		space.queue_free()
+	space = null
 
 
 func _leave_arena() -> void:
 	if not arena:
 		return
 	arena = false
+	_clear_space()
 	exit_pos = Vector2.INF
 	if floor_layer != null:
 		floor_layer.visible = false

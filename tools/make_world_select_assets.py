@@ -54,9 +54,9 @@ ERASE = [
 TITLE = (168, 186, 796, 289)
 # recolour of the world-1 picture for the worlds that have no painting yet:
 # hue shift (degrees on OpenCV's 0-180 scale) and saturation / value gain
-WORLD_TINTS = {}
+WORLD_TINTS = {}  # e.g. {n: (hue, sat, val)} recolours world 1 for a world without art
 # worlds with their own painting (transparent png/webp in tools/)
-WORLD_PICS = {2: "world2_ref.webp"}
+WORLD_PICS = {2: "world2_ref.webp", 3: "world3_ref.webp", 4: "world4_ref.webp"}
 
 
 def erase(a, box):

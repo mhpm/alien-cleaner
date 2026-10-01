@@ -183,6 +183,7 @@ func _start_survival() -> void:
 	station_mode = false
 	var sd: Dictionary = room_def.survival
 	room.build_arena(sd.get("arena", Vector2i(64, 96)), entities, randi(), str(sd.get("art", "")))
+	room.modulate = sd.get("tint", Color.WHITE)  # world 3: a violet floor
 	player.reset_for_room(room.bounds().get_center() + Vector2(0, 24))
 	_camera_setup()
 	waves = []
@@ -204,6 +205,7 @@ func _survival_clear() -> void:
 	state_t = 1.6
 	hud.hide_boss()
 	hud.banner("STAGE CLEAR!", Color("a7f070"), 40, 1.3)
+	Sfx.play_music("level")
 	Sfx.play("clean", 0.0)
 	for p in get_tree().get_nodes_in_group("pickups"):
 		(p as Pickup).magnet = true
@@ -651,7 +653,7 @@ func explosion(pos: Vector2, radius: float, enemy_dmg: float, player_dmg: float)
 		var e := n as Enemy
 		if e != null and e.targetable and e.global_position.distance_to(pos) < radius + e.radius:
 			e.take_damage(enemy_dmg, (e.global_position - pos).normalized() * 3.0)
-	if not player.dead and player.global_position.distance_to(pos) < radius:
+	if player_dmg > 0.0 and not player.dead and player.global_position.distance_to(pos) < radius:
 		player.take_damage(player_dmg, pos)
 	# chain reaction: explosive barrels and prop tanks nearby go off too
 	for n in get_tree().get_nodes_in_group("barrels"):
