@@ -1,15 +1,18 @@
 class_name GooPuddle
 extends Node2D
-## A puddle of a boss's goo (STYLES: "red" = BIG RED, "hive" = HIVE QUEEN). Acid
+## A puddle of a boss's goo (STYLES: "red" = BIG RED, "hive" = HIVE QUEEN, "lava" = MAGMA DRAKE). Acid
 ## puddles (the bosses' mortars) bubble and burn the astronaut standing in them; the
 ## rest is just residue left where the goo splashed. Both dry up after `life` seconds.
 
 const RED := "res://assets/sprites/enemies/big-red/big-red_elements/big-red_%03d.png"
+const LAVA := "res://assets/sprites/enemies/magma_drake/die/image_%02d.png"
 const HIVE := "res://assets/sprites/enemies/bosses/boss_2_elements/boss_2_%03d.png"
 ## style -> small puddles, the big one (the boss's melted body), bubble colour
 const STYLES := {
 	"red": {"small": [RED % 95, RED % 98], "big": RED % 82, "color": Color("ff4fd8")},
 	"hive": {"small": [HIVE % 107, HIVE % 108, HIVE % 109], "big": HIVE % 121, "color": Color("c8ff3a")},
+	# MAGMA DRAKE: the lava pool of its death frames
+	"lava": {"small": [LAVA % 5], "big": LAVA % 5, "color": Color("ff8a2a")},
 }
 const TICK := 0.5
 

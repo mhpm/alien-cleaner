@@ -1,6 +1,6 @@
 # Cómo arrancar y usar el MCP de Godot (Godot MCP Pro)
 
-Guía para un agente nuevo. Sigue los pasos **en orden**.
+Guía para un agente nuevo (Claude Code o Codex). Sigue los pasos **en orden**.
 
 ## Cómo funciona (30 segundos)
 
@@ -82,6 +82,44 @@ Las herramientas aparecen como `mcp__godot-mcp-pro__<comando>`.
 Pedir/ejecutar `get_project_info`. Si devuelve nombre y versión de Godot, todo funciona.
 
 ## Problemas típicos
+
+### Usar también desde Codex (sin cambiar Claude Code)
+
+Claude Code conserva su registro en `.mcp.json`. Codex usa un registro separado en
+`C:\Users\miche\.codex\config.toml`, según la
+[documentación oficial de MCP](https://developers.openai.com/codex/mcp).
+Ambos lanzan el mismo `addons/godot_mcp/server/index.js`; no hace falta duplicar ni
+modificar el plugin.
+
+En esta máquina, Codex queda registrado con:
+
+```toml
+[mcp_servers.godot-mcp-pro]
+command = 'C:\Program Files\nodejs\node.exe'
+args = ['C:/Users/miche/Documents/alien-cleaner/addons/godot_mcp/server/index.js']
+cwd = 'C:\Users\miche\Documents\alien-cleaner'
+startup_timeout_sec = 30
+tool_timeout_sec = 360
+
+[mcp_servers.godot-mcp-pro.env]
+GODOT_MCP_PORT = "6505"
+```
+
+Para comprobar el registro: `codex mcp get godot-mcp-pro`.
+Si la sesión de Codex ya estaba abierta al añadirlo, reiniciar Codex para que
+cargue el nuevo servidor en su catálogo de herramientas. Mantener Godot abierto.
+
+El plugin conecta con **todos** los puertos 6505–6514 y cada servidor Node busca
+el siguiente puerto libre. Claude Code y Codex pueden conectarse a la vez.
+No cerrar procesos de Claude Code para dar paso a Codex. Ambos controlan la misma
+escena abierta: coordinar las ediciones y las órdenes de ejecutar/detener el juego.
+El registro de Codex es global y apunta a este proyecto; actualizarlo si se mueve
+la carpeta o se quiere usar otro proyecto.
+
+Verificación realizada el 1 de octubre de 2026: dos clientes MCP simultáneos,
+uno con el comando registrado para Codex y otro leyendo `.mcp.json`, expusieron
+178 herramientas y respondieron a `get_project_info` y `get_scene_tree`.
+Ambos devolvieron `Alien Cleanup Crew`, Godot 4.7.2 y `res://scenes/game.tscn`.
 
 ### "Godot editor is not connected"
 1. ¿Está Godot abierto **con este proyecto** y el plugin activo? (pasos 2-3)

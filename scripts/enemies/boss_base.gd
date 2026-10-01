@@ -15,8 +15,8 @@ var armor := 1.0
 
 
 ## Call first thing in _init_ai.
-func _size_to_player() -> void:
-	var need := _player_dps() * DPS_REALISM * TARGET_SECS
+func _size_to_player(secs := TARGET_SECS) -> void:
+	var need := _player_dps() * DPS_REALISM * secs
 	if need > max_hp:
 		max_hp = need
 		hp = max_hp

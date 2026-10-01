@@ -378,6 +378,20 @@ const TYPES := {
 		"color": Color("5fe6ff"), "kb": 1.2,
 		"script": "res://scripts/enemies/zorp_drone.gd",
 	},
+	# world 4 mini boss (wave 11): little lava dragon (enemies/boss_magma.gd)
+	"magma_drake": {
+		"name": "MAGMA DRAKE", "hp": 1600.0, "speed": 32.0, "damage": 22.0, "coins": 80, "cost": 0,
+		"radius": 16.0, "art": "magma_drake", "scale": 0.4, "ai": "boss",
+		"color": Color("ff8a2a"), "kb": 0.0, "boss": true,
+		"script": "res://scripts/enemies/boss_magma.gd",
+	},
+	# world 3 mini boss (wave 8): toxic lantern pufferfish (enemies/boss_angler.gd)
+	"toxic_angler": {
+		"name": "TOXIC ANGLER", "hp": 1500.0, "speed": 34.0, "damage": 22.0, "coins": 80, "cost": 0,
+		"radius": 16.0, "art": "toxic_angler", "scale": 0.36, "ai": "boss",
+		"color": Color("a7f070"), "kb": 0.0, "boss": true,
+		"script": "res://scripts/enemies/boss_angler.gd",
+	},
 	# eye the Archmage summons: floats to you and bursts (enemies/arcane_eye.gd)
 	"arcane_eye": {
 		"name": "Arcane Eye", "hp": 18.0, "speed": 42.0, "damage": 14.0, "coins": 1, "cost": 2,

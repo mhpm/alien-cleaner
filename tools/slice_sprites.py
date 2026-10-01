@@ -47,6 +47,7 @@ U3 = "enemies/ufo3/%s/image_%s.png"
 JP = "enemies/jelly pod/%s/image_%s.png"
 SM = "enemies/spike mine/%s/image_%s.png"
 W4 = "enemies/%s/%s/image_%02d.png"  # cut by tools/cut_sheet_enemies.py
+TA = "enemies/toxic_angler/%s/image_%02d.png"
 B3 = "enemies/bosses/boss_3_elements/image_%s.png"
 B4 = "enemies/bosses/boss_4_elements/image_%s.png"
 
@@ -622,6 +623,70 @@ SETS = {
     "blink_bubble": {"anchor": "center", "anims": {"fly": ([W4 % ("blink_saucer", "shot", 1)], 1, True)}, "body": "fly"},
     "nugget_orb": {"anchor": "center", "anims": {"fly": ([W4 % ("nugget_ship", "shot", 1)], 1, True)}, "body": "fly"},
     "lantern_bubble": {"anchor": "center", "anims": {"fly": ([W4 % ("goo_lantern", "shot", 1)], 1, True)}, "body": "fly"},
+    # MAGMA DRAKE boss (tools/boss_magma_ref.webp -> cut_sheet_enemies.py magma_drake;
+    # enemies/boss_magma.gd): idle 01-05 = calm, 06 = blazing (fury), 07 = hurt wince,
+    # 08 = dizzy stars; breath / cast / summon poses; death = collapses into a lava pool.
+    "magma_drake": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("magma_drake", "idle", i) for i in (1, 2, 3, 1, 5, 4)], 5, True),
+            "fury": ([W4 % ("magma_drake", "idle", i) for i in (6, 5)], 8, True),
+            "hurt": ([W4 % ("magma_drake", "idle", 7)], 1, False),
+            "stun": ([W4 % ("magma_drake", "idle", 8)], 1, True),
+            "breath": ([W4 % ("magma_drake", "breath", 1)], 1, True),
+            "cast": ([W4 % ("magma_drake", "cast", 1)], 1, True),
+            "summon": ([W4 % ("magma_drake", "summon", 1)], 1, True),
+            "death": ([W4 % ("magma_drake", "die", i) for i in (1, 2, 3, 4, 5, 6, 7, 8)], 6, False),
+        },
+        "body": "walk",
+    },
+    "magma_fire": {"anchor": "center", "anims": {"fly": ([W4 % ("magma_drake", "fireball", 1)], 1, True)}, "body": "fly"},
+    "magma_meteor": {"anchor": "center", "anims": {"fly": ([W4 % ("magma_drake", "meteor", 1)], 1, True)}, "body": "fly"},
+    "magma_crescent": {"anchor": "center", "anims": {"fly": ([W4 % ("magma_drake", "crescent", 1)], 1, True)}, "body": "fly"},
+    "magma_ring": {"anchor": "center", "anims": {"pop": ([W4 % ("magma_drake", "ring", 1)], 1, False)}, "body": "pop"},
+    "magma_ring_small": {"anchor": "center", "anims": {"pop": ([W4 % ("magma_drake", "ring_small", 1)], 1, False)}, "body": "pop"},
+    "magma_mine": {"anchor": "center", "anims": {"fly": ([W4 % ("magma_drake", "mine", 1)], 1, True)}, "body": "fly"},
+    "magma_erupt": {"anchor": "center", "anims": {"pop": ([W4 % ("magma_drake", "erupt", 1)], 1, False)}, "body": "pop"},
+    # TOXIC ANGLER mini boss (tools/boss_puffer_ref.webp -> cut_sheet_enemies.py toxic_angler;
+    # enemies/boss_angler.gd): a toxic lantern pufferfish. idle 1-4 = calm looks, 5-6 = angry,
+    # 7 = bloated with an aura (fury), 8 = dizzy, 9 = hurt; attack 1 = bubble in the mouth,
+    # 2-3 = spitting; charge = belly glowing; summon = channelling spore mines; wink = the
+    # lure's "come here"; dive = sinks in its own rings; ripple = the surface of the goo
+    # while it swims below; die = deflates and melts into a puddle of spines.
+    "toxic_angler": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([TA % ("idle", i) for i in (1, 2, 4, 1, 3, 2)], 5, True),
+            "angry": ([TA % ("idle", i) for i in (5, 6)], 6, True),
+            "fury": ([TA % ("idle", i) for i in (7, 6)], 8, True),
+            "hurt": ([TA % ("idle", 9)], 1, False),
+            "stun": ([TA % ("idle", 8)], 1, True),
+            "inflate": ([TA % ("attack", 1)], 1, True),
+            "spit": ([TA % ("attack", i) for i in (2, 3)], 8, True),
+            "charge": ([TA % ("charge", 1)], 1, True),
+            "wind": ([TA % ("summon", 1)], 1, True),
+            "channel": ([TA % ("summon", i) for i in (2, 3, 4, 3)], 7, True),
+            "wink": ([TA % ("wink", 1)], 1, True),
+            "sink": ([TA % ("dive", i) for i in (1, 2, 3)], 8, False),
+            "ripple": ([TA % ("ripple", 1), TA % ("ripple", 2), TA % ("ripple2", 1), TA % ("ripple", 2)], 8, True),
+            "death": ([TA % ("die", i) for i in (1, 2, 3, 4)] + [TA % ("die2", i) for i in (1, 2, 3, 4, 5, 6)], 6, False),
+        },
+        "body": "walk",
+    },
+    "angler_bubble": {"anchor": "center", "anims": {"fly": ([TA % ("bubble", 2), TA % ("bubble", 3), TA % ("bubble2", 1)], 3, False)}, "body": "fly"},
+    "angler_drop": {"anchor": "center", "anims": {"fly": ([TA % ("bubble", 1), TA % ("bubble", 2)], 6, True)}, "body": "fly"},
+    "angler_pop": {"anchor": "center", "anims": {"pop": ([TA % ("bubble2", 2)], 1, False)}, "body": "pop"},
+    "angler_mine": {
+        "anchor": "center",
+        "anims": {
+            "fly": ([TA % ("mine", 1)], 1, True),
+            "arm": ([TA % ("mine", i) for i in (2, 3, 4, 5)], 4, False),
+        },
+        "body": "fly",
+    },
+    "angler_boom": {"anchor": "center", "anims": {"pop": ([TA % ("mine", 6)], 1, False)}, "body": "pop"},
+    "angler_geyser": {"anchor": "bottom", "anims": {"pop": ([TA % ("ripple", 3), TA % ("ripple2", 1)], 8, False)}, "body": "pop"},
+    "angler_ring": {"anchor": "center", "anims": {"pop": ([TA % ("ripple", 2)], 1, False)}, "body": "pop"},
     "jelly_spore": {"anchor": "center", "anims": {"fly": ([JP % ("attack", i) for i in ("093", "098")], 6, True)}, "body": "fly"},
     # VOID ARCHMAGE, world 3 final boss (loose frames in assets/sprites/enemies/bosses/
     # boss_3_elements, cut from the sheet; enemies/boss_archmage.gd): a hooded one-eyed

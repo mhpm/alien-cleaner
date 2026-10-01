@@ -75,6 +75,14 @@ const STYLES := {
 	"blink": {"art": "blink_bubble", "scale": 0.15, "pop": "glob_pop", "pop_s": 0.12, "tint": Color(1.6, 0.6, 1.4), "color": Color("ff6fc8"), "hit": 6.0},
 	"nugget": {"art": "nugget_orb", "scale": 0.22, "pop": "droid_pop", "pop_s": 0.18, "tint": Color(0.6, 1.3, 1.8), "color": Color("5fd0ff"), "hit": 8.5},
 	"lantern": {"art": "lantern_bubble", "scale": 0.15, "pop": "glob_pop", "pop_s": 0.12, "tint": Color(1.5, 0.6, 1.8), "color": Color("c060ff"), "hit": 6.0},
+	# MAGMA DRAKE: fireball, crescent wave, and the meteor that bursts into fireballs (art points +x)
+	"magma": {"art": "magma_fire", "scale": 0.15, "pop": "glob_pop", "pop_s": 0.14, "tint": Color(1.6, 0.8, 0.4), "color": Color("ff8a2a"), "hit": 6.5},
+	"magma_crescent": {"art": "magma_crescent", "scale": 0.22, "pop": "glob_pop", "pop_s": 0.16, "tint": Color(1.6, 0.8, 0.4), "color": Color("ff8a2a"), "hit": 9.0},
+	"magma_meteor": {"art": "magma_meteor", "scale": 0.24, "pop": "glob_pop", "pop_s": 0.4, "tint": Color(1.6, 0.8, 0.4), "color": Color("ff8a2a"), "hit": 12.0, "split": 10, "split_tex": "magma"},
+	# TOXIC ANGLER: a bubble that swells ("grow" = its frames play over its life) and bursts
+	# into droplets, the droplets, and the spine-storm droplet (art is centred, round)
+	"angler": {"art": "angler_bubble", "scale": 0.2, "pop": "angler_pop", "pop_s": 0.17, "tint": Color.WHITE, "color": Color("a7f070"), "hit": 8.5, "grow": true, "split": 6, "split_tex": "angler_drop"},
+	"angler_drop": {"art": "angler_drop", "scale": 0.15, "pop": "angler_pop", "pop_s": 0.07, "tint": Color.WHITE, "color": Color("a7f070"), "hit": 5.5},
 	"big_red_mega": {"art": "big_red_ball", "scale": 0.19, "pop": "glob_pop", "pop_s": 0.45, "tint": Color(1.6, 0.8, 1.2), "color": Color("ff4f9a"), "hit": 13.0, "split": 12},
 }
 
@@ -85,6 +93,7 @@ var damage := 10.0
 var life := 4.0
 var tex_id := "glob"
 var no_split := false
+var span := 0.0  # total life when first stepped (the "grow" frames spread over it)
 var t := 0.0
 var sprite: AnimatedSprite2D
 
@@ -110,6 +119,11 @@ func _physics_process(delta: float) -> void:
 			var want := (target.global_position + Vector2(0, Player.BODY_Y) - global_position).angle()
 			var turn := float(STYLES[tex_id].home) * delta
 			vel = vel.rotated(clampf(angle_difference(vel.angle(), want), -turn, turn))
+	if STYLES.has(tex_id) and STYLES[tex_id].has("grow"):
+		if span == 0.0:
+			span = life + delta
+		var n := sprite.sprite_frames.get_frame_count(sprite.animation)
+		sprite.frame = mini(n - 1, int(t / span * n))
 	if STYLES.has(tex_id) and STYLES[tex_id].has("drag"):
 		var st: Dictionary = STYLES[tex_id]
 		vel = vel.move_toward(vel.normalized() * float(st.get("min", 0.0)), vel.length() * float(st.drag) * delta)

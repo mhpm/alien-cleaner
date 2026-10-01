@@ -308,7 +308,8 @@ const WORLDS := [
 						{"at": 0.0, "event": "spiral", "id": "tentacle_plant", "count": 8, "label": "OVERGROWTH!"},
 						{"at": 15.0, "event": "pincer", "pool": ["runner", "splitter"], "count": 22}]},
 					{"pool": VOID, "alive": 50, "rate": 4.2, "elite": 0.05, "event": "pincer", "id": "runner", "count": 28, "events": [
-						{"at": 14.0, "event": "breach", "pool": VOID_MID, "count": 20, "points": 4}]},
+						{"at": 8.0, "event": "boss", "id": "toxic_angler", "label": "TOXIC ANGLER!"},
+						{"at": 18.0, "event": "breach", "pool": VOID_MID, "count": 20, "points": 4}]},
 					{"pool": VOID, "alive": 54, "rate": 4.4, "elite": 0.06, "events": [
 						{"at": 0.0, "event": "escort", "id": "big_red", "minion": "splitter", "count": 8, "label": "BRUTE SQUAD!"},
 						{"at": 15.0, "event": "spiral", "id": "slime", "count": 30}]},
@@ -389,7 +390,7 @@ const WORLDS := [
 						{"at": 16.0, "event": "dropship", "id": "big_red", "count": 4, "label": "HEAVY DROP!"},
 						{"at": 24.0, "event": "swarm", "id": "comet_baby", "count": 14, "label": "BABY RUSH!"},
 						{"at": 8.0, "event": "pincer", "id": "slime_comet", "count": 4, "label": "SLIME RUN!"}]},
-					{"pool": SPACE, "alive": 36, "rate": 3.4, "elite": 0.06, "event": "boss", "id": "brood_mother", "count": 2, "events": [
+					{"pool": SPACE, "alive": 36, "rate": 3.4, "elite": 0.06, "event": "boss", "id": "magma_drake", "label": "MAGMA DRAKE!", "events": [
 						{"at": 14.0, "event": "crossfire", "pool": SPACE_SHOOTERS, "count": 8},
 						{"at": 24.0, "event": "ring", "id": "tesla_drone", "count": 6, "label": "TESLA CAGE!"}]},
 					# 12-15: the whole fleet

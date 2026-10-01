@@ -3072,5 +3072,398 @@
     "loop": true
    }
   }
+ },
+ "magma_drake": {
+  "size": [
+   160,
+   136
+  ],
+  "anchor": [
+   80,
+   136
+  ],
+  "body_h": 121.0,
+  "anims": {
+   "walk": {
+    "frames": 6,
+    "fps": 5,
+    "loop": true
+   },
+   "fury": {
+    "frames": 2,
+    "fps": 8,
+    "loop": true
+   },
+   "hurt": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "stun": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "breath": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "cast": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "summon": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "death": {
+    "frames": 8,
+    "fps": 6,
+    "loop": false
+   }
+  }
+ },
+ "magma_fire": {
+  "size": [
+   82,
+   60
+  ],
+  "anchor": [
+   41,
+   30.0
+  ],
+  "body_h": 60.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "magma_meteor": {
+  "size": [
+   250,
+   136
+  ],
+  "anchor": [
+   125,
+   68.0
+  ],
+  "body_h": 136.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "magma_crescent": {
+  "size": [
+   88,
+   105
+  ],
+  "anchor": [
+   44,
+   52.5
+  ],
+  "body_h": 105.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "magma_ring": {
+  "size": [
+   132,
+   109
+  ],
+  "anchor": [
+   66,
+   54.5
+  ],
+  "body_h": 109.0,
+  "anims": {
+   "pop": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   }
+  }
+ },
+ "magma_ring_small": {
+  "size": [
+   132,
+   88
+  ],
+  "anchor": [
+   66,
+   44.0
+  ],
+  "body_h": 88.0,
+  "anims": {
+   "pop": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   }
+  }
+ },
+ "magma_mine": {
+  "size": [
+   66,
+   77
+  ],
+  "anchor": [
+   33,
+   38.5
+  ],
+  "body_h": 77.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "magma_erupt": {
+  "size": [
+   134,
+   82
+  ],
+  "anchor": [
+   67,
+   41.0
+  ],
+  "body_h": 82.0,
+  "anims": {
+   "pop": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   }
+  }
+ },
+ "toxic_angler": {
+  "size": [
+   172,
+   133
+  ],
+  "anchor": [
+   86,
+   133
+  ],
+  "body_h": 132.0,
+  "anims": {
+   "walk": {
+    "frames": 6,
+    "fps": 5,
+    "loop": true
+   },
+   "angry": {
+    "frames": 2,
+    "fps": 6,
+    "loop": true
+   },
+   "fury": {
+    "frames": 2,
+    "fps": 8,
+    "loop": true
+   },
+   "hurt": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "stun": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "inflate": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "spit": {
+    "frames": 2,
+    "fps": 8,
+    "loop": true
+   },
+   "charge": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "wind": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "channel": {
+    "frames": 4,
+    "fps": 7,
+    "loop": true
+   },
+   "wink": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "sink": {
+    "frames": 3,
+    "fps": 8,
+    "loop": false
+   },
+   "ripple": {
+    "frames": 4,
+    "fps": 8,
+    "loop": true
+   },
+   "death": {
+    "frames": 10,
+    "fps": 6,
+    "loop": false
+   }
+  }
+ },
+ "angler_bubble": {
+  "size": [
+   120,
+   148
+  ],
+  "anchor": [
+   60,
+   74.0
+  ],
+  "body_h": 109.0,
+  "anims": {
+   "fly": {
+    "frames": 3,
+    "fps": 3,
+    "loop": false
+   }
+  }
+ },
+ "angler_drop": {
+  "size": [
+   84,
+   76
+  ],
+  "anchor": [
+   42,
+   38.0
+  ],
+  "body_h": 75.0,
+  "anims": {
+   "fly": {
+    "frames": 2,
+    "fps": 6,
+    "loop": true
+   }
+  }
+ },
+ "angler_pop": {
+  "size": [
+   164,
+   153
+  ],
+  "anchor": [
+   82,
+   76.5
+  ],
+  "body_h": 153.0,
+  "anims": {
+   "pop": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   }
+  }
+ },
+ "angler_mine": {
+  "size": [
+   90,
+   101
+  ],
+  "anchor": [
+   45,
+   50.5
+  ],
+  "body_h": 48.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "arm": {
+    "frames": 4,
+    "fps": 4,
+    "loop": false
+   }
+  }
+ },
+ "angler_boom": {
+  "size": [
+   122,
+   117
+  ],
+  "anchor": [
+   61,
+   58.5
+  ],
+  "body_h": 117.0,
+  "anims": {
+   "pop": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   }
+  }
+ },
+ "angler_geyser": {
+  "size": [
+   150,
+   124
+  ],
+  "anchor": [
+   75,
+   124
+  ],
+  "body_h": 112.5,
+  "anims": {
+   "pop": {
+    "frames": 2,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "angler_ring": {
+  "size": [
+   148,
+   99
+  ],
+  "anchor": [
+   74,
+   49.5
+  ],
+  "body_h": 99.0,
+  "anims": {
+   "pop": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   }
+  }
  }
 }

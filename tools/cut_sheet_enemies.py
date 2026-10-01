@@ -203,6 +203,43 @@ SHEETS = {
             ("die", 733, 840, 622, 1112, [728, 829, 937, 1034]),
         ],
     },
+    # MAGMA DRAKE boss (enemies/boss_magma.gd): one row per pose; the projectiles drawn in
+    # the rows are cut as single frames (cuts = [] keeps the whole box as one frame)
+    "boss_magma_ref.webp": {
+        "magma_drake": [
+            ("idle", 22, 163, 0, 1125, [147, 289, 431, 571, 708, 851, 994]),
+            ("breath", 165, 302, 0, 148, []),
+            ("cast", 302, 415, 0, 155, []),
+            ("summon", 415, 522, 0, 158, []),
+            ("die", 523, 626, 0, 1125, [138, 275, 432, 597, 755, 874, 995]),
+            ("fireball", 165, 302, 340, 432, []),
+            ("meteor", 165, 302, 860, 1120, []),
+            ("crescent", 302, 415, 490, 590, []),
+            ("ring", 302, 415, 990, 1122, []),
+            ("ring_small", 302, 415, 592, 732, []),
+            ("mine", 415, 522, 245, 320, []),
+            ("erupt", 415, 522, 870, 1012, []),
+        ],
+    },
+    # TOXIC ANGLER boss (enemies/boss_angler.gd): one sheet, one row per pose / effect
+    "boss_puffer_ref.webp": {
+        "toxic_angler": [
+            ("idle", 5, 142, 0, 1125, [133, 260, 388, 513, 643, 770, 902, 1016]),
+            ("attack", 143, 277, 0, 405, [127, 266]),
+            ("spit", 143, 282, 405, 465, []),
+            ("charge", 143, 282, 465, 553, []),
+            ("bubble", 143, 283, 553, 826, [647, 722]),
+            ("bubble2", 143, 297, 826, 1125, [950]),
+            ("summon", 279, 405, 0, 662, [131, 300, 490]),
+            ("mine", 298, 422, 662, 1125, [707, 768, 833, 902, 995]),
+            ("wink", 402, 526, 0, 134, []),
+            ("dive", 411, 528, 134, 603, [300, 458]),
+            ("ripple", 402, 536, 603, 998, [700, 848]),
+            ("ripple2", 422, 536, 998, 1125, []),
+            ("die", 526, 626, 0, 502, [108, 234, 366]),
+            ("die2", 534, 626, 502, 1125, [615, 720, 806, 869, 991]),
+        ],
+    },
 }
 
 
@@ -220,6 +257,22 @@ def clean(fr):
         if (x <= 1 or x + bw >= w - 1) and area < big * 0.12:
             a[lab == k] = 0
     return Image.fromarray(a)
+
+
+def main_piece(fr):
+    """Only the biggest piece of a frame (drops stray drips of the rows around it)."""
+    a = np.asarray(fr).copy()
+    m = cv2.dilate((a[:, :, 3] > 20).astype(np.uint8), np.ones((5, 5), np.uint8))
+    n, lab, st, _ = cv2.connectedComponentsWithStats(m)
+    if n < 2:
+        return fr
+    keep = 1 + int(np.argmax(st[1:, cv2.CC_STAT_AREA]))
+    a[lab != keep] = 0
+    return Image.fromarray(a)
+
+
+# rows whose first N frames keep only their biggest piece (TOXIC ANGLER's spore mine)
+MAIN_ONLY = {"mine": 5}
 
 
 def _fresh(d):
@@ -270,6 +323,8 @@ def main(only=None):
                 _fresh(d)
                 for i in range(len(xs) - 1):
                     fr = clean(img.crop((xs[i], y0, xs[i + 1], y1)))
+                    if i < MAIN_ONLY.get(row, 0):
+                        fr = main_piece(fr)
                     fr = fr.crop(fr.getbbox())
                     fr.save(os.path.join(d, "image_%02d.png" % (i + 1)))
                 print(name, row, len(xs) - 1, "frames", xs)
