@@ -22,14 +22,15 @@ func _size_to_player(secs := TARGET_SECS) -> void:
 		hp = max_hp
 
 
-## The astronaut's damage per second right now: blaster (tier, extra shots, crits) plus
-## the Martian UFO's plasma.
+## The astronaut's damage per second right now: the ARMORY weapon (its level, blaster
+## tier, extra shots, crits) plus the Martian UFO's plasma.
 static func _player_dps() -> float:
 	var s := Game.stats
 	var tier := WeaponData.tier(int(s.weapon))
 	var shots := int(s.shots) + int(s.spread)  # side shots of the spread rarely all hit
 	var crit := 1.0 + float(s.crit) * (float(s.crit_mult) - 1.0)
-	var dps := float(s.damage) * float(tier.dmg) * shots / float(s.fire_interval) * crit
+	var gun_dps := GunData.dps(str(s.get("gun", "pulse")), int(s.get("gun_lv", 1)))
+	var dps := float(s.damage) * float(tier.dmg) * gun_dps * shots * (GunFire.BASE_INTERVAL / float(s.fire_interval)) * crit
 	var ml := int(s.get("martian", 0))
 	if ml > 0:
 		var d: Dictionary = UpgradeData.MARTIAN_LV[mini(ml, UpgradeData.MARTIAN_LV.size()) - 1]

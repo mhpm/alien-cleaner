@@ -1,11 +1,11 @@
 class_name Astronaut
 extends Node2D
 ## The astronaut: always the reference-sheet sprite (assets/sprites/player), plus the
-## equipped blaster as a separate sprite that rotates around its grip toward `aim`.
-## Blaster images and joints: tools/make_suit_parts.py -> assets/suits/<variant>_weapon.png
-## + weapons.json (grip / tip in image pixels). Origin = feet. The blaster is always
-## drawn in front of the body, except while walking up (back view): then it goes behind.
-## Used by the Player and by the CHARACTER screen preview.
+## ARMORY weapon it carries (Game.gun) as a separate sprite that rotates around its grip
+## toward `aim`. Weapon images and joints: tools/make_armory_assets.py ->
+## assets/guns/gun_<n>.png + guns.json (grip / tip in image pixels); bigger weapons are
+## held a bit longer. Origin = feet. The weapon is always drawn in front of the body,
+## except while walking up (back view): then it goes behind. Used by the Player.
 ## set_form(MutationData.sprite_set(lv)) swaps in the mutant: the astronaut's own frames
 ## with the mutated helmet of its phase (same scale and animations); set_mutation_gun(lv)
 ## then puts the mutation gun bought in the MUTATION LAB in its hands instead of the
@@ -13,12 +13,12 @@ extends Node2D
 ## walk_left/right/up/down are `directional` (never flipped, scaled to the astronaut's
 ## height).
 
-const WEAPONS_PATH := "res://assets/suits/weapons.json"
+const GUNS_PATH := "res://assets/guns/guns.json"
 const BODY_SCALE := 0.34  # sprite frame px -> world units (~25 units tall)
 const HAND := Vector2(6, -30)  # hands in frame px from the feet (facing right)
-const GUN_LEN := 30.0  # grip -> muzzle in frame px
+const GUN_LEN := 30.0  # grip -> muzzle in frame px (the Pulse Blaster; others scale)
 
-static var _weapons: Dictionary = {}
+static var _guns: Dictionary = {}
 
 var body: AnimatedSprite2D
 var gun: Sprite2D
@@ -48,27 +48,28 @@ func _ready() -> void:
 	refresh()
 
 
-## Re-read the equipped blaster (call after buying / equipping).
+## Re-read the equipped weapon (call after buying / equipping).
 func refresh() -> void:
 	mut_gun = 0
-	gun_len = GUN_LEN
-	var v := weapon_variant()
-	var w: Dictionary = weapons_data()[v]
-	_grip = Vector2(float(w.grip[0]), float(w.grip[1]))
-	_tip = Vector2(float(w.tip[0]), float(w.tip[1]))
-	gun.texture = Art.suit_tex(v, "weapon")
+	var n := GunData.index(Game.gun)
+	var all: Array = guns_data().guns
+	_grip = _point(all[n].grip)
+	_tip = _point(all[n].tip)
+	var ref := (_point(all[0].tip) - _point(all[0].grip)).length()
+	gun_len = GUN_LEN * sqrt((_tip - _grip).length() / ref)
+	gun.texture = GunFire.tex("gun_%d" % (n + 1))
 	gun.offset = -_grip
 	_pose()
 
 
-static func weapon_variant() -> String:
-	return GearData.variant_of(str(Game.gear_equipped["weapon"]))
+static func _point(a: Array) -> Vector2:
+	return Vector2(float(a[0]), float(a[1]))
 
 
-static func weapons_data() -> Dictionary:
-	if _weapons.is_empty():
-		_weapons = JSON.parse_string(FileAccess.get_file_as_string(WEAPONS_PATH))
-	return _weapons
+static func guns_data() -> Dictionary:
+	if _guns.is_empty():
+		_guns = JSON.parse_string(FileAccess.get_file_as_string(GUNS_PATH))
+	return _guns
 
 
 ## "player" (reference-sheet astronaut) or a mutant set (a bit taller than the astronaut).

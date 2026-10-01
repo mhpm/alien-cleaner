@@ -43,6 +43,15 @@ var art := ""
 var _ufo_attacks := 0
 var _sep := Vector2.ZERO  # last separation push (refreshed every other frame)
 var elite := false  # tougher golden variant with a crown (final waves)
+## ARMORY weapon effects: armor break (takes `vuln` x damage while vuln_t lasts),
+## Cryo chill stacks (freeze at the weapon's threshold) and burn / acid damage over time
+var vuln := 1.0
+var vuln_t := 0.0
+var chill := 0
+var chill_t := 0.0
+var burn_dps := 0.0
+var burn_t := 0.0
+var _burn_acc := 0.0
 
 
 func setup(id: String) -> void:
@@ -161,6 +170,10 @@ func _physics_process(delta: float) -> void:
 	if slow_t > 0.0:
 		slow_t -= delta
 		vel *= 0.5
+	if vuln_t > 0.0 or chill_t > 0.0 or burn_t > 0.0:
+		_tick_status(delta)
+		if dead:
+			return
 	# crowds: each alien re-checks its neighbours every other frame (halves the cost)
 	if (Engine.get_physics_frames() + get_instance_id()) % 2 == 0:
 		_sep = _separation()
@@ -278,6 +291,7 @@ func take_damage(amount: float, dir := Vector2.ZERO, crit := false) -> void:
 		return
 	if dead or (not targetable and spawn_t <= 0.0 and air > 4.0):
 		return
+	amount *= vuln
 	hp -= amount
 	flash_t = 0.12
 	hurt_t = 0.18
@@ -287,6 +301,47 @@ func take_damage(amount: float, dir := Vector2.ZERO, crit := false) -> void:
 	Game.world.popup_damage(hit_center() + Vector2(randf_range(-4, 4), -6), amount, crit)
 	if hp <= 0.0:
 		die()
+
+
+func _tick_status(delta: float) -> void:
+	vuln_t -= delta
+	if vuln_t <= 0.0:
+		vuln = 1.0
+	chill_t -= delta
+	if chill_t <= 0.0:
+		chill = 0
+	if burn_t > 0.0:
+		burn_t -= delta
+		_burn_acc += burn_dps * delta
+		if _burn_acc >= burn_dps * 0.3 or burn_t <= 0.0:
+			var d := _burn_acc
+			_burn_acc = 0.0
+			take_damage(d)
+
+
+## Armor break: every hit for `secs` deals x(1 + amount).
+func shred(amount: float, secs: float) -> void:
+	vuln = maxf(vuln, 1.0 + amount)
+	vuln_t = maxf(vuln_t, secs)
+
+
+## Damage over time (Solar burn, toxic acid): the strongest one running wins.
+func ignite(dps: float, secs: float) -> void:
+	if dps >= burn_dps or burn_t <= 0.0:
+		burn_dps = dps
+	burn_t = maxf(burn_t, secs)
+
+
+## Cryo: slows; `limit` stacks within 2.5 s freeze the alien.
+func add_chill(limit: int) -> bool:
+	slow_t = maxf(slow_t, 1.2)
+	chill += 1
+	chill_t = 2.5
+	if chill >= limit:
+		chill = 0
+		freeze(1.5)
+		return true
+	return false
 
 
 func push(v: Vector2) -> void:

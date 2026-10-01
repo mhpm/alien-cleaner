@@ -194,8 +194,7 @@ func _refresh() -> void:
 	hp_bar.ratio = clampf(hp / float(s.max_hp), 0.0, 1.0)
 	hp_bar.text = "%d/%d" % [ceili(hp), roundi(float(s.max_hp))]
 	coin_label.text = str(Game.run_coins)
-	var lvl := int(s.weapon)
-	weapon_label.text = "LV%d %s" % [lvl, str(WeaponData.tier(lvl).name).to_upper()]
+	weapon_label.text = "%s LV%d" % [str(GunData.gun(str(s.get("gun", "pulse"))).name), int(s.get("gun_lv", 1))]
 	if last_hp >= 0.0 and hp < last_hp:
 		hurt.color.a = 0.28
 		create_tween().tween_property(hurt, "color:a", 0.0, 0.35)
@@ -467,7 +466,7 @@ func _upgrade_card(id: String, delay: float) -> Button:
 		var ntw := nw.create_tween().set_loops()
 		ntw.tween_property(nw, "modulate", Color(1.4, 1.4, 1.4), 0.5)
 		ntw.tween_property(nw, "modulate", Color.WHITE, 0.5)
-	var desc := UiTheme.body(str(def.desc), 11)
+	var desc := UiTheme.body(UpgradeData.description(id), 11)
 	desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	desc.custom_minimum_size = Vector2(200, 0)
@@ -847,10 +846,10 @@ func _pause_stats() -> Control:
 	h.add_theme_constant_override("separation", 0)
 	h.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	p.add_child(h)
-	var lvl := int(Game.stats.weapon)
-	var gun := _tex_rect(Art.suit_tex(Astronaut.weapon_variant(), "weapon"), Vector2(52, 26))
-	var gun_col := _stat_col("WEAPON", gun, "Lv %d" % lvl, Color.WHITE, 11)
-	var tier := str(WeaponData.tier(lvl).name)
+	var gid := str(Game.stats.get("gun", "pulse"))
+	var gun := _tex_rect(GunData.icon(gid), Vector2(52, 26))
+	var gun_col := _stat_col("WEAPON", gun, "Lv %d" % int(Game.stats.get("gun_lv", 1)), Color.WHITE, 11)
+	var tier := str(GunData.gun(gid).name)
 	var tl := UiTheme.label(tier, UiTheme.fit_size(UiTheme.FONT, tier, 10, 62.0))
 	tl.add_theme_constant_override("outline_size", 4)
 	gun_col.add_child(tl)

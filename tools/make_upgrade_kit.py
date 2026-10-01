@@ -5,6 +5,7 @@
 Sources (loose PNGs cut from the level-up mock-up):
   assets/ui/upgrades/upgrade_elements/elements_NNN.png   frames, header, NEW, shield strip
   assets/ui/upgrades/marciano_elements/marciano_NNN.png  Martian UFO, its shots, level boxes
+  tools/overdrive_ref.webp   OVERDRIVE: 5 framed level cards, their 5 shot pictures, portrait
 
 Output: assets/ui/upgrades/kit/
   header.png            "LEVEL UP / Choose an upgrade" plate
@@ -34,6 +35,12 @@ UP = os.path.join(HERE, "..", "assets", "ui", "upgrades")
 EL = os.path.join(UP, "upgrade_elements")
 MA = os.path.join(UP, "marciano_elements")
 OUT = os.path.join(UP, "kit")
+
+# OVERDRIVE (tools/overdrive_ref.webp): the loose shot pictures of levels 1-5 under the
+# framed cards, and the portrait (gun icon with a shot) at the bottom
+OVERDRIVE_LEVELS = [(20, 570, 290, 715), (300, 540, 550, 740), (565, 505, 825, 785),
+                    (825, 560, 1113, 745), (1108, 450, 1440, 800)]
+OVERDRIVE_PORTRAIT = (606, 824, 858, 1038)
 
 # shield strength colours, weakest -> strongest (red is always the strongest)
 SHIELD_HUES = [None, 135.0, 275.0, 32.0, 356.0]  # None = keep the art's blue
@@ -251,6 +258,12 @@ def main() -> None:
         save(tinted, "shield_dome_%d.png" % (i + 1))
         save(hollow(tinted), "shield_bubble_%d.png" % (i + 1))
     save(fit(dome, 160), "shield.png")
+
+    # --- OVERDRIVE (boosts whatever ARMORY weapon is equipped)
+    ref = Image.open(os.path.join(HERE, "overdrive_ref.webp")).convert("RGBA")
+    for i, box in enumerate(OVERDRIVE_LEVELS):
+        save(fit(square(trim(ref.crop(box))), 128), "overdrive_%d.png" % (i + 1))
+    save(fit(trim(ref.crop(OVERDRIVE_PORTRAIT)), 200), "overdrive.png")
 
 
 if __name__ == "__main__":

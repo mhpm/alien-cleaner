@@ -42,6 +42,7 @@ var squash := Vector2.ONE
 var gun_angle := -PI * 0.5
 var recoil := 0.0
 var infected: Infected  # Infected mode: meter, mutation and its powers
+var nova_t := 1.0  # OVERDRIVE level 5: seconds to the next Rocket Nova
 
 
 func _ready() -> void:
@@ -240,10 +241,16 @@ func _physics_process(delta: float) -> void:
 				_shoot_mutant()
 				fire_t = float(infected.gun().rate) * frenzy
 			else:
-				_shoot()
-				fire_t = float(s.fire_interval) * frenzy
+				_shoot(target)
+				fire_t = GunFire.interval(s) * frenzy
 	else:
 		fire_t = maxf(fire_t - delta, 0.08)
+	if int(s.get("overdrive", 0)) >= 5 and not mutated and not locked:
+		nova_t -= delta
+		if nova_t <= 0.0 and target != null:
+			nova_t = GunFire.NOVA_EVERY
+			GunFire.rocket_nova(self)
+	_overdrive_glow(int(s.get("overdrive", 0)), mutated)
 
 	_update_dome(delta)
 	shield_fx.visible = has_buff("shield")
@@ -251,6 +258,19 @@ func _physics_process(delta: float) -> void:
 
 	_update_bots(delta)
 	_animate(delta, moving, dir)
+
+
+## OVERDRIVE: the weapon in hand pulses in its colour, harder each level, and from
+## level 3 sheds sparks from the muzzle.
+func _overdrive_glow(od: int, mutated: bool) -> void:
+	if od <= 0 or mutated:
+		body.gun.self_modulate = Color.WHITE
+		return
+	var col := GunData.color(str(Game.stats.gun))
+	var k := 0.5 + 0.5 * sin(t * (5.0 + od))
+	body.gun.self_modulate = Color.WHITE.lerp(Color(col.r * 1.8, col.g * 1.8, col.b * 1.8), 0.08 * od * k)
+	if od >= 3 and randf() < 0.05 * od:
+		Game.world.burst(body.to_global(body.muzzle_pos()), col.lightened(0.4), 1, 18.0, 0.25, 1.2)
 
 
 func _muzzle_base() -> Vector2:
@@ -295,29 +315,12 @@ func _has_los(e: Enemy) -> bool:
 	return hit.is_empty() or hit.collider is Barrel
 
 
-func _shoot() -> void:
-	var s := Game.stats
+## The equipped ARMORY weapon (GunFire: every weapon fires its own way).
+func _shoot(target: Enemy) -> void:
 	var d := _gun_dir()
 	var origin := body.to_global(body.muzzle_pos())
-	var perp := d.orthogonal()
-	var shots := int(s.shots)
-	for i in shots:
-		var off := (i - (shots - 1) * 0.5) * 5.0
-		_spawn_bullet(origin + perp * off, d)
-	for k in int(s.spread) + (1 if has_buff("triple") else 0):
-		var a := 0.3 * (k + 1)
-		_spawn_bullet(origin, d.rotated(a))
-		_spawn_bullet(origin, d.rotated(-a))
+	recoil = GunFire.fire(self, origin, d, target)
 	shoot_t = 0.45
-	recoil = 2.5
-	var lvl := int(s.weapon)
-	Sfx.play("shoot", 0.12, -7.0 + lvl)
-	var st := WeaponData.style(Astronaut.weapon_variant())
-	var flash := AnimFx.spawn(Game.world.effects, "muzzle", "flash", origin, 0.2 + lvl * 0.03)
-	if st.color != null:
-		flash.material = Art.shot_material(Color(str(st.color)))
-	flash.create_tween().tween_property(flash, "modulate:a", 0.0, 0.06)
-	Game.world.burst(origin, Color(str(st.flash)), 2 + lvl, 45.0, 0.15, 1.5, 0.0, d, 0.5)
 
 
 ## The mutant's mutation gun (MutationData): its own bolt, plus the run's extra shots.
@@ -345,23 +348,6 @@ func _shoot_mutant() -> void:
 	Sfx.play("shoot", 0.12, -5.0 + infected.level)
 	Game.world.burst(origin, Color(str(g.color)), 3 + infected.level, 55.0, 0.15, 2.0, 0.0, d, 0.5)
 	Game.world.ring(origin, 3.0 + infected.level, Color(str(g.color)), 0.1, 1.5)
-
-
-func _spawn_bullet(pos: Vector2, d: Vector2) -> void:
-	var s := Game.stats
-	var tier := WeaponData.tier(int(s.weapon))
-	var st := WeaponData.style(Astronaut.weapon_variant())
-	var b := Bullet.new()
-	var mult := 1.0
-	b.tier = tier
-	b.style = st
-	b.dir = d
-	b.speed = float(s.bullet_speed) * float(tier.speed) / 220.0 * float(st.speed)
-	b.damage = float(s.damage) * float(tier.dmg) * mult * (2.0 if has_buff("rage") else 1.0)
-	b.pierce = int(s.pierce) + int(tier.pierce) + int(st.pierce)
-	b.bounces = int(s.ricochet)
-	Game.world.effects.add_child(b)
-	b.global_position = pos
 
 
 func blast() -> void:
@@ -395,10 +381,6 @@ func blast() -> void:
 			e.push(dn * (230.0 + float(s.knockback) * 1.5) * (1.0 - l / (BLAST_RADIUS * 1.6)))
 			e.stun(0.6)
 			e.take_damage(float(s.damage) * 0.5, Vector2.ZERO)
-	if bool(s.get("surge", false)):
-		# Energy Surge (full gear set): the blast also fires a ring of plasma
-		for i in 12:
-			_spawn_bullet(c, Vector2.from_angle(TAU * i / 12.0))
 	for n in get_tree().get_nodes_in_group("enemy_shots"):
 		var shot := n as EnemyShot
 		if shot != null and shot.global_position.distance_to(c) < BLAST_RADIUS:

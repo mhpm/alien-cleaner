@@ -4,7 +4,7 @@ extends RefCounted
 ## in enemy.gd, or a custom `script` for bosses).
 
 const TYPES := {
-    # Available for future worlds; deliberately not assigned to existing waves.
+	# Available for future worlds; deliberately not assigned to existing waves.
 	"orbit_warden": {
 		"name": "ORBIT WARDEN", "hp": 2600.0, "speed": 28.0, "damage": 24.0, "coins": 120, "cost": 0,
 		"radius": 21.0, "art": "orbit_warden", "scale": 0.38, "ai": "boss", "shoots": true,

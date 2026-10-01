@@ -12,7 +12,7 @@ const ART := "res://assets/ui/upgrades/"
 const KIT := "res://assets/ui/upgrades/kit/"
 const LEVELS := 5
 ## Offered on level-up right now (the others stay defined for later).
-const ACTIVE := ["martian", "shield"]
+const ACTIVE := ["overdrive", "martian", "shield"]
 
 ## Martian UFO ally per level: plasma shots per volley, seconds between volleys, extra
 ## aliens each shot chains to (level 5 = a 5-shot fan; the abduction beam is off).
@@ -53,6 +53,8 @@ const UPGRADES := {
 	"air_cannon": {"name": "Air Cannon Mod", "desc": "More knockback; BLAST recharges 15% faster.", "icon": ")))", "color": Color("38b764"), "max": 5},
 	"shield": {"name": "Ion Shield", "desc": "A dome that blocks hits, grows and recharges. Red is the strongest.", "icon": "( )", "color": Color("41a6f6"), "max": 5, "kit": true,
 		"levels": ["Blue dome: blocks 1 hit.", "Green dome: bigger, blocks 2 hits.", "Purple dome: 3 hits, shoves aliens away.", "Orange dome: 4 hits, recharges faster.", "RED dome, the strongest: 5 hits and burns aliens."]},
+	"overdrive": {"name": "Overdrive", "desc": "Supercharges the weapon in your hands, whichever it is.", "icon": ">>", "color": Color("41a6f6"), "max": 5, "kit": true, "weight": 1.3,
+		"levels": ["Overcharged: +25% damage, +15% fire rate.", "Twin barrels: fires 2 shots side by side.", "Triple fan: 3 shots in a spread.", "Drill tips: shots pierce 2 more aliens, +15% damage.", "ROCKET NOVA: every 3s, 5 homing rockets burst out!"]},
 	"martian": {"name": "Martian UFO", "desc": "A tiny ally that orbits you and attacks with you.", "icon": "o", "color": Color("5ef07a"), "max": 5, "kit": true,
 		"levels": ["Zaps the nearest alien with plasma.", "Fires twin plasma shots.", "Shots chain to 2 more aliens.", "Triple burst, fires faster.", "Fires a fan of 5 plasma shots."]},
 	"magnet": {"name": "Coin Magnet", "desc": "Pulls coins and XP gems from further away. +1 coin per alien.", "icon": "$", "color": Color("ffcd75"), "max": 5},
@@ -86,6 +88,13 @@ static func shield_dome(hits: int) -> Texture2D:
 ## The dome drawn around the astronaut: hollowed out so the astronaut shows through.
 static func shield_bubble(hits: int) -> Texture2D:
 	return load(KIT + "shield_bubble_%d.png" % clampi(hits, 1, LEVELS))
+
+
+## Card text; OVERDRIVE names the weapon it will supercharge.
+static func description(id: String) -> String:
+	if id == "overdrive" and not Game.stats.is_empty():
+		return "Supercharges your %s: more shots, more power." % GunData.gun(str(Game.stats.get("gun", "pulse"))).name
+	return str(UPGRADES[id].desc)
 
 
 ## What level lv adds ("" when the upgrade has no per-level text).
@@ -180,6 +189,20 @@ static func apply(id: String, s: Dictionary, lv := 1) -> void:
 			s.shield_lvl = lv
 		"martian":
 			s.martian = lv
+		"overdrive":  # boosts the equipped ARMORY weapon (GunFire copies / pierce / nova)
+			s.overdrive = lv
+			match lv:
+				1:
+					s.damage = float(s.damage) * 1.25
+					s.fire_interval = float(s.fire_interval) / 1.15
+				2:
+					s.shots = int(s.shots) + 1
+				3:
+					s.shots = int(s.shots) - 1
+					s.spread = int(s.spread) + 1
+				4:
+					s.pierce = int(s.pierce) + 2
+					s.damage = float(s.damage) * 1.15
 		"magnet":
 			s.magnet = true
 			s.magnet_lvl = lv

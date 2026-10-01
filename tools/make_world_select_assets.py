@@ -2,8 +2,8 @@
 
 Usage: python tools/make_world_select_assets.py
 - assets/ui/world/bg.webp: the art with every live value erased (name, level, the
-  three counters, the world title, "Longest Survived", the start button's energy cost
-  and the badges / locks of the nav slots that are redrawn in code).
+  three counters, the world title, "Longest Survived", the painted START button
+  and chest label and the badges / locks of the nav slots that are redrawn in code).
 - assets/ui/world/btn_<name>.png: crops for the pressable parts.
 - assets/ui/world/world_<n>.png: the isometric picture of each world. World 1 is cut
   out of the art (grabCut) and then removed from bg.webp (the sky behind it is
@@ -22,8 +22,8 @@ OUT = os.path.join(HERE, "..", "assets", "ui", "world")
 
 BUTTONS = {
     "menu": (22, 166, 130, 274),
-    "start": (235, 1210, 708, 1420),
-    "chest": (345, 996, 598, 1186),
+    "start": (212, 1222, 732, 1407),  # START_PIC, placed here (not cropped from the art)
+    "chest": (367, 995, 561, 1145),   # CHEST_PIC
     "shop": (8, 1478, 178, 1665),
     "gear": (182, 1478, 352, 1665),
     "battle": (358, 1458, 585, 1662),
@@ -44,12 +44,16 @@ ERASE = [
     (612, 36, 680, 74),      # gem count
     (800, 36, 876, 74),      # coin count
     (270, 342, 672, 382),    # "Longest Survived: 2m 16s"
-    (396, 1320, 548, 1394),  # energy cost on START
+    (222, 1196, 722, 1432),  # the painted START button (replaced by START_PIC)
+    (380, 1128, 566, 1184),  # "Ch. Chest" label (the new chest is drawn over the old one)
     (40, 1502, 150, 1630),   # shop: lock + label
     (212, 1502, 324, 1630),  # heroes: lock + label
     (872, 1470, 922, 1512),  # lab badge
     (96, 158, 136, 196),     # menu badge
 ]
+# own art for two buttons: a plain PLAY button and the chest (transparent images in tools/)
+START_PIC = "start_play_ref.webp"
+CHEST_PIC = "chest_ref.png"
 # the world title is cut out of textured space: inpainted from its surroundings
 TITLE = (168, 186, 796, 289)
 # recolour of the world-1 picture for the worlds that have no painting yet:
@@ -67,6 +71,18 @@ def erase(a, box):
         for x in range(x0, x1):
             k = (x - x0) / float(x1 - x0)
             a[y, x] = (left * (1 - k) + right * k).astype(np.uint8)
+
+
+def button_picture(name, box):
+    """An own image trimmed and scaled to fill `box` (x0, y0, x1, y1) keeping its aspect."""
+    img = Image.open(os.path.join(HERE, name)).convert("RGBA")
+    img = img.crop(img.getbbox())
+    w, h = box[2] - box[0], box[3] - box[1]
+    k = min(w / img.width, h / img.height)
+    img = img.resize((round(img.width * k), round(img.height * k)), Image.LANCZOS)
+    out = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    out.paste(img, ((w - img.width) // 2, (h - img.height) // 2))
+    return out
 
 
 def erase_title(a):
@@ -173,8 +189,12 @@ def main():
     a = clear_world(a, world[:, :, 3])
     clean = Image.fromarray(a)
     clean.save(os.path.join(OUT, "bg.webp"), quality=92)
+    own = {"start": START_PIC, "chest": CHEST_PIC}
     for name, box in BUTTONS.items():
-        clean.crop(box).save(os.path.join(OUT, f"btn_{name}.png"))
+        if name in own:
+            button_picture(own[name], box).save(os.path.join(OUT, f"btn_{name}.png"))
+        else:
+            clean.crop(box).save(os.path.join(OUT, f"btn_{name}.png"))
     Image.fromarray(world).save(os.path.join(OUT, "world_1.png"))
     for n, (h, s, v) in WORLD_TINTS.items():
         Image.fromarray(tint(world, h, s, v)).save(os.path.join(OUT, f"world_{n}.png"))

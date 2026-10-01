@@ -6,9 +6,13 @@ signal coins_changed
 
 const SAVE_PATH := "user://save.cfg"
 const BASE_HP := 70.0
+## ARMORY crew levels: LIFE (perm.health) and ATTACK (perm.power). A level costs
+## cost + step * current level coins (step defaults to cost).
+const LIFE_STEP := 0.2  # +20% max health per LIFE level
+const ATTACK_STEP := 0.1  # +10% damage (every weapon) per ATTACK level
 const PERM := {
-	"health": {"name": "Suit Plating", "desc": "+20 max health", "max": 5, "cost": 20},
-	"power": {"name": "Suds Pressure", "desc": "+12% cleaning power", "max": 5, "cost": 25},
+	"health": {"name": "Life", "desc": "+20% max health", "max": 20, "cost": 50, "step": 100},
+	"power": {"name": "Attack", "desc": "+10% damage, every weapon", "max": 20, "cost": 100, "step": 100},
 	"speed": {"name": "Jet Boots", "desc": "+6% move speed", "max": 5, "cost": 20},
 }
 
@@ -25,11 +29,15 @@ var chests: Array = []
 ## BOSS CHALLENGE (world select, once a world is cleared): fastest time beating each
 ## world's final boss straight away (seconds, by world index)
 var boss_best: Dictionary = {}
+## worlds whose BOSS CHALLENGE chest (unlocked by winning the challenge once) was opened
+var boss_chests: Array = []
 var total_xp := 0
-var menu_scene := "res://scenes/world_select.tscn"  # where the game / gear screen return
-## equipment: owned item levels ({id: level}) and the item worn in each slot
-var gear_owned: Dictionary = {}
-var gear_equipped: Dictionary = {}
+var menu_scene := "res://scenes/world_select.tscn"  # where the game / armory return
+## ARMORY: weapons owned ({GunData id: level 1-3}) and the one carried into runs
+var guns: Dictionary = {"pulse": 1}
+var gun := "pulse"
+## coins given back for the retired gear system (shown once by the armory screen)
+var gear_refund := 0
 
 # current run
 var stats: Dictionary = {}
@@ -43,17 +51,7 @@ var playground_active := false  # test runs never write persistent progression
 
 
 func _ready() -> void:
-	_default_gear()
 	load_save()
-
-
-func _default_gear() -> void:
-	for slot: String in GearData.SLOTS:
-		var id := GearData.item_id(slot, "standard")
-		if not gear_owned.has(id):
-			gear_owned[id] = 0
-		if not gear_equipped.has(slot):
-			gear_equipped[slot] = id
 
 
 func new_run(world_i := -1, rush := false) -> void:
@@ -63,141 +61,99 @@ func new_run(world_i := -1, rush := false) -> void:
 		world_index = world_i
 	room_index = 0
 	run_coins = 0
-	# a fresh crew member is fragile: the shop's Suit Plating is what keeps you alive
-	var mhp := BASE_HP + 20.0 * int(perm.health)
+	# a fresh crew member is fragile: the ARMORY's LIFE levels are what keep you alive
+	# (aliens hit relative to base_hp, so every LIFE level is real extra survival)
+	var mhp := roundf(BASE_HP * (1.0 + LIFE_STEP * int(perm.health)))
 	stats = {
-		"max_hp": mhp, "hp": mhp,
-		"damage": 10.0 * (1.0 + 0.12 * int(perm.power)),
+		"max_hp": mhp, "hp": mhp, "base_hp": BASE_HP,
+		"damage": 10.0 * (1.0 + ATTACK_STEP * int(perm.power)),
 		"fire_interval": 0.42, "bullet_speed": 220.0,
 		"move_speed": 80.0 * (1.0 + 0.06 * int(perm.speed)),
 		"shots": 1, "spread": 0, "ricochet": 0, "pierce": 0,
 		"freeze": 0.0, "chain": 0, "crit": 0.05, "crit_mult": 2.0,
 		"orbiters": 0, "death_explode": false, "magnet": false,
-		"knockback": 60.0, "blast_cooldown": 6.0, "shield": false, "shield_lvl": 0, "martian": 0,
-		"weapon": 1,
-		"hazard_mult": 1.0, "coin_bonus": 0, "surge": false, "room_heal": 0,
+		"knockback": 60.0, "blast_cooldown": 6.0, "shield": false, "shield_lvl": 0, "martian": 0, "overdrive": 0,
+		"weapon": 1, "gun": gun, "gun_lv": gun_level(gun),
+		"hazard_mult": 1.0, "coin_bonus": 0, "room_heal": 0,
 		"infected": int(perm.infected),
 	}
-	_apply_gear(stats)
 
 
-# ---------------------------------------------------------------- equipment
+# ---------------------------------------------------------------- armory
 
-func gear_level(id: String) -> int:
-	return int(gear_owned.get(id, -1))
-
-
-func is_owned(id: String) -> bool:
-	return gear_owned.has(id)
+func gun_level(id: String) -> int:
+	return int(guns.get(id, 0))
 
 
-func equipped_level(slot: String) -> int:
-	return gear_level(str(gear_equipped[slot]))
+func owns_gun(id: String) -> bool:
+	return guns.has(id)
 
 
-## Totals of every equipped item: {"hp", "spd", "dmg"}.
-func gear_totals() -> Dictionary:
-	var t := {"hp": 0, "spd": 0.0, "dmg": 0}
-	for slot: String in GearData.SLOTS:
-		var id := str(gear_equipped[slot])
-		var st := GearData.stats(id, gear_level(id))
-		t.hp = int(t.hp) + int(st.hp)
-		t.spd = float(t.spd) + float(st.spd)
-		t.dmg = int(t.dmg) + int(st.dmg)
-	return t
-
-
-func parts_equipped() -> int:
-	var n := 0
-	for slot: String in GearData.SLOTS:
-		if equipped_level(slot) >= 1:
-			n += 1
-	return n
-
-
-## Most common non-standard variant worn and how many slots use it.
-func set_progress() -> Array:
-	var counts := {}
-	for slot: String in GearData.SLOTS:
-		var v := GearData.variant_of(str(gear_equipped[slot]))
-		if v != "standard":
-			counts[v] = int(counts.get(v, 0)) + 1
-	var best := ""
-	var best_n := 0
-	for v: String in counts:
-		if int(counts[v]) > best_n:
-			best_n = int(counts[v])
-			best = v
-	return [best, best_n]
-
-
-func gear_power() -> int:
-	var p := 0
-	for slot: String in GearData.SLOTS:
-		var id := str(gear_equipped[slot])
-		var lvl := gear_level(id)
-		if lvl > 0:
-			p += lvl * 10 + GearData.VARIANTS.find(GearData.variant_of(id)) * 5
-	return p
-
-
-func buy_gear(id: String) -> bool:
-	if is_owned(id) or bank < GearData.price(id):
+func buy_gun(id: String) -> bool:
+	if owns_gun(id) or bank < GunData.price(id):
 		return false
-	bank -= GearData.price(id)
-	gear_owned[id] = 1
-	gear_equipped[GearData.slot_of(id)] = id
+	bank -= GunData.price(id)
+	guns[id] = 1
+	gun = id
 	save()
 	return true
 
 
-func upgrade_gear(id: String) -> bool:
-	var lvl := gear_level(id)
-	if lvl < 0 or lvl >= GearData.MAX_LEVEL or bank < GearData.upgrade_cost(id, lvl):
+func upgrade_gun(id: String) -> bool:
+	var lv := gun_level(id)
+	if lv < 1 or lv >= GunData.MAX_LEVEL or bank < GunData.upgrade_cost(id, lv):
 		return false
-	bank -= GearData.upgrade_cost(id, lvl)
-	gear_owned[id] = lvl + 1
+	bank -= GunData.upgrade_cost(id, lv)
+	guns[id] = lv + 1
 	save()
 	return true
 
 
-func equip_gear(id: String) -> void:
-	if is_owned(id):
-		gear_equipped[GearData.slot_of(id)] = id
+func equip_gun(id: String) -> void:
+	if owns_gun(id):
+		gun = id
 		save()
 
 
-func _apply_gear(s: Dictionary) -> void:
-	var t := gear_totals()
-	s.max_hp = float(s.max_hp) + int(t.hp)
-	s.damage = float(s.damage) + int(t.dmg)
-	s.move_speed = float(s.move_speed) * (1.0 + float(t.spd))
-	for slot: String in GearData.SLOTS:
-		var id := str(gear_equipped[slot])
-		if gear_level(id) < 1:
+## Crew POWER (world select / armory): the equipped weapon plus ATTACK and LIFE levels.
+func crew_power() -> int:
+	return GunData.power(gun, gun_level(gun)) + 12 * int(perm.power) + 8 * int(perm.health)
+
+
+## True when some weapon, weapon level, ATTACK or LIFE level can be bought right now.
+func armory_affordable() -> bool:
+	for id: String in GunData.ids():
+		if not owns_gun(id):
+			if bank >= GunData.price(id):
+				return true
+		elif gun_level(id) < GunData.MAX_LEVEL and bank >= GunData.upgrade_cost(id, gun_level(id)):
+			return true
+	for id: String in ["power", "health"]:
+		if int(perm[id]) < int(PERM[id].max) and bank >= perm_cost(id):
+			return true
+	return false
+
+
+## Coins spent in the retired gear system (CHARACTER screen: 6 slots x 8 variants,
+## buy price by variant and upgrades of price * 0.5 * (level + 1); standard items were
+## free at level 0 and upgraded from there).
+static func _gear_spent(owned: Dictionary) -> int:
+	var variants := ["standard", "recon", "heavy", "stealth", "hazard", "exploration", "titan", "final"]
+	var prices := [0, 120, 250, 250, 400, 400, 600, 900]
+	var total := 0
+	for id: String in owned:
+		var v := variants.find(id.get_slice("_", 1))
+		if v < 0:
 			continue
-		s.weapon = mini(int(s.weapon) + GearData.weapon_bonus(id), WeaponData.max_level())
-		var perk: Dictionary = GearData.PROFILE[GearData.variant_of(id)].perk
-		for k: String in perk:
-			if perk[k] is bool:
-				s[k] = true
-			elif k == "hazard_mult":
-				s[k] = maxf(0.2, float(s[k]) + float(perk[k]))
-			else:
-				s[k] = s[k] + perk[k]
-	var parts := parts_equipped()
-	if parts >= 2:
-		s.max_hp = float(s.max_hp) * 1.1
-	if parts >= 4:
-		s.damage = float(s.damage) * 1.1
-	if parts >= 6:
-		s.move_speed = float(s.move_speed) * 1.1
-	var sp := set_progress()
-	if int(sp[1]) >= 6:
-		s.surge = true
-		s.blast_cooldown = float(s.blast_cooldown) * 0.6
-	s.max_hp = roundf(float(s.max_hp))
-	s.hp = s.max_hp
+		var lvl := int(owned[id])
+		var price: int = prices[v]
+		var from := 1
+		if price == 0:
+			from = 0
+		total += price
+		for l in range(from, lvl):
+			total += int((price if price > 0 else 60) * 0.5 * (l + 1))
+	return total
 
 
 ## Enemy HP/damage scale with how deep the player is in the current world
@@ -248,7 +204,7 @@ func weapon_up() -> bool:
 
 func perm_cost(id: String) -> int:
 	var def: Dictionary = PERM[id]
-	return int(def.cost) * (int(perm[id]) + 1)
+	return int(def.cost) + int(def.get("step", def.cost)) * int(perm[id])
 
 
 func buy_perm(id: String) -> bool:
@@ -285,6 +241,11 @@ func boss_bonus(record: bool) -> int:
 	bank += n
 	save()
 	return n
+
+
+## Coins inside the BOSS CHALLENGE chest of world `i`.
+func boss_chest_coins(i: int) -> int:
+	return 250 * (i + 1)
 
 
 ## Coins for beating the current world: the full bonus the first time, a third after.
@@ -335,9 +296,10 @@ func save() -> void:
 	cfg.set_value("worlds", "best_time", best_time)
 	cfg.set_value("worlds", "chests", chests)
 	cfg.set_value("worlds", "boss_best", boss_best)
+	cfg.set_value("worlds", "boss_chests", boss_chests)
 	cfg.set_value("meta", "total_xp", total_xp)
-	cfg.set_value("gear", "owned", gear_owned)
-	cfg.set_value("gear", "equipped", gear_equipped)
+	cfg.set_value("armory", "guns", guns)
+	cfg.set_value("armory", "gun", gun)
 	cfg.set_value("settings", "music", Sfx.music_enabled)
 	cfg.set_value("settings", "sfx", Sfx.sfx_enabled)
 	cfg.save(SAVE_PATH)
@@ -360,13 +322,18 @@ func load_save() -> void:
 	best_time = cfg.get_value("worlds", "best_time", {})
 	chests = cfg.get_value("worlds", "chests", [])
 	boss_best = cfg.get_value("worlds", "boss_best", {})
+	boss_chests = cfg.get_value("worlds", "boss_chests", [])
 	total_xp = int(cfg.get_value("meta", "total_xp", 0))
-	var owned: Dictionary = cfg.get_value("gear", "owned", {})
-	var equipped: Dictionary = cfg.get_value("gear", "equipped", {})
+	var owned: Dictionary = cfg.get_value("armory", "guns", {})
 	for k: String in owned:
-		gear_owned[k] = int(owned[k])
-	for k: String in equipped:
-		if gear_owned.has(str(equipped[k])):
-			gear_equipped[k] = str(equipped[k])
+		if GunData.ids().has(k):
+			guns[k] = clampi(int(owned[k]), 1, GunData.MAX_LEVEL)
+	var g := str(cfg.get_value("armory", "gun", "pulse"))
+	gun = g if guns.has(g) else "pulse"
 	Sfx.music_enabled = bool(cfg.get_value("settings", "music", true))
 	Sfx.sfx_enabled = bool(cfg.get_value("settings", "sfx", true))
+	if not cfg.has_section("armory"):
+		# the CHARACTER gear screen became the ARMORY: its coins come back once
+		gear_refund = _gear_spent(cfg.get_value("gear", "owned", {}))
+		bank += gear_refund
+		save()

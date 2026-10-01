@@ -568,10 +568,11 @@ func _boss_hp_mult() -> float:
 	return 1.0 + _ramp_t() / 60.0 * float(def.get("hp_per_min", 0.3)) * 0.75
 
 
-## Alien damage: a Slime's hit takes 1/HITS_TO_DIE of the player's max health, and
-## every alien hits a little harder as the minutes pass.
+## Alien damage: a Slime's hit takes 1/HITS_TO_DIE of the crew's base health (the
+## ARMORY's LIFE levels on top of it are extra hits you can take), and every alien hits
+## a little harder as the minutes pass.
 func _dmg_mult() -> float:
-	var per_hit := float(Game.stats.max_hp) / HITS_TO_DIE
+	var per_hit := float(Game.stats.get("base_hp", Game.stats.max_hp)) / HITS_TO_DIE
 	return per_hit / REF_DMG * (1.0 + _ramp_t() / 60.0 * DMG_PER_MIN)
 
 

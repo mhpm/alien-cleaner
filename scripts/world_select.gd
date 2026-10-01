@@ -5,7 +5,7 @@ extends Control
 ## (the world-1 station is removed from bg.webp by the tool). Top bar: crew level (lifetime XP gems),
 ## gear power, XP gems and coins; the world picture with its name and longest time
 ## survived (swipe or the arrows to change world; locked until the previous one is
-## beaten); the world chest (coins, once, after beating the world); START; and the nav
+## beaten); the world chest (coins, once, after beating the world); the PLAY button; and the nav
 ## bar: SHOP (crew upgrades), GEAR (suits & blasters), BATTLE, TALENTS (soon), LAB
 ## (Infected Mode).
 
@@ -15,8 +15,8 @@ const DIR := "res://assets/ui/world/"
 const ART_SIZE := Vector2(941, 1672)
 const BUTTONS := {
 	"menu": Rect2(22, 166, 108, 108),
-	"start": Rect2(235, 1210, 473, 210),
-	"chest": Rect2(345, 996, 253, 190),
+	"start": Rect2(212, 1222, 520, 185),
+	"chest": Rect2(367, 995, 194, 150),
 	"shop": Rect2(8, 1478, 170, 187),
 	"gear": Rect2(182, 1478, 170, 187),
 	"battle": Rect2(358, 1458, 227, 204),
@@ -30,6 +30,7 @@ const WORLD_RECT := Rect2(118, 398, 740, 614)
 ## BOSS CHALLENGE button (drawn in code, right of the chest): only once the world is cleared
 const BOSS_RECT := Rect2(626, 1004, 296, 176)
 const RED := Color("ff4f6a")
+const GOLD := Color("ffc933")
 const SHOP_IDS := ["health", "power", "speed"]
 const CYAN := Color("73eff7")
 const GREEN := Color("a7f070")
@@ -45,7 +46,6 @@ var title_num: Label
 var title_name: Label
 var best_label: Label
 var best_value: Label
-var start_label: Label
 var chest_label: Label
 var arrows: Array[Button] = []
 var labels: Dictionary = {}
@@ -58,6 +58,8 @@ var stars: Control
 var boss_btn: Button
 var boss_pic: TextureRect
 var boss_best: Label
+var boss_frame: NeonFrame
+var boss_chest: TextureButton
 
 
 func _ready() -> void:
@@ -183,16 +185,13 @@ func _build() -> void:
 	labels.power = _stage_label(Rect2(406, 34, 88, 42), 32, Color.WHITE)
 	labels.gems = _stage_label(Rect2(608, 34, 76, 42), 32, Color.WHITE)
 	labels.coins = _stage_label(Rect2(796, 34, 84, 42), 32, Color.WHITE)
-	start_label = _stage_label(Rect2(300, 1318, 343, 78), 40, Color("5a2408"))
-	start_label.add_theme_color_override("font_outline_color", Color("ffe07a"))
-	start_label.add_theme_constant_override("outline_size", 6)
 	chest_label = _stage_label(Rect2(345, 952, 253, 44), 30, GREEN)
 	chest_label.add_theme_constant_override("outline_size", 12)
 
-	# nav slots redrawn in code: SHOP (coin) and GEAR (the equipped blaster)
+	# nav slots redrawn in code: SHOP (coin) and ARMORY (the equipped weapon)
 	_nav_icon("shop", CollectibleData.tex("coin"), Vector2(70, 70), "SHOP")
-	_nav_icon("gear", Art.suit_tex(Astronaut.weapon_variant(), "weapon"), Vector2(110, 70), "GEAR")
-	for id: String in ["shop", "lab"]:
+	_nav_icon("gear", GunData.icon(Game.gun), Vector2(110, 70), "ARMORY")
+	for id: String in ["shop", "lab", "gear"]:
 		var bd := _label("!", 30, Color.WHITE)
 		var r: Rect2 = BUTTONS[id]
 		var dot := Panel.new()
@@ -246,6 +245,7 @@ func _build_boss_button() -> void:
 	f.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	f.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	boss_btn.add_child(f)
+	boss_frame = f
 	boss_pic = TextureRect.new()
 	boss_pic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	boss_pic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -274,6 +274,17 @@ func _build_boss_button() -> void:
 		Sfx.play("select", 0.0)
 		_start(true))
 	stage.add_child(boss_btn)
+	# once the challenge is won: a golden chest perched on the card's corner (opens once for coins)
+	boss_chest = TextureButton.new()
+	boss_chest.texture_normal = load(DIR + "btn_chest.png")
+	boss_chest.ignore_texture_size = true
+	boss_chest.stretch_mode = TextureButton.STRETCH_SCALE
+	boss_chest.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	boss_chest.position = BOSS_RECT.position + Vector2(BOSS_RECT.size.x - 112.0, -62.0)
+	boss_chest.size = Vector2(100, 77)
+	boss_chest.pivot_offset = boss_chest.size * 0.5
+	boss_chest.pressed.connect(_open_boss_chest)
+	stage.add_child(boss_chest)
 
 
 func _show_boss_button() -> void:
@@ -281,6 +292,7 @@ func _show_boss_button() -> void:
 		return
 	var open := Game.worlds_cleared > sel
 	boss_btn.visible = open
+	boss_chest.visible = false
 	if not open:
 		return
 	var rooms: Array = WorldData.world(sel).rooms
@@ -290,6 +302,13 @@ func _show_boss_button() -> void:
 		boss_pic.texture = Art.frames(str(EnemyData.TYPES[boss].art)).get_frame_texture("walk", 0)
 	var best := float(Game.boss_best.get(str(sel), 0.0))
 	boss_best.text = "Best %dm %02ds" % [floori(best / 60.0), int(best) % 60] if best > 0.0 else "Beat the boss!"
+	var won := best > 0.0
+	boss_frame.color = GOLD if won else RED
+	boss_frame.fill_top = Color(0.24, 0.16, 0.03, 0.92) if won else Color(0.22, 0.04, 0.1, 0.92)
+	boss_frame.queue_redraw()
+	boss_chest.visible = won
+	var taken := Game.boss_chests.has(sel)
+	boss_chest.self_modulate = Color(0.5, 0.5, 0.6) if taken else Color(1.35, 1.12, 0.62)
 
 
 func _tex_rect(tex: Texture2D, r: Rect2) -> TextureRect:
@@ -331,7 +350,7 @@ func _nav_icon(id: String, tex: Texture2D, sz: Vector2, text: String) -> void:
 	var b: TextureButton = buttons[id]
 	var ic := _tex_rect(tex, Rect2((b.size.x - sz.x) * 0.5, 40 + (70 - sz.y) * 0.5, sz.x, sz.y))
 	b.add_child(ic)
-	var l := _label(text, 30, Color("c7d2ec"))
+	var l := _label(text, UiTheme.fit_size(UiTheme.FONT, text, 30, b.size.x - 20.0), Color("c7d2ec"))
 	l.position = Vector2(0, 116)
 	l.size = Vector2(b.size.x, 40)
 	b.add_child(l)
@@ -351,11 +370,12 @@ func _refresh() -> void:
 	var cl := Game.crew_level()
 	_fit(labels.level, "Lv. %d" % int(cl[0]))
 	level_fill.size.x = 112.0 * float(cl[1])
-	_fit(labels.power, str(Game.gear_power()))
+	_fit(labels.power, str(Game.crew_power()))
 	_fit(labels.gems, _short(Game.total_xp))
 	_fit(labels.coins, _short(Game.bank))
 	badges.shop.visible = MenuPanels.can_buy(SHOP_IDS)
 	badges.lab.visible = MutationData.can_buy()
+	badges.gear.visible = Game.armory_affordable()
 	_show_chest()
 
 
@@ -389,7 +409,6 @@ func _show_world(fade := true) -> void:
 	best_value.text = "%dm %02ds" % [floori(secs / 60.0), int(secs) % 60] if secs > 0.0 else "0m 00s"
 	arrows[0].visible = sel > 0
 	arrows[1].visible = sel < WorldData.WORLDS.size() - 1
-	_fit(start_label, "WORLD %d" % (sel + 1) if open else "LOCKED")
 	(buttons.start as TextureButton).modulate = Color.WHITE if open else Color(0.45, 0.45, 0.5)
 	_show_chest()
 	_show_boss_button()
@@ -448,7 +467,7 @@ func _on_button(id: String) -> void:
 		"lab":
 			get_tree().change_scene_to_file("res://scenes/lab.tscn")
 		"gear", "plus_power":
-			get_tree().change_scene_to_file("res://scenes/character.tscn")
+			get_tree().change_scene_to_file("res://scenes/armory.tscn")
 		"talents":
 			_toast("TALENTS COMING SOON!")
 		"plus_gems":
@@ -518,6 +537,28 @@ func _open_chest() -> void:
 	_refresh()
 
 
+## The golden chest of a won BOSS CHALLENGE: coins, once per world.
+func _open_boss_chest() -> void:
+	if Game.boss_chests.has(sel):
+		_toast("Already opened.")
+		return
+	if float(Game.boss_best.get(str(sel), 0.0)) <= 0.0:
+		return
+	var coins := Game.boss_chest_coins(sel)
+	Game.boss_chests.append(sel)
+	Game.bank += coins
+	Game.save()
+	Sfx.play("victory", 0.0)
+	var b := boss_chest
+	var tw := b.create_tween()
+	tw.tween_property(b, "scale", Vector2(1.25, 0.8), 0.08)
+	tw.tween_property(b, "scale", Vector2(0.85, 1.2), 0.1)
+	tw.tween_property(b, "scale", Vector2.ONE, 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_toast("+%d COINS!" % coins)
+	_refresh()
+	_show_boss_button()
+
+
 func _toast(text: String) -> void:
 	toast.text = text
 	toast.modulate.a = 1.0
@@ -542,6 +583,13 @@ func _process(delta: float) -> void:
 		chest.rotation = sin(t * 9.0) * 0.06 * maxf(0.0, sin(t * 2.0))
 	else:
 		chest.rotation = 0.0
+	if boss_chest.visible:
+		if Game.boss_chests.has(sel):
+			boss_chest.rotation = 0.0
+			boss_chest.position.y = BOSS_RECT.position.y - 62.0
+		else:  # waiting to be opened: bobs and rattles
+			boss_chest.position.y = BOSS_RECT.position.y - 62.0 + sin(t * 3.0) * 4.0
+			boss_chest.rotation = sin(t * 11.0) * 0.07 * maxf(0.0, sin(t * 2.0))
 	var battle: TextureButton = buttons.battle
 	battle.self_modulate = Color(1, 1, 1).lerp(Color(1.3, 1.3, 1.5), 0.5 + 0.5 * sin(t * 2.5))
 	for a in arrows:
