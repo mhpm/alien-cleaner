@@ -48,6 +48,7 @@ JP = "enemies/jelly pod/%s/image_%s.png"
 SM = "enemies/spike mine/%s/image_%s.png"
 W4 = "enemies/%s/%s/image_%02d.png"  # cut by tools/cut_sheet_enemies.py
 TA = "enemies/toxic_angler/%s/image_%02d.png"
+DB = "enemies/drillback/%s/image_%02d.png"
 B3 = "enemies/bosses/boss_3_elements/image_%s.png"
 B4 = "enemies/bosses/boss_4_elements/image_%s.png"
 
@@ -710,6 +711,41 @@ SETS = {
     "angler_boom": {"anchor": "center", "anims": {"pop": ([TA % ("mine", 6)], 1, False)}, "body": "pop"},
     "angler_geyser": {"anchor": "bottom", "anims": {"pop": ([TA % ("ripple", 3), TA % ("ripple2", 1)], 8, False)}, "body": "pop"},
     "angler_ring": {"anchor": "center", "anims": {"pop": ([TA % ("ripple", 2)], 1, False)}, "body": "pop"},
+    # DRILLBACK mini boss (tools/boss_drill_ref.webp -> cut_sheet_enemies.py drillback;
+    # enemies/boss_drillback.gd): a rocky armadillo with a drill nose. idle 1-2 calm, 4-5
+    # angry, 7 tongue out (winded), 8 dizzy, 9 hurt; attack 1 = crouch, 2-4 = drill spinning
+    # up; dash_a-d = the bore (body only, the trail is drawn in code); dive = sinks into a
+    # ring of dirt; spike 1-2 = the mound it tunnels under; rear = stands up to throw;
+    # die = collapses into a heap of rocks.
+    "drillback": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([DB % ("idle", i) for i in (1, 2)], 3, True),
+            "angry": ([DB % ("idle", i) for i in (4, 5)], 4, True),
+            "hurt": ([DB % ("idle", 9)], 1, False),
+            "stun": ([DB % ("idle", 8)], 1, True),
+            "gasp": ([DB % ("idle", 7)], 1, True),
+            "crouch": ([DB % ("attack", 1)], 1, True),
+            "spin": ([DB % ("attack", i) for i in (2, 3, 4)], 14, True),
+            "dash": ([DB % (r, 1) for r in ("dash_a", "dash_b", "dash_c", "dash_d")], 14, True),
+            "sink": ([DB % ("dive", i) for i in (1, 2, 3, 4)], 8, False),
+            "mound": ([DB % ("spike", 2), DB % ("spike", 1)], 8, True),
+            "rear": ([DB % ("rear", 1)], 1, True),
+            "death": ([DB % ("die", i) for i in range(1, 10)], 6, False),
+        },
+        "body": "walk",
+    },
+    "drill_rock": {"anchor": "center", "anims": {"fly": ([DB % ("rock", 1)], 1, True)}, "body": "fly"},
+    "drill_seed": {
+        "anchor": "bottom",
+        "anims": {
+            "arm": ([DB % ("seed", i) for i in (6, 5, 4, 3, 2, 1)], 5, False),
+            "fly": ([DB % ("seed", 6)], 1, True),
+        },
+        "body": "fly",
+    },
+    "drill_boom": {"anchor": "bottom", "anims": {"pop": ([DB % ("seed", i) for i in (7, 8, 9)], 10, False)}, "body": "pop"},
+    "drill_spike": {"anchor": "bottom", "anims": {"pop": ([DB % ("spike", i) for i in (1, 2, 3, 4)], 12, False)}, "body": "pop"},
     "jelly_spore": {"anchor": "center", "anims": {"fly": ([JP % ("attack", i) for i in ("093", "098")], 6, True)}, "body": "fly"},
     # VOID ARCHMAGE, world 3 final boss (loose frames in assets/sprites/enemies/bosses/
     # boss_3_elements, cut from the sheet; enemies/boss_archmage.gd): a hooded one-eyed

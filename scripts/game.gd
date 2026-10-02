@@ -617,7 +617,7 @@ func enemy_killed(e: Enemy) -> void:
 			pc.position = e.global_position
 			entities.add_child(pc)
 	if boss:
-		hud.hide_boss()
+		hud.hide_boss(e)
 		ring(center, 60.0, c, 0.6, 4.0, true)
 		for i in 5:
 			get_tree().create_timer(0.12 * i).timeout.connect(func() -> void:

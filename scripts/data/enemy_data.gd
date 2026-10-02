@@ -410,6 +410,13 @@ const TYPES := {
 		"color": Color("a7f070"), "kb": 0.0, "boss": true,
 		"script": "res://scripts/enemies/boss_angler.gd",
 	},
+	# world 2 mini boss (wave 9): drill-nosed rock armadillo (enemies/boss_drillback.gd)
+	"drillback": {
+		"name": "DRILLBACK", "hp": 1500.0, "speed": 38.0, "damage": 22.0, "coins": 80, "cost": 0,
+		"radius": 17.0, "art": "drillback", "scale": 0.36, "ai": "boss",
+		"color": Color("d98a3c"), "kb": 0.0, "boss": true,
+		"script": "res://scripts/enemies/boss_drillback.gd",
+	},
 	# eye the Archmage summons: floats to you and bursts (enemies/arcane_eye.gd)
 	"arcane_eye": {
 		"name": "Arcane Eye", "hp": 18.0, "speed": 42.0, "damage": 14.0, "coins": 1, "cost": 2,

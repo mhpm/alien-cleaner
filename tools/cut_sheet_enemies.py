@@ -240,6 +240,24 @@ SHEETS = {
             ("die2", 534, 626, 502, 1125, [615, 720, 806, 869, 991]),
         ],
     },
+    # DRILLBACK boss (enemies/boss_drillback.gd): one sheet, one row per pose / effect. The
+    # dash rows keep only the body of each frame (the long plasma trail is drawn in code)
+    "boss_drill_ref.webp": {
+        "drillback": [
+            ("idle", 30, 170, 0, 1500, [171, 340, 512, 688, 855, 1026, 1190, 1350]),
+            ("attack", 195, 363, 0, 662, [166, 308, 460]),
+            ("dash_a", 195, 363, 664, 822, []),
+            ("dash_b", 195, 363, 880, 1030, []),
+            ("dash_c", 195, 363, 1135, 1300, []),
+            ("dash_d", 195, 363, 1360, 1500, []),
+            ("dive", 362, 526, 0, 745, [177, 366, 556]),
+            ("spike", 362, 526, 745, 1500, [903, 1088, 1281]),
+            ("rear", 526, 690, 0, 190, []),
+            ("rock", 540, 617, 168, 240, []),
+            ("seed", 526, 690, 240, 1500, [360, 528, 690, 822, 928, 1006, 1165, 1328]),
+            ("die", 698, 838, 0, 1500, [172, 348, 532, 730, 855, 1002, 1195, 1315]),
+        ],
+    },
 }
 
 
@@ -272,7 +290,9 @@ def main_piece(fr):
 
 
 # rows whose first N frames keep only their biggest piece (TOXIC ANGLER's spore mine)
-MAIN_ONLY = {"mine": 5}
+MAIN_ONLY = {"mine": 5, "rear": 1, "rock": 1}
+# rows whose left edge fades out over N px (a long trail cut off by the frame box)
+FADE_LEFT = {"dash_b": 50, "dash_c": 70, "dash_d": 60}
 
 
 def _fresh(d):
@@ -325,6 +345,11 @@ def main(only=None):
                     fr = clean(img.crop((xs[i], y0, xs[i + 1], y1)))
                     if i < MAIN_ONLY.get(row, 0):
                         fr = main_piece(fr)
+                    if row in FADE_LEFT:
+                        fa = np.asarray(fr).copy()
+                        ramp = np.clip(np.arange(fa.shape[1]) / FADE_LEFT[row], 0.0, 1.0)
+                        fa[:, :, 3] = (fa[:, :, 3] * ramp[None, :]).astype(np.uint8)
+                        fr = Image.fromarray(fa)
                     fr = fr.crop(fr.getbbox())
                     fr.save(os.path.join(d, "image_%02d.png" % (i + 1)))
                 print(name, row, len(xs) - 1, "frames", xs)

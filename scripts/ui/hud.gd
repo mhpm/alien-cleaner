@@ -20,6 +20,7 @@ var _left := -2
 var boss_box: Control
 var boss_bar: Bar
 var boss_name: Label
+var boss_scan := 0.0  # seconds to the next look for a living boss (bar lost its boss)
 var boss_ref: Enemy
 var banner_label: Label
 var banner_tween: Tween
@@ -280,11 +281,7 @@ func _process(delta: float) -> void:
 	else:
 		controls.infect_state = 2 if inf.charge >= 1.0 else 1
 		controls.infect = inf.charge
-	if boss_ref != null:
-		if is_instance_valid(boss_ref) and not boss_ref.dead:
-			boss_bar.ratio = clampf(boss_ref.hp / boss_ref.max_hp, 0.0, 1.0)
-		else:
-			boss_bar.ratio = 0.0
+	_track_boss(delta)
 
 
 # ---------------------------------------------------------------- feedback
@@ -330,16 +327,57 @@ func fade_to(a: float, dur: float) -> Tween:
 
 
 func show_boss(e: Enemy) -> void:
+	if e == null or not is_instance_valid(e):
+		return
 	boss_ref = e
 	boss_name.text = str(e.def.name)
-	boss_bar.ratio = 1.0
-	boss_bar.lag = 1.0
+	boss_bar.ratio = clampf(e.hp / e.max_hp, 0.0, 1.0)
+	boss_bar.lag = boss_bar.ratio
 	boss_box.visible = true
 
 
-func hide_boss() -> void:
+## `e` died (or, with no argument, the fight is over). Only the boss on the bar hides it,
+## and the bar moves on to any other boss still alive (two GLOOP BRUTEs, a mini boss that
+## outlived its wave next to the final boss...).
+func hide_boss(e: Enemy = null) -> void:
+	if e != null and e != boss_ref:
+		return
 	boss_box.visible = false
 	boss_ref = null
+	boss_scan = 0.0
+
+
+## Keeps the bar on a living boss: follows boss_ref, and whenever it is gone (or a boss
+## appeared without show_boss) picks the final boss first, else the toughest boss alive.
+func _track_boss(delta: float) -> void:
+	if boss_ref != null and is_instance_valid(boss_ref) and not boss_ref.dead:
+		boss_bar.ratio = clampf(boss_ref.hp / boss_ref.max_hp, 0.0, 1.0)
+		boss_box.visible = true
+		return
+	boss_scan -= delta
+	if boss_scan > 0.0:
+		return
+	boss_scan = 0.25
+	var final_id := ""
+	if game.survival != null:
+		final_id = str(game.survival.def.get("boss", ""))
+	var best: Enemy = null
+	var best_score := -1.0
+	for n in game.enemy_cache:
+		if not is_instance_valid(n):
+			continue
+		var b := n as Enemy
+		if b == null or not b.is_boss or b.dead:
+			continue
+		var score := b.max_hp + (1e9 if b.type_id == final_id else 0.0)
+		if score > best_score:
+			best_score = score
+			best = b
+	if best != null:
+		show_boss(best)
+	elif boss_box.visible:
+		boss_box.visible = false
+		boss_ref = null
 
 
 # ---------------------------------------------------------------- overlays

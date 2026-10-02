@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tests/boss_bar_test.gd" id="1_bossbar"]
+
+[node name="BossBarTest" type="Node"]
+script = ExtResource("1_bossbar")
