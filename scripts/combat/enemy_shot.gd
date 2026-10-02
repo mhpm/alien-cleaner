@@ -86,6 +86,8 @@ const STYLES := {
 	"angler_drop": {"art": "angler_drop", "scale": 0.15, "pop": "angler_pop", "pop_s": 0.07, "tint": Color.WHITE, "color": Color("a7f070"), "hit": 5.5},
 	# DRILLBACK: a chunk of rock (rubble, debris of the bursts)
 	"drill_chunk": {"art": "drill_rock", "scale": 0.13, "pop": "drill_boom", "pop_s": 0.08, "tint": Color(1.1, 0.95, 0.8), "color": Color("b9803f"), "hit": 5.0},
+	# BLOBULUS: a droplet of slime
+	"blob_drop": {"art": "blob_drop", "scale": 0.1, "pop": "blob_pop", "pop_s": 0.07, "tint": Color.WHITE, "color": Color("5fd0ff"), "hit": 5.5},
 	"big_red_mega": {"art": "big_red_ball", "scale": 0.19, "pop": "glob_pop", "pop_s": 0.45, "tint": Color(1.6, 0.8, 1.2), "color": Color("ff4f9a"), "hit": 13.0, "split": 12},
 }
 

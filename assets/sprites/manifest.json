@@ -3735,5 +3735,168 @@
     "loop": false
    }
   }
+ },
+ "blobulus": {
+  "size": [
+   262,
+   153
+  ],
+  "anchor": [
+   131,
+   153
+  ],
+  "body_h": 151.0,
+  "anims": {
+   "walk": {
+    "frames": 4,
+    "fps": 3,
+    "loop": true
+   },
+   "angry": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "fury": {
+    "frames": 2,
+    "fps": 6,
+    "loop": true
+   },
+   "hurt": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   },
+   "stun": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "tired": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "charge": {
+    "frames": 4,
+    "fps": 7,
+    "loop": false
+   },
+   "crack": {
+    "frames": 2,
+    "fps": 6,
+    "loop": true
+   },
+   "hop": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "sink": {
+    "frames": 3,
+    "fps": 8,
+    "loop": false
+   },
+   "death": {
+    "frames": 5,
+    "fps": 5,
+    "loop": false
+   }
+  }
+ },
+ "blob_orb": {
+  "size": [
+   192,
+   200
+  ],
+  "anchor": [
+   96,
+   100.0
+  ],
+  "body_h": 89.0,
+  "anims": {
+   "grow": {
+    "frames": 5,
+    "fps": 4,
+    "loop": false
+   },
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "blob_pop": {
+  "size": [
+   192,
+   200
+  ],
+  "anchor": [
+   96,
+   100.0
+  ],
+  "body_h": 200.0,
+  "anims": {
+   "pop": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   }
+  }
+ },
+ "blob_drop": {
+  "size": [
+   104,
+   64
+  ],
+  "anchor": [
+   52,
+   32.0
+  ],
+  "body_h": 64.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "blob_geyser": {
+  "size": [
+   192,
+   153
+  ],
+  "anchor": [
+   96,
+   153
+  ],
+  "body_h": 144.5,
+  "anims": {
+   "pop": {
+    "frames": 4,
+    "fps": 12,
+    "loop": false
+   }
+  }
+ },
+ "blobling": {
+  "size": [
+   72,
+   65
+  ],
+  "anchor": [
+   36,
+   65
+  ],
+  "body_h": 60.0,
+  "anims": {
+   "walk": {
+    "frames": 4,
+    "fps": 6,
+    "loop": true
+   }
+  }
  }
 }

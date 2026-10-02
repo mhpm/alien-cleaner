@@ -417,6 +417,20 @@ const TYPES := {
 		"color": Color("d98a3c"), "kb": 0.0, "boss": true,
 		"script": "res://scripts/enemies/boss_drillback.gd",
 	},
+	# world 1 mini boss (wave 8): one-eyed slime king (enemies/boss_blobulus.gd)
+	"blobulus": {
+		"name": "BLOBULUS", "hp": 1500.0, "speed": 32.0, "damage": 22.0, "coins": 80, "cost": 0,
+		"radius": 17.0, "art": "blobulus", "scale": 0.33, "ai": "boss",
+		"color": Color("5fd0ff"), "kb": 0.0, "boss": true,
+		"script": "res://scripts/enemies/boss_blobulus.gd",
+	},
+	# the little floating eyes BLOBULUS splits into (enemies/blobling.gd)
+	"blobling": {
+		"name": "Blobling", "hp": 22.0, "speed": 56.0, "damage": 12.0, "coins": 1, "cost": 2,
+		"radius": 8.0, "art": "blobling", "scale": 0.43, "ai": "blobling",
+		"color": Color("5fd0ff"), "kb": 1.0,
+		"script": "res://scripts/enemies/blobling.gd",
+	},
 	# eye the Archmage summons: floats to you and bursts (enemies/arcane_eye.gd)
 	"arcane_eye": {
 		"name": "Arcane Eye", "hp": 18.0, "speed": 42.0, "damage": 14.0, "coins": 1, "cost": 2,

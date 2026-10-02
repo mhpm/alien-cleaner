@@ -258,6 +258,25 @@ SHEETS = {
             ("die", 698, 838, 0, 1500, [172, 348, 532, 730, 855, 1002, 1195, 1315]),
         ],
     },
+    # BLOBULUS boss (enemies/boss_blobulus.gd): one sheet, one row per pose / effect.
+    # "m1".."m6" = the little floating eyes it splits into (the biggest piece of each box)
+    "boss_slime_ref.webp": {
+        "blobulus": [
+            ("idle", 28, 188, 0, 1500, [207, 392, 582, 780, 975, 1163, 1328]),
+            ("attack", 195, 362, 0, 732, [200, 383, 558]),
+            ("orb", 195, 399, 732, 1500, [845, 965, 1118, 1284]),
+            ("float", 385, 532, 0, 205, []),
+            ("dive", 400, 555, 205, 1500, [390, 580, 757, 950, 1125, 1305]),
+            ("split", 565, 709, 0, 935, [208, 404, 533, 731]),
+            ("m1", 583, 650, 940, 1015, []),
+            ("m2", 628, 700, 1028, 1100, []),
+            ("m3", 645, 706, 1115, 1190, []),
+            ("m4", 598, 668, 1177, 1255, []),
+            ("m5", 622, 702, 1280, 1362, []),
+            ("m6", 586, 650, 1394, 1466, []),
+            ("die", 712, 836, 0, 1500, [212, 415, 632, 888, 1115, 1262]),
+        ],
+    },
 }
 
 
@@ -290,7 +309,7 @@ def main_piece(fr):
 
 
 # rows whose first N frames keep only their biggest piece (TOXIC ANGLER's spore mine)
-MAIN_ONLY = {"mine": 5, "rear": 1, "rock": 1}
+MAIN_ONLY = {"mine": 5, "rear": 1, "rock": 1, "m1": 1, "m2": 1, "m3": 1, "m4": 1, "m5": 1, "m6": 1}
 # rows whose left edge fades out over N px (a long trail cut off by the frame box)
 FADE_LEFT = {"dash_b": 50, "dash_c": 70, "dash_d": 60}
 

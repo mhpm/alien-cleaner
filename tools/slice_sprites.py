@@ -49,6 +49,7 @@ SM = "enemies/spike mine/%s/image_%s.png"
 W4 = "enemies/%s/%s/image_%02d.png"  # cut by tools/cut_sheet_enemies.py
 TA = "enemies/toxic_angler/%s/image_%02d.png"
 DB = "enemies/drillback/%s/image_%02d.png"
+BL = "enemies/blobulus/%s/image_%02d.png"
 B3 = "enemies/bosses/boss_3_elements/image_%s.png"
 B4 = "enemies/bosses/boss_4_elements/image_%s.png"
 
@@ -746,6 +747,44 @@ SETS = {
     },
     "drill_boom": {"anchor": "bottom", "anims": {"pop": ([DB % ("seed", i) for i in (7, 8, 9)], 10, False)}, "body": "pop"},
     "drill_spike": {"anchor": "bottom", "anims": {"pop": ([DB % ("spike", i) for i in (1, 2, 3, 4)], 12, False)}, "body": "pop"},
+    # BLOBULUS mini boss (tools/boss_slime_ref.webp -> cut_sheet_enemies.py blobulus;
+    # enemies/boss_blobulus.gd): a one-eyed slime king. idle 1/6 calm, 2 smug, 3 squint (hurt),
+    # 4 angry, 5 sparking (fury), 7 dizzy, 8 flat (tired); attack = holds a growing orb;
+    # split 1-2 = shell cracking; float = hopping; dive 1-3 = sinking into a puddle, 4-7 = the
+    # geyser effect; die = melts. m1-m6 = the little floating eyes (bloblings).
+    "blobulus": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([BL % ("idle", i) for i in (1, 6, 1, 2)], 3, True),
+            "angry": ([BL % ("idle", 4)], 1, True),
+            "fury": ([BL % ("idle", i) for i in (5, 4)], 6, True),
+            "hurt": ([BL % ("idle", 3)], 1, False),
+            "stun": ([BL % ("idle", 7)], 1, True),
+            "tired": ([BL % ("idle", 8)], 1, True),
+            "charge": ([BL % ("attack", i) for i in (1, 2, 3, 4)], 7, False),
+            "crack": ([BL % ("split", i) for i in (1, 2)], 6, True),
+            "hop": ([BL % ("float", 1)], 1, True),
+            "sink": ([BL % ("dive", i) for i in (1, 2, 3)], 8, False),
+            "death": ([BL % ("die", i) for i in (1, 2, 3, 4, 7)], 5, False),
+        },
+        "body": "walk",
+    },
+    "blob_orb": {
+        "anchor": "center",
+        "anims": {
+            "grow": ([BL % ("orb", i) for i in (1, 2, 3, 4, 5)], 4, False),
+            "fly": ([BL % ("orb", 2)], 1, True),
+        },
+        "body": "fly",
+    },
+    "blob_pop": {"anchor": "center", "anims": {"pop": ([BL % ("orb", 5)], 1, False)}, "body": "pop"},
+    "blob_drop": {"anchor": "center", "anims": {"fly": ([BL % ("orb", 1)], 1, True)}, "body": "fly"},
+    "blob_geyser": {"anchor": "bottom", "anims": {"pop": ([BL % ("dive", i) for i in (4, 5, 6, 7)], 12, False)}, "body": "pop"},
+    "blobling": {
+        "anchor": "bbox",
+        "anims": {"walk": ([BL % ("m%d" % i, 1) for i in (1, 3, 6, 3)], 6, True)},
+        "body": "walk",
+    },
     "jelly_spore": {"anchor": "center", "anims": {"fly": ([JP % ("attack", i) for i in ("093", "098")], 6, True)}, "body": "fly"},
     # VOID ARCHMAGE, world 3 final boss (loose frames in assets/sprites/enemies/bosses/
     # boss_3_elements, cut from the sheet; enemies/boss_archmage.gd): a hooded one-eyed

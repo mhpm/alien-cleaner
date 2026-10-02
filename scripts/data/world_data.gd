@@ -229,7 +229,8 @@ const WORLDS := [
 					{"pool": MID, "alive": 40, "total": 200, "elite": 0.02, "invasion": 120},
 					{"pool": EARLY, "alive": 30, "total": 70, "event": "boss", "id": "gloop_brute"},
 					{"pool": ["slime", "runner", "splitter", "spitter", "droid", "ufo"], "alive": 44, "total": 100, "elite": 0.03, "event": "swarm", "id": "runner", "count": 20},
-					{"pool": ["slime", "runner", "splitter", "spitter", "droid", "ufo"], "alive": 48, "total": 110, "elite": 0.04, "event": "swarm", "id": "runner", "count": 28},
+					{"pool": ["slime", "runner", "splitter", "spitter", "droid", "ufo"], "alive": 48, "total": 110, "elite": 0.04, "event": "swarm", "id": "runner", "count": 28, "events": [
+						{"at": 12.0, "event": "boss", "id": "blobulus", "label": "BLOBULUS!"}]},
 					{"pool": ALL_BR, "alive": 52, "total": 120, "elite": 0.04, "event": "ring", "id": "slime", "count": 26},
 					{"pool": ALL_BR, "alive": 56, "total": 300, "elite": 0.05, "invasion": 180},
 					{"pool": ALL_BR, "alive": 36, "total": 90, "elite": 0.05, "event": "boss", "id": "gloop_brute", "count": 2},
