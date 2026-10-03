@@ -27,6 +27,7 @@ func setup(center: Vector2, r: float) -> BossFence:
 
 
 func _ready() -> void:
+	DarkLights.glow(self)
 	Sfx.play("zap", 0.0, 2.0)
 	Sfx.play("door", 0.0)
 	_new_arcs()

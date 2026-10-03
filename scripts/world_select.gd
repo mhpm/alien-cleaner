@@ -1,8 +1,10 @@
 extends Control
-## World select hub (after PLAY on the title screen), built on the painted art
-## tools/world_select_ref.webp -> tools/make_world_select_assets.py -> assets/ui/world/.
-## Same 941x1672 "stage" as the title screen; the world pictures float over the sky
-## (the world-1 station is removed from bg.webp by the tool). Top bar: crew level (lifetime XP gems),
+## World select hub (after PLAY on the title screen). Behind it, WorldSpace: a wide
+## spaceship window that covers any screen, with ships, asteroids and planets moving in its
+## sky. On top, a 941x1672 UI stage (buttons cut from tools/world_select_ref.webp by
+## tools/make_world_select_assets.py; top/nav bars from tools/make_world_space_assets.py)
+## split in bands so tall phones keep the bars at the edges; the world pictures float in
+## the window. Top bar: crew level (lifetime XP gems),
 ## gear power, XP gems and coins; the world picture with its name and longest time
 ## survived (swipe or the arrows to change world; locked until the previous one is
 ## beaten); the world chest (coins, once, after beating the world); the PLAY button; and the nav
@@ -12,20 +14,23 @@ extends Control
 const GAME_SCENE := "res://scenes/game.tscn"
 const SELF_SCENE := "res://scenes/world_select.tscn"
 const DIR := "res://assets/ui/world/"
+const SPACE := "res://assets/ui/world/space/"
 const ART_SIZE := Vector2(941, 1672)
 const BUTTONS := {
 	"menu": Rect2(22, 166, 108, 108),
 	"start": Rect2(212, 1222, 520, 185),
 	"chest": Rect2(367, 995, 194, 150),
-	"shop": Rect2(8, 1478, 170, 187),
-	"gear": Rect2(182, 1478, 170, 187),
-	"battle": Rect2(358, 1458, 227, 204),
-	"talents": Rect2(590, 1478, 175, 187),
-	"lab": Rect2(770, 1478, 165, 187),
+	"shop": Rect2(12, 1482, 166, 185),
+	"gear": Rect2(190, 1482, 166, 185),
+	"battle": Rect2(368, 1457, 203, 215),
+	"talents": Rect2(583, 1482, 166, 185),
+	"lab": Rect2(761, 1482, 166, 185),
 	"plus_power": Rect2(498, 34, 42, 42),
 	"plus_gems": Rect2(688, 34, 42, 42),
 	"plus_coins": Rect2(882, 34, 42, 42),
 }
+## bottom-nav tiles (python tools/make_nav_icons.py): frame and label are painted in the art
+const NAV := ["shop", "gear", "battle", "talents", "lab"]
 const WORLD_RECT := Rect2(118, 398, 740, 614)
 ## BOSS CHALLENGE button (drawn in code, right of the chest): only once the world is cleared
 const BOSS_RECT := Rect2(626, 1004, 296, 176)
@@ -53,8 +58,6 @@ var level_fill: ColorRect
 var badges: Dictionary = {}
 var toast: Label
 var drag_from := Vector2.INF
-var sparkles: Array[Vector3] = []
-var stars: Control
 var boss_btn: Button
 var boss_pic: TextureRect
 var boss_best: Label
@@ -70,6 +73,9 @@ func _ready() -> void:
 	Game.menu_scene = SELF_SCENE
 	sel = clampi(Game.worlds_cleared, 0, WorldData.WORLDS.size() - 1)
 	_build()
+	# tall phones: top bar + title pinned up, chest/START/nav pinned down, the world
+	# floats in the middle and the sky grows above and below it
+	UiTheme.set_seams(stage, [[400.0, 1.0, 1], [1000.0, 1.0, -1]], 1)
 	resized.connect(_fit_stage)
 	_fit_stage()
 	_show_world(false)
@@ -80,18 +86,15 @@ func _ready() -> void:
 # ---------------------------------------------------------------- building
 
 func _build() -> void:
+	# animated spaceship window behind everything; it covers any screen by itself
+	add_child(WorldSpace.new())
 	stage = Control.new()
 	stage.size = ART_SIZE
 	stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(stage)
-	var bg := _tex_rect(load(DIR + "bg.webp"), Rect2(Vector2.ZERO, ART_SIZE))
-	stage.add_child(bg)
-	UiTheme.add_backdrop(self, stage, bg.texture)
-	stars = Control.new()
-	stars.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	stars.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	stars.draw.connect(_draw_stars)
-	add_child(stars)
+	# only the UI bars of the old art are kept (python tools/make_world_space_assets.py)
+	stage.add_child(_tex_rect(load(SPACE + "top_bar.png"), Rect2(0, 0, 941, 126)))
+	stage.add_child(_tex_rect(load(DIR + "nav/bar.png"), Rect2(0, 1460, 941, 212)))
 	pic = _tex_rect(null, WORLD_RECT)
 	stage.add_child(pic)
 	# locked world: dark veil with a lock and what unlocks it
@@ -101,15 +104,9 @@ func _build() -> void:
 	lock_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	(lock_box as VBoxContainer).alignment = BoxContainer.ALIGNMENT_CENTER
 	stage.add_child(lock_box)
-	var lock_icon := _tex_rect(load(DIR + "btn_talents.png"), Rect2(0, 0, 175, 110))
-	lock_icon.custom_minimum_size = Vector2(175, 110)
+	var lock_icon := _tex_rect(load(DIR + "lock.png"), Rect2(0, 0, 88, 100))
+	lock_icon.custom_minimum_size = Vector2(88, 100)
 	lock_icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	# only the padlock part of the talents slot
-	var at := AtlasTexture.new()
-	at.atlas = load(DIR + "btn_talents.png")
-	at.region = Rect2(52, 28, 72, 80)
-	lock_icon.texture = at
-	lock_icon.custom_minimum_size = Vector2(90, 100)
 	lock_box.add_child(lock_icon)
 	lock_label = _label("", 38, Color("ff9aa8"))
 	lock_box.add_child(lock_label)
@@ -134,6 +131,27 @@ func _build() -> void:
 	bh.alignment = BoxContainer.ALIGNMENT_CENTER
 	bh.add_theme_constant_override("separation", 12)
 	bh.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var box := Panel.new()  # backing for "Longest Survived" (it was painted on the old art)
+	var box_sb := StyleBoxFlat.new()
+	box_sb.bg_color = Color(0.03, 0.05, 0.14, 0.82)
+	box_sb.border_color = Color("3d6fd6")
+	box_sb.set_border_width_all(4)
+	box_sb.set_corner_radius_all(14)
+	box.add_theme_stylebox_override("panel", box_sb)
+	box.position = Vector2(222, 332)
+	box.size = Vector2(498, 62)
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stage.add_child(box)
+	var line := Control.new()  # neon rule under the title
+	line.position = Vector2(190, 286)
+	line.size = Vector2(560, 24)
+	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	line.draw.connect(func() -> void:
+		var pts := PackedVector2Array([Vector2(0, 16), Vector2(130, 16), Vector2(146, 6),
+				Vector2(414, 6), Vector2(430, 16), Vector2(560, 16)])
+		line.draw_polyline(pts, Color(CYAN, 0.25), 10.0)
+		line.draw_polyline(pts, CYAN, 4.0))
+	stage.add_child(line)
 	stage.add_child(bh)
 	best_label = _label("", 30, Color.WHITE)
 	best_value = _label("", 30, GREEN)
@@ -160,7 +178,7 @@ func _build() -> void:
 	for id: String in BUTTONS:
 		var r: Rect2 = BUTTONS[id]
 		var b := TextureButton.new()
-		b.texture_normal = load(DIR + "btn_%s.png" % id)
+		b.texture_normal = load(DIR + ("nav/%s.png" if NAV.has(id) else "btn_%s.png") % id)
 		b.ignore_texture_size = true
 		b.stretch_mode = TextureButton.STRETCH_SCALE
 		b.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
@@ -188,9 +206,8 @@ func _build() -> void:
 	chest_label = _stage_label(Rect2(345, 952, 253, 44), 30, GREEN)
 	chest_label.add_theme_constant_override("outline_size", 12)
 
-	# nav slots redrawn in code: SHOP (coin) and ARMORY (the equipped weapon)
-	_nav_icon("shop", CollectibleData.tex("coin"), Vector2(70, 70), "SHOP")
-	_nav_icon("gear", GunData.icon(Game.gun), Vector2(110, 70), "ARMORY")
+	# the ARMORY tile is empty in the art: the equipped weapon is drawn in it
+	_nav_icon("gear", GunData.icon(Game.gun), Vector2(120, 70))
 	for id: String in ["shop", "lab", "gear"]:
 		var bd := _label("!", 30, Color.WHITE)
 		var r: Rect2 = BUTTONS[id]
@@ -219,10 +236,6 @@ func _build() -> void:
 	toast.position -= toast.size * 0.5
 	toast.modulate.a = 0.0
 	add_child(toast)
-	while sparkles.size() < 24:  # in the sky around the world picture
-		var sp := Vector3(randf() * ART_SIZE.x, 110.0 + randf() * 880.0, randf())
-		if not WORLD_RECT.grow(-40.0).has_point(Vector2(sp.x, sp.y)):
-			sparkles.append(sp)
 
 
 ## BOSS CHALLENGE: a red neon card with the world's final boss, "BOSS / CHALLENGE" and
@@ -346,14 +359,9 @@ func _fit(l: Label, text: String) -> void:
 	l.add_theme_font_size_override("font_size", UiTheme.fit_size(UiTheme.FONT, text, int(l.get_meta("size")), l.size.x))
 
 
-func _nav_icon(id: String, tex: Texture2D, sz: Vector2, text: String) -> void:
+func _nav_icon(id: String, tex: Texture2D, sz: Vector2) -> void:
 	var b: TextureButton = buttons[id]
-	var ic := _tex_rect(tex, Rect2((b.size.x - sz.x) * 0.5, 40 + (70 - sz.y) * 0.5, sz.x, sz.y))
-	b.add_child(ic)
-	var l := _label(text, UiTheme.fit_size(UiTheme.FONT, text, 30, b.size.x - 20.0), Color("c7d2ec"))
-	l.position = Vector2(0, 116)
-	l.size = Vector2(b.size.x, 40)
-	b.add_child(l)
+	b.add_child(_tex_rect(tex, Rect2(Vector2(83.0, 68.0) - sz * 0.5, sz)))
 
 
 ## Fit the whole art inside the safe area (any phone aspect), centered.
@@ -485,7 +493,7 @@ func _input(event: InputEvent) -> void:
 	var sp := event as InputEventScreenTouch
 	if sp == null or _overlay_open():
 		return
-	var local := (sp.position - stage.position) / stage.scale.x
+	var local := UiTheme.to_art(stage, sp.position)
 	if sp.pressed and WORLD_RECT.has_point(local):
 		drag_from = local
 	elif not sp.pressed and drag_from != Vector2.INF:
@@ -596,17 +604,5 @@ func _process(delta: float) -> void:
 		a.modulate.a = 0.65 + 0.35 * sin(t * 4.0)
 	# the world picture floats over the (empty) sky of the art
 	pic.position.y = WORLD_RECT.position.y + sin(t * 1.3) * 7.0
-	stars.queue_redraw()
 
 
-## Twinkling stars over the space part of the art (drawn by `stars`, above the art).
-func _draw_stars() -> void:
-	var s := stage.scale.x
-	for sp in sparkles:
-		var a := 0.5 + 0.5 * sin(t * (1.5 + sp.z * 2.0) + sp.z * 30.0)
-		if a < 0.6:
-			continue
-		var p := stage.position + Vector2(sp.x, sp.y) * s
-		var r := (1.0 + sp.z * 1.5) * a
-		stars.draw_rect(Rect2(p - Vector2(r, 0.5), Vector2(r * 2.0, 1.0)), Color(1, 1, 1, a * 0.8))
-		stars.draw_rect(Rect2(p - Vector2(0.5, r), Vector2(1.0, r * 2.0)), Color(1, 1, 1, a * 0.8))

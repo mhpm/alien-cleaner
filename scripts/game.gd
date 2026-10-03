@@ -35,6 +35,7 @@ var wave_n := 0
 var follow_cam := false
 var indicators: OffscreenIndicators
 var survival: Survival  # survivor-style stage director (WorldData "survival")
+var explore: Explore  # big sectioned arena with chests (WorldData survival "explore")
 var enemy_cache: Array[Node] = []  # the "enemies" group, refreshed every physics frame
 const GRID_CELL := 16.0
 var enemy_grid: Dictionary = {}  # Vector2i cell -> aliens in it (same refresh): cheap neighbour lookups
@@ -184,7 +185,20 @@ func _start_survival() -> void:
 	var sd: Dictionary = room_def.survival
 	room.build_arena(sd.get("arena", Vector2i(64, 96)), entities, randi(), str(sd.get("art", "")))
 	room.modulate = sd.get("tint", Color.WHITE)  # world 3: a violet floor
-	player.reset_for_room(room.bounds().get_center() + Vector2(0, 24))
+	if explore != null and is_instance_valid(explore):
+		explore.queue_free()
+	explore = null
+	if sd.has("explore") and not Game.boss_rush:
+		explore = Explore.new()
+		room.add_child(explore)
+		explore.setup(self, sd.explore)
+		if bool(sd.explore.get("dark", false)):
+			add_child(DarkLights.new().setup(self, explore))
+		elif bool(sd.explore.get("alarms", false)):
+			add_child(DarkLights.new().alarms_only(explore))
+		player.reset_for_room(explore.start)
+	else:
+		player.reset_for_room(room.bounds().get_center() + Vector2(0, 24))
 	_camera_setup()
 	waves = []
 	wave_n = 0
@@ -539,6 +553,7 @@ func _spawn_wave(w: Dictionary) -> void:
 
 
 func spawn_with_marker(id: String, pos: Vector2, delay: float, hp_mult := 1.0, sp_mult := 1.0, elite := false, dmg_mult := 1.0) -> void:
+	pos = room.open_near(pos)
 	pending += 1
 	var def: Dictionary = EnemyData.TYPES[id]
 	var col: Color = Color("ffcd75") if elite else def.color
@@ -560,7 +575,7 @@ func _marker(pos: Vector2, dur: float, size: float, col: Color) -> SpawnMarker:
 
 func spawn_enemy(id: String, pos: Vector2, hp_mult := 1.0, sp_mult := 1.0, elite := false, quiet := false, dmg_mult := 1.0) -> Enemy:
 	var e := EnemyData.create(id)
-	e.position = pos
+	e.position = room.open_near(pos)  # never inside an Explore bulkhead
 	if hp_mult != 1.0 or sp_mult != 1.0 or dmg_mult != 1.0:
 		e.toughen(hp_mult, sp_mult, dmg_mult)
 	if elite:

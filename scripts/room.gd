@@ -82,6 +82,8 @@ var electric: Array[Vector2i] = []
 var decor: Array = []  # [cell, texture]
 var grime: Array = []  # [position, texture, rotation, scale] floor stains
 var spawned: Array[Node] = []
+## Solid areas inside an arena (Explore bulkheads): spawns and free spots avoid them.
+var blockers: Array[Rect2] = []
 var door_open := false
 var door_k := 0.0
 var door_shape: CollisionShape2D
@@ -387,6 +389,7 @@ func build_arena(size: Vector2i, _entities: Node2D, seed_v: int, art := "") -> v
 	grime.clear()
 	floor_pads.clear()
 	grid = []
+	blockers.clear()
 	arena = true
 	theme = "arena"
 	exit_pos = Vector2.INF
@@ -487,14 +490,35 @@ func arena_free_spot(p: Vector2, clear := 12.0) -> Vector2:
 	var b := bounds().grow(-14.0)
 	for i in 12:
 		var q := (p + Vector2.from_angle(randf() * TAU) * randf() * 10.0 * i).clamp(b.position, b.end)
-		var ok := true
+		var ok := is_open(q, 10.0)
 		for n in spawned:
-			if is_instance_valid(n) and (n as Node2D).global_position.distance_to(q) < clear:
+			if ok and is_instance_valid(n) and (n as Node2D).global_position.distance_to(q) < clear:
 				ok = false
 				break
 		if ok:
 			return q
-	return p.clamp(b.position, b.end)
+	return open_near(p.clamp(b.position, b.end))
+
+
+## True when `p` is clear of every blocker (grown by `pad`).
+func is_open(p: Vector2, pad := 8.0) -> bool:
+	for r in blockers:
+		if r.grow(pad).has_point(p):
+			return false
+	return true
+
+
+## `p` if it is open, else the nearest open point around it (arena walls respected).
+func open_near(p: Vector2) -> Vector2:
+	if blockers.is_empty() or is_open(p):
+		return p
+	var b := bounds().grow(-14.0)
+	for ring in range(1, 12):
+		for k in 8:
+			var q := (p + Vector2.from_angle(TAU * k / 8.0 + ring * 0.4) * ring * 14.0).clamp(b.position, b.end)
+			if is_open(q):
+				return q
+	return p
 
 
 func _draw_arena() -> void:

@@ -4,6 +4,8 @@ extends RefCounted
 ##   "a:NNN" = assets/sprites/enviroment/enviroment_elements/enviroment_NNN.png
 ##   "b:NNN" = assets/sprites/enviroment/enviroment_elements2/enviroment_NNN.png
 ##   "c:NNN" = assets/sprites/enviroment/world2/enviroment2_NNN.png (world 2, theme "hive")
+##   "l:NNN" = assets/sprites/lab/lab_NNN.png (lab kit of the world 1 EXPLORE map,
+##             tools/make_lab_kit.py; drawn with mipmaps: the art is far bigger than shown)
 ## Each layout character maps to a prop; `tex` lists interchangeable variants (the
 ## room picks one per cell, stable for that layout) so rooms look varied but tidy.
 ##   width   sprite width in world units (1 tile = 16)
@@ -22,11 +24,38 @@ const DIRS := {
 	"a": "res://assets/sprites/enviroment/enviroment_elements/enviroment_%s.png",
 	"b": "res://assets/sprites/enviroment/enviroment_elements2/enviroment_%s.png",
 	"c": "res://assets/sprites/enviroment/world2/enviroment2_%s.png",
+	"l": "res://assets/sprites/lab/lab_%s.png",
 }
+static var _mip: Dictionary = {}
 ## Collision layer of props that stop bodies but not bullets (player/alien masks include it).
 const LAYER_BODIES_ONLY := 8
 
 const PROPS := {
+	# ---- lab kit (world 1 EXPLORE map: "zone zero", the lab where it all began)
+	"lab_desk": {"tex": ["l:054"], "width": 32.0, "box": Vector2(30, 8)},
+	"lab_cabinet": {"tex": ["l:055", "l:060", "l:062", "l:080"], "width": 14.0, "box": Vector2(12, 6)},
+	"lab_shelf": {"tex": ["l:056", "l:063", "l:086"], "width": 28.0, "box": Vector2(26, 7)},
+	"lab_locker": {"tex": ["l:061", "l:064"], "width": 22.0, "box": Vector2(20, 7)},
+	"lab_computer": {"tex": ["l:057", "l:059"], "width": 32.0, "box": Vector2(28, 9),
+		"glow": Color(0.35, 0.8, 1.0, 0.3), "kind": "spark"},
+	"lab_terminal": {"tex": ["l:058", "l:053", "l:122"], "width": 15.0, "box": Vector2(12, 6),
+		"glow": Color(0.35, 0.8, 1.0, 0.3), "kind": "spark"},
+	"lab_cart": {"tex": ["l:065", "l:070"], "width": 16.0, "box": Vector2(12, 6)},
+	"lab_case": {"tex": ["l:069", "l:071", "l:072", "l:073", "l:074"], "width": 16.0, "box": Vector2(14, 6)},
+	"bio_barrel": {"tex": ["l:087", "l:088", "l:089"], "width": 11.0, "box": Vector2(9, 6)},
+	"specimen": {"tex": ["l:090", "l:091", "l:092"], "width": 13.0, "box": Vector2(10, 6),
+		"glow": Color(0.5, 1.0, 0.4, 0.35)},
+	"lab_generator": {"tex": ["l:049", "l:050", "l:051", "l:117"], "width": 15.0, "box": Vector2(13, 6), "kind": "spark"},
+	"light_pillar": {"tex": ["l:042", "l:045"], "width": 9.0, "box": Vector2(6, 4), "glow": Color(1.0, 0.3, 0.3, 0.3)},
+	"glass_panel": {"tex": ["l:043", "l:044"], "width": 34.0, "box": Vector2(32, 4)},
+	"lab_fence": {"tex": ["l:097", "l:098", "l:101", "l:102"], "width": 30.0, "box": Vector2(28, 4), "bullets": false},
+	"hazard_rail": {"tex": ["l:041"], "width": 40.0, "box": Vector2(38, 4), "bullets": false},
+	"lab_planter": {"tex": ["l:107", "l:108", "l:113"], "width": 18.0, "box": Vector2(16, 6)},
+	"broken_tube": {"tex": ["l:099"], "width": 46.0, "box": Vector2(20, 7), "glow": Color(0.5, 1.0, 0.3, 0.3)},
+	"bio_pod": {"tex": ["l:095", "l:104"], "width": 9.0, "box": Vector2(6, 4), "glow": Color(1.0, 0.3, 0.7, 0.35)},
+	"cryo_station": {"tex": ["l:106"], "width": 76.0, "box": Vector2(64, 14), "glow": Color(0.4, 0.8, 1.0, 0.35)},
+	"reactor": {"tex": ["l:112"], "width": 104.0, "box": Vector2(86, 30), "glow": Color(1.0, 0.25, 0.25, 0.45)},
+
 	# '#' metal crate (## = big crate)
 	"crate": {"tex": ["a:116", "a:117", "b:028", "a:120", "b:025", "b:030", "b:057", "b:058", "b:029"],
 		"width": 16.0, "box": Vector2(15, 11)},
@@ -167,4 +196,17 @@ static func themed(id: String, fallback: Array, theme: String) -> Array:
 
 
 static func pick(list: Array, cell: Vector2i) -> Texture2D:
-	return load(path(str(list[(cell.x * 7 + cell.y * 13) % list.size()])))
+	return tex(str(list[(cell.x * 7 + cell.y * 13) % list.size()]))
+
+
+## A prop texture by reference; the lab kit ("l:") gets mipmaps (cached).
+static func tex(ref: String) -> Texture2D:
+	if not ref.begins_with("l:"):
+		return load(path(ref))
+	if not _mip.has(ref):
+		var img := (load(path(ref)) as Texture2D).get_image()
+		if img.is_compressed():
+			img.decompress()
+		img.generate_mipmaps()
+		_mip[ref] = ImageTexture.create_from_image(img)
+	return _mip[ref]

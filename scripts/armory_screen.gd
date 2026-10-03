@@ -60,6 +60,8 @@ func _ready() -> void:
 	stage.add_child(bg)
 	UiTheme.add_backdrop(self, stage, bg.texture)
 	_build()
+	# tall phones: top bar pinned up, ATTACK/LIFE cards pinned down; the hangar grows
+	UiTheme.set_seams(stage, [[195.0, 1.0, 1], [1222.0, 1.0, 1]], 1)
 	resized.connect(_fit)
 	_fit()
 	sel = Game.gun
@@ -397,7 +399,7 @@ func _refresh_slots() -> void:
 		var f := _nine(s, frame, Rect2(Vector2.ZERO, SLOT), 18)
 		if id == sel and not equipped:
 			f.modulate = Color(1.2, 1.2, 1.2)
-		_label(s, Rect2(12, 6, 50, 26), "%02d" % (i + 1), 18, GunData.rarity_color(id))
+		_label(s, Rect2(12, 6, 50, 26), "%02d" % (i + 1), 18, GunData.role_color(id))
 		var icon := TextureRect.new()
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -488,7 +490,7 @@ func _show_detail(new_gun: bool) -> void:
 	var owned := Game.owns_gun(id)
 	var lv := maxi(1, Game.gun_level(id))
 	_put(labels.name, str(g.name))
-	_put(labels.tag, "%s  -  POWER %d" % [g.rarity, GunData.power(id, lv)], GunData.rarity_color(id))
+	_put(labels.tag, "%s  -  POWER %d" % [g.role, GunData.power(id, lv)], GunData.role_color(id))
 	_put(labels.ability, str(g.ability))
 	labels.desc.text = str(g.desc)
 	if new_gun:
@@ -620,7 +622,7 @@ func _upgrade_perm(k: String) -> void:
 	if Game.buy_perm(k):
 		Sfx.play("upgrade", 0.0)
 		var c: Control = cards[k].card
-		_sparkle(stage.position + (c.position + c.size * 0.5) * stage.scale.x,
+		_sparkle(UiTheme.to_screen(stage, c.position + c.size * 0.5),
 				Color("ff6a3a") if k == "power" else C_GREEN)
 		c.pivot_offset = c.size * 0.5
 		var tw := c.create_tween()
@@ -657,7 +659,7 @@ func _hero_hop() -> void:
 
 ## Big centred banner (title + subtitle in the weapon's colour) with a burst of sparks.
 func _celebrate(head: String, sub: String, col: Color) -> void:
-	var c := stage.position + (DETAIL.position + DETAIL.size * Vector2(0.5, 0.31)) * stage.scale.x
+	var c := UiTheme.to_screen(stage, DETAIL.position + DETAIL.size * Vector2(0.5, 0.31))
 	_sparkle(c, col)
 	var box := VBoxContainer.new()
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -711,7 +713,7 @@ func _input(event: InputEvent) -> void:
 	var st := event as InputEventScreenTouch
 	if st == null:
 		return
-	var local := (st.position - stage.position) / stage.scale.x
+	var local := UiTheme.to_art(stage, st.position)
 	if st.pressed and STRIP.has_point(local):
 		drag_from = local
 	elif not st.pressed and drag_from != Vector2.INF:

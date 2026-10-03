@@ -56,6 +56,8 @@ func _ready() -> void:
 	sel = mini(lv + 1, MutationData.MAX)
 	bar_fill = lv
 	_build()
+	# tall phones: BACK/MUTATE pinned to the bottom, the room grows above them
+	UiTheme.set_seams(stage, [[1440.0, 1.0, -1, 120.0]], 0)
 	resized.connect(_fit_stage)
 	_fit_stage()
 	_refresh()

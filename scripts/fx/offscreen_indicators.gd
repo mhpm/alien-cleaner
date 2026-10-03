@@ -36,6 +36,7 @@ func _draw() -> void:
 			col = Color("ffcd75")
 			s = 4.0
 		_arrow(view, inner, e.hit_center(), col, s, e.phase)
+	# EXPLORE chests and survivors get no arrows: finding them is the point of exploring
 	if w.survival != null:
 		for c in w.survival.crates:
 			if is_instance_valid(c):

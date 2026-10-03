@@ -63,8 +63,9 @@ func setup(id: String) -> void:
 	max_hp = float(def.hp) * (1.0 if is_boss else mult) * world_mult
 	hp = max_hp
 	radius = float(def.radius)
-	speed = float(def.speed) * world_mult
-	aggro = world_mult
+	# tougher worlds hit harder and soak more; speed and attack pace grow only half as much
+	speed = float(def.speed) * (1.0 + (world_mult - 1.0) * 0.5)
+	aggro = 1.0 + (world_mult - 1.0) * 0.5
 	contact_damage = float(def.damage) * (1.0 + (mult - 1.0) * 0.5) * world_mult
 	base_scale = float(def.scale)
 	art = str(def.art)

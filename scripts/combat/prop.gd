@@ -73,7 +73,7 @@ func _ready() -> void:
 	add_child(shadow)
 	sprite = Sprite2D.new()
 	sprite.texture = PropData.texture_for(id, cell, theme)
-	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	var tw := float(sprite.texture.get_width())
 	sprite.scale = Vector2.ONE * (width / tw)
 	sprite.centered = false

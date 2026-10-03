@@ -35,8 +35,8 @@ extends Node
 ## on with DROPS / SUPPLY_CRATES.
 
 const WAVE_SECS := 30.0
-const MAX_ALIVE := 100
-const INVASION_ALIVE := 160  # an invasion may crowd the arena up to this many
+const MAX_ALIVE := 80
+const INVASION_ALIVE := 120  # an invasion may crowd the arena up to this many
 const INVASION_WARN := 3.0  # seconds of warning before the horde arrives
 const RUSH_INTRO := 3.0  # BOSS CHALLENGE countdown before the fence goes up
 const HELP_MERCY := 0.25  # no reinforcements while the astronaut is below this health
@@ -44,7 +44,9 @@ const FENCE_R := 270.0  # radius of the electric fence around the final boss fig
 const HITS_TO_DIE := 6.0  # a Slime's hit = max health / 6 (tougher aliens hit harder)
 const REF_DMG := 10.0  # the Slime's base damage: the yardstick for every alien
 const BOSS_DMG := 0.8  # bosses are scaled a little softer (their base damage is ~2x)
-const DMG_PER_MIN := 0.05  # alien damage ramp (+5% per minute)
+const DMG_PER_MIN := 0.03  # alien damage ramp (+3% per minute)
+## EXPLORE maps (walls, rooms, things to find): fewer aliens at once and per wave
+const EXPLORE_CROWD := 0.65
 ## Aliens that shoot (EnemyData "shoots": spitter, droid, UFO, octo) are kept a minority
 ## so the horde is mostly green slimes and red runners that chase you: at most this share
 ## of new aliens ("shooters" per wave overrides it), and never more than MAX_SHOOTERS alive.
@@ -206,7 +208,7 @@ func _hud() -> void:
 func _start_wave(i: int) -> void:
 	wave = i
 	var w: Dictionary = waves[i]
-	quota += int(w.get("total", 0))  # plus whatever the last wave could not send
+	quota += roundi(int(w.get("total", 0)) * crowd())  # plus whatever the last wave could not send
 	wave_end = (i + 1) * WAVE_SECS
 	for e: Dictionary in w.get("events", []):
 		var te := e.duplicate()
@@ -451,7 +453,7 @@ func _spawn(delta: float) -> void:
 	# waves with a "total" pace their quota over the time left; others use "rate"
 	var stream := quota - invasion_left
 	var counted := stream > 0
-	var rate := float(w.get("rate", 1.0))
+	var rate := float(w.get("rate", 1.0)) * crowd()
 	if counted:
 		rate = maxf(rate if final_sent else 0.0, stream / maxf(wave_end - t, 3.0))
 	elif w.has("total"):
@@ -460,7 +462,7 @@ func _spawn(delta: float) -> void:
 	var pool: Array = w.get("pool", ["slime"])
 	while spawn_acc >= 1.0:
 		spawn_acc -= 1.0
-		if alive >= mini(int(w.get("alive", 10)), MAX_ALIVE):
+		if alive >= mini(roundi(int(w.get("alive", 10)) * crowd()), MAX_ALIVE):
 			spawn_acc = 0.0
 			break
 		var id := _pick(pool, float(w.get("shooters", SHOOTER_SHARE)))
@@ -508,7 +510,7 @@ func _count(n: int) -> void:
 
 ## INVASION INCOMING!: sirens and a red warning, then the horde (see _invasion).
 func _warn_invasion(n: int) -> void:
-	invasion_left = n
+	invasion_left = roundi(n * crowd())
 	invasion_warn = INVASION_WARN
 	invasion_acc = 0.0
 	world.hud.banner("INVASION INCOMING!", Color("ff3344"), 30, INVASION_WARN - 0.6)
@@ -543,15 +545,21 @@ func _invasion(delta: float) -> void:
 	invasion_acc += 45.0 * delta
 	var w := _current()
 	var pool: Array = w.get("pool", ["slime"])
-	while invasion_acc >= 1.0 and invasion_left > 0 and alive < INVASION_ALIVE:
+	var cap := roundi(INVASION_ALIVE * crowd())
+	while invasion_acc >= 1.0 and invasion_left > 0 and alive < cap:
 		invasion_acc -= 1.0
 		var id := _pick(pool, INVASION_SHOOTERS)
 		_spawn_one(id, _edge_pos(), randf() < float(w.get("elite", 0.0)) * 0.5)
 		invasion_left -= 1
 		alive += 1
 		_count(1)
-	if alive >= INVASION_ALIVE:
+	if alive >= cap:
 		invasion_acc = 0.0
+
+
+## Share of the horde a map takes: EXPLORE maps (walls and rooms to search) get fewer.
+func crowd() -> float:
+	return EXPLORE_CROWD if world.explore != null else 1.0
 
 
 ## Clock the toughness ramps read (world 2 starts where world 1 ended).
@@ -587,7 +595,7 @@ func _ring_pos(r: float, angle := INF) -> Vector2:
 	for i in 10:
 		var a := randf() * TAU if angle == INF else angle + randf_range(-0.5, 0.5) * i * 0.3
 		var q := p + Vector2.from_angle(a) * r
-		if b.has_point(q):
+		if b.has_point(q) and world.room.is_open(q):
 			return q
 	var q2 := p + Vector2.from_angle(randf() * TAU) * r
 	return q2.clamp(b.position, b.end)
@@ -600,7 +608,7 @@ func _edge_pos(angle := INF) -> Vector2:
 	for i in 10:
 		var a := randf() * TAU if angle == INF else angle + randf_range(-0.5, 0.5) * i * 0.3
 		var q := p + Vector2.from_angle(a) * edge_dist(a)
-		if b.has_point(q):
+		if b.has_point(q) and world.room.is_open(q):
 			return q
 	var a2 := randf() * TAU
 	return (p + Vector2.from_angle(a2) * edge_dist(a2)).clamp(b.position, b.end)

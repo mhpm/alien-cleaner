@@ -22,6 +22,7 @@ var color := Color(1.0, 0.25, 0.3)
 
 
 func _ready() -> void:
+	DarkLights.glow(self)  # warnings stay readable in the dark (unshaded)
 	if kind == "line":
 		var m := CanvasItemMaterial.new()
 		m.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD  # glows over the floor

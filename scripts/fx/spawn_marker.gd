@@ -10,6 +10,10 @@ var color := Color("c75bd6")
 var t := 0.0
 
 
+func _ready() -> void:
+	DarkLights.glow(self)
+
+
 func _process(delta: float) -> void:
 	t += delta
 	if t >= dur:

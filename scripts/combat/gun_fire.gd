@@ -67,6 +67,8 @@ static func fire(p: Player, origin: Vector2, d: Vector2, target: Enemy) -> float
 				var b := _shot("shot_pulse", o, sd, float(g.speed), dk, 14.0, 3.5, 1.2)
 				b.force_crit = crit
 				if crit:
+					b.pierce += int(prm.crit_pierce)
+					b.trail = Color("ffe08a")
 					b.base_len = 19.0
 					b.modulate = Color(1.4, 1.25, 0.8)
 			"nova":

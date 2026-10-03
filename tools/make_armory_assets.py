@@ -92,6 +92,23 @@ FX = {
 }
 
 
+# ray segments stretched along a beam: their ends fade out so the beam never shows a cut
+FEATHER = {"beam_solar": 0.3, "beam_drill": 0.25}
+
+
+def feather_x(img: Image.Image, share: float) -> Image.Image:
+    """Fades alpha to 0 over `share` of the width at the left and right ends."""
+    arr = np.array(img).astype(np.float32)
+    w = arr.shape[1]
+    ramp = np.ones(w, np.float32)
+    n = max(1, int(w * share))
+    k = np.linspace(0.0, 1.0, n) ** 1.5
+    ramp[:n] = k
+    ramp[w - n:] = k[::-1]
+    arr[..., 3] *= ramp[None, :]
+    return Image.fromarray(arr.clip(0, 255).astype(np.uint8))
+
+
 def load(name: str) -> Image.Image:
     return Image.open(os.path.join(TOOLS, name)).convert("RGBA")
 
@@ -238,7 +255,10 @@ def make_guns() -> None:
         img = sheet.crop(box[:4])
         if len(box) > 4:
             img = main_piece(img, 3)
-        save(trim(img, 1), GUNS, name + ".png")
+        img = trim(img, 1)
+        if name in FEATHER:
+            img = feather_x(img, FEATHER[name])
+        save(img, GUNS, name + ".png")
     with open(os.path.join(GUNS, "guns.json"), "w") as f:
         json.dump(data, f, indent=1)
 

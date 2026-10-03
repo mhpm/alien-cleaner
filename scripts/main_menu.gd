@@ -79,6 +79,8 @@ func _ready() -> void:
 	theme = UiTheme.build()
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_build()
+	# extra height on tall phones opens up in the sky under the coins/settings row
+	UiTheme.set_seams(stage, [[150.0, 1.0, 1]], 1)
 	resized.connect(_fit_stage)
 	_fit_stage()
 	_intro()
@@ -132,7 +134,7 @@ func _build() -> void:
 	stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	stage.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	add_child(stage)
-	UiTheme.add_backdrop(self, stage, load(TITLE + "bg_full.webp"))
+	UiTheme.add_backdrop(self, stage, load(TITLE + "sky.webp"))
 
 	_rect(load(TITLE + "sky.webp"), Vector2.ZERO)
 	sky_layer = _layer()
@@ -589,7 +591,7 @@ func _gui_input(ev: InputEvent) -> void:
 	if not pressed or not germ.visible or germ_state == "pop":
 		return
 	var p := (ev as InputEventMouseButton).position if ev is InputEventMouseButton else (ev as InputEventScreenTouch).position
-	var local := (p - stage.position) / stage.scale.x
+	var local := UiTheme.to_art(stage, p)
 	if local.distance_to(germ.position) < germ.scale.x * germ.texture.get_width() * 0.6:
 		_pop()
 

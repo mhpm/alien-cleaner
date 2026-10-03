@@ -330,6 +330,9 @@ func show_boss(e: Enemy) -> void:
 	if e == null or not is_instance_valid(e):
 		return
 	boss_ref = e
+	# EXPLORE maps have the CHESTS line and the RESCUE panel up there: the bar goes below
+	boss_box.offset_top = 112.0 if game != null and game.explore != null else 44.0
+	boss_box.offset_bottom = boss_box.offset_top + 34.0
 	boss_name.text = str(e.def.name)
 	boss_bar.ratio = clampf(e.hp / e.max_hp, 0.0, 1.0)
 	boss_bar.lag = boss_bar.ratio
@@ -845,8 +848,12 @@ func _pause_panel() -> Control:
 	panel.add_child(v)
 	v.add_child(_upgrade_header("PAUSED", "Run temporarily halted", Color("73eff7"), Color("123a6b")))
 	v.add_child(_pause_stats())
-	v.add_child(_section_title("ACTIVE UPGRADES"))
-	v.add_child(_pause_upgrades())
+	if game.explore != null and not game.explore.saved_crew.is_empty():
+		v.add_child(_section_title("RESCUED CREW BONUSES"))
+		v.add_child(_pause_crew(game.explore.saved_crew))
+	if game.explore == null or game.explore.saved_crew.is_empty() or not Game.upgrades.is_empty():
+		v.add_child(_section_title("ACTIVE UPGRADES"))
+		v.add_child(_pause_upgrades())
 	v.add_child(_spacer(2))
 	var resume_row := HBoxContainer.new()
 	resume_row.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -1002,6 +1009,87 @@ func _pause_upgrades() -> Control:
 	grid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER | Control.SIZE_EXPAND
 	sc.add_child(grid)
 	return sc
+
+
+## Rescued crew and the bonus each one gave (pause menu): portrait in a frame of their
+## colour, name, gift. Scrolls after a few rows (fewer when there are upgrades too).
+func _pause_crew(crew: Array[int]) -> Control:
+	var list := VBoxContainer.new()
+	list.add_theme_constant_override("separation", 8)
+	list.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for i in crew:
+		list.add_child(_crew_row(i))
+	var fit := 4 if Game.upgrades.is_empty() else 2  # rows shown before it scrolls
+	if crew.size() <= fit:
+		return list
+	var sc := ScrollContainer.new()
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	sc.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	sc.custom_minimum_size = Vector2(0, (fit + 0.5) * 62.0)  # cut through a row: the list goes on
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sc.add_child(list)
+	return sc
+
+
+func _crew_row(i: int) -> Control:
+	var def: Dictionary = SurvivorData.CREW[i]
+	var col: Color = def.color
+	var row := PanelContainer.new()
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.05, 0.08, 0.17, 0.95)
+	sb.border_color = Color(col, 0.55)
+	sb.set_border_width_all(1)
+	sb.set_corner_radius_all(4)
+	sb.content_margin_left = 6
+	sb.content_margin_right = 10
+	sb.content_margin_top = 6
+	sb.content_margin_bottom = 6
+	row.add_theme_stylebox_override("panel", sb)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 12)
+	h.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(h)
+	# portrait: the happy face, cropped to the head, in a frame of their colour
+	var pf := Panel.new()
+	var psb := StyleBoxFlat.new()
+	psb.bg_color = col.darkened(0.6)
+	psb.border_color = col
+	psb.set_border_width_all(2)
+	psb.set_corner_radius_all(4)
+	pf.add_theme_stylebox_override("panel", psb)
+	pf.custom_minimum_size = Vector2(42, 42)
+	pf.clip_contents = true
+	pf.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var face := TextureRect.new()
+	var tex := SurvivorData.tex(i, true)
+	var at := AtlasTexture.new()
+	at.atlas = tex
+	var tw := float(tex.get_width())
+	at.region = Rect2(tw * 0.08, 0, tw * 0.84, tw * 0.84)
+	face.texture = at
+	face.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	face.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	face.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	face.position = Vector2(2, 2)
+	face.size = Vector2(38, 38)
+	face.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pf.add_child(face)
+	h.add_child(pf)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 5)
+	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	v.alignment = BoxContainer.ALIGNMENT_CENTER
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var name_l := UiTheme.label(str(def.name), 14, col.lightened(0.15))
+	name_l.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	name_l.add_theme_constant_override("outline_size", 4)
+	v.add_child(name_l)
+	var gift := UiTheme.body(str(def.gift), 12, Color("d6e6ff"))
+	gift.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	v.add_child(gift)
+	h.add_child(v)
+	return row
 
 
 func _active_card(id: String) -> Control:

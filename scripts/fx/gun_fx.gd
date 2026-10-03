@@ -320,8 +320,12 @@ class Pool extends Node2D:
 
 
 ## Solar Lance: a sun orb charges at the muzzle, then a laser fires along `dir`, stopped
-## only by walls, hitting every alien on it and setting them on fire.
+## only by walls, hitting every alien on it and setting them on fire. It leaves a Scorch
+## line on the floor, and every alien it kills bursts into a solar flare (area damage).
+## The ray art is feathered at both ends and dressed with glow, sparks and embers so it
+## never shows a hard cut.
 class Beam extends Node2D:
+	const FADE := 0.32
 	var player: Player
 	var dir := Vector2.RIGHT
 	var off := 0.0  # angle from the aim (extra beams of OVERDRIVE / Triple)
@@ -359,13 +363,18 @@ class Beam extends Node2D:
 			if t >= charge:
 				_fire()
 			return
-		var f := 1.0 - (t - charge) / 0.28
+		var f := 1.0 - (t - charge) / FADE
 		if f <= 0.0:
 			queue_free()
 			return
 		ray.modulate.a = f
 		orb.modulate.a = f
+		orb.scale = Vector2.ONE * ((14.0 + 6.0 * f) / orb.texture.get_width())
 		core = f
+		# embers drift off the ray while it fades
+		if randf() < delta * 50.0 * f:
+			var at := global_position + dir * randf() * length
+			Game.world.burst(at, Color("ffcf5a"), 1, 20.0, 0.35, 1.5, -25.0)
 		queue_redraw()
 
 	func _fire() -> void:
@@ -381,12 +390,31 @@ class Beam extends Node2D:
 		ray.centered = false
 		ray.offset = Vector2(0, -ray.texture.get_height() * 0.5)
 		ray.rotation = dir.angle()
-		ray.scale = Vector2(length / ray.texture.get_width(), w * 1.8 / ray.texture.get_height())
+		# starts a little behind the muzzle (hidden in its flare) and overshoots the end
+		ray.position = -dir * 4.0
+		ray.scale = Vector2((length + 10.0) / ray.texture.get_width(), w * 1.8 / ray.texture.get_height())
+		var add := CanvasItemMaterial.new()
+		add.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+		ray.material = add
 		add_child(ray)
 		move_child(ray, 0)
 		var end := global_position + dir * length
 		GunFx.flash(GunFire.tex("hit_solar"), end, 30.0 + w * 2.0, 0.3, dir.angle())
+		GunFx.flash(GunFire.tex("hit_pulse"), global_position, 18.0 + w, 0.18).modulate = Color(1.6, 1.2, 0.5)
+		# sparks spray out of both sides along the whole ray
+		var n := int(length / 14.0)
+		for i in n:
+			var at := global_position + dir * (length * (i + randf()) / n)
+			var side := dir.orthogonal() * (1.0 if randf() < 0.5 else -1.0)
+			Game.world.burst(at, Color("ffd36a") if i % 2 == 0 else Color.WHITE, 1, 45.0, 0.25, 1.5, 0.0, side, 0.6)
+		var scorch := Scorch.new()
+		scorch.a = global_position + dir * 6.0
+		scorch.b = end
+		scorch.dur = float(prm.scorch_t)
+		scorch.dps = unit * float(prm.scorch_dps)
+		Game.world.decals.add_child(scorch)
 		var burn := unit * float(prm.burn_dps)
+		var flares: Array[Vector2] = []
 		for node in Game.world.enemy_cache:
 			if not is_instance_valid(node):
 				continue
@@ -399,14 +427,67 @@ class Beam extends Node2D:
 				continue
 			if absf((c - global_position).cross(dir)) <= e.radius + w * 0.5:
 				GunFx.hit(e, dmg, dir * 0.6)
-				if is_instance_valid(e) and not e.dead:
+				if not is_instance_valid(e) or e.dead:
+					flares.append(c)
+				else:
 					e.ignite(burn, float(prm.burn_t))
 				Game.world.burst(c, Color("ffb020"), 4, 50.0, 0.3, 1.5)
+		# SOLAR FLARE: every alien the ray kills bursts and burns the ones around it
+		for i in mini(flares.size(), 4):
+			GunFx.blast(flares[i], float(prm.flare_r), unit * float(prm.flare_k), Color("ffb030"), "hit_solar")
 		Sfx.play("laser", 0.08, -5.0)
 		Game.world.shake(0.2)
 		if is_instance_valid(player):
 			player.recoil = 6.0
 
 	func _draw() -> void:
-		if core > 0.0:
-			draw_line(Vector2.ZERO, dir * length, Color(1, 1, 0.85, core), maxf(1.0, float(prm.width) * 0.3))
+		if core <= 0.0:
+			return
+		var w := float(prm.width)
+		var end := dir * length
+		# soft glow under the ray, white core over it, round caps at both ends
+		draw_line(Vector2.ZERO, end, Color(1.0, 0.65, 0.15, 0.22 * core), w * 2.6)
+		draw_line(Vector2.ZERO, end, Color(1, 1, 0.85, core), maxf(1.0, w * 0.3))
+		draw_circle(Vector2.ZERO, w * 0.9 * core + 2.0, Color(1.0, 0.85, 0.4, 0.7 * core))
+		draw_circle(end, w * 1.1 * core + 2.0, Color(1.0, 0.75, 0.3, 0.5 * core))
+
+
+## Burning line the Solar Lance leaves on the floor: aliens crossing it catch fire.
+class Scorch extends Node2D:
+	var a := Vector2.ZERO
+	var b := Vector2.ZERO
+	var dur := 1.6
+	var dps := 8.0
+	var t := 0.0
+	var tick := 0.0
+
+	func _process(delta: float) -> void:
+		t += delta
+		if t >= dur:
+			queue_free()
+			return
+		tick -= delta
+		if tick <= 0.0:
+			tick = 0.25
+			var seg := b - a
+			var l2 := maxf(seg.length_squared(), 1.0)
+			for node in Game.world.enemy_cache:
+				if not is_instance_valid(node):
+					continue
+				var e := node as Enemy
+				if e == null or not e.targetable:
+					continue
+				var k := clampf((e.global_position - a).dot(seg) / l2, 0.0, 1.0)
+				if e.global_position.distance_to(a + seg * k) < 5.0 + e.radius:
+					e.ignite(dps, 0.5)
+			if randf() < 0.9:
+				var p := a.lerp(b, randf())
+				Game.world.burst(p, Color("ff9a3a"), 1, 10.0, 0.4, 1.5, -30.0)
+		queue_redraw()
+
+	func _draw() -> void:
+		var fade := clampf((dur - t) / 0.5, 0.0, 1.0)
+		var flick := 0.8 + 0.2 * sin(t * 25.0)
+		draw_line(a, b, Color(0.35, 0.08, 0.02, 0.45 * fade), 6.0)
+		draw_line(a, b, Color(1.0, 0.45, 0.1, 0.55 * fade * flick), 3.0)
+		draw_line(a, b, Color(1.0, 0.85, 0.4, 0.5 * fade * flick), 1.0)

@@ -216,7 +216,10 @@ const WORLDS := [
 			# himself when the clock hits 7:30 (the horde is wiped and an electric fence
 			# closes the fight).
 			{"final": true, "survival": {
-				"arena": Vector2i(64, 96), "duration": 450.0, "hp_per_min": 0.45,
+				# EXPLORE prototype: a 3x4 grid of painted lab rooms (LabRoomData) with 8
+				# chests that grant run perks (Explore); "arena" is replaced by the room grid
+				"arena": Vector2i(96, 144), "duration": 450.0, "hp_per_min": 0.25,
+				"explore": {"grid": [3, 4], "chests": 8, "dark": true},
 				"boss": "big_red_boss",
 				# during the boss fight: squads slip in through the fence (Survival._boss_help)
 				"boss_help": {"pool": ["slime", "slime", "runner"], "max": 8, "every": [18.0, 9.0], "squad": 3},
@@ -247,12 +250,15 @@ const WORLDS := [
 		# select with a fresh crew, so the horde starts as if 2.5 minutes in ("t_offset")
 		# and every alien, boss included, is 30% stronger, faster and quicker to attack
 		# ("enemy_mult").
-		"name": "THE HIVE", "theme": "hive", "enemy_mult": 1.3, "difficulty": [1.0, 0.0],
+		"name": "THE HIVE", "theme": "hive", "enemy_mult": 1.15, "difficulty": [1.0, 0.0],
 		"pic": "world_2.png", "chest": 600,
 		"rooms": [
 			{"final": true, "survival": {
-				"arena": Vector2i(56, 75), "art": "hive", "duration": 420.0, "hp_per_min": 0.45,
-				"t_offset": 150.0, "boss": "hive_queen",
+				# EXPLORE: 3x4 rooms of the "w2" set (the hive's hatchery decks), 8 chests and a
+				# few discreet red alarm lights (no darkness, no ZONE ZERO)
+				"arena": Vector2i(56, 75), "art": "hive", "duration": 420.0, "hp_per_min": 0.25,
+				"explore": {"grid": [3, 4], "chests": 8, "set": "w2", "zero": false, "alarms": true},
+				"t_offset": 60.0, "boss": "hive_queen",
 				"boss_help": {"pool": ["ufo_alien", "ufo_alien", "runner", "slime"], "max": 8, "every": [16.0, 8.0], "squad": 3},
 				"final": {"pool": HIVE, "alive": 30, "rate": 2.8},
 				"waves": [
@@ -281,12 +287,16 @@ const WORLDS := [
 		# horde comes in lab-style events: containment breaches out of the floor hatches,
 		# pincers, vortexes, elite squads and crossfire rings of shooters, several per
 		# wave ("events" with "at"). Final boss: the VOID ARCHMAGE.
-		"name": "THE VOID", "theme": "void", "enemy_mult": 1.6, "difficulty": [1.0, 0.0],
+		"name": "THE VOID", "theme": "void", "enemy_mult": 1.3, "difficulty": [1.0, 0.0],
 		"pic": "world_3.png", "chest": 900,
 		"rooms": [
 			{"final": true, "survival": {
-				"arena": Vector2i(64, 96), "art": "void", "duration": 450.0, "hp_per_min": 0.45,
-				"t_offset": 300.0, "boss": "archmage",
+				# EXPLORE: a maze of 3x4 rooms of the "w3" set (spanning tree + 35% extra
+				# doorways), kit pieces in the middle of the rooms, 8 chests, 5 crew
+				"arena": Vector2i(64, 96), "art": "void", "duration": 450.0, "hp_per_min": 0.25,
+				"explore": {"grid": [3, 4], "chests": 8, "set": "w3", "zero": false, "alarms": true,
+					"maze": 0.35, "interior": "w3"},
+				"t_offset": 120.0, "boss": "archmage",
 				"boss_help": {"pool": ["splitter", "runner", "eyeclops", "octo_wizard"], "max": 8, "every": [16.0, 8.0], "squad": 3},
 				"final": {"pool": VOID, "alive": 34, "rate": 3.0},
 				"waves": [
@@ -343,12 +353,12 @@ const WORLDS := [
 		# carries on from 7:00 of toughness. Its own events: DROPSHIPs crossing the screen
 		# beaming aliens down and METEOR SHOWERs (rocks on marked spots that hurt everyone,
 		# some hatch an alien). Final boss: COMMANDER ZORP.
-		"name": "ORBITAL DECK", "theme": "space", "enemy_mult": 1.75, "difficulty": [1.0, 0.0],
+		"name": "ORBITAL DECK", "theme": "space", "enemy_mult": 1.45, "difficulty": [1.0, 0.0],
 		"pic": "world_4.png", "chest": 1200,
 		"rooms": [
 			{"final": true, "survival": {
-				"arena": Vector2i(52, 68), "art": "space", "duration": 450.0, "hp_per_min": 0.45,
-				"t_offset": 420.0, "boss": "zorp",
+				"arena": Vector2i(52, 68), "art": "space", "duration": 450.0, "hp_per_min": 0.25,
+				"t_offset": 180.0, "boss": "zorp",
 				"boss_help": {"pool": ["ufo_alien", "ufo_alien", "runner", "scout"], "max": 8, "every": [15.0, 7.0], "squad": 3},
 				"final": {"pool": SPACE, "alive": 36, "rate": 3.2},
 				"waves": [
