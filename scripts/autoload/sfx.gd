@@ -50,6 +50,18 @@ func play(id: String, pitch_var := 0.08, vol_db := 0.0) -> void:
 	p.play()
 
 
+## Like play() with an exact pitch (dialogue voices).
+func play_pitched(id: String, pitch: float, vol_db := 0.0) -> void:
+	if not sfx_enabled or not sounds.has(id):
+		return
+	var p := players[next_player]
+	next_player = (next_player + 1) % players.size()
+	p.stream = sounds[id]
+	p.pitch_scale = maxf(0.05, pitch)
+	p.volume_db = vol_db
+	p.play()
+
+
 func set_music_enabled(on: bool) -> void:
 	music_enabled = on
 	if on:

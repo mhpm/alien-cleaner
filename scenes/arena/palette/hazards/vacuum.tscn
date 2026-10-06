@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/arena/components/hazard_area.gd" id="1_vkgng"]
+
+[node name="Vacuum" type="Node2D" unique_id=1741175895]
+script = ExtResource("1_vkgng")
+type = 5
+size = Vector2(96, 96)
+damage = 2.0
+damage_interval = 0.8

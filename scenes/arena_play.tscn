@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/arena/runtime/arena_play_host.gd" id="1_host"]
+
+[node name="ArenaPlay" type="Node"]
+script = ExtResource("1_host")

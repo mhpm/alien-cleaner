@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/arena/components/arena_trigger.gd" id="1_q0ys0"]
+
+[node name="SpawnerTrigger" type="Node2D" unique_id=1777017126]
+script = ExtResource("1_q0ys0")
+action = 3
+targets = PackedStringArray()
+show_in_game = false

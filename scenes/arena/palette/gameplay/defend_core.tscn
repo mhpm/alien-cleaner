@@ -1,0 +1,7 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/arena/components/defend_core.gd" id="1_fowgk"]
+
+[node name="DefendCore" type="Node2D" unique_id=1052726386]
+script = ExtResource("1_fowgk")
+object_id = "core"

@@ -90,12 +90,20 @@ func _ready() -> void:
 var buffs: Dictionary = {}
 var sticky_t := 0.0  # > 0: slowed by sticky goo (Bean Cruiser), see stick()
 const STICKY_SLOW := 0.55
+var sticky_mult := STICKY_SLOW  # speed kept while stuck (arena hazards pick their own)
 var star_hit_t := 0.0
 
 
 ## Sticky goo on the boots: slower for `secs` (it doesn't stack, it refreshes).
 func stick(secs: float) -> void:
 	sticky_t = maxf(sticky_t, secs)
+	sticky_mult = STICKY_SLOW
+
+
+## Slowed to `mult` of the normal speed for `secs` (arena HazardArea slow percentage).
+func slow_down(mult: float, secs: float) -> void:
+	sticky_t = maxf(sticky_t, secs)
+	sticky_mult = clampf(mult, 0.05, 1.0)
 
 
 func has_buff(k: String) -> bool:
@@ -212,7 +220,7 @@ func _physics_process(delta: float) -> void:
 	var slow := Game.world.room.slow_factor(global_position)  # sticky alien creep
 	sticky_t = maxf(sticky_t - delta, 0.0)
 	if sticky_t > 0.0:
-		slow *= STICKY_SLOW  # stuck in Bean Cruiser goo
+		slow *= sticky_mult  # stuck in Bean Cruiser goo (or an arena hazard)
 	velocity = dir * float(s.move_speed) * slow * (1.45 if has_buff("boots") else 1.0) * infected.speed_mult() + knock
 	var dash_v := infected.dash_velocity()
 	if dash_v != Vector2.INF:
@@ -321,6 +329,7 @@ func _shoot(target: Enemy) -> void:
 	var origin := body.to_global(body.muzzle_pos())
 	recoil = GunFire.fire(self, origin, d, target)
 	shoot_t = 0.45
+	body.fire_flash()
 
 
 ## The mutant's mutation gun (MutationData): its own bolt, plus the run's extra shots.
@@ -345,6 +354,7 @@ func _shoot_mutant() -> void:
 		b.global_position = origin
 	shoot_t = 0.45
 	recoil = 3.5
+	body.fire_flash()
 	Sfx.play("shoot", 0.12, -5.0 + infected.level)
 	Game.world.burst(origin, Color(str(g.color)), 3 + infected.level, 55.0, 0.15, 2.0, 0.0, d, 0.5)
 	Game.world.ring(origin, 3.0 + infected.level, Color(str(g.color)), 0.1, 1.5)
@@ -535,6 +545,7 @@ func _animate(delta: float, moving: bool, dir: Vector2) -> void:
 	hurt_t = maxf(0.0, hurt_t - delta)
 	shoot_t = maxf(0.0, shoot_t - delta)
 	var mutant := infected.override_anim()
+	body.shooting = shoot_t > 0.0
 	if body.directional:
 		# the mutant: its own frames for each direction (no flip); faces what it shoots
 		if shoot_t > 0.0 and absf(aim_dir.x) > 0.05 and mutant == "":
@@ -583,4 +594,4 @@ func _animate(delta: float, moving: bool, dir: Vector2) -> void:
 	# blaster: points where the shots go, kicks back on fire
 	recoil = move_toward(recoil, 0.0, delta * 18.0)
 	body.aim = gun_angle - body.rotation
-	body.recoil = recoil / Astronaut.BODY_SCALE
+	body.recoil = recoil / body.px

@@ -1,0 +1,2308 @@
+{
+ "name": "Earth",
+ "items": [
+  {
+   "file": "rocks/rocks_big_1.png",
+   "category": "Rocks",
+   "width": 36.0,
+   "solid": [
+    28.8,
+    12.2
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "rocks/rocks_big_2.png",
+   "category": "Rocks",
+   "width": 40.5,
+   "solid": [
+    32.4,
+    12.8
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "rocks/rock_mossy.png",
+   "category": "Rocks",
+   "width": 22.0,
+   "solid": [
+    17.6,
+    7.7
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "trees/oak_green.png",
+   "category": "Trees",
+   "width": 52.0,
+   "solid": [
+    10.4,
+    4.8
+   ],
+   "sway": true,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": true
+  },
+  {
+   "file": "trees/oak_yellow.png",
+   "category": "Trees",
+   "width": 51.0,
+   "solid": [
+    10.2,
+    4.6
+   ],
+   "sway": true,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": true
+  },
+  {
+   "file": "trees/oak_autumn.png",
+   "category": "Trees",
+   "width": 44.0,
+   "solid": [
+    8.8,
+    4.2
+   ],
+   "sway": true,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": true
+  },
+  {
+   "file": "trees/pine_tall_1.png",
+   "category": "Trees",
+   "width": 37.0,
+   "solid": [
+    7.4,
+    4.7
+   ],
+   "sway": true,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": true
+  },
+  {
+   "file": "trees/cherry_blossom.png",
+   "category": "Trees",
+   "width": 48.0,
+   "solid": [
+    9.6,
+    4.2
+   ],
+   "sway": true,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": true
+  },
+  {
+   "file": "trees/pine_small_1.png",
+   "category": "Trees",
+   "width": 20.0,
+   "solid": [
+    4.0,
+    3.0
+   ],
+   "sway": true,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": true
+  },
+  {
+   "file": "rocks/pebbles.png",
+   "category": "Rocks",
+   "width": 17.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "rocks/rock_small.png",
+   "category": "Rocks",
+   "width": 14.0,
+   "solid": [
+    11.2,
+    5.6
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "trees/oak_small.png",
+   "category": "Trees",
+   "width": 30.0,
+   "solid": [
+    6.0,
+    3.0
+   ],
+   "sway": true,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": true
+  },
+  {
+   "file": "trees/tree_yellow_small.png",
+   "category": "Trees",
+   "width": 21.5,
+   "solid": [
+    4.3,
+    3.0
+   ],
+   "sway": true,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": true
+  },
+  {
+   "file": "trees/pine_small_2.png",
+   "category": "Trees",
+   "width": 21.0,
+   "solid": [
+    4.2,
+    3.0
+   ],
+   "sway": true,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": true
+  },
+  {
+   "file": "plants/bush_tiny.png",
+   "category": "Plants",
+   "width": 10.5,
+   "solid": null,
+   "sway": true,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "rocks/rocks_big_3.png",
+   "category": "Rocks",
+   "width": 34.0,
+   "solid": [
+    27.2,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "rocks/rocks_big_4.png",
+   "category": "Rocks",
+   "width": 41.5,
+   "solid": [
+    33.2,
+    12.6
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "rocks/rock_mossy_big.png",
+   "category": "Rocks",
+   "width": 32.5,
+   "solid": [
+    26.0,
+    10.7
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "plants/bush_flowers.png",
+   "category": "Plants",
+   "width": 31.5,
+   "solid": null,
+   "sway": true,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "plants/bushes_flowers.png",
+   "category": "Plants",
+   "width": 41.5,
+   "solid": null,
+   "sway": true,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "trees/pine_berries.png",
+   "category": "Trees",
+   "width": 24.0,
+   "solid": [
+    4.8,
+    3.0
+   ],
+   "sway": true,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": true
+  },
+  {
+   "file": "trees/pine_small_3.png",
+   "category": "Trees",
+   "width": 20.0,
+   "solid": [
+    4.0,
+    3.0
+   ],
+   "sway": true,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": true
+  },
+  {
+   "file": "plants/bush_yellow.png",
+   "category": "Plants",
+   "width": 21.0,
+   "solid": null,
+   "sway": true,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "plants/grass_tuft_1.png",
+   "category": "Plants",
+   "width": 14.5,
+   "solid": null,
+   "sway": true,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "plants/grass_flowers.png",
+   "category": "Plants",
+   "width": 21.5,
+   "solid": null,
+   "sway": true,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "trees/pine_small_4.png",
+   "category": "Trees",
+   "width": 19.0,
+   "solid": [
+    3.8,
+    3.0
+   ],
+   "sway": true,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": true
+  },
+  {
+   "file": "rocks/rocks_moss_small.png",
+   "category": "Rocks",
+   "width": 19.5,
+   "solid": [
+    15.6,
+    5.2
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "cliffs/cliff_1.png",
+   "category": "Cliffs",
+   "width": 59.5,
+   "solid": [
+    53.6,
+    34.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "cliffs/cliff_2.png",
+   "category": "Cliffs",
+   "width": 36.0,
+   "solid": [
+    32.4,
+    26.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "cliffs/cliff_3.png",
+   "category": "Cliffs",
+   "width": 35.0,
+   "solid": [
+    31.5,
+    29.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "cliffs/cliff_4.png",
+   "category": "Cliffs",
+   "width": 37.5,
+   "solid": [
+    33.8,
+    32.8
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "cliffs/cliff_5.png",
+   "category": "Cliffs",
+   "width": 35.0,
+   "solid": [
+    31.5,
+    28.5
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "cliffs/cliff_6.png",
+   "category": "Cliffs",
+   "width": 32.5,
+   "solid": [
+    29.2,
+    23.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "cliffs/cliff_7.png",
+   "category": "Cliffs",
+   "width": 35.0,
+   "solid": [
+    31.5,
+    26.5
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "water/waterfall_1.png",
+   "category": "Water",
+   "width": 45.0,
+   "solid": [
+    42.8,
+    40.2
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "water/waterfall_2.png",
+   "category": "Water",
+   "width": 112.5,
+   "solid": [
+    106.9,
+    42.3
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "cliffs/cliff_rocks.png",
+   "category": "Cliffs",
+   "width": 41.5,
+   "solid": [
+    37.4,
+    10.6
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "plants/bush_flowers_2.png",
+   "category": "Plants",
+   "width": 29.5,
+   "solid": null,
+   "sway": true,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "plants/grass_tuft_2.png",
+   "category": "Plants",
+   "width": 9.5,
+   "solid": null,
+   "sway": true,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "plants/fern.png",
+   "category": "Plants",
+   "width": 14.0,
+   "solid": null,
+   "sway": true,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "plants/grass_tuft_3.png",
+   "category": "Plants",
+   "width": 10.0,
+   "solid": null,
+   "sway": true,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "plants/grass_tuft_4.png",
+   "category": "Plants",
+   "width": 10.0,
+   "solid": null,
+   "sway": true,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "fences/guardrail_1.png",
+   "category": "Fences",
+   "width": 37.5,
+   "solid": [
+    35.6,
+    3.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "water/bridge_1.png",
+   "category": "Water",
+   "width": 50.5,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": true,
+   "shadow": false
+  },
+  {
+   "file": "water/bridge_2.png",
+   "category": "Water",
+   "width": 45.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": true,
+   "shadow": false
+  },
+  {
+   "file": "water/bridge_3.png",
+   "category": "Water",
+   "width": 40.5,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": true,
+   "shadow": false
+  },
+  {
+   "file": "water/bridge_4.png",
+   "category": "Water",
+   "width": 24.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": true,
+   "shadow": false
+  },
+  {
+   "file": "fences/dock_steps.png",
+   "category": "Fences",
+   "width": 26.0,
+   "solid": [
+    20.8,
+    12.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "fences/sawhorse.png",
+   "category": "Fences",
+   "width": 21.0,
+   "solid": [
+    16.8,
+    6.8
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "fences/fence_wood_1.png",
+   "category": "Fences",
+   "width": 36.5,
+   "solid": [
+    34.7,
+    3.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "fences/fence_wood_2.png",
+   "category": "Fences",
+   "width": 24.5,
+   "solid": [
+    23.3,
+    3.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "fences/guardrail_2.png",
+   "category": "Fences",
+   "width": 39.0,
+   "solid": [
+    37.0,
+    3.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "fences/guardrail_3.png",
+   "category": "Fences",
+   "width": 24.5,
+   "solid": [
+    23.3,
+    3.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "plants/grass_tuft_5.png",
+   "category": "Plants",
+   "width": 16.5,
+   "solid": null,
+   "sway": true,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "fences/guardrail_short.png",
+   "category": "Fences",
+   "width": 36.5,
+   "solid": [
+    34.7,
+    3.1
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "fences/bollard_1.png",
+   "category": "Fences",
+   "width": 5.5,
+   "solid": [
+    4.4,
+    3.9
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "fences/bollard_2.png",
+   "category": "Fences",
+   "width": 5.0,
+   "solid": [
+    4.0,
+    3.9
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "fences/road_stone.png",
+   "category": "Fences",
+   "width": 59.0,
+   "solid": [
+    47.2,
+    5.5
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "fences/guardrail_long.png",
+   "category": "Fences",
+   "width": 5.5,
+   "solid": [
+    5.2,
+    3.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "fences/bollard_3.png",
+   "category": "Fences",
+   "width": 11.5,
+   "solid": [
+    9.2,
+    3.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "fences/signpost.png",
+   "category": "Fences",
+   "width": 15.5,
+   "solid": [
+    4.6,
+    3.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "roads/road_straight.png",
+   "category": "Roads",
+   "width": 46.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "roads/road_cracked.png",
+   "category": "Roads",
+   "width": 45.5,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "roads/road_lot.png",
+   "category": "Roads",
+   "width": 52.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "roads/road_turn.png",
+   "category": "Roads",
+   "width": 44.5,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "barriers/barrier_concrete.png",
+   "category": "Barriers",
+   "width": 27.0,
+   "solid": [
+    25.6,
+    4.8
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "barriers/barrier_hazard.png",
+   "category": "Barriers",
+   "width": 24.0,
+   "solid": [
+    22.8,
+    4.8
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "barriers/barrier_red.png",
+   "category": "Barriers",
+   "width": 27.5,
+   "solid": [
+    26.1,
+    4.8
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "barriers/traffic_cone.png",
+   "category": "Barriers",
+   "width": 13.5,
+   "solid": [
+    9.4,
+    4.2
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "barriers/sign_chevron.png",
+   "category": "Barriers",
+   "width": 25.5,
+   "solid": [
+    22.9,
+    3.6
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "barriers/sandbags.png",
+   "category": "Barriers",
+   "width": 40.5,
+   "solid": [
+    38.5,
+    6.8
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "barriers/barrier_concrete_long.png",
+   "category": "Barriers",
+   "width": 48.0,
+   "solid": [
+    45.6,
+    5.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "barriers/roadblock.png",
+   "category": "Barriers",
+   "width": 40.5,
+   "solid": [
+    36.5,
+    4.3
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "barriers/barrier_frame.png",
+   "category": "Barriers",
+   "width": 41.0,
+   "solid": [
+    36.9,
+    3.4
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "camp/crate_wood.png",
+   "category": "Camp",
+   "width": 25.0,
+   "solid": [
+    21.2,
+    9.3
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "camp/crate_green_1.png",
+   "category": "Camp",
+   "width": 17.0,
+   "solid": [
+    14.4,
+    7.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "camp/crate_green_2.png",
+   "category": "Camp",
+   "width": 23.5,
+   "solid": [
+    20.0,
+    8.4
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "camp/radio_tower.png",
+   "category": "Camp",
+   "width": 30.0,
+   "solid": [
+    18.0,
+    12.2
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "camp/camp_tent.png",
+   "category": "Camp",
+   "width": 85.5,
+   "solid": [
+    72.7,
+    25.5
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "camp/camp_awning.png",
+   "category": "Camp",
+   "width": 57.0,
+   "solid": [
+    48.4,
+    13.8
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "camp/cooking_tripod.png",
+   "category": "Camp",
+   "width": 15.0,
+   "solid": [
+    7.5,
+    5.9
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "camp/crate_stack.png",
+   "category": "Camp",
+   "width": 46.5,
+   "solid": [
+    39.5,
+    12.1
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "camp/radio_desk.png",
+   "category": "Camp",
+   "width": 42.0,
+   "solid": [
+    35.7,
+    13.5
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "camp/satellite_dish.png",
+   "category": "Camp",
+   "width": 17.0,
+   "solid": [
+    6.8,
+    5.5
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "camp/field_radio.png",
+   "category": "Camp",
+   "width": 13.5,
+   "solid": [
+    8.1,
+    6.6
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "camp/generator_1.png",
+   "category": "Camp",
+   "width": 45.5,
+   "solid": [
+    38.7,
+    13.6
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "camp/floodlight.png",
+   "category": "Camp",
+   "width": 28.5,
+   "solid": [
+    11.4,
+    9.5
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "camp/stump_1.png",
+   "category": "Camp",
+   "width": 20.0,
+   "solid": [
+    16.0,
+    6.8
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "camp/campfire.png",
+   "category": "Camp",
+   "width": 35.5,
+   "solid": [
+    24.8,
+    8.2
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "camp/stump_2.png",
+   "category": "Camp",
+   "width": 15.5,
+   "solid": [
+    12.4,
+    5.6
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "camp/log_pile.png",
+   "category": "Camp",
+   "width": 31.0,
+   "solid": [
+    26.3,
+    9.6
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "camp/coolers.png",
+   "category": "Camp",
+   "width": 29.0,
+   "solid": [
+    24.6,
+    14.2
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "camp/jerrycan_1.png",
+   "category": "Camp",
+   "width": 19.5,
+   "solid": [
+    15.6,
+    7.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "camp/jerrycan_2.png",
+   "category": "Camp",
+   "width": 17.5,
+   "solid": [
+    14.0,
+    6.1
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "camp/jerrycan_3.png",
+   "category": "Camp",
+   "width": 15.0,
+   "solid": [
+    12.0,
+    6.1
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "camp/generator_2.png",
+   "category": "Camp",
+   "width": 34.0,
+   "solid": [
+    28.9,
+    11.2
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "camp/jerrycan_4.png",
+   "category": "Camp",
+   "width": 14.5,
+   "solid": [
+    11.6,
+    5.8
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "plants/grass_tuft_6.png",
+   "category": "Plants",
+   "width": 16.0,
+   "solid": null,
+   "sway": true,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "forest/log_mossy_1.png",
+   "category": "Forest",
+   "width": 56.5,
+   "solid": [
+    50.9,
+    9.2
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "forest/log_mossy_2.png",
+   "category": "Forest",
+   "width": 49.0,
+   "solid": [
+    44.1,
+    10.7
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "forest/log_mossy_3.png",
+   "category": "Forest",
+   "width": 38.0,
+   "solid": [
+    34.2,
+    9.9
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "forest/branches.png",
+   "category": "Forest",
+   "width": 27.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "forest/stump_old.png",
+   "category": "Forest",
+   "width": 39.5,
+   "solid": [
+    31.6,
+    7.6
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "forest/dead_tree_1.png",
+   "category": "Forest",
+   "width": 51.5,
+   "solid": [
+    10.3,
+    3.4
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": true
+  },
+  {
+   "file": "forest/dead_tree_2.png",
+   "category": "Forest",
+   "width": 38.5,
+   "solid": [
+    7.7,
+    3.7
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": true
+  },
+  {
+   "file": "alien_invasion/infested_tree_1.png",
+   "category": "Alien Invasion",
+   "width": 55.5,
+   "solid": [
+    11.1,
+    3.9
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": true
+  },
+  {
+   "file": "alien_invasion/infested_tree_2.png",
+   "category": "Alien Invasion",
+   "width": 42.0,
+   "solid": [
+    8.4,
+    4.1
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": true
+  },
+  {
+   "file": "alien_invasion/infested_tree_3.png",
+   "category": "Alien Invasion",
+   "width": 26.5,
+   "solid": [
+    5.3,
+    3.4
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": true
+  },
+  {
+   "file": "alien_invasion/crystals_1.png",
+   "category": "Alien Invasion",
+   "width": 36.0,
+   "solid": [
+    21.6,
+    6.5
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "alien_invasion/crashed_ship.png",
+   "category": "Alien Invasion",
+   "width": 128.5,
+   "solid": [
+    109.2,
+    23.1
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "alien_invasion/ship_debris_1.png",
+   "category": "Alien Invasion",
+   "width": 43.5,
+   "solid": [
+    34.8,
+    9.6
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "alien_invasion/ship_debris_2.png",
+   "category": "Alien Invasion",
+   "width": 44.0,
+   "solid": [
+    22.0,
+    9.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "alien_invasion/ship_debris_3.png",
+   "category": "Alien Invasion",
+   "width": 32.5,
+   "solid": [
+    26.0,
+    7.3
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "alien_invasion/crystals_2.png",
+   "category": "Alien Invasion",
+   "width": 41.5,
+   "solid": [
+    24.9,
+    7.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "alien_invasion/crystals_3.png",
+   "category": "Alien Invasion",
+   "width": 22.5,
+   "solid": [
+    13.5,
+    4.6
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "alien_invasion/crystals_4.png",
+   "category": "Alien Invasion",
+   "width": 29.0,
+   "solid": [
+    17.4,
+    7.2
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "alien_invasion/ship_debris_4.png",
+   "category": "Alien Invasion",
+   "width": 26.5,
+   "solid": [
+    21.2,
+    6.1
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "alien_invasion/ship_debris_5.png",
+   "category": "Alien Invasion",
+   "width": 46.5,
+   "solid": [
+    37.2,
+    7.3
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "alien_invasion/crystals_5.png",
+   "category": "Alien Invasion",
+   "width": 31.5,
+   "solid": [
+    18.9,
+    6.8
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "alien_invasion/crystals_6.png",
+   "category": "Alien Invasion",
+   "width": 22.5,
+   "solid": [
+    13.5,
+    4.8
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "alien_invasion/alien_hive_roots.png",
+   "category": "Alien Invasion",
+   "width": 87.0,
+   "solid": [
+    52.2,
+    13.5
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "alien_invasion/crystals_7.png",
+   "category": "Alien Invasion",
+   "width": 40.5,
+   "solid": [
+    24.3,
+    8.1
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "cliffs/plateau_1.png",
+   "category": "Cliffs",
+   "width": 31.5,
+   "solid": [
+    29.9,
+    19.5
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "cliffs/plateau_2.png",
+   "category": "Cliffs",
+   "width": 33.0,
+   "solid": [
+    31.3,
+    19.5
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "cliffs/plateau_3.png",
+   "category": "Cliffs",
+   "width": 31.0,
+   "solid": [
+    29.4,
+    20.1
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "cliffs/plateau_4.png",
+   "category": "Cliffs",
+   "width": 32.0,
+   "solid": [
+    30.4,
+    19.8
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "cliffs/plateau_5.png",
+   "category": "Cliffs",
+   "width": 33.0,
+   "solid": [
+    31.3,
+    19.8
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "cliffs/plateau_6.png",
+   "category": "Cliffs",
+   "width": 33.0,
+   "solid": [
+    31.3,
+    19.8
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "cliffs/plateau_7.png",
+   "category": "Cliffs",
+   "width": 27.5,
+   "solid": [
+    26.1,
+    19.8
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "cliffs/plateau_8.png",
+   "category": "Cliffs",
+   "width": 33.0,
+   "solid": [
+    31.3,
+    19.8
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "cliffs/plateau_9.png",
+   "category": "Cliffs",
+   "width": 31.5,
+   "solid": [
+    29.9,
+    19.8
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false
+  },
+  {
+   "file": "trees/image_003_2.png",
+   "category": "Trees",
+   "width": 33.5,
+   "solid": [
+    27.0,
+    9.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "shadow": true
+  },
+  {
+   "file": "trees/image_003_2_2.png",
+   "category": "Trees",
+   "width": 67.0,
+   "solid": [
+    54.0,
+    18.5
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "shadow": false
+  },
+  {
+   "file": "trees/image_004.png",
+   "category": "Trees",
+   "width": 76.5,
+   "solid": [
+    61.0,
+    18.5
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "shadow": false
+  },
+  {
+   "file": "trees/image_005.png",
+   "category": "Trees",
+   "width": 82.0,
+   "solid": [
+    65.5,
+    18.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "shadow": true
+  },
+  {
+   "file": "trees/image_008.png",
+   "category": "Trees",
+   "width": 79.5,
+   "solid": [
+    63.5,
+    18.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "shadow": true
+  },
+  {
+   "file": "trees/image_008_2.png",
+   "category": "Trees",
+   "width": 79.5,
+   "solid": [
+    63.5,
+    18.0
+   ],
+   "sway": true,
+   "fade": true,
+   "flat": false,
+   "shadow": true
+  },
+  {
+   "file": "misc/girl.png",
+   "category": "Misc",
+   "width": 29.0,
+   "solid": [
+    23.0,
+    6.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": true
+  },
+  {
+   "file": "misc/image_017.png",
+   "category": "Misc",
+   "width": 24.0,
+   "solid": [
+    19.0,
+    6.5
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": true
+  },
+  {
+   "file": "misc/image_018.png",
+   "category": "Misc",
+   "width": 30.5,
+   "solid": [
+    24.5,
+    6.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": true
+  },
+  {
+   "file": "misc/image_019.png",
+   "category": "Misc",
+   "width": 37.5,
+   "solid": [
+    30.0,
+    6.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": true
+  },
+  {
+   "file": "misc/image_024.png",
+   "category": "Misc",
+   "width": 28.0,
+   "solid": [
+    22.5,
+    6.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": true
+  },
+  {
+   "file": "misc/image_037.png",
+   "category": "Misc",
+   "width": 31.0,
+   "solid": [
+    25.0,
+    6.5
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": true
+  },
+  {
+   "file": "misc/image_045.png",
+   "category": "Misc",
+   "width": 26.0,
+   "solid": [
+    21.0,
+    6.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": true
+  },
+  {
+   "file": "misc/image_049.png",
+   "category": "Misc",
+   "width": 29.0,
+   "solid": [
+    23.0,
+    6.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": true
+  },
+  {
+   "file": "misc/image_052.png",
+   "category": "Misc",
+   "width": 25.5,
+   "solid": [
+    20.5,
+    6.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": true
+  },
+  {
+   "file": "misc/image_072.png",
+   "category": "Misc",
+   "width": 29.0,
+   "solid": [
+    23.0,
+    7.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": true
+  },
+  {
+   "file": "misc/image_075.png",
+   "category": "Misc",
+   "width": 28.0,
+   "solid": [
+    22.5,
+    6.5
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": true
+  },
+  {
+   "file": "misc/image_077.png",
+   "category": "Misc",
+   "width": 35.5,
+   "solid": [
+    28.5,
+    6.5
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": true
+  },
+  {
+   "file": "misc/image_083.png",
+   "category": "Misc",
+   "width": 28.0,
+   "solid": [
+    22.5,
+    5.5
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": true
+  },
+  {
+   "file": "misc/image_101.png",
+   "category": "Misc",
+   "width": 26.5,
+   "solid": [
+    21.0,
+    6.5
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": true
+  },
+  {
+   "file": "misc/image_107.png",
+   "category": "Misc",
+   "width": 28.5,
+   "solid": [
+    23.0,
+    6.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": true
+  },
+  {
+   "file": "villagers/boy_sheet.png",
+   "category": "Villagers",
+   "width": 32.0,
+   "solid": [
+    25.5,
+    6.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": true,
+   "anim": {
+    "columns": 3.0,
+    "rows": 2.0,
+    "count": 4.0,
+    "fps": 8.0,
+    "loop": true
+   }
+  },
+  {
+   "file": "villagers/boy_sheet_2.png",
+   "category": "Villagers",
+   "width": 32.0,
+   "solid": [
+    25.5,
+    6.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": true,
+   "anim": {
+    "columns": 3.0,
+    "rows": 2.0,
+    "count": 4.0,
+    "fps": 8.0,
+    "loop": true
+   }
+  },
+  {
+   "file": "farm/villagers/boy-sheet.png",
+   "category": "Villagers",
+   "width": 32.0,
+   "solid": [
+    25.5,
+    6.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": true,
+   "anim": {
+    "columns": 3.0,
+    "rows": 2.0,
+    "count": 4.0,
+    "fps": 8.0,
+    "loop": true
+   }
+  },
+  {
+   "file": "farm/farm_elements/image_062.png",
+   "category": "Farm/farm Elements",
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": true,
+   "solid": [
+    8.0,
+    4.5
+   ]
+  },
+  {
+   "file": "farm/farm_elements/image_096.png",
+   "category": "Farm/farm Elements",
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": false,
+   "solid": [
+    32.0,
+    5.5
+   ]
+  },
+  {
+   "file": "farm/farm_elements/image_071.png",
+   "category": "Farm/farm Elements",
+   "width": 48.0,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": false,
+   "solid": [
+    38.5,
+    10.0
+   ]
+  },
+  {
+   "file": "farm/farm_elements/image_080.png",
+   "category": "Farm/farm Elements",
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": false,
+   "solid": [
+    8.0,
+    3.0
+   ]
+  },
+  {
+   "file": "farm/farm_elements/image_039.png",
+   "category": "Farm/farm Elements",
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": true,
+   "solid": [
+    8.0,
+    4.0
+   ]
+  },
+  {
+   "file": "farm/farm_elements/image_020.png",
+   "category": "Farm/farm Elements",
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": false,
+   "solid": [
+    32.0,
+    7.5
+   ]
+  },
+  {
+   "file": "farm/farm_elements/image_017.png",
+   "category": "Farm/farm Elements",
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": true,
+   "solid": [
+    8.0,
+    4.0
+   ]
+  },
+  {
+   "file": "farm/farm_elements/image_034.png",
+   "category": "Farm/farm Elements",
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": true,
+   "solid": [
+    8.0,
+    5.5
+   ]
+  },
+  {
+   "file": "farm/farm_elements/image_130.png",
+   "category": "Farm/farm Elements",
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "shadow": false,
+   "solid": [
+    32.0,
+    5.5
+   ]
+  },
+  {
+   "file": "farm/farm_elements/image_132.png",
+   "category": "Farm/farm Elements",
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "shadow": false,
+   "solid": [
+    32.0,
+    6.0
+   ]
+  },
+  {
+   "file": "farm/farm_elements/image_027.png",
+   "category": "Farm/farm Elements",
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": false,
+   "solid": [
+    32.0,
+    6.5
+   ]
+  },
+  {
+   "file": "farm/farm_elements/image_089.png",
+   "category": "Farm/farm Elements",
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": true,
+   "solid": [
+    8.0,
+    3.0
+   ]
+  },
+  {
+   "file": "farm/farm_elements/image_002.png",
+   "category": "Farm/farm Elements",
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": false,
+   "solid": [
+    32.0,
+    6.0
+   ]
+  },
+  {
+   "file": "farm/farm_elements/image_001.png",
+   "category": "Farm/farm Elements",
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": false,
+   "solid": [
+    32.0,
+    6.0
+   ]
+  },
+  {
+   "file": "farm/farm_elements/image_005.png",
+   "category": "Farm/farm Elements",
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": false,
+   "solid": [
+    32.0,
+    6.5
+   ]
+  },
+  {
+   "file": "farm/farm_elements/image_003.png",
+   "category": "Farm/farm Elements",
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": false,
+   "solid": [
+    32.0,
+    11.5
+   ]
+  },
+  {
+   "file": "farm/farm_elements/image_004.png",
+   "category": "Farm/farm Elements",
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": false,
+   "solid": [
+    32.0,
+    13.0
+   ]
+  }
+ ]
+}

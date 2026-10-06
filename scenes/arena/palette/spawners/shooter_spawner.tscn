@@ -1,0 +1,26 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/arena/components/enemy_spawner.gd" id="1_qtbmm"]
+[ext_resource type="Script" path="res://scripts/arena/data/spawn_entry.gd" id="2_tyblh"]
+
+[sub_resource type="Resource" id="Resource_j1vkf"]
+script = ExtResource("2_tyblh")
+enemy_id = "spitter"
+weight = 40.0
+
+[sub_resource type="Resource" id="Resource_jgicg"]
+script = ExtResource("2_tyblh")
+enemy_id = "droid"
+weight = 30.0
+
+[sub_resource type="Resource" id="Resource_luslp"]
+script = ExtResource("2_tyblh")
+enemy_id = "octo_wizard"
+weight = 30.0
+
+[node name="ShooterSpawner" type="Node2D" unique_id=633448293]
+script = ExtResource("1_qtbmm")
+enemies = Array[ExtResource("2_tyblh")]([SubResource("Resource_j1vkf"), SubResource("Resource_jgicg"), SubResource("Resource_luslp")])
+spawn_count = 6
+spawn_interval = 2.5
+max_alive = 4

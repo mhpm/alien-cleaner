@@ -1,0 +1,13 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/arena/components/boss_trigger.gd" id="1_ls3xp"]
+[ext_resource type="Script" path="res://scripts/arena/data/reward_data.gd" id="2_0bku5"]
+
+[sub_resource type="Resource" id="Resource_4us1n"]
+script = ExtResource("2_0bku5")
+coins = 100
+heal = 0.3
+
+[node name="BossTrigger" type="Node2D" unique_id=179829413]
+script = ExtResource("1_ls3xp")
+reward = SubResource("Resource_4us1n")

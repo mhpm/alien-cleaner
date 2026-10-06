@@ -1,0 +1,7 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/arena/components/arena_exit.gd" id="1_nb0o1"]
+
+[node name="Teleporter" type="Node2D" unique_id=1699714428]
+script = ExtResource("1_nb0o1")
+always_open = true

@@ -390,6 +390,7 @@ const WORLDS := [
 						{"at": 15.0, "event": "meteor", "pool": ["splitter", "runner"], "count": 10, "hatch": 0.5},
 						{"at": 24.0, "event": "swarm", "id": "goo_hopper", "count": 8, "label": "GOO STAMPEDE!"}]},
 					{"pool": SPACE, "alive": 50, "rate": 4.2, "elite": 0.05, "event": "escort", "id": "gunship", "minion": "scout", "count": 5, "label": "UFO SQUADRON!", "events": [
+						{"at": 4.0, "event": "boss", "id": "clawdozer", "label": "CLAWDOZER!"},
 						{"at": 12.0, "event": "dropship", "pool": SPACE_MID, "count": 14},
 						{"at": 23.0, "event": "crossfire", "pool": ["meteor_peeper", "bell_cruiser", "bubble_brain"], "count": 6, "label": "SAUCER SIEGE!"}]},
 					{"pool": SPACE, "alive": 54, "rate": 4.4, "elite": 0.06, "events": [

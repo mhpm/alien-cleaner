@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/arena/components/android_part.gd" id="1_m3nuk"]
+
+[node name="AndroidPart" type="Node2D" unique_id=907898239]
+script = ExtResource("1_m3nuk")
+part = 2
+part_id = "android_left_arm"

@@ -1,0 +1,14 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/arena/components/arena_survivor.gd" id="1_l6ruu"]
+[ext_resource type="Script" path="res://scripts/arena/data/reward_data.gd" id="2_bfdky"]
+
+[sub_resource type="Resource" id="Resource_l21uh"]
+script = ExtResource("2_bfdky")
+coins = 25
+
+[node name="Survivor" type="Node2D" unique_id=1523314693]
+script = ExtResource("1_l6ruu")
+dialogue = PackedStringArray()
+thanks_line = "You came for me! I thought I'd be alien food."
+reward = SubResource("Resource_l21uh")

@@ -1,0 +1,7 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/arena/components/hazard_area.gd" id="1_os5yi"]
+
+[node name="Acid" type="Node2D" unique_id=229972977]
+script = ExtResource("1_os5yi")
+damage = 6.0

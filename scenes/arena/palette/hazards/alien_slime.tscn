@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/arena/components/hazard_area.gd" id="1_tj3tu"]
+
+[node name="AlienSlime" type="Node2D" unique_id=1120677660]
+script = ExtResource("1_tj3tu")
+type = 2
+damage = 0.0
+slow_percentage = 55.0

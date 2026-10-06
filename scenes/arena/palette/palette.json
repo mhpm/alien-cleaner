@@ -1,0 +1,14 @@
+{
+	"_doc": "Arena Editor palette: decal sets (ArenaDecal). textures = res:// paths or PropData refs (a:NNN, b:NNN, c:NNN, l:NNN). Scenes in the sub-folders of this folder are added automatically (folder = category).",
+	"decal_sets": [
+		{
+			"category": "Contamination",
+			"width": 26,
+			"textures": [
+				"res://assets/room/prop_splat1.png", "res://assets/room/prop_splat2.png", "res://assets/room/prop_splat3.png",
+				"b:076", "b:078", "b:095", "b:090", "b:105", "b:097",
+				"c:077", "c:081", "c:079", "c:080", "c:108", "c:071", "c:106"
+			]
+		}
+	]
+}

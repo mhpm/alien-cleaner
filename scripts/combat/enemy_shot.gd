@@ -88,6 +88,9 @@ const STYLES := {
 	"drill_chunk": {"art": "drill_rock", "scale": 0.13, "pop": "drill_boom", "pop_s": 0.08, "tint": Color(1.1, 0.95, 0.8), "color": Color("b9803f"), "hit": 5.0},
 	# BLOBULUS: a droplet of slime
 	"blob_drop": {"art": "blob_drop", "scale": 0.1, "pop": "blob_pop", "pop_s": 0.07, "tint": Color.WHITE, "color": Color("5fd0ff"), "hit": 5.5},
+	# CLAWDOZER: cannon orb (swells in flight, "grow") and a spark of its shell
+	"claw_orb": {"art": "claw_orb", "scale": 0.16, "pop": "claw_pop", "pop_s": 0.14, "tint": Color.WHITE, "color": Color("7dff9a"), "hit": 8.0, "split": 6, "split_tex": "claw_drop"},
+	"claw_drop": {"art": "claw_drop", "scale": 0.1, "pop": "claw_pop", "pop_s": 0.07, "tint": Color.WHITE, "color": Color("7dff9a"), "hit": 5.5},
 	"big_red_mega": {"art": "big_red_ball", "scale": 0.19, "pop": "glob_pop", "pop_s": 0.45, "tint": Color(1.6, 0.8, 1.2), "color": Color("ff4f9a"), "hit": 13.0, "split": 12},
 }
 

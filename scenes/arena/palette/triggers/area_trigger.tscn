@@ -1,0 +1,7 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/arena/components/arena_trigger.gd" id="1_pchil"]
+
+[node name="AreaTrigger" type="Node2D" unique_id=1466007204]
+script = ExtResource("1_pchil")
+targets = PackedStringArray()

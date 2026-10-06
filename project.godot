@@ -20,6 +20,9 @@ config/icon="res://assets/icon/icon.png"
 Art="*res://scripts/autoload/art.gd"
 Sfx="*res://scripts/autoload/sfx.gd"
 Game="*res://scripts/autoload/game.gd"
+MCPScreenshot="*res://addons/godot_mcp/mcp_screenshot_service.gd"
+MCPInputService="*res://addons/godot_mcp/mcp_input_service.gd"
+MCPGameInspector="*res://addons/godot_mcp/mcp_game_inspector_service.gd"
 
 [debug]
 
@@ -37,7 +40,7 @@ window/handheld/orientation=1
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/godot_mcp/plugin.cfg")
+enabled=PackedStringArray("res://addons/aliens_cleaner_arena_editor/plugin.cfg", "res://addons/godot_mcp/plugin.cfg")
 
 [gui]
 

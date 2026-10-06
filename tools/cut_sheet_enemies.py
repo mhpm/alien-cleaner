@@ -277,6 +277,29 @@ SHEETS = {
             ("die", 712, 836, 0, 1500, [212, 415, 632, 888, 1115, 1262]),
         ],
     },
+    # CLAWDOZER boss (enemies/boss_crab.gd): one sheet, one row per pose / effect.
+    # "j1".."j10" = the little crab-pod it throws (jump, land, burrow, pop up)
+    "boss_crab_ref.webp": {
+        "clawdozer": [
+            ("idle", 10, 185, 0, 1500, [215, 430, 640, 875, 1100, 1315]),
+            ("attack", 190, 376, 0, 895, [225, 465, 690]),
+            ("orb", 190, 376, 895, 1500, [990, 1121, 1285]),
+            ("brace", 372, 560, 0, 418, [215]),
+            ("slam", 372, 560, 418, 1500, [655, 845, 1115]),
+            ("pod0", 548, 697, 0, 215, []),
+            ("j1", 548, 697, 250, 340, []),
+            ("j2", 548, 697, 358, 447, []),
+            ("j3", 548, 697, 440, 517, []),
+            ("j4", 548, 697, 520, 632, []),
+            ("j5", 548, 697, 660, 772, []),
+            ("j6", 548, 697, 805, 912, []),
+            ("j7", 548, 697, 930, 1047, []),
+            ("j8", 548, 697, 1070, 1187, []),
+            ("j9", 548, 697, 1207, 1310, []),
+            ("j10", 548, 697, 1338, 1428, []),
+            ("die", 700, 842, 0, 1500, [220, 428, 625, 842, 1012, 1160]),
+        ],
+    },
 }
 
 
@@ -309,7 +332,7 @@ def main_piece(fr):
 
 
 # rows whose first N frames keep only their biggest piece (TOXIC ANGLER's spore mine)
-MAIN_ONLY = {"mine": 5, "rear": 1, "rock": 1, "m1": 1, "m2": 1, "m3": 1, "m4": 1, "m5": 1, "m6": 1}
+MAIN_ONLY = {"pod0": 1, "j1": 1, "j2": 1, "j3": 1, "j4": 1, "j5": 1, "j6": 1, "j7": 1, "j8": 1, "j9": 1, "j10": 1, "mine": 5, "rear": 1, "rock": 1, "m1": 1, "m2": 1, "m3": 1, "m4": 1, "m5": 1, "m6": 1}
 # rows whose left edge fades out over N px (a long trail cut off by the frame box)
 FADE_LEFT = {"dash_b": 50, "dash_c": 70, "dash_d": 60}
 

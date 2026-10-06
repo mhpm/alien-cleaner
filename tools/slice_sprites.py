@@ -50,6 +50,7 @@ W4 = "enemies/%s/%s/image_%02d.png"  # cut by tools/cut_sheet_enemies.py
 TA = "enemies/toxic_angler/%s/image_%02d.png"
 DB = "enemies/drillback/%s/image_%02d.png"
 BL = "enemies/blobulus/%s/image_%02d.png"
+CD = "enemies/clawdozer/%s/image_%02d.png"
 B3 = "enemies/bosses/boss_3_elements/image_%s.png"
 B4 = "enemies/bosses/boss_4_elements/image_%s.png"
 
@@ -784,6 +785,46 @@ SETS = {
         "anchor": "bbox",
         "anims": {"walk": ([BL % ("m%d" % i, 1) for i in (1, 3, 6, 3)], 6, True)},
         "body": "walk",
+    },
+    # CLAWDOZER mini boss (tools/boss_crab_ref.webp -> cut_sheet_enemies.py clawdozer;
+    # enemies/boss_crab.gd): a bulldozer crab with a cannon turret on its head. idle 1/3 calm,
+    # 2 wink, 4 angry, 5 turret glowing (fury), 6 dizzy, 7 flat (tired); attack = mouth cannon
+    # charging; brace = claws forward; slam 1 = stomping in a ring of dirt; die = melts down.
+    # j1..j10 = the little crab-pods it throws (flight, landing, burrowing, popping up).
+    "clawdozer": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([CD % ("idle", i) for i in (1, 3, 1, 2)], 3, True),
+            "angry": ([CD % ("idle", 4)], 1, True),
+            "fury": ([CD % ("idle", i) for i in (5, 4)], 6, True),
+            "hurt": ([CD % ("idle", 3)], 1, False),
+            "stun": ([CD % ("idle", 6)], 1, True),
+            "tired": ([CD % ("idle", 7)], 1, True),
+            "charge": ([CD % ("attack", i) for i in (1, 2, 3, 4)], 6, False),
+            "brace": ([CD % ("brace", 1)], 1, True),
+            "plow": ([CD % ("brace", 2)], 1, True),
+            "stomp": ([CD % ("slam", 1)], 1, True),
+            "death": ([CD % ("die", i) for i in range(1, 8)], 5, False),
+        },
+        "body": "walk",
+    },
+    "claw_orb": {
+        "anchor": "center",
+        "anims": {"fly": ([CD % ("orb", 2)], 1, True), "grow": ([CD % ("orb", i) for i in (1, 2, 3, 4)], 4, False)},
+        "body": "fly",
+    },
+    "claw_pop": {"anchor": "center", "anims": {"pop": ([CD % ("orb", 4)], 1, False)}, "body": "pop"},
+    "claw_drop": {"anchor": "center", "anims": {"fly": ([CD % ("orb", 1)], 1, True)}, "body": "fly"},
+    "claw_spike": {"anchor": "bottom", "anims": {"pop": ([CD % ("slam", i) for i in (2, 3, 4)], 10, False)}, "body": "pop"},
+    "claw_pod": {
+        "anchor": "bottom",
+        "anims": {
+            "fly": ([CD % ("j%d" % i, 1) for i in (1, 2)], 6, True),
+            "land": ([CD % ("j%d" % i, 1) for i in (3, 4, 5)], 8, False),
+            "hide": ([CD % ("j%d" % i, 1) for i in (6, 7, 8, 9)], 8, True),
+            "pop": ([CD % ("j10", 1)], 1, False),
+        },
+        "body": "fly",
     },
     "jelly_spore": {"anchor": "center", "anims": {"fly": ([JP % ("attack", i) for i in ("093", "098")], 6, True)}, "body": "fly"},
     # VOID ARCHMAGE, world 3 final boss (loose frames in assets/sprites/enemies/bosses/

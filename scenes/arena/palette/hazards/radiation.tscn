@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/arena/components/hazard_area.gd" id="1_vvyng"]
+
+[node name="Radiation" type="Node2D" unique_id=1415074588]
+script = ExtResource("1_vvyng")
+type = 1
+size = Vector2(128, 96)
+damage = 3.0
+damage_interval = 0.5
+slow_percentage = 10.0

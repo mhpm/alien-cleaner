@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/arena/components/enemy_spawner.gd" id="1_5q7ki"]
+[ext_resource type="Script" path="res://scripts/arena/data/spawn_entry.gd" id="2_cdi4x"]
+
+[sub_resource type="Resource" id="Resource_uf38d"]
+script = ExtResource("2_cdi4x")
+weight = 60.0
+
+[sub_resource type="Resource" id="Resource_uyigl"]
+script = ExtResource("2_cdi4x")
+enemy_id = "runner"
+weight = 40.0
+
+[node name="HordeSpawner" type="Node2D" unique_id=2040853115]
+script = ExtResource("1_5q7ki")
+enemies = Array[ExtResource("2_cdi4x")]([SubResource("Resource_uf38d"), SubResource("Resource_uyigl")])
+spawn_count = 30
+spawn_interval = 1.0
+burst = 4
+spawn_radius = 90.0
+max_alive = 24

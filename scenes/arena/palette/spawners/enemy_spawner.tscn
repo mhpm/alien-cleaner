@@ -1,0 +1,26 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/arena/components/enemy_spawner.gd" id="1_lwqu0"]
+[ext_resource type="Script" path="res://scripts/arena/data/spawn_entry.gd" id="2_4v71f"]
+
+[sub_resource type="Resource" id="Resource_13n14"]
+script = ExtResource("2_4v71f")
+weight = 40.0
+
+[sub_resource type="Resource" id="Resource_kqkdi"]
+script = ExtResource("2_4v71f")
+enemy_id = "runner"
+weight = 30.0
+
+[sub_resource type="Resource" id="Resource_ec7o8"]
+script = ExtResource("2_4v71f")
+enemy_id = "spitter"
+weight = 20.0
+
+[sub_resource type="Resource" id="Resource_o54ss"]
+script = ExtResource("2_4v71f")
+enemy_id = "big_red"
+
+[node name="EnemySpawner" type="Node2D" unique_id=1937581562]
+script = ExtResource("1_lwqu0")
+enemies = Array[ExtResource("2_4v71f")]([SubResource("Resource_13n14"), SubResource("Resource_kqkdi"), SubResource("Resource_ec7o8"), SubResource("Resource_o54ss")])

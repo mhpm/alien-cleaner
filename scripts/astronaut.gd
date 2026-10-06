@@ -1,6 +1,7 @@
 class_name Astronaut
 extends Node2D
-## The astronaut: always the reference-sheet sprite (assets/sprites/player), plus the
+## The playable character (CharacterData: the astronaut by default, or one made in the
+## Arena dock > Players editor; set_character), plus the
 ## ARMORY weapon it carries (Game.gun) as a separate sprite that rotates around its grip
 ## toward `aim`. Weapon images and joints: tools/make_armory_assets.py ->
 ## assets/guns/gun_<n>.png + guns.json (grip / tip in image pixels); bigger weapons are
@@ -11,12 +12,14 @@ extends Node2D
 ## then puts the mutation gun bought in the MUTATION LAB in its hands instead of the
 ## blaster (grip / muzzle from MutationData.points(), GUN_LEN world units long). Sets with
 ## walk_left/right/up/down are `directional` (never flipped, scaled to the astronaut's
-## height).
+## height). Characters whose art already holds a gun (CharacterData.Weapon.IN_SPRITE)
+## hide the weapon sprite, play "shoot" while `shooting` and fire from their `muzzle`.
 
 const GUNS_PATH := "res://assets/guns/guns.json"
 const BODY_SCALE := 0.34  # sprite frame px -> world units (~25 units tall)
 const HAND := Vector2(6, -30)  # hands in frame px from the feet (facing right)
-const GUN_LEN := 30.0  # grip -> muzzle in frame px (the Pulse Blaster; others scale)
+const GUN_LEN := 30.0
+const FLASH_TIME := 0.08  # grip -> muzzle in frame px (the Pulse Blaster; others scale)
 
 static var _guns: Dictionary = {}
 
@@ -34,18 +37,64 @@ var form := "player"
 var body_scale := BODY_SCALE
 var directional := false  # the set has walk_left/right/up/down (no flip_h)
 var mut_gun := 0  # mutation gun in the hands (0 = the equipped blaster)
-var gun_len := GUN_LEN  # grip -> muzzle in frame px
+var gun_len := GUN_LEN  # grip -> muzzle in astronaut frame px (x BODY_SCALE = world)
+var character: CharacterData  # null until _ready: the default astronaut
+var px := BODY_SCALE  # world units per frame px of the character
+var shooting := false  # set by the Player while it fires ("shoot" pose)
+var flash: Sprite2D  # the character's muzzle flash (fire_flash)
+var flash_t := 0.0
 
 
 func _ready() -> void:
 	body = Art.make_anim("player", BODY_SCALE)
-	body.animation = "idle"  # frozen on frame 0 (see play)
 	add_child(body)
 	gun = Sprite2D.new()
 	gun.centered = false
 	gun.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	add_child(gun)
+	flash = Sprite2D.new()
+	flash.centered = false
+	flash.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	flash.visible = false
+	flash.z_index = 1
+	var add := CanvasItemMaterial.new()
+	add.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	flash.material = add
+	add_child(flash)
+	set_character(character)
 	refresh()
+
+
+## Swap the playable character (null = the astronaut). Safe before or after _ready.
+func set_character(c: CharacterData) -> void:
+	if c == null or c.frames == null:
+		c = CharacterData.default_character()
+	character = c
+	if body == null:
+		return
+	if c != null and c.frames != null:
+		body.sprite_frames = c.frames
+		body.offset = c.offset()
+		px = c.px_scale()
+	else:
+		body.sprite_frames = Art.frames("player")
+		body.offset = Art.anchor_offset("player")
+		px = BODY_SCALE
+	form = "player"
+	body_scale = px
+	directional = false
+	body.modulate = Color.WHITE
+	body.animation = &""
+	play("idle")
+	_pose()
+
+
+func _custom() -> bool:
+	return character != null and not character.is_default()
+
+
+func _in_sprite() -> bool:
+	return character != null and character.weapon == CharacterData.Weapon.IN_SPRITE
 
 
 ## Re-read the equipped weapon (call after buying / equipping).
@@ -74,6 +123,16 @@ static func guns_data() -> Dictionary:
 
 ## "player" (reference-sheet astronaut) or a mutant set (a bit taller than the astronaut).
 func set_form(f: String) -> void:
+	if _custom() or f == "player":
+		# other characters keep their own frames while mutated: a magenta tint instead
+		var keep := character
+		set_character(keep)
+		if f != "player":
+			form = f
+			body.modulate = Color(1.0, 0.55, 1.0)
+		if mut_gun > 0 and f == "player":
+			refresh()
+		return
 	form = f
 	body.sprite_frames = Art.frames(f)
 	body.offset = Art.anchor_offset(f)
@@ -124,15 +183,40 @@ static func _mipmapped(src: Texture2D) -> Texture2D:
 
 
 func play(anim: String) -> void:
+	if character != null and (form == "player" or _custom()):
+		if shooting and (_in_sprite() or character.aim_pose) and anim in ["idle", "walk", "walk_up"]:
+			var pose := _shoot_pose()
+			# walk frames that already aim: keep walking while firing to the side
+			if not (pose == "shoot" and anim == "walk" and character.walk_aims):
+				anim = pose
+		anim = character.resolve(anim)
 	if body.animation == anim:
 		return
-	if anim == "idle" and form == "player":
+	if anim == "idle" and form == "player" and (character == null or character.still_idle):
 		# standing: a single frame holding the blaster; breathing is procedural
 		body.animation = "idle"
 		body.stop()
 		body.frame = 0
 	else:
 		body.play(anim)
+
+
+## The shoot pose for the current aim: more than 45 degrees down / up = shoot_down /
+## shoot_up (if the character has them), else the side pose.
+func _shoot_pose() -> String:
+	var y := sin(aim)
+	if y > 0.7:
+		return "shoot_down"
+	if y < -0.7:
+		return "shoot_up"
+	return "shoot"
+
+
+## A shot left the muzzle: show the character's muzzle flash for a moment.
+func fire_flash() -> void:
+	if character != null and character.muzzle_flash != null:
+		flash_t = FLASH_TIME
+		flash.texture = character.muzzle_flash
 
 
 func set_layer_material(m: Material) -> void:
@@ -146,11 +230,14 @@ func grip_pos() -> Vector2:
 
 
 func muzzle_pos() -> Vector2:
+	if _in_sprite() and mut_gun == 0:
+		return body.position + Vector2(character.muzzle.x * facing, character.muzzle.y) * px
 	return gun.position + Vector2.from_angle(aim) * gun_len * BODY_SCALE
 
 
 func _process(delta: float) -> void:
 	breathe_t += delta
+	flash_t = maxf(0.0, flash_t - delta)
 	_pose()
 
 
@@ -162,25 +249,45 @@ func _pose() -> void:
 	var one_way := body.animation == &"idle" or str(body.animation).begins_with("combo_")
 	body.flip_h = facing < 0.0 and (not directional or one_way)
 	# walking: a hop per step with a little squash on landing; standing: slow breathing
+	var bounce := walk_amount if character == null or character.hop else 0.0
 	var step := absf(sin(walk_phase))
-	var hop := -step * 1.8 * walk_amount
-	var land := (1.0 - step) * 0.08 * walk_amount
+	var hop := -step * 1.8 * bounce
+	var land := (1.0 - step) * 0.08 * bounce
 	var breath := sin(breathe_t * 2.6) * 0.018 * (1.0 - walk_amount)
 	body.position = Vector2(0, hop)
 	# directional sets have real walk frames in every direction: no procedural sway
-	body.rotation = 0.0 if directional else sin(walk_phase) * 0.06 * walk_amount * facing
+	body.rotation = 0.0 if directional else sin(walk_phase) * 0.06 * bounce * facing
 	body.scale = Vector2(1.0 + land - breath * 0.4, 1.0 - land + breath) * body_scale
 	var dir := Vector2.from_angle(aim)
+	# weapons keep their world size whoever holds them (gun_len is in astronaut frame px)
 	var s := gun_len / (_tip - _grip).length() * BODY_SCALE
 	var base := (_tip - _grip).angle()
 	# pointing left: mirror the blaster vertically so it is never upside down
 	var flip := dir.x < 0.0
 	gun.scale = Vector2(s, -s if flip else s)
 	gun.rotation = aim + (base if flip else -base)
-	var hand := Vector2(HAND.x * facing, HAND.y * (1.0 - land + breath))
-	gun.position = hand * BODY_SCALE + Vector2(0, hop) - dir * recoil * BODY_SCALE
-	gun.visible = body.animation != "death" and (form == "player" or mut_gun > 0)
+	var h := character.hand if character != null else HAND
+	if character != null and character.aim_pose and not _in_sprite() \
+			and CharacterData.POSE_HANDS.has(str(body.animation)):
+		h = character.get(CharacterData.POSE_HANDS[str(body.animation)])
+	elif character != null and character.walk_aims and body.animation == &"walk":
+		h = character.walk_hand
+	var hand := Vector2(h.x * facing, h.y * (1.0 - land + breath))
+	gun.position = hand * px + Vector2(0, hop) - dir * recoil * px
+	gun.visible = body.animation != "death" and (form == "player" or _custom() or mut_gun > 0) \
+		and (mut_gun > 0 or not _in_sprite())
+	flash.visible = flash_t > 0.0 and body.animation != "death"
+	if flash.visible:
+		var t := flash.texture
+		var k := 1.0 - flash_t / FLASH_TIME  # 0 -> 1: pops out, then shrinks
+		var len := character.flash_size * (0.75 + 0.45 * sin(k * PI))
+		var fs := len / float(t.get_width())
+		flash.offset = Vector2(0, -t.get_height() * 0.5)
+		flash.position = muzzle_pos()
+		flash.rotation = aim
+		flash.scale = Vector2(fs, -fs if flip else fs)
+		flash.modulate.a = 1.0 - k * 0.5
 	# only when walking up (back view) is the blaster hidden behind the body
-	var behind := body.animation == "walk_up"
+	var behind := body.animation == "walk_up" or body.animation == "shoot_up"
 	if (gun.get_index() < body.get_index()) != behind:
 		move_child(gun, 0 if behind else -1)

@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/arena/components/arena_pickup.gd" id="1_x0gns"]
+
+[node name="EnergyCore" type="Node2D" unique_id=23263230]
+texture_filter = 4
+script = ExtResource("1_x0gns")
+kind = "power"

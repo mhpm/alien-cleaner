@@ -1,0 +1,23 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/arena/components/enemy_spawner.gd" id="1_hw838"]
+[ext_resource type="Script" path="res://scripts/arena/data/spawn_entry.gd" id="2_vbjaj"]
+
+[sub_resource type="Resource" id="Resource_fxaor"]
+script = ExtResource("2_vbjaj")
+enemy_id = "big_red"
+weight = 50.0
+elite_chance = 1.0
+
+[sub_resource type="Resource" id="Resource_lm4m5"]
+script = ExtResource("2_vbjaj")
+enemy_id = "eyeclops"
+weight = 50.0
+elite_chance = 1.0
+
+[node name="EliteSpawner" type="Node2D" unique_id=1191654088]
+script = ExtResource("1_hw838")
+enemies = Array[ExtResource("2_vbjaj")]([SubResource("Resource_fxaor"), SubResource("Resource_lm4m5")])
+spawn_count = 3
+spawn_interval = 3.0
+burst = 1

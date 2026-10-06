@@ -1,0 +1,163 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://bujsakluxhwtg"]
+
+[ext_resource type="Texture2D" uid="uid://dxyhcnkhmgyu2" path="res://assets/characters/kid_astronaut/death_0.png" id="1_gkatc"]
+[ext_resource type="Texture2D" uid="uid://cyuci45fejc4c" path="res://assets/characters/kid_astronaut/death_1.png" id="2_uxc5p"]
+[ext_resource type="Texture2D" uid="uid://b4ru65u8hspd7" path="res://assets/characters/kid_astronaut/death_2.png" id="3_nslb2"]
+[ext_resource type="Texture2D" uid="uid://dmi2ndvcwpslb" path="res://assets/characters/kid_astronaut/death_3.png" id="4_5fo5g"]
+[ext_resource type="Texture2D" uid="uid://db4nr0o0qc58q" path="res://assets/characters/kid_astronaut/hurt_0.png" id="5_22igt"]
+[ext_resource type="Texture2D" uid="uid://cuthb3x2jfjbh" path="res://assets/characters/kid_astronaut/hurt_1.png" id="6_wkqgo"]
+[ext_resource type="Texture2D" uid="uid://blpt8u37tlxjp" path="res://assets/characters/kid_astronaut/hurt_2.png" id="7_01n2t"]
+[ext_resource type="Texture2D" uid="uid://iyaqf200bc7s" path="res://assets/characters/kid_astronaut/idle_0.png" id="8_srafn"]
+[ext_resource type="Texture2D" uid="uid://8jd44odmlqer" path="res://assets/characters/kid_astronaut/idle_1.png" id="9_nf3qy"]
+[ext_resource type="Texture2D" uid="uid://cmspcyvnwce8r" path="res://assets/characters/kid_astronaut/idle_2.png" id="10_2ktft"]
+[ext_resource type="Texture2D" uid="uid://c84m8y8p8esvm" path="res://assets/characters/kid_astronaut/idle_3.png" id="11_jvu8u"]
+[ext_resource type="Texture2D" uid="uid://cfedcbgn1j0fs" path="res://assets/characters/kid_astronaut/shoot_0.png" id="12_d6uvp"]
+[ext_resource type="Texture2D" uid="uid://oekn1tn7hhah" path="res://assets/characters/kid_astronaut/shoot_down_0.png" id="13_q4ssb"]
+[ext_resource type="Texture2D" uid="uid://bsgxflg4kqbpx" path="res://assets/characters/kid_astronaut/shoot_up_0.png" id="14_gkatc"]
+[ext_resource type="Texture2D" uid="uid://c5wgl1i0qo5wv" path="res://assets/characters/kid_astronaut/muzzle_flash.png" id="16_4lapq"]
+[ext_resource type="Texture2D" uid="uid://bbpogmjs5cqq0" path="res://assets/characters/kid_astronaut/walk_0.png" id="16_y1xlb"]
+[ext_resource type="Texture2D" uid="uid://d3imkt6jq5utu" path="res://assets/characters/kid_astronaut/walk_1.png" id="17_ecwjm"]
+[ext_resource type="Texture2D" uid="uid://bwmd8xmg75al" path="res://assets/characters/kid_astronaut/walk_2.png" id="18_qsff4"]
+[ext_resource type="Texture2D" uid="uid://dqto582si7ylp" path="res://assets/characters/kid_astronaut/walk_3.png" id="19_fud5m"]
+[ext_resource type="Script" uid="uid://62bejkh4jfqx" path="res://scripts/data/character_data.gd" id="20_iii8i"]
+[ext_resource type="Texture2D" uid="uid://bsv5id4ljxrd1" path="res://assets/characters/kid_astronaut/idle_4.png" id="idle_4"]
+[ext_resource type="Texture2D" uid="uid://duta2sjnx8g7j" path="res://assets/characters/kid_astronaut/idle_5.png" id="idle_5"]
+[ext_resource type="Texture2D" uid="uid://dgd3y24lea28u" path="res://assets/characters/kid_astronaut/idle_6.png" id="idle_6"]
+[ext_resource type="Texture2D" uid="uid://dvrfb38oqk0xh" path="res://assets/characters/kid_astronaut/idle_7.png" id="idle_7"]
+[ext_resource type="Texture2D" uid="uid://b41aprbuj6ppw" path="res://assets/characters/kid_astronaut/walk_4.png" id="walk_4"]
+[ext_resource type="Texture2D" uid="uid://d14q1saggh7l8" path="res://assets/characters/kid_astronaut/walk_5.png" id="walk_5"]
+[ext_resource type="Texture2D" uid="uid://den3vydld3j0r" path="res://assets/characters/kid_astronaut/walk_6.png" id="walk_6"]
+[ext_resource type="Texture2D" uid="uid://du8s4fcdw6j3c" path="res://assets/characters/kid_astronaut/walk_7.png" id="walk_7"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_gkatc"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_gkatc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_uxc5p")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_nslb2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_5fo5g")
+}],
+"loop": 0,
+"name": &"death",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_22igt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_wkqgo")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_01n2t")
+}],
+"loop": 0,
+"name": &"hurt",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("8_srafn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_nf3qy")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_2ktft")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_jvu8u")
+}, {
+"duration": 1.0,
+"texture": ExtResource("idle_4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("idle_5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("idle_6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("idle_7")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("12_d6uvp")
+}],
+"loop": 1,
+"name": &"shoot",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("13_q4ssb")
+}],
+"loop": 0,
+"name": &"shoot_down",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("14_gkatc")
+}],
+"loop": 0,
+"name": &"shoot_up",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("16_y1xlb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("17_ecwjm")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_qsff4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_fud5m")
+}, {
+"duration": 1.0,
+"texture": ExtResource("walk_4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("walk_5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("walk_6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("walk_7")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 12.0
+}]
+
+[resource]
+script = ExtResource("20_iii8i")
+character_id = "kid_astronaut"
+display_name = "Kid Astronaut"
+frames = SubResource("SpriteFrames_gkatc")
+anchor = Vector2(146, 215)
+body_height = 200.0
+hand = Vector2(38, -55)
+aim_pose = true
+shoot_hand = Vector2(42, -68)
+shoot_down_hand = Vector2(-2, -50)
+shoot_up_hand = Vector2(4, -142)
+walk_aims = true
+walk_hand = Vector2(56, -71)
+muzzle = Vector2(107, -107)
+muzzle_flash = ExtResource("16_4lapq")

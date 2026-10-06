@@ -9,7 +9,16 @@ extends Node2D
 const HEIGHT := 30.0  # world units, a bit taller than the astronaut huddled
 const DRAIN := 0.15  # progress lost per second away from them
 
+signal rescued(survivor: Survivor)
+
 var kind := 0
+## Per-instance overrides (arena editor survivors); defaults = SurvivorData.
+var rescue_r := SurvivorData.RESCUE_R
+var rescue_time := SurvivorData.RESCUE_TIME
+var help_lines: Array = SurvivorData.HELP
+var display_name := ""  # "" = the crew member's job title
+var beam_out := true  # false: stays (escorts follow the astronaut instead)
+var look: Texture2D  # their own picture, scared and happy alike (villagers); null = the crew's
 var progress := 0.0
 var saved := false
 var gone := false
@@ -25,7 +34,7 @@ var k := 1.0  # sprite scale (from the sad picture, shared by the happy one)
 func _ready() -> void:
 	add_to_group("survivors")
 	sprite = Sprite2D.new()
-	sprite.texture = _mip(SurvivorData.tex(kind, false))
+	sprite.texture = _mip(look if look != null else SurvivorData.tex(kind, false))
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	sprite.centered = false
 	k = HEIGHT / sprite.texture.get_height()
@@ -71,12 +80,12 @@ func _process(delta: float) -> void:
 	if w == null or w.player == null or w.player.dead:
 		return
 	var d := w.player.global_position.distance_to(global_position + Vector2(0, -6))
-	near = d < SurvivorData.RESCUE_R
+	near = d < rescue_r
 	# shiver
 	sprite.position = Vector2(sin(t * 40.0) * 0.4, 0)
 	shout_t -= delta
 	if near:
-		progress = minf(1.0, progress + delta / SurvivorData.RESCUE_TIME)
+		progress = minf(1.0, progress + delta / rescue_time)
 		var step := int(progress * 4.0)
 		if step > hold_said and step < 4:
 			hold_said = step
@@ -91,7 +100,7 @@ func _process(delta: float) -> void:
 		if shout_t <= 0.0:
 			# louder (more often) when you are around, but they never stop asking
 			shout_t = randf_range(1.6, 2.6) if d < 160.0 else randf_range(3.0, 5.0)
-			say(SurvivorData.HELP.pick_random(), Color("ffdf5a"))
+			say(str(help_lines.pick_random()), Color("ffdf5a"))
 			if d < 220.0:
 				Sfx.play("alert", 0.2, -18.0)
 
@@ -118,7 +127,7 @@ func _rescue() -> void:
 	saved = true
 	var w := Game.world
 	var def: Dictionary = SurvivorData.CREW[kind]
-	sprite.texture = _mip(SurvivorData.tex(kind, true))
+	sprite.texture = _mip(look if look != null else SurvivorData.tex(kind, true))
 	_place_sprite()
 	SurvivorData.reward(kind)
 	var at := global_position + Vector2(0, -HEIGHT * 0.6)
@@ -130,11 +139,13 @@ func _rescue() -> void:
 	for c in bubbles.get_children():
 		c.queue_free()
 	say(SurvivorData.THANKS.pick_random(), Color("a7f070"), 1.8)
-	w.popup_text(at + Vector2(0, -18), "%s SAVED: %s" % [def.name, def.gift], _col().lightened(0.3), 11)
+	w.popup_text(at + Vector2(0, -18), "%s SAVED: %s" % [display_name if display_name != "" else def.name, def.gift], _col().lightened(0.3), 11)
 	if w.explore != null:
 		w.explore.survivor_saved(self)
+	rescued.emit(self)
 	# beamed out to safety
-	get_tree().create_timer(2.4, false).timeout.connect(_beam_out)
+	if beam_out:
+		get_tree().create_timer(2.4, false).timeout.connect(_beam_out)
 
 
 func _beam_out() -> void:
@@ -162,9 +173,9 @@ func _draw() -> void:
 	var pulse := 0.5 + 0.5 * sin(t * 4.0)
 	draw_set_transform(Vector2(0, -1), 0.0, Vector2(1.0, 0.38))
 	draw_circle(Vector2.ZERO, 15.0 + pulse * 3.0, Color(c, 0.14 + 0.1 * pulse))
-	draw_arc(Vector2.ZERO, SurvivorData.RESCUE_R, 0.0, TAU, 40, Color(c, 0.5 if near else 0.22), 1.5)
+	draw_arc(Vector2.ZERO, rescue_r, 0.0, TAU, 40, Color(c, 0.5 if near else 0.22), 1.5)
 	if progress > 0.0:
-		draw_arc(Vector2.ZERO, SurvivorData.RESCUE_R, -PI * 0.5, -PI * 0.5 + TAU * progress, 48, Color(0.65, 1.0, 0.45, 0.95), 3.5)
+		draw_arc(Vector2.ZERO, rescue_r, -PI * 0.5, -PI * 0.5 + TAU * progress, 48, Color(0.65, 1.0, 0.45, 0.95), 3.5)
 	draw_set_transform(Vector2.ZERO)
 	if near or progress > 0.0:
 		var txt := "%d%%" % int(progress * 100.0)

@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/arena/components/arena_trigger.gd" id="1_het15"]
+
+[node name="Console" type="Node2D" unique_id=1010356006]
+script = ExtResource("1_het15")
+action = 6
+size = Vector2(40, 40)
+targets = PackedStringArray()

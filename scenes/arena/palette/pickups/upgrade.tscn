@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/arena/components/arena_pickup.gd" id="1_y02iu"]
+
+[node name="Upgrade" type="Node2D" unique_id=920694526]
+texture_filter = 4
+script = ExtResource("1_y02iu")
+kind = "golden_carrot"

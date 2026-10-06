@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/arena/components/hazard_area.gd" id="1_r01cx"]
+
+[node name="Fire" type="Node2D" unique_id=1890268245]
+script = ExtResource("1_r01cx")
+type = 4
+size = Vector2(80, 48)
+damage = 9.0
+damage_interval = 0.5

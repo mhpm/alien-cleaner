@@ -32,6 +32,8 @@ var boss_best: Dictionary = {}
 ## worlds whose BOSS CHALLENGE chest (unlocked by winning the challenge once) was opened
 var boss_chests: Array = []
 var total_xp := 0
+## Android pieces found in arenas (AndroidPart part_id -> true), kept across runs.
+var android_parts: Dictionary = {}
 var menu_scene := "res://scenes/world_select.tscn"  # where the game / armory return
 ## ARMORY: weapons owned ({GunData id: level 1-3}) and the one carried into runs
 var guns: Dictionary = {"pulse": 1}
@@ -298,6 +300,7 @@ func save() -> void:
 	cfg.set_value("worlds", "boss_best", boss_best)
 	cfg.set_value("worlds", "boss_chests", boss_chests)
 	cfg.set_value("meta", "total_xp", total_xp)
+	cfg.set_value("android", "parts", android_parts)
 	cfg.set_value("armory", "guns", guns)
 	cfg.set_value("armory", "gun", gun)
 	cfg.set_value("settings", "music", Sfx.music_enabled)
@@ -324,6 +327,7 @@ func load_save() -> void:
 	boss_best = cfg.get_value("worlds", "boss_best", {})
 	boss_chests = cfg.get_value("worlds", "boss_chests", [])
 	total_xp = int(cfg.get_value("meta", "total_xp", 0))
+	android_parts = cfg.get_value("android", "parts", {})
 	var owned: Dictionary = cfg.get_value("armory", "guns", {})
 	for k: String in owned:
 		if GunData.ids().has(k):

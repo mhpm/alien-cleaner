@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/arena/components/arena_trigger.gd" id="1_vp5nd"]
+
+[node name="DialogueTrigger" type="Node2D" unique_id=194470203]
+script = ExtResource("1_vp5nd")
+action = 1
+targets = PackedStringArray()
+message = "Movement detected ahead. Stay sharp, cleaner."
+show_in_game = false

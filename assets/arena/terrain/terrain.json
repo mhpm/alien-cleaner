@@ -1,0 +1,174 @@
+{
+	"_doc": "Arena Editor terrain (addons/aliens_cleaner_arena_editor). Each source = an atlas of 'tile' px cells. Keep ids stable (painted arenas reference them); add new art with a new id, then Arena dock > TERRAIN > Sync TileSet. solid = true: full-tile collision, or a json of per-tile polygons (alternative tile 1 = the same tile without collision: bridges use it). terrain = Godot terrain (Terrains tab of the TileMap panel): all = every tile is that terrain; wang = 16 corner tiles land/other (+ extra full tiles). terrains = the names of the terrain set. fill = how many leading tiles (reading order) New Arena uses to fill a floor. border = atlas rows of the 4-tile wall strips (top, bottom, left, right) and the 4 corners (tl, tr, bl, br). Atlases made by python tools/make_arena_terrain.py.",
+	"tile": 64,
+	"terrains": [
+		{
+			"name": "Grass",
+			"color": "#5fbf3a"
+		},
+		{
+			"name": "Water",
+			"color": "#2f7fd6"
+		},
+		{
+			"name": "Dirt path",
+			"color": "#d4a55a"
+		},
+		{
+			"name": "Infested",
+			"color": "#b03cc8"
+		}
+	],
+	"tileset": "res://scenes/arena/terrain/arena_terrain.tres",
+	"sources": [
+		{
+			"id": 0,
+			"name": "Ship plates",
+			"group": "Space",
+			"path": "res://assets/arena/floor_atlas.png",
+			"fill": 98
+		},
+		{
+			"id": 1,
+			"name": "Lab",
+			"group": "Space",
+			"path": "res://assets/arena/lab_floor_atlas.png",
+			"fill": 11
+		},
+		{
+			"id": 2,
+			"name": "Void lab",
+			"group": "Space",
+			"path": "res://assets/arena/terrain/void_floor.png",
+			"fill": 3
+		},
+		{
+			"id": 3,
+			"name": "Walls",
+			"group": "Space",
+			"path": "res://assets/arena/terrain/walls.png",
+			"solid": true,
+			"border": {
+				"top": 0,
+				"bottom": 1,
+				"left": 2,
+				"right": 3,
+				"corners": 4
+			}
+		},
+		{
+			"id": 4,
+			"name": "Contamination",
+			"group": "Space",
+			"path": "res://assets/arena/terrain/contamination.png"
+		},
+		{
+			"id": 5,
+			"name": "Grass",
+			"group": "Earth",
+			"path": "res://assets/arena/terrain/earth_grass.png",
+			"fill": 6,
+			"terrain": {
+				"all": 0
+			}
+		},
+		{
+			"id": 6,
+			"name": "Roads",
+			"group": "Earth",
+			"path": "res://assets/arena/terrain/earth_roads.png"
+		},
+		{
+			"id": 7,
+			"name": "Mud",
+			"group": "Earth",
+			"path": "res://assets/arena/terrain/earth_mud.png"
+		},
+		{
+			"id": 8,
+			"name": "Water (autotile; blocks, bridges open it)",
+			"group": "Earth",
+			"path": "res://assets/arena/terrain/earth_water_edges.png",
+			"solid": "res://assets/arena/terrain/earth_water_edges.json",
+			"terrain": {
+				"wang": [
+					0,
+					1
+				],
+				"variants": 3,
+				"extra_probability": 0.06
+			}
+		},
+		{
+			"id": 9,
+			"name": "Dirt path (autotile)",
+			"group": "Earth",
+			"path": "res://assets/arena/terrain/earth_path_edges.png",
+			"terrain": {
+				"wang": [
+					0,
+					2
+				],
+				"variants": 3
+			}
+		},
+		{
+			"id": 10,
+			"name": "Infested ground (autotile)",
+			"group": "Earth",
+			"path": "res://assets/arena/terrain/earth_infested_edges.png",
+			"fill": 1,
+			"terrain": {
+				"wang": [
+					0,
+					3
+				],
+				"variants": 3,
+				"extra_probability": 0.12
+			}
+		},
+		{
+			"id": 11,
+			"name": "Farm grass",
+			"group": "Farm",
+			"path": "res://assets/arena/terrain/custom/11_farm_grass.png",
+			"origin": {
+				"images": [
+					"res://tools/farm_tiles/grass_1.png",
+					"res://tools/farm_tiles/grass_2.png",
+					"res://tools/farm_tiles/grass_3.png",
+					"res://tools/farm_tiles/grass_4.png",
+					"res://tools/farm_tiles/grass_5.png",
+					"res://tools/farm_tiles/grass_6.png"
+				],
+				"from": "res://tools/farm_tiles/grass_1.png",
+				"seamless": true
+			},
+			"fill": 6
+		},
+		{
+			"id": 12,
+			"name": "Farm dirt patches",
+			"group": "Farm",
+			"path": "res://assets/arena/terrain/custom/12_farm_dirt_patches.png",
+			"origin": {
+				"images": [
+					"res://tools/farm_tiles/patch_1.png",
+					"res://tools/farm_tiles/patch_2.png",
+					"res://tools/farm_tiles/patch_3.png",
+					"res://tools/farm_tiles/patch_4.png",
+					"res://tools/farm_tiles/patch_5.png",
+					"res://tools/farm_tiles/patch_6.png",
+					"res://tools/farm_tiles/patch_7.png",
+					"res://tools/farm_tiles/patch_8.png",
+					"res://tools/farm_tiles/patch_9.png",
+					"res://tools/farm_tiles/patch_10.png",
+					"res://tools/farm_tiles/patch_11.png",
+					"res://tools/farm_tiles/patch_12.png"
+				],
+				"from": "res://tools/farm_tiles/patch_1.png",
+				"seamless": false
+			}
+		}
+	]
+}

@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/arena/components/arena_trigger.gd" id="1_o6px3"]
+
+[node name="HazardTrigger" type="Node2D" unique_id=1813279715]
+script = ExtResource("1_o6px3")
+action = 4
+targets = PackedStringArray()
+show_in_game = false

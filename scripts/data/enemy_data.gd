@@ -354,6 +354,14 @@ const TYPES := {
 		"color": Color("c8ff3a"), "kb": 0.0, "boss": true,
 		"script": "res://scripts/enemies/boss_hive_queen.gd",
 	},
+	# Arena Editor nest (scripts/arena/components/alien_nest.gd): a pulsing hive that keeps
+	# sending aliens until destroyed. "internal" = not offered as a spawner alien.
+	"alien_nest": {
+		"name": "Alien Nest", "hp": 260.0, "speed": 0.0, "damage": 6.0, "coins": 6, "cost": 6,
+		"radius": 15.0, "art": "hive_egg", "scale": 0.3, "ai": "nest", "internal": true,
+		"color": Color("c75bd6"), "kb": 0.0, "tint": Color(1.15, 0.8, 1.35),
+		"script": "res://scripts/enemies/alien_nest_body.gd",
+	},
 	# the queen's goo egg: hatches greenies unless broken in time (enemies/hive_egg.gd)
 	"hive_egg": {
 		"name": "Hive Egg", "hp": 45.0, "speed": 0.0, "damage": 0.0, "coins": 1, "cost": 1,
@@ -430,6 +438,13 @@ const TYPES := {
 		"radius": 8.0, "art": "blobling", "scale": 0.43, "ai": "blobling",
 		"color": Color("5fd0ff"), "kb": 1.0,
 		"script": "res://scripts/enemies/blobling.gd",
+	},
+	# world 4 mini boss (wave 8): bulldozer crab with a cannon turret (enemies/boss_crab.gd)
+	"clawdozer": {
+		"name": "CLAWDOZER", "hp": 1500.0, "speed": 36.0, "damage": 22.0, "coins": 80, "cost": 0,
+		"radius": 17.0, "art": "clawdozer", "scale": 0.3, "ai": "boss",
+		"color": Color("ff5a2a"), "kb": 0.0, "boss": true,
+		"script": "res://scripts/enemies/boss_crab.gd",
 	},
 	# eye the Archmage summons: floats to you and bursts (enemies/arcane_eye.gd)
 	"arcane_eye": {

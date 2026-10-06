@@ -1,0 +1,122 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://cui5hau6qkuhu"]
+
+[ext_resource type="Texture2D" uid="uid://fobj46x5lh6k" path="res://assets/sprites/player/death_0.png" id="1_says7"]
+[ext_resource type="Texture2D" uid="uid://gyef0wr42q7a" path="res://assets/sprites/player/death_1.png" id="2_q07aw"]
+[ext_resource type="Texture2D" uid="uid://bx5qarl5gbm6t" path="res://assets/sprites/player/death_2.png" id="3_m4fyj"]
+[ext_resource type="Texture2D" uid="uid://busxwmf147gy0" path="res://assets/sprites/player/hurt_0.png" id="4_ljfx2"]
+[ext_resource type="Texture2D" uid="uid://bq48pp0g0cngk" path="res://assets/sprites/player/hurt_1.png" id="5_unuc8"]
+[ext_resource type="Texture2D" uid="uid://du77la4cjehhu" path="res://assets/sprites/player/idle_0.png" id="6_f0eqy"]
+[ext_resource type="Texture2D" uid="uid://ix8ath0km3sk" path="res://assets/sprites/player/idle_1.png" id="7_s0mu0"]
+[ext_resource type="Texture2D" uid="uid://bdt8g1klqv7ck" path="res://assets/sprites/player/idle_2.png" id="8_15yh2"]
+[ext_resource type="Texture2D" uid="uid://cl7yvqtdtekvf" path="res://assets/sprites/player/idle_3.png" id="9_01nnt"]
+[ext_resource type="Texture2D" uid="uid://d1835myn4v0dw" path="res://assets/sprites/player/shoot_0.png" id="10_ftcgf"]
+[ext_resource type="Texture2D" uid="uid://brwl5oe2e2gs0" path="res://assets/sprites/player/shoot_1.png" id="11_as178"]
+[ext_resource type="Texture2D" uid="uid://c41rabv3ajmtu" path="res://assets/sprites/player/walk_0.png" id="12_i3sac"]
+[ext_resource type="Texture2D" uid="uid://dx6iqrhtp08ih" path="res://assets/sprites/player/walk_1.png" id="13_f2eom"]
+[ext_resource type="Texture2D" uid="uid://c6yyjbhxfxw2a" path="res://assets/sprites/player/walk_2.png" id="14_8kthj"]
+[ext_resource type="Texture2D" uid="uid://c2e85xkvufoaa" path="res://assets/sprites/player/walk_3.png" id="15_pam2i"]
+[ext_resource type="Texture2D" uid="uid://c4crlxxrjepfi" path="res://assets/sprites/player/walk_up_0.png" id="16_dx5sh"]
+[ext_resource type="Texture2D" uid="uid://bgwthwm8x8uum" path="res://assets/sprites/player/walk_up_1.png" id="17_sv1xr"]
+[ext_resource type="Texture2D" uid="uid://c3cmatfl5ivl" path="res://assets/sprites/player/walk_up_2.png" id="18_ylb8y"]
+[ext_resource type="Texture2D" uid="uid://ctlxk0iu8dqu" path="res://assets/sprites/player/walk_up_3.png" id="19_tccar"]
+[ext_resource type="Script" uid="uid://62bejkh4jfqx" path="res://scripts/data/character_data.gd" id="20_dfyhv"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_5w55o"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_says7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_q07aw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_m4fyj")
+}],
+"loop": 0,
+"name": &"death",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_ljfx2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_unuc8")
+}],
+"loop": 0,
+"name": &"hurt",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("6_f0eqy")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_s0mu0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_15yh2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_01nnt")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("10_ftcgf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_as178")
+}],
+"loop": 0,
+"name": &"shoot",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("12_i3sac")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_f2eom")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_8kthj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_pam2i")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 9.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("16_dx5sh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("17_sv1xr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_ylb8y")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_tccar")
+}],
+"loop": 1,
+"name": &"walk_up",
+"speed": 9.0
+}]
+
+[resource]
+script = ExtResource("20_dfyhv")
+character_id = "astronaut"
+display_name = "Astronaut"
+frames = SubResource("SpriteFrames_5w55o")
+anchor = Vector2(46, 80)
+height = 25.500000000000004
+hand = Vector2(10, -29)
+still_idle = true
