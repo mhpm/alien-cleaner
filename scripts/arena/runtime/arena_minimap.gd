@@ -135,10 +135,10 @@ func _draw() -> void:
 	var pulse := 0.5 + 0.5 * sin(_t * 6.0)
 	for o in director.objects_of("ArenaSurvivor"):
 		if is_instance_valid(o) and not o.is_resolved():
-			draw_circle(_to_map(o.focus_point()), 2.0, Color("a7f070"))
+			FastDraw.disc(self, _to_map(o.focus_point()), 2.0, Color("a7f070"))
 	for o in director.objects_of("AlienNest"):
 		if is_instance_valid(o) and not o.is_resolved():
-			draw_circle(_to_map(o.focus_point()), 2.0, Color("c75bd6"))
+			FastDraw.disc(self, _to_map(o.focus_point()), 2.0, Color("c75bd6"))
 	for o in director.objects_of("DefendCore"):
 		if is_instance_valid(o) and not o.is_resolved():
 			draw_rect(Rect2(_to_map(o.focus_point()) - Vector2(2, 2), Vector2(4, 4)), Color("ffcd75"))
@@ -148,9 +148,9 @@ func _draw() -> void:
 	for o in director.objects_of("BossTrigger"):
 		var b := (o as BossTrigger).boss
 		if is_instance_valid(b) and not b.dead:
-			draw_circle(_to_map(b.global_position), 2.5 + pulse, Color("ff5566"))
+			FastDraw.disc(self, _to_map(b.global_position), 2.5 + pulse, Color("ff5566"))
 	if director.guide_target != Vector2.INF:
-		draw_arc(_to_map(director.guide_target), 3.0 + pulse * 2.0, 0.0, TAU, 12, Color("ffcd75"), 1.0)
+		FastDraw.ring(self, _to_map(director.guide_target), 3.0 + pulse * 2.0, Color("ffcd75"), 1.0)
 	var pl := director.world.player
 	var at := _to_map(pl.global_position)
 	var dir := pl.input_dir.normalized() if pl.input_dir.length() > 0.2 else Vector2.UP

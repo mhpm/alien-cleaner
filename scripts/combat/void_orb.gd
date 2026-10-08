@@ -54,7 +54,7 @@ func _draw() -> void:
 	for i in 3:
 		var r := PULL_R * (1.0 - fposmod(t * 0.9 + i / 3.0, 1.0))
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.75))
-		draw_arc(Vector2.ZERO, r, 0.0, TAU, 40, Color(0.85, 0.3, 1.0, 0.15 + 0.25 * k), 1.0)
+		FastDraw.ring(self, Vector2.ZERO, r, Color(0.85, 0.3, 1.0, 0.15 + 0.25 * k), 1.0)
 
 
 func _burst() -> void:

@@ -230,9 +230,9 @@ class Arc extends Node2D:
 			var off := 0.0 if i == 0 or i == n else randf_range(-5.0, 5.0)
 			pts.append(a.lerp(b, k) + perp * off)
 		var alpha := 1.0 - t / dur
-		draw_polyline(pts, Color(color, alpha * 0.35), width * 3.0)
-		draw_polyline(pts, Color(color, alpha), width)
-		draw_polyline(pts, Color(1, 1, 1, alpha), maxf(1.0, width * 0.4))
+		FastDraw.polyline(self, pts, Color(color, alpha * 0.35), width * 3.0)
+		FastDraw.polyline(self, pts, Color(color, alpha), width)
+		FastDraw.polyline(self, pts, Color(1, 1, 1, alpha), maxf(1.0, width * 0.4))
 
 
 ## Toxic Goo Launcher glob: flies in an arc to `to`, splashes, leaves an acid Pool.
@@ -310,13 +310,13 @@ class Pool extends Node2D:
 		var fade := clampf(t / 0.15, 0.0, 1.0) * clampf((dur - t) / 0.5, 0.0, 1.0)
 		var r := radius * (0.85 + 0.15 * clampf(t / 0.3, 0.0, 1.0))
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.62))
-		draw_circle(Vector2.ZERO, r, Color(0.25, 0.75, 0.1, 0.45 * fade))
-		draw_circle(Vector2.ZERO, r * 0.72, Color(0.45, 1.0, 0.2, 0.35 * fade))
+		FastDraw.disc(self, Vector2.ZERO, r, Color(0.25, 0.75, 0.1, 0.45 * fade))
+		FastDraw.disc(self, Vector2.ZERO, r * 0.72, Color(0.45, 1.0, 0.2, 0.35 * fade))
 		for i in 4:
 			var a := seed_a + i * 1.7 + t * 0.6
 			var bp := Vector2.from_angle(a) * r * (0.3 + 0.12 * i)
-			draw_circle(bp, 1.6 + sin(t * 6.0 + i) * 0.6, Color(0.8, 1.0, 0.5, 0.7 * fade))
-		draw_arc(Vector2.ZERO, r, 0.0, TAU, 28, Color(0.6, 1.0, 0.3, 0.6 * fade), 1.0)
+			FastDraw.disc(self, bp, 1.6 + sin(t * 6.0 + i) * 0.6, Color(0.8, 1.0, 0.5, 0.7 * fade))
+		FastDraw.ring(self, Vector2.ZERO, r, Color(0.6, 1.0, 0.3, 0.6 * fade), 1.0)
 
 
 ## Solar Lance: a sun orb charges at the muzzle, then a laser fires along `dir`, stopped
@@ -448,8 +448,8 @@ class Beam extends Node2D:
 		# soft glow under the ray, white core over it, round caps at both ends
 		draw_line(Vector2.ZERO, end, Color(1.0, 0.65, 0.15, 0.22 * core), w * 2.6)
 		draw_line(Vector2.ZERO, end, Color(1, 1, 0.85, core), maxf(1.0, w * 0.3))
-		draw_circle(Vector2.ZERO, w * 0.9 * core + 2.0, Color(1.0, 0.85, 0.4, 0.7 * core))
-		draw_circle(end, w * 1.1 * core + 2.0, Color(1.0, 0.75, 0.3, 0.5 * core))
+		FastDraw.disc(self, Vector2.ZERO, w * 0.9 * core + 2.0, Color(1.0, 0.85, 0.4, 0.7 * core))
+		FastDraw.disc(self, end, w * 1.1 * core + 2.0, Color(1.0, 0.75, 0.3, 0.5 * core))
 
 
 ## Burning line the Solar Lance leaves on the floor: aliens crossing it catch fire.

@@ -338,18 +338,19 @@ func _draw() -> void:
 	if def.get("kind", "") != "turret" or Game.world == null:
 		return
 	var c := Vector2(0, -1)
-	draw_set_transform(c, 0.0, Vector2(1.0, 0.55))
+	var flat := Transform2D(0.0, Vector2(1.0, 0.55), 0.0, c)
+	draw_set_transform_matrix(flat)
 	match turret:
 		"idle":
 			if Game.world.state in ["fight", "gap", "survive"]:
 				var a := 0.35 + sin(t * 4.0) * 0.15
-				draw_arc(Vector2.ZERO, TURRET_WAKE, 0.0, TAU, 32, Color(0.45, 0.94, 0.97, a), 1.0)
+				FastDraw.ring(self, Vector2.ZERO, TURRET_WAKE, Color(0.45, 0.94, 0.97, a), 1.0)
 		"charge":
-			draw_arc(Vector2.ZERO, TURRET_WAKE, -PI * 0.5, -PI * 0.5 + TAU * turret_t / TURRET_CHARGE, 32, Color("73eff7"), 2.0)
+			FastDraw.arc(self, Vector2.ZERO, TURRET_WAKE, -PI * 0.5, -PI * 0.5 + TAU * turret_t / TURRET_CHARGE, Color("73eff7"), 2.0, flat)
 		"active":
-			draw_arc(Vector2.ZERO, 12.0, -PI * 0.5, -PI * 0.5 + TAU * turret_t / TURRET_ACTIVE, 24, Color("73eff7"), 1.5)
+			FastDraw.arc(self, Vector2.ZERO, 12.0, -PI * 0.5, -PI * 0.5 + TAU * turret_t / TURRET_ACTIVE, Color("73eff7"), 1.5, flat)
 		"cool":
-			draw_arc(Vector2.ZERO, 12.0, -PI * 0.5, -PI * 0.5 + TAU * (1.0 - turret_t / TURRET_COOL), 24, Color(0.5, 0.5, 0.6, 0.6), 1.0)
+			FastDraw.arc(self, Vector2.ZERO, 12.0, -PI * 0.5, -PI * 0.5 + TAU * (1.0 - turret_t / TURRET_COOL), Color(0.5, 0.5, 0.6, 0.6), 1.0, flat)
 	draw_set_transform(Vector2.ZERO)
 
 

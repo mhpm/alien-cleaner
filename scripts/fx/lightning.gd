@@ -26,5 +26,5 @@ func _draw() -> void:
 		var off := 0.0 if i == 0 or i == n else randf_range(-3.5, 3.5)
 		pts.append(a.lerp(b, k) + perp * off)
 	var alpha := 1.0 - t / dur
-	draw_polyline(pts, Color(color, alpha), 2.0)
-	draw_polyline(pts, Color(1, 1, 1, alpha), 1.0)
+	FastDraw.polyline(self, pts, Color(color, alpha), 2.0)
+	FastDraw.polyline(self, pts, Color(1, 1, 1, alpha), 1.0)

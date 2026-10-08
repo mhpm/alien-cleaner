@@ -44,11 +44,8 @@ func _physics_process(delta: float) -> void:
 	global_position += dir * speed * delta
 	var k := LEN / TEX.get_width()
 	sprite.scale = Vector2(k * (1.0 + sin(t * 45.0) * 0.08), k)
-	for node in Game.world.enemy_cache:
-		if not is_instance_valid(node):
-			continue
-		var e := node as Enemy
-		if e == null or not e.targetable or hit_list.has(e.get_instance_id()):
+	for e in Game.world.enemies_near(global_position, hit_r + 8.0):
+		if not e.targetable or hit_list.has(e.get_instance_id()):
 			continue
 		if global_position.distance_to(e.hit_center()) <= e.radius + hit_r:
 			_hit(e)

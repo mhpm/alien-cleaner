@@ -26,7 +26,9 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	var k := t / dur
 	var r := size * (0.35 + 0.65 * k)
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.6))
-	draw_circle(Vector2.ZERO, r, Color(color, 0.25))
-	draw_arc(Vector2.ZERO, r, t * 8.0, t * 8.0 + PI * 1.3, 14, color, 1.0)
-	draw_arc(Vector2.ZERO, r * 0.6, -t * 11.0, -t * 11.0 + PI, 10, Color(1, 1, 1, 0.8), 1.0)
+	# FastDraw: one of these per alien arriving, redrawn every frame
+	var flat := Transform2D(0.0, Vector2(1.0, 0.6), 0.0, Vector2.ZERO)
+	draw_set_transform_matrix(flat)
+	FastDraw.disc(self, Vector2.ZERO, r, Color(color, 0.25))
+	FastDraw.arc(self, Vector2.ZERO, r, t * 8.0, t * 8.0 + PI * 1.3, color, 1.0, flat)
+	FastDraw.arc(self, Vector2.ZERO, r * 0.6, -t * 11.0, -t * 11.0 + PI, Color(1, 1, 1, 0.8), 1.0, flat)

@@ -496,6 +496,44 @@ SETS = {
         },
         "body": "walk",
     },
+    # ALIEN TROOPER: walk/idle/attack from tools/make_alien_walk.py (128 px frames, the
+    # attack = charge + muzzle flash + recoil); death and orb cut from
+    # tools/enemies_saucers_ref.webp, drawn ~1.18x smaller there
+    "alien_trooper": {
+        "anchor": "feet",
+        "anims": {
+            "walk": ([W4 % ("alien_trooper", "walk", i) for i in range(1, 9)], 11, True),
+            "idle": ([W4 % ("alien_trooper", "idle", i) for i in range(1, 7)], 7, True),
+            "charge": ([W4 % ("alien_trooper", "attack", 1)], 1, True),
+            "attack": ([W4 % ("alien_trooper", "attack", i) for i in (2, 3, 4, 5)], 14, False),
+            "splat": ([(W4 % ("alien_trooper", "die", i), 0, 999, 1.18) for i in (1, 2, 3, 4)], 8, False),
+        },
+        "body": "walk",
+    },
+    # SAUCER PILOT / JELLY SAUCER (tools/enemies_saucers_ref.webp, cut_sheet_enemies.py)
+    "saucer_pilot": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("saucer_pilot", "idle", i) for i in (1, 2, 3, 4)], 7, True),
+            "charge": ([W4 % ("saucer_pilot", "attack", 1)], 1, True),
+            "attack": ([W4 % ("saucer_pilot", "attack", i) for i in (2, 3)], 7, False),
+            "death": ([W4 % ("saucer_pilot", "die", i) for i in (1, 2, 3, 4)], 9, False),
+        },
+        "body": "walk",
+    },
+    "saucer_ring": {"anchor": "center", "anims": {"pop": ([W4 % ("saucer_pilot", "shot", 1)], 1, False)}, "body": "pop"},
+    "saucer_bolt": {"anchor": "center", "anims": {"fly": ([W4 % ("saucer_pilot", "shot", 2)], 1, True)}, "body": "fly"},
+    "jelly_saucer": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("jelly_saucer", "idle", i) for i in (1, 2, 3, 4)], 7, True),
+            "attack": ([W4 % ("jelly_saucer", "jattack", i) for i in (1, 2, 3)], 9, False),
+            "splat": ([W4 % ("jelly_saucer", "die", i) for i in (1, 2, 3, 4)], 8, False),
+        },
+        "body": "walk",
+    },
+    "jelly_bubble": {"anchor": "center", "anims": {"fly": ([W4 % ("jelly_saucer", "bubble", 1)], 1, True)}, "body": "fly"},
+    "trooper_orb": {"anchor": "center", "anims": {"fly": ([W4 % ("alien_trooper", "shot", 1)], 1, True)}, "body": "fly"},
     "ring_eye": {
         "anchor": "bbox",
         "anims": {

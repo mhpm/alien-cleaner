@@ -184,19 +184,19 @@ const LAYOUTS := {
 	],
 }
 
-const ALL := ["slime", "runner", "splitter", "spitter", "droid", "ufo", "octopus", "eyeclops", "tentacle_plant", "octo_wizard"]
+const ALL := ["slime", "runner", "splitter", "spitter", "droid", "ufo", "octopus", "eyeclops", "tentacle_plant", "octo_wizard", "alien_trooper"]
 const EARLY := ["slime", "runner", "spitter"]
 const MID := ["slime", "runner", "spitter", "droid"]
 ## late world 1: the horde brings the odd Big Red brute (1 in 7 of the chasers)
-const ALL_BR := ["slime", "slime", "slime", "runner", "runner", "runner", "big_red", "splitter", "spitter", "droid", "ufo", "octopus", "eyeclops", "tentacle_plant", "octo_wizard"]
-const HIVE := ["slime", "runner", "spitter", "droid", "ufo", "octopus", "eyeclops", "splitter", "tentacle_plant", "octo_wizard", "ufo_alien"]
+const ALL_BR := ["slime", "slime", "slime", "runner", "runner", "runner", "big_red", "splitter", "spitter", "droid", "ufo", "octopus", "eyeclops", "tentacle_plant", "octo_wizard", "alien_trooper", "saucer_pilot"]
+const HIVE := ["slime", "runner", "spitter", "droid", "ufo", "octopus", "eyeclops", "splitter", "tentacle_plant", "octo_wizard", "ufo_alien", "alien_trooper", "saucer_pilot", "jelly_saucer"]
 ## world 3: the whole zoo, the sturdy and the shooting
 const VOID_MID := ["slime", "runner", "splitter", "spitter", "droid", "octo_wizard"]
 ## world 3 opens with the new specimens (the splitter does the chasing)
 const LAB_START := ["splitter", "splitter", "slime", "eyeclops", "octo_wizard"]
 const LAB_EARLY := ["splitter", "runner", "slime", "eyeclops", "tentacle_plant", "octo_wizard"]
-const VOID_SHOOTERS := ["eyeclops", "octo_wizard", "tentacle_plant"]
-const VOID := ["slime", "runner", "splitter", "spitter", "droid", "ufo", "octopus", "eyeclops", "tentacle_plant", "octo_wizard", "big_red"]
+const VOID_SHOOTERS := ["eyeclops", "octo_wizard", "tentacle_plant", "jelly_saucer"]
+const VOID := ["slime", "runner", "splitter", "spitter", "droid", "ufo", "octopus", "eyeclops", "tentacle_plant", "octo_wizard", "big_red", "jelly_saucer"]
 ## world 4: UFO crews and the new saucers (scout from the start, gunship from wave 3)
 const SPACE_START := ["ufo_alien", "comet_hopper", "comet_baby", "comet_baby", "slime", "runner", "scout", "ring_bug", "nebula_pod"]
 const SPACE_MID := ["ufo_alien", "comet_hopper", "slime", "runner", "splitter", "scout", "gunship", "jelly_pod", "spike_mine", "ring_bug", "drill_orbiter", "nova_puffer", "blade_drone", "tesla_drone", "goo_hopper", "bubble_brain", "comet_baby", "nebula_pod", "ring_eye", "tadpole_saucer", "plasma_pupil", "martian_scout", "cyclops_pod", "blink_saucer", "bean_cruiser"]
@@ -232,13 +232,15 @@ const WORLDS := [
 					{"pool": MID, "alive": 40, "total": 200, "elite": 0.02, "invasion": 120},
 					{"pool": EARLY, "alive": 30, "total": 70, "event": "boss", "id": "gloop_brute"},
 					{"pool": ["slime", "runner", "splitter", "spitter", "droid", "ufo"], "alive": 44, "total": 100, "elite": 0.03, "event": "swarm", "id": "runner", "count": 20},
-					{"pool": ["slime", "runner", "splitter", "spitter", "droid", "ufo"], "alive": 48, "total": 110, "elite": 0.04, "event": "swarm", "id": "runner", "count": 28, "events": [
+					{"pool": ["slime", "runner", "splitter", "spitter", "droid", "ufo", "alien_trooper"], "alive": 48, "total": 110, "elite": 0.04, "event": "swarm", "id": "runner", "count": 28, "events": [
 						{"at": 12.0, "event": "boss", "id": "blobulus", "label": "BLOBULUS!"}]},
-					{"pool": ALL_BR, "alive": 52, "total": 120, "elite": 0.04, "event": "ring", "id": "slime", "count": 26},
+					{"pool": ALL_BR, "alive": 52, "total": 120, "elite": 0.04, "event": "ring", "id": "slime", "count": 26, "events": [
+						{"at": 18.0, "event": "crossfire", "id": "alien_trooper", "count": 5, "label": "TROOPER SQUAD!"}]},
 					{"pool": ALL_BR, "alive": 56, "total": 300, "elite": 0.05, "invasion": 180},
 					{"pool": ALL_BR, "alive": 36, "total": 90, "elite": 0.05, "event": "boss", "id": "gloop_brute", "count": 2},
 					{"pool": ALL_BR, "alive": 64, "total": 140, "elite": 0.06, "event": "swarm", "id": "slime", "count": 24},
-					{"pool": ALL_BR, "alive": 70, "total": 150, "elite": 0.07, "event": "ring", "id": "runner", "count": 36},
+					{"pool": ALL_BR, "alive": 70, "total": 150, "elite": 0.07, "event": "ring", "id": "runner", "count": 36, "events": [
+						{"at": 16.0, "event": "crossfire", "id": "saucer_pilot", "count": 4, "label": "SAUCER SQUADRON!"}]},
 					{"pool": ALL_BR, "alive": 76, "total": 160, "elite": 0.08, "event": "swarm", "id": "runner", "count": 30},
 					{"pool": ALL_BR, "alive": 80, "total": 315, "elite": 0.09, "invasion": 220},
 				],
@@ -268,7 +270,8 @@ const WORLDS := [
 					{"pool": HIVE, "alive": 36, "rate": 3.4, "elite": 0.04, "event": "swarm", "id": "runner", "count": 24},
 					{"pool": HIVE, "alive": 40, "rate": 3.6, "elite": 0.04, "event": "ring", "id": "runner", "count": 18},
 					{"pool": MID, "alive": 28, "rate": 2.6, "elite": 0.04, "event": "boss", "id": "brood_mother"},
-					{"pool": HIVE, "alive": 46, "rate": 4.0, "elite": 0.05, "event": "swarm", "id": "ufo_alien", "count": 30},
+					{"pool": HIVE, "alive": 46, "rate": 4.0, "elite": 0.05, "event": "swarm", "id": "ufo_alien", "count": 30, "events": [
+						{"at": 16.0, "event": "crossfire", "id": "jelly_saucer", "count": 4, "label": "JELLY FLEET!"}]},
 					{"pool": HIVE, "alive": 50, "rate": 4.2, "elite": 0.05, "event": "ring", "id": "slime", "count": 34},
 					{"pool": HIVE, "alive": 54, "rate": 4.4, "elite": 0.06, "event": "swarm", "id": "slime", "count": 24, "events": [
 						{"at": 10.0, "event": "boss", "id": "drillback", "label": "DRILLBACK!"}]},

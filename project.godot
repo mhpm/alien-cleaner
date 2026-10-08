@@ -97,6 +97,7 @@ pointing/emulate_touch_from_mouse=true
 
 [physics]
 
+common/max_physics_steps_per_frame=3
 3d/physics_engine="Jolt Physics"
 
 [rendering]

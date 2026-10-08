@@ -68,7 +68,7 @@ func _draw() -> void:
 	var wob := 1.0 + sin(t * 4.0) * 0.04
 	var hot := 1.0 if fuse >= 0.0 and fmod(t, 0.16) < 0.08 else 0.0  # about to erupt
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(wob, 0.6))
-	draw_circle(Vector2.ZERO, radius, Color(base, 0.45 * a).lerp(Color.WHITE, hot * 0.6))
-	draw_circle(Vector2(-3, -2), radius * 0.7, Color(light, 0.45 * a).lerp(Color.WHITE, hot * 0.6))
-	draw_circle(Vector2(-5, -5), radius * 0.22, Color(glint, 0.6 * a))
-	draw_arc(Vector2.ZERO, radius, 0.0, TAU, 32, Color(rim, 0.7 * a), 1.5)
+	FastDraw.disc(self, Vector2.ZERO, radius, Color(base, 0.45 * a).lerp(Color.WHITE, hot * 0.6))
+	FastDraw.disc(self, Vector2(-3, -2), radius * 0.7, Color(light, 0.45 * a).lerp(Color.WHITE, hot * 0.6))
+	FastDraw.disc(self, Vector2(-5, -5), radius * 0.22, Color(glint, 0.6 * a))
+	FastDraw.ring(self, Vector2.ZERO, radius, Color(rim, 0.7 * a), 1.5)

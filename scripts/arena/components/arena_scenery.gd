@@ -169,7 +169,7 @@ func height() -> float:
 
 ## Playing: tall pieces join the y-sorted entities; solid ones get their footprint.
 func activate(director: Node) -> void:
-	if bridge:
+	if bridge and texture != null:  # a bridge whose picture is gone would be an invisible way across
 		open_terrain(Arena.of(self))
 	if footprint.x > 0.0 and footprint.y > 0.0:
 		var body := StaticBody2D.new()
@@ -223,7 +223,7 @@ func validate_arena(report: ArenaReport, _arena: Arena) -> void:
 func _draw() -> void:
 	if shadow and not flat:
 		draw_set_transform(Vector2(0, -1), 0.0, Vector2(1.0, 0.32))
-		draw_circle(Vector2.ZERO, width * 0.36, Color(0, 0, 0, 0.28))
+		FastDraw.disc(self, Vector2.ZERO, width * 0.36, Color(0, 0, 0, 0.28))
 		draw_set_transform(Vector2.ZERO)
 	if Engine.is_editor_hint():
 		if texture == null:

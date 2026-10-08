@@ -37,8 +37,41 @@ var indicators: OffscreenIndicators
 var survival: Survival  # survivor-style stage director (WorldData "survival")
 var explore: Explore  # big sectioned arena with chests (WorldData survival "explore")
 var enemy_cache: Array[Node] = []  # the "enemies" group, refreshed every physics frame
-const GRID_CELL := 16.0
-var enemy_grid: Dictionary = {}  # Vector2i cell -> aliens in it (same refresh): cheap neighbour lookups
+## Spatial hash of the aliens, rebuilt every physics frame from flat packed arrays (no
+## per-alien Dictionary keys or Arrays): neighbour pushes and hit tests only look at
+## the cells around a point. Query it with enemies_near().
+const GRID_CELL := 32.0
+const GRID_MAX_SIDE := 256  # cells per side (huge spreads share the border cells)
+const BIG_REACH := 28.0  # aliens reaching further than this (bosses) are always candidates
+const SEP_MAX := 6  # a packed horde: the first overlaps are enough
+const SEP_CHECKS := 28  # neighbours an alien looks at, at most, per update
+var _g_nodes: Array[Enemy] = []
+var _g_pos := PackedVector2Array()
+var _g_rad := PackedFloat32Array()
+var _g_big := PackedByteArray()
+var _g_head := PackedInt32Array()
+var _g_next := PackedInt32Array()
+var _g_origin := Vector2.ZERO
+var _g_cols := 1
+var _g_rows := 1
+var _g_bigs: Array[Enemy] = []
+## Aliens outside this rect (the view plus a margin) think less often (Enemy.lod_skip).
+const LOD_MARGIN := 140.0
+var lod_on := false  # only when the camera scrolls (open maps)
+## Big hordes: each alien thinks, animates and touches every `crowd_every` frames
+## (staggered) and only glides in between (Enemy._physics_process).
+var crowd_2 := 120  # more aliens than this: every 2nd frame
+var crowd_3 := 300  # more than this: every 3rd frame
+var crowd_every := 1
+var lod_rect := Rect2()
+## Is there anything solid near a spot? Asked lazily per SOLID_CELL cell and kept for
+## SOLID_TTL ms (doors that close are seen within that time): aliens in the open just
+## add their velocity instead of a full move_and_slide (Enemy._physics_process).
+const SOLID_CELL := 32.0
+const SOLID_MARGIN := 24.0  # alien radius + a few frames of a fast knockback
+const SOLID_TTL := 1000
+var _solid_cells: Dictionary = {}  # Vector2i -> msec the answer expires (negative = open)
+var _solid_query: PhysicsShapeQueryParameters2D
 
 
 func _ready() -> void:
@@ -144,20 +177,150 @@ func _camera_setup() -> void:
 	camera.reset_smoothing()
 
 
-## World-space size of what the camera shows (depends on the camera zoom and screen).
-## Buckets the aliens by GRID_CELL so each one only checks its neighbours (Enemy
-## separation): hordes of 150+ would otherwise cost n^2 checks every frame.
+## Buckets the aliens by GRID_CELL (cell -> linked list of indices) and pushes
+## overlapping aliens apart: hordes of hundreds would otherwise cost n^2 checks.
+## Called once per physics frame, before the aliens move.
 func _build_enemy_grid() -> void:
-	enemy_grid.clear()
-	for n in enemy_cache:
-		var e := n as Node2D
-		var c := Vector2i((e.global_position / GRID_CELL).floor())
-		var bucket: Array = enemy_grid.get(c, [])
-		if bucket.is_empty():
-			enemy_grid[c] = bucket
-		bucket.append(e)
+	_g_nodes.clear()
+	_g_bigs.clear()
+	var n := enemy_cache.size()
+	_g_pos.resize(n)
+	_g_rad.resize(n)
+	_g_big.resize(n)
+	var lo := Vector2(INF, INF)
+	var hi := Vector2(-INF, -INF)
+	var k := 0
+	for node in enemy_cache:
+		var e := node as Enemy
+		if e == null or e.dead:
+			continue
+		var p := e.global_position
+		_g_nodes.append(e)
+		_g_pos[k] = p
+		_g_rad[k] = e.radius
+		var big := e.radius + e.tex_h * e.base_scale * 0.5 + e.air > BIG_REACH
+		_g_big[k] = 1 if big else 0
+		if big:
+			_g_bigs.append(e)
+		lo = lo.min(p)
+		hi = hi.max(p)
+		k += 1
+	crowd_every = 1 if k <= crowd_2 else (2 if k <= crowd_3 else 3)
+	_g_pos.resize(k)
+	_g_rad.resize(k)
+	_g_big.resize(k)
+	_g_next.resize(k)
+	if k == 0:
+		_g_cols = 1
+		_g_rows = 1
+		_g_head.resize(1)
+		_g_head.fill(-1)
+		return
+	_g_origin = (lo / GRID_CELL).floor() * GRID_CELL
+	_g_cols = clampi(int((hi.x - _g_origin.x) / GRID_CELL) + 1, 1, GRID_MAX_SIDE)
+	_g_rows = clampi(int((hi.y - _g_origin.y) / GRID_CELL) + 1, 1, GRID_MAX_SIDE)
+	_g_head.resize(_g_cols * _g_rows)
+	_g_head.fill(-1)
+	for i in k:
+		var c := _g_cell(_g_pos[i])
+		_g_next[i] = _g_head[c]
+		_g_head[c] = i
+	_separate_enemies()
+	_update_lod_rect()
 
 
+func _g_cell(p: Vector2) -> int:
+	var cx := clampi(int((p.x - _g_origin.x) / GRID_CELL), 0, _g_cols - 1)
+	var cy := clampi(int((p.y - _g_origin.y) / GRID_CELL), 0, _g_rows - 1)
+	return cy * _g_cols + cx
+
+
+## Each alien re-checks its neighbours every other frame (half the horde per frame)
+## and keeps the push (Enemy._sep) in between.
+func _separate_enemies() -> void:
+	var k := _g_pos.size()
+	var parity := Engine.get_physics_frames() % 2
+	for i in range(parity, k, 2):
+		var p := _g_pos[i]
+		var ri := _g_rad[i]
+		var cx := clampi(int((p.x - _g_origin.x) / GRID_CELL), 0, _g_cols - 1)
+		var cy := clampi(int((p.y - _g_origin.y) / GRID_CELL), 0, _g_rows - 1)
+		var sep := Vector2.ZERO
+		var hits := 0
+		var checks := 0
+		for y in range(maxi(cy - 1, 0), mini(cy + 2, _g_rows)):
+			for x in range(maxi(cx - 1, 0), mini(cx + 2, _g_cols)):
+				var j := _g_head[y * _g_cols + x]
+				while j != -1 and hits < SEP_MAX and checks < SEP_CHECKS:
+					if j != i:
+						checks += 1
+						var d := p - _g_pos[j]
+						var min_d := (ri + _g_rad[j]) * 0.8
+						var l2 := d.length_squared()
+						if l2 < min_d * min_d and l2 > 0.0001:
+							var l := sqrt(l2)
+							sep += d / l * (min_d - l) * 8.0
+							hits += 1
+					j = _g_next[j]
+		_g_nodes[i]._sep = sep
+
+
+## Candidate aliens whose body may be within `r` of `pos`: the grid cells around it
+## plus the big ones (bosses). Coarse: check the exact distance yourself. Dead or
+## freed aliens are already left out.
+func enemies_near(pos: Vector2, r: float) -> Array[Enemy]:
+	var out: Array[Enemy] = []
+	if _g_nodes.is_empty():
+		return out
+	var reach := r + BIG_REACH
+	var x0 := clampi(int((pos.x - reach - _g_origin.x) / GRID_CELL), 0, _g_cols - 1)
+	var x1 := clampi(int((pos.x + reach - _g_origin.x) / GRID_CELL), 0, _g_cols - 1)
+	var y0 := clampi(int((pos.y - reach - _g_origin.y) / GRID_CELL), 0, _g_rows - 1)
+	var y1 := clampi(int((pos.y + reach - _g_origin.y) / GRID_CELL), 0, _g_rows - 1)
+	for y in range(y0, y1 + 1):
+		for x in range(x0, x1 + 1):
+			var j := _g_head[y * _g_cols + x]
+			while j != -1:
+				if _g_big[j] == 0:
+					var e := _g_nodes[j]
+					if is_instance_valid(e) and not e.dead:
+						out.append(e)
+				j = _g_next[j]
+	for e in _g_bigs:
+		if is_instance_valid(e) and not e.dead:
+			out.append(e)
+	return out
+
+
+func _update_lod_rect() -> void:
+	lod_on = follow_cam
+	if not lod_on:
+		return
+	var v := view_size()
+	lod_rect = Rect2(camera.get_screen_center_position() - v * 0.5, v).grow(LOD_MARGIN)
+
+
+func near_solid(p: Vector2) -> bool:
+	var c := Vector2i(floori(p.x / SOLID_CELL), floori(p.y / SOLID_CELL))
+	var now := Time.get_ticks_msec()
+	var v: int = _solid_cells.get(c, 0)
+	if v != 0 and absi(v) > now:
+		return v > 0
+	if _solid_query == null:
+		_solid_query = PhysicsShapeQueryParameters2D.new()
+		var shape := RectangleShape2D.new()
+		shape.size = Vector2.ONE * (SOLID_CELL + SOLID_MARGIN * 2.0)
+		_solid_query.shape = shape
+		_solid_query.collision_mask = 1 | PropData.LAYER_BODIES_ONLY  # what aliens bump into
+		_solid_query.collide_with_areas = false
+	_solid_query.transform = Transform2D(0.0, (Vector2(c) + Vector2(0.5, 0.5)) * SOLID_CELL)
+	var hit := not get_world_2d().direct_space_state.intersect_shape(_solid_query, 1).is_empty()
+	var expires := now + SOLID_TTL + (c.x * 7 + c.y * 13) % 200  # staggered refreshes
+	_solid_cells[c] = expires if hit else -expires
+	return hit
+
+
+## World-space size of what the camera shows (depends on the camera zoom and screen).
 func view_size() -> Vector2:
 	return get_viewport_rect().size / camera.zoom
 
@@ -343,7 +506,7 @@ func _physics_process(delta: float) -> void:
 			if state_t <= 0.0:
 				_begin_fight()
 		"fight":
-			if pending == 0 and get_tree().get_nodes_in_group("enemies").is_empty():
+			if pending == 0 and enemy_cache.is_empty():
 				if waves.is_empty() and boss_pending != "":
 					# the sector boss arrives after its waves
 					hud.banner("BOSS!", Color("ff5566"), 44, 1.0)
@@ -649,9 +812,8 @@ func enemy_killed(e: Enemy) -> void:
 func _slime_burst(pos: Vector2, dmg: float, rad := 26.0) -> void:
 	ring(pos, rad, Color("a7f070"), 0.3, 2.0, true)
 	burst(pos, Color("a7f070"), 10, 80.0, 0.35, 2.0)
-	for n in get_tree().get_nodes_in_group("enemies"):
-		var e := n as Enemy
-		if e != null and e.targetable and e.global_position.distance_to(pos) < rad + e.radius:
+	for e in enemies_near(pos, rad):
+		if e.targetable and e.global_position.distance_to(pos) < rad + e.radius:
 			e.take_damage(dmg, (e.global_position - pos).normalized())
 
 
@@ -664,9 +826,8 @@ func explosion(pos: Vector2, radius: float, enemy_dmg: float, player_dmg: float)
 	burst(pos, Color("ef7d57"), 16, 100.0, 0.55, 3.0)
 	burst(pos, Color(0.2, 0.2, 0.25, 0.8), 10, 40.0, 0.8, 4.0, -30.0)
 	add_stain(pos + Vector2(0, 6), Color(0.1, 0.1, 0.12), 1.8)
-	for n in get_tree().get_nodes_in_group("enemies"):
-		var e := n as Enemy
-		if e != null and e.targetable and e.global_position.distance_to(pos) < radius + e.radius:
+	for e in enemies_near(pos, radius):
+		if e.targetable and e.global_position.distance_to(pos) < radius + e.radius:
 			e.take_damage(enemy_dmg, (e.global_position - pos).normalized() * 3.0)
 	if player_dmg > 0.0 and not player.dead and player.global_position.distance_to(pos) < radius:
 		player.take_damage(player_dmg, pos)
@@ -683,9 +844,8 @@ func chain_lightning(from: Enemy, dmg: float, count: int) -> void:
 	for i in count:
 		var best: Enemy = null
 		var bd := 60.0
-		for n in get_tree().get_nodes_in_group("enemies"):
-			var e := n as Enemy
-			if e == null or not e.targetable or hit.has(e):
+		for e in enemies_near(cur_pos, bd):
+			if not e.targetable or hit.has(e):
 				continue
 			var d := e.hit_center().distance_to(cur_pos)
 			if d < bd:
@@ -816,7 +976,7 @@ func _process(delta: float) -> void:
 		var target := player.global_position + Vector2(0, -10)
 		camera.position = camera.position.lerp(target, 1.0 - exp(-7.0 * delta))
 		guide.target = _guide_target()
-	hud.set_enemies_left(get_tree().get_nodes_in_group("enemies").size() + pending
+	hud.set_enemies_left(enemy_cache.size() + pending
 			if state in ["fight", "gap"] else -1)
 
 

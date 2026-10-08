@@ -51,7 +51,7 @@ func start(paths: Array[String]) -> void:
 	for f: Array in FLAGS:
 		var key: String = f[0]
 		var o: OptionButton = _flags[key]
-		var vals := items.map(func(i: Dictionary) -> bool: return i.get(key) != null and i.get(key) != false)
+		var vals := items.map(func(i: Dictionary) -> bool: return _on(i.get(key)))
 		if vals.all(func(v: bool) -> bool: return v == vals[0]):
 			o.select(1 if vals[0] else 2)
 		else:
@@ -64,6 +64,13 @@ func start(paths: Array[String]) -> void:
 	_grid_on.button_pressed = false
 	_loop.select(0)
 	popup_centered()
+
+
+## A kit flag: true/false, or for "solid" a [w, h] footprint (null = off).
+static func _on(v: Variant) -> bool:
+	if v is bool:
+		return v
+	return v != null
 
 
 func _same(items: Array[Dictionary], key: String) -> Variant:

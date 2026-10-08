@@ -120,7 +120,7 @@ func _draw() -> void:
 		if pts.size() >= 3:
 			draw_colored_polygon(pts, Color(0.02, 0.04, 0.12, 0.6))
 	if btn_flash > 0.0:
-		draw_circle(b, BTN_R + 10.0 * (1.0 - btn_flash), Color(1, 1, 1, btn_flash * 0.5))
+		FastDraw.disc(self, b, BTN_R + 10.0 * (1.0 - btn_flash), Color(1, 1, 1, btn_flash * 0.5))
 	if infect_state > 0:
 		_draw_infection(b)
 
@@ -128,12 +128,12 @@ func _draw() -> void:
 func _draw_infection(b: Vector2) -> void:
 	const MAG := Color("ff3df0")
 	var r := BTN_R + 5.0
-	draw_arc(b, r, 0.0, TAU, 48, Color(0.15, 0.03, 0.2, 0.75), 5.0)
+	FastDraw.ring(self, b, r, Color(0.15, 0.03, 0.2, 0.75), 5.0)
 	if infect > 0.0:
-		draw_arc(b, r, -PI * 0.5, -PI * 0.5 + TAU * clampf(infect, 0.0, 1.0), 48, MAG, 4.0)
+		FastDraw.arc(self, b, r, -PI * 0.5, -PI * 0.5 + TAU * clampf(infect, 0.0, 1.0), MAG, 4.0)
 	if infect_state == 2:
 		var p := 0.5 + 0.5 * sin(t * 8.0)
-		draw_arc(b, r + 4.0 + p * 4.0, 0.0, TAU, 48, Color(MAG, 0.5 - p * 0.3), 3.0)
+		FastDraw.ring(self, b, r + 4.0 + p * 4.0, Color(MAG, 0.5 - p * 0.3), 3.0)
 		_label(b + Vector2(0, -r - 10.0), "MUTATE!", MAG.lerp(Color.WHITE, p * 0.5))
 	elif infect_state == 3:
 		_label(b + Vector2(0, -r - 10.0), "ROLL", MAG)

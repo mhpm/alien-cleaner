@@ -564,11 +564,12 @@ func _draw_portal() -> void:
 	var pw := 44.0 * k
 	var sz := Vector2(pw, pw * portal_tex.get_height() / portal_tex.get_width())
 	var pulse := 0.8 + sin(anim_t * 5.0) * 0.2
-	draw_set_transform(exit_pos, 0.0, Vector2(1.0, 0.5))
-	draw_circle(Vector2.ZERO, 30.0 * k, Color(0.45, 1.0, 0.55, 0.18 * pulse))
+	var flat := Transform2D(0.0, Vector2(1.0, 0.5), 0.0, exit_pos)
+	draw_set_transform_matrix(flat)
+	FastDraw.disc(self, Vector2.ZERO, 30.0 * k, Color(0.45, 1.0, 0.55, 0.18 * pulse))
 	for i in 3:
 		var a := anim_t * (2.0 + i) + i * 2.0
-		draw_arc(Vector2.ZERO, (16.0 + i * 6.0) * k, a, a + PI * 1.2, 20, Color(0.65, 1.0, 0.6, 0.7 * pulse), 1.5)
+		FastDraw.arc(self, Vector2.ZERO, (16.0 + i * 6.0) * k, a, a + PI * 1.2, Color(0.65, 1.0, 0.6, 0.7 * pulse), 1.5, flat)
 	draw_set_transform(Vector2.ZERO)
 	draw_texture_rect(portal_tex, Rect2(exit_pos - Vector2(sz.x * 0.5, sz.y - 6.0), sz), false, Color(1, 1, 1, k))
 
@@ -985,7 +986,7 @@ func _draw() -> void:
 		var k := fmod(anim_t * 1.6 + (c.x + c.y) * 0.25, 1.0)
 		var cx := -6.0 + k * 12.0
 		var col := Color(0.75, 1.0, 1.0, sin(k * PI))
-		draw_polyline(PackedVector2Array([Vector2(cx - 2.5, -3.0), Vector2(cx, 0), Vector2(cx - 2.5, 3.0)]), col, 1.2)
+		FastDraw.polyline(self, PackedVector2Array([Vector2(cx - 2.5, -3.0), Vector2(cx, 0), Vector2(cx - 2.5, 3.0)]), col, 1.2)
 		draw_set_transform(Vector2.ZERO)
 	# toxic slime: glowing painted splats
 	for c: Vector2i in toxic:
@@ -993,7 +994,7 @@ func _draw() -> void:
 		var glow := 0.85 + sin(anim_t * 3.0 + c.x + c.y) * 0.15
 		var sz := Vector2(22, 22.0 * tex.get_height() / tex.get_width())
 		var pos := cell_center(c) - sz * 0.5
-		draw_circle(cell_center(c), 9.0, Color(0.45, 0.95, 0.25, 0.18 * glow))
+		FastDraw.disc(self, cell_center(c), 9.0, Color(0.45, 0.95, 0.25, 0.18 * glow))
 		draw_texture_rect(tex, Rect2(pos, sz), false, Color(glow + 0.2, glow + 0.2, glow))
 	# electric floor: grate + warning frame + arcs when live
 	for c in electric:
@@ -1009,7 +1010,7 @@ func _draw() -> void:
 				var a := pos + Vector2(randf_range(0, 16), 0)
 				for j in 5:
 					pts.append(a + Vector2(randf_range(-3, 3), j * 4.0))
-				draw_polyline(pts, Color(1, 1, 1, 0.9), 1.0)
+				FastDraw.polyline(self, pts, Color(1, 1, 1, 0.9), 1.0)
 	_draw_door()
 
 

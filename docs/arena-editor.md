@@ -16,7 +16,17 @@ Dock **Arena** junto al Inspector. Arena de ejemplo: `scenes/arenas/arena_world_
 2. **PAINT**: Floor / Environment / Details / Walls abren el pintor TileMap de Godot
    (las baldosas de Walls tienen colisión). ↻ = Sync TileSet.
 3. **OBJECTS**: categoría → clic en un objeto → clic en la vista (arrastrar pinta con
-   snap; Esc / clic derecho suelta). Categorías: Gameplay, Spawners, Triggers, Hazards,
+   snap; Esc / clic derecho suelta). **Brush** (debajo de la paleta): *One (click)* = una copia por clic;
+   *Area (random)* = arrastra un rectángulo en la vista y se llena de copias en posiciones
+   al azar (Ctrl / Shift + clic en varios objetos de la paleta para mezclarlos). Opciones:
+   *Copies*, *Min dist.* (0 = pueden encimarse), *Round area* (la elipse dentro del
+   rectángulo), *Avoid objects* (respeta lo que ya hay), y lo que quieras aleatorio:
+   *Random size* (entre dos %), *Random opacity* (entre dos %), *Tint* (un color entre dos;
+   el mismo dos veces = todos con ese tinte), *Random flip*, *Random rotation* (± grados).
+   Cada arrastre usa una semilla nueva salvo con *Lock seed*. Todo el relleno es una sola
+   acción de Ctrl+Z; las opciones se recuerdan por proyecto. La transparencia al pasar
+   detrás respeta la opacidad de cada pieza. Código: `dock/brush_panel.gd`,
+   `editor/area_brush.gd` (prueba `tests/area_brush_test.tscn`). Categorías: Gameplay, Spawners, Triggers, Hazards,
    Pickups, Environment (props de `PropData`), Contamination (decals).
 4. **MISSIONS**: tipo → Add Objective; clic en una fila = editarla en el Inspector y ver
    en la vista los objetos a los que apunta.
@@ -133,8 +143,8 @@ arma de la ARMORY con *Shoot pose*).
   (`fade_behind`), una huella de colisión opcional (`footprint`) y pueden ir planos sobre
   el suelo (`flat`).
 
-Arena demo de mundo abierto: `scenes/arenas/arena_world_09_level_01.tscn`
-("Pinewood Outskirts", 96×96), construida con `res://tools/build_earth_demo.tscn`.
+Arena demo de mundo abierto: `scenes/arenas/arena_world_10_level_01.tscn` ("Harvest
+Hollow", ver más abajo).
 
 ## Proteger la aldea (aldeanos y asaltos)
 
@@ -156,6 +166,22 @@ defender el Viejo Pozo (y el granero) de 3 asaltos que salen de los maizales, el
 y el bosque, 6 aldeanos escondidos (Pip hay que llevarlo del estanque a la plaza), nidos
 en el maíz, diálogo con el anciano, maizales en hileras y COMMANDER ZORP en el
 círculo de las cosechas.
+
+**Kit de construcciones de granja**: hoja `tools/farm_buildings_ref.webp` → `python
+tools/import_decor_sheet.py tools/farm_buildings_ref.webp --kit farm --category Buildings --prefix bld
+--solid --scale 0.75 --min-area 300` (las piezas que se tocan en la hoja se separaron después:
+casa/silo, corrales/torre/molino, puesto/farol, pacas, cajas, barril/carreta = `bld_48..54`) →
+`assets/decor/farm/buildings/bld_NN.png`, OBJECTS > Farm · Buildings · Houses / Barns / Animal
+pens / Fences / Yard. Tamaño y colisión (huella en la base) por tipo en `kit.json`, sin sombra;
+el arco con farol `bld_51` no bloquea (se pasa por debajo). Harvest Hollow los usa: casas,
+granero (núcleo `bld_07`), pozo (núcleo `bld_40`), silo, torre de agua, molino, establos,
+gallinero, corral de ovejas, puestos del mercado, pacas, cajas, barriles y carreta.
+
+**Kit de hierba**: hoja `tools/grass_sheet_ref.webp` → `python tools/import_decor_sheet.py
+tools/grass_sheet_ref.webp --kit farm --category Grass --prefix grass --sway --scale 0.3 --min-area 60`
+→ `assets/decor/farm/grass/grass_NN.png` (98 piezas: matas, arbustos con flores y bayas, hojas
+bajas) en OBJECTS y DECOR > Farm · Grass, con viento y sin sombra; las que llevan piedras o tocón
+(73-75, 77, 78, 80, 81) van en Farm · Grass · Rocks sin viento y con colisión, y la piedrita 95 es plana.
 
 **Kit de maíz**: hoja `tools/corn_sheet_ref.webp` → `python tools/import_decor_sheet.py
 tools/corn_sheet_ref.webp --kit farm --category Corn --prefix corn --sway --scale 0.3 --min-area 150`

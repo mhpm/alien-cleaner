@@ -50,7 +50,7 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	# the ship's shadow on the ground, and the tractor beam while it drops
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.3))
-	draw_circle(Vector2.ZERO, 22.0, Color(0, 0, 0, 0.25))
+	FastDraw.disc(self, Vector2.ZERO, 22.0, Color(0, 0, 0, 0.25))
 	draw_set_transform(Vector2.ZERO)
 	if beam_t > 0.0:
 		var a := clampf(beam_t / 0.4, 0.0, 1.0)
@@ -59,5 +59,5 @@ func _draw() -> void:
 		draw_colored_polygon(poly, Color(0.65, 1.0, 0.45, 0.35 * a))
 		draw_line(Vector2(0, top), Vector2(0, 0), Color(0.9, 1.0, 0.8, 0.6 * a), 2.0)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.35))
-		draw_circle(Vector2.ZERO, 22.0, Color(0.65, 1.0, 0.45, 0.3 * a))
+		FastDraw.disc(self, Vector2.ZERO, 22.0, Color(0.65, 1.0, 0.45, 0.3 * a))
 		draw_set_transform(Vector2.ZERO)

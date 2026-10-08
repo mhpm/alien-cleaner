@@ -145,7 +145,7 @@ func _draw() -> void:
 	var a := lerpf(0.12 + 0.08 * sin(_t * 5.0), 1.0, _seen) * (0.45 if _owned else 1.0)
 	# floor glow and scan beam once revealed
 	draw_set_transform(Vector2(0, -1), 0.0, Vector2(1.0, 0.4))
-	draw_circle(Vector2.ZERO, 12.0, Color(COLOR, 0.25 * _seen))
+	FastDraw.disc(self, Vector2.ZERO, 12.0, Color(COLOR, 0.25 * _seen))
 	draw_set_transform(Vector2.ZERO)
 	if _seen > 0.05:
 		var beam := Color(COLOR, 0.12 * _seen * (0.7 + 0.3 * sin(_t * 8.0)))

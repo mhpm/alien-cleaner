@@ -46,4 +46,4 @@ func _draw() -> void:
 	var dir := -FROM.normalized()
 	for i in 6:
 		var p := rock.position - dir * (8.0 + i * 9.0)
-		draw_circle(p, 7.0 - i, Color(1.0, 0.55 - i * 0.06, 0.2, 0.55 - i * 0.08))
+		FastDraw.disc(self, p, 7.0 - i, Color(1.0, 0.55 - i * 0.06, 0.2, 0.55 - i * 0.08))

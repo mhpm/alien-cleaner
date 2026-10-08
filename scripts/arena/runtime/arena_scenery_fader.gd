@@ -39,9 +39,10 @@ func _process(delta: float) -> void:
 		if not is_instance_valid(s) or s.sprite == null:
 			_faded.erase(s)
 			continue
-		var want: float = ArenaScenery.FADE_ALPHA if _faded[s] else 1.0
+		# back to the piece's own opacity (its tint), not always 1
+		var want: float = ArenaScenery.FADE_ALPHA * s.tint.a if _faded[s] else s.tint.a
 		s.sprite.modulate.a = move_toward(s.sprite.modulate.a, want, delta * SPEED)
-		if not _faded[s] and s.sprite.modulate.a >= 1.0:
+		if not _faded[s] and s.sprite.modulate.a >= s.tint.a:
 			_faded.erase(s)
 
 

@@ -174,6 +174,6 @@ class Lights:
 			var k := clampf(sin(t * 2.2 + i * 1.7) * 1.6, 0.0, 1.0)
 			if k <= 0.0:
 				continue
-			draw_circle(p, 9.0 * k, Color(1.0, 0.2, 0.15, 0.18 * k))
-			draw_circle(p, 4.0 * k, Color(1.0, 0.35, 0.25, 0.4 * k))
-			draw_circle(p, 1.6, Color(1.0, 0.8, 0.7, 0.8 * k))
+			FastDraw.disc(self, p, 9.0 * k, Color(1.0, 0.2, 0.15, 0.18 * k))
+			FastDraw.disc(self, p, 4.0 * k, Color(1.0, 0.35, 0.25, 0.4 * k))
+			FastDraw.disc(self, p, 1.6, Color(1.0, 0.8, 0.7, 0.8 * k))

@@ -207,6 +207,29 @@ static func update(id: int, values: Dictionary) -> void:
 	await commit(cfg)
 
 
+## Collision of single tiles (atlas reading order): "solid" = they block, "walk" = they
+## never block, "reset" = whatever their source says. Kept in terrain.json, so a sync
+## (which rebuilds every tile's collision) does not lose it.
+static func set_tile_collision(id: int, indices: Array, mode: String) -> void:
+	var src := find(load_config(), id)
+	if src.is_empty():
+		return
+	var solid_list: Array = Array(src.get("solid_tiles", [])).map(func(v: Variant) -> int: return int(v))
+	var walk_list: Array = Array(src.get("walk_tiles", [])).map(func(v: Variant) -> int: return int(v))
+	for v: Variant in indices:
+		var i := int(v)
+		solid_list.erase(i)
+		walk_list.erase(i)
+		if mode == "solid":
+			solid_list.append(i)
+		elif mode == "walk":
+			walk_list.append(i)
+	solid_list.sort()
+	walk_list.sort()
+	await update(id, {"solid_tiles": solid_list if not solid_list.is_empty() else null,
+		"walk_tiles": walk_list if not walk_list.is_empty() else null})
+
+
 ## Tiles of a source the painter should not offer (atlas reading order, 0-based).
 static func set_excluded(id: int, indices: Array) -> void:
 	await update(id, {"exclude": indices if not indices.is_empty() else null})

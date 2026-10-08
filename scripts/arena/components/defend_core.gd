@@ -97,14 +97,10 @@ func _physics_process(delta: float) -> void:
 		if _lure_t <= 0.0:
 			_lure_t = 0.4
 			_lure(w)
-	var c := Vector2i((global_position / GameWorld.GRID_CELL).floor())
-	var reach := int(ceil(danger_radius / GameWorld.GRID_CELL))
 	var n := 0
-	for dy in range(-reach, reach + 1):
-		for dx in range(-reach, reach + 1):
-			for e in w.enemy_grid.get(c + Vector2i(dx, dy), []):
-				if is_instance_valid(e) and (e as Enemy).global_position.distance_to(global_position) < danger_radius:
-					n += 1
+	for e in w.enemies_near(global_position, danger_radius):
+		if e.global_position.distance_to(global_position) < danger_radius:
+			n += 1
 	if n > 0:
 		_hp -= drain_per_alien * n * delta
 		_hit = 0.15
@@ -149,8 +145,8 @@ func _draw() -> void:
 	var tint := Color(0.3, 0.3, 0.35) if _dead else (Color(1.6, 0.8, 0.8) if _hit > 0.0 else Color.WHITE)
 	var pulse := 0.5 + 0.5 * sin(_t * 3.0)
 	draw_set_transform(Vector2(0, -2), 0.0, Vector2(1.0, 0.4))
-	draw_circle(Vector2.ZERO, danger_radius, Color(1.0, 0.3, 0.3, 0.05 + 0.05 * pulse))
-	draw_arc(Vector2.ZERO, danger_radius, 0.0, TAU, 48, Color(1.0, 0.4, 0.4, 0.35), 1.0)
+	FastDraw.disc(self, Vector2.ZERO, danger_radius, Color(1.0, 0.3, 0.3, 0.05 + 0.05 * pulse))
+	FastDraw.ring(self, Vector2.ZERO, danger_radius, Color(1.0, 0.4, 0.4, 0.35), 1.0)
 	draw_set_transform(Vector2.ZERO)
 	_standing(tex, palette_width(), tint)
 	if not _dead:

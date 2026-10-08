@@ -77,7 +77,7 @@ func _draw() -> void:
 		draw_rect(b, Color(0, 0, 0, 0.5))
 		draw_rect(b, col, false, 1.0)
 		if s.done:
-			draw_polyline(PackedVector2Array([b.position + Vector2(1.5, 4), b.position + Vector2(3.5, 6.5), b.position + Vector2(7, 1.5)]), DONE, 1.5)
+			FastDraw.polyline(self, PackedVector2Array([b.position + Vector2(1.5, 4), b.position + Vector2(3.5, 6.5), b.position + Vector2(7, 1.5)]), DONE, 1.5)
 		elif s.failed:
 			draw_line(b.position + Vector2(1.5, 1.5), b.end - Vector2(1.5, 1.5), FAIL, 1.5)
 			draw_line(Vector2(b.end.x - 1.5, b.position.y + 1.5), Vector2(b.position.x + 1.5, b.end.y - 1.5), FAIL, 1.5)

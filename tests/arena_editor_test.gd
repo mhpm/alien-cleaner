@@ -2,7 +2,7 @@ extends Node
 ## Arena Editor end-to-end test (run headless):
 ##   godot --headless --path . res://tests/arena_editor_test.tscn
 ## 1. Validation: the sample arena is clean; broken arenas report the right errors.
-## 3. Open world: plays the Earth sample (arena_world_09_level_01): minimap, see-through
+## 3. Open world: plays Harvest Hollow (arena_world_10_level_01): minimap, see-through
 ##    trees, roaming aliens and the leash that brings the horde along across the map.
 ## 2. Plays scenes/arenas/arena_world_01_level_01.tscn in ArenaWorld and walks through
 ##    it like a player would (shortcuts instead of aiming): wave 1, a rescue, an escort,
@@ -198,7 +198,7 @@ func _play_test() -> void:
 # ---------------------------------------------------------------- open world
 
 func _open_world_test() -> void:
-	ArenaSession.arena_path = "res://scenes/arenas/arena_world_09_level_01.tscn"
+	ArenaSession.arena_path = "res://scenes/arenas/arena_world_10_level_01.tscn"
 	ArenaSession.test = true
 	ArenaSession.invincible = true
 	var host := (load(ArenaSession.PLAY_SCENE) as PackedScene).instantiate()
@@ -207,14 +207,20 @@ func _open_world_test() -> void:
 	check(await _until(func() -> bool: return world.director != null and world.director.objectives != null, 6.0), "open world: arena started")
 	director = world.director
 	world.survival.choosing = true
+	# the elder's briefing pauses the game until tapped: skip it
+	var brief := world.find_child("Briefing", true, false)
+	if brief != null:
+		brief.queue_free()
+	get_tree().paused = false
 	var mm := world.hud.safe.find_child("Minimap", true, false) as Control
 	check(mm != null and mm.size.x > 40.0, "open world: minimap shown (%s)" % (str(mm.size) if mm else "none"))
 	check(director.find_child("SceneryFader", true, false) != null, "open world: see-through scenery fader running")
 	var trees := world.entities.get_children().filter(func(n: Node) -> bool: return n is ArenaScenery)
 	check(trees.size() > 200, "open world: %d scenery pieces sorted with the entities" % trees.size())
-	check(await _until(func() -> bool: return director.horde._mine.size() >= 4, 12.0), "open world: roaming aliens arrive around the explorer")
+	_teleport(Vector2(1280, 1720))  # open ground south of the village (the start is by the creek)
+	check(await _until(func() -> bool: return director.horde._mine.size() >= 4, 16.0), "open world: roaming aliens arrive around the explorer (%d)" % director.horde._mine.size())
 	# run to the far side of the map: the roaming horde must follow (leash)
-	var far := Vector2(300, 2800)
+	var far := Vector2(300, 2400)
 	_teleport(far)
 	world.camera.global_position = far
 	await _wait(1.6)
@@ -227,19 +233,19 @@ func _open_world_test() -> void:
 	for o in director.horde._mine.keys():
 		if is_instance_valid(o):
 			(o as Enemy).die()
-	# (same meander as tools/build_earth_demo.gd)
+	# (same creek as tools/build_harvest_hollow.gd: 2 rows, bridges on the road (x 40) and at x 67)
 	var river_top := func(x_tile: float) -> float:
-		return roundf(30.0 + sin(x_tile * 0.11) * 2.2 + sin(x_tile * 0.037 + 1.0) * 1.5) * 32.0
+		return roundf(66.0 + sin(x_tile * 0.13) * 1.6 + sin(x_tile * 0.05 + 2.0) * 1.2) * 32.0
 	var walk_north := func(x_tile: float) -> float:
-		_teleport(Vector2(x_tile * 32.0, river_top.call(floorf(x_tile)) + 3.0 * 32.0 + 60.0))
+		_teleport(Vector2(x_tile * 32.0, river_top.call(floorf(x_tile)) + 2.0 * 32.0 + 60.0))
 		Input.action_press("move_up")
 		await _wait(2.0)
 		Input.action_release("move_up")
 		return world.player.global_position.y
-	var blocked_y: float = await walk_north.call(60.5)
-	check(blocked_y > river_top.call(60.0), "open world: the river blocks the way (stopped at y %d)" % blocked_y)
-	var bridge_y: float = await walk_north.call(47.5)
-	check(bridge_y < river_top.call(47.0) - 8.0, "open world: the bridge crosses the river (reached y %d)" % bridge_y)
+	var blocked_y: float = await walk_north.call(30.5)
+	check(blocked_y > river_top.call(30.0), "open world: the river blocks the way (stopped at y %d)" % blocked_y)
+	var bridge_y: float = await walk_north.call(40.0)
+	check(bridge_y < river_top.call(40.0) - 8.0, "open world: the bridge crosses the river (reached y %d)" % bridge_y)
 	# a tree fades when walked behind
 	var tree: ArenaScenery = null
 	for t in trees:

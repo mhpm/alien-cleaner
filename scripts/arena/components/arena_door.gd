@@ -98,7 +98,7 @@ func _draw() -> void:
 			var pts := PackedVector2Array()
 			for j in 7:
 				pts.append(Vector2(-half.x + size.x * j / 6.0, rng.randf_range(-half.y, half.y)))
-			draw_polyline(pts, Color(0.75, 0.95, 1.0, 0.85 * k), 1.0)
+			FastDraw.polyline(self, pts, Color(0.75, 0.95, 1.0, 0.85 * k), 1.0)
 	if editor:
 		var gate := "trigger"
 		if not open_on_wave.is_empty():

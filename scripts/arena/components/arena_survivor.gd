@@ -130,14 +130,11 @@ func _physics_process(delta: float) -> void:
 	var to := p - survivor.global_position
 	if to.length() > FOLLOW:
 		survivor.global_position += to.normalized() * minf(to.length() - FOLLOW, 70.0 * delta)
-	# aliens touching them hurt them (only the 3x3 grid cells around: no searching)
-	var c := Vector2i((survivor.global_position / GameWorld.GRID_CELL).floor())
+	# aliens touching them hurt them (only the grid cells around: no searching)
 	var touching := 0
-	for dy in range(-1, 2):
-		for dx in range(-1, 2):
-			for n in w.enemy_grid.get(c + Vector2i(dx, dy), []):
-				if is_instance_valid(n) and (n as Enemy).global_position.distance_to(survivor.global_position) < (n as Enemy).radius + 8.0:
-					touching += 1
+	for e in w.enemies_near(survivor.global_position, 8.0):
+		if e.global_position.distance_to(survivor.global_position) < e.radius + 8.0:
+			touching += 1
 	if touching > 0:
 		_escort_hp -= ESCORT_HIT * touching * delta
 		if randf() < delta * 8.0:
@@ -194,8 +191,8 @@ func validate_arena(report: ArenaReport, arena: Arena) -> void:
 
 func _draw_editor() -> void:
 	draw_set_transform(Vector2(0, -1), 0.0, Vector2(1.0, 0.38))
-	draw_circle(Vector2.ZERO, rescue_radius, Color(COLOR, 0.08))
-	draw_arc(Vector2.ZERO, rescue_radius, 0.0, TAU, 40, COLOR, 1.5)
+	FastDraw.disc(self, Vector2.ZERO, rescue_radius, Color(COLOR, 0.08))
+	FastDraw.ring(self, Vector2.ZERO, rescue_radius, COLOR, 1.5)
 	draw_set_transform(Vector2.ZERO)
 	_standing(palette_icon(), 22.0)
 	var who := character_name if not character_name.is_empty() else str(SurvivorData.CREW[clampi(crew, 0, SurvivorData.CREW.size() - 1)].name)

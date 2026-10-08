@@ -166,6 +166,13 @@ func _build() -> void:
 	stage.add_child(bank_label)
 	gear_btn = _button(_tex(40), Vector2(640, 64), 0.85, _open_settings)
 
+	var arena_btn := UiTheme.button("ARENA 10", Color("38b764"), 22, Vector2(180, 52))
+	arena_btn.position = Vector2(20, 112)
+	arena_btn.pressed.connect(func() -> void:
+		Sfx.play("select", 0.0)
+		_play_arena())
+	stage.add_child(arena_btn)
+
 	play_btn = _button(_tex(34), Vector2(360, 1140), 1.0, _play)
 	play_btn.material = shine_mat
 	hint = UiTheme.label("", 22, Color("9fc3ef"))
@@ -625,6 +632,15 @@ func _play() -> void:
 	var tw := fade.create_tween()
 	tw.tween_property(fade, "color:a", 1.0, 0.25)
 	tw.tween_callback(func() -> void: get_tree().change_scene_to_file(WORLD_SCENE))
+
+
+## Shortcut to the open-world demo arena (world 10, Harvest Hollow), played for real.
+func _play_arena() -> void:
+	ArenaSession.arena_path = "res://scenes/arenas/arena_world_10_level_01.tscn"
+	ArenaSession.test = false
+	ArenaSession.invincible = false
+	ArenaSession.start_wave = 0
+	get_tree().change_scene_to_file(ArenaSession.PLAY_SCENE)
 
 
 func _open_settings() -> void:

@@ -208,7 +208,8 @@ static func settings(texture_path: String) -> Dictionary:
 
 
 ## Changes the kit.json settings of several pictures at once. `values` holds only what
-## changes: category, width, solid (true/false: footprint from the width), sway, fade,
+## changes: category, width, solid (true/false: footprint from the width, or an exact
+## [w, h] footprint), sway, fade,
 ## flat, shadow. The pictures stay where they are (arenas keep pointing at them).
 static func update_objects(texture_paths: Array, values: Dictionary) -> void:
 	var by_kit := {}
@@ -239,6 +240,10 @@ static func update_objects(texture_paths: Array, values: Dictionary) -> void:
 				elif k != "solid":
 					item[k] = values[k]
 			var width := float(item.get("width", 40.0))
+			if values.get("solid") is Array:  # an exact footprint (copied from a placed piece)
+				var fp: Array = values.solid
+				item["solid"] = [snappedf(float(fp[0]), 0.5), snappedf(float(fp[1]), 0.5)] if float(fp[0]) > 0.0 and float(fp[1]) > 0.0 else null
+				continue
 			var want := bool(values.solid) if values.has("solid") else old_solid != null
 			if not want:
 				item["solid"] = null

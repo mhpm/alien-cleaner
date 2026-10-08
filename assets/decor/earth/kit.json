@@ -568,50 +568,6 @@
    "shadow": false
   },
   {
-   "file": "water/bridge_1.png",
-   "category": "Water",
-   "width": 50.5,
-   "solid": null,
-   "sway": false,
-   "fade": false,
-   "flat": true,
-   "bridge": true,
-   "shadow": false
-  },
-  {
-   "file": "water/bridge_2.png",
-   "category": "Water",
-   "width": 45.0,
-   "solid": null,
-   "sway": false,
-   "fade": false,
-   "flat": true,
-   "bridge": true,
-   "shadow": false
-  },
-  {
-   "file": "water/bridge_3.png",
-   "category": "Water",
-   "width": 40.5,
-   "solid": null,
-   "sway": false,
-   "fade": false,
-   "flat": true,
-   "bridge": true,
-   "shadow": false
-  },
-  {
-   "file": "water/bridge_4.png",
-   "category": "Water",
-   "width": 24.0,
-   "solid": null,
-   "sway": false,
-   "fade": false,
-   "flat": true,
-   "bridge": true,
-   "shadow": false
-  },
-  {
    "file": "fences/dock_steps.png",
    "category": "Fences",
    "width": 26.0,
@@ -1816,7 +1772,7 @@
    "sway": false,
    "fade": true,
    "flat": false,
-   "shadow": true
+   "shadow": false
   },
   {
    "file": "trees/image_008.png",
@@ -1842,7 +1798,7 @@
    "sway": true,
    "fade": true,
    "flat": false,
-   "shadow": true
+   "shadow": false
   },
   {
    "file": "misc/girl.png",
@@ -2302,6 +2258,36 @@
    "solid": [
     32.0,
     13.0
+   ]
+  },
+  {
+   "file": "water/bridge_5.png",
+   "category": "Water",
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "shadow": false,
+   "solid": null
+  },
+  {
+   "file": "water/bridge_007.png",
+   "category": "Water",
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "shadow": false,
+   "solid": null
+  },
+  {
+   "file": "water/bridge_008.png",
+   "category": "Water",
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "shadow": false,
+   "solid": [
+    32.0,
+    12.0
    ]
   }
  ]

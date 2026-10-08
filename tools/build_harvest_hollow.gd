@@ -4,7 +4,7 @@ extends Node
 ## barn) while raiders march on them, find the villagers hiding round the hollow, walk
 ## little Pip home from the pond, burn the nests in the corn and face what landed in the
 ## crop circle north of the village. Only art the project already has: the Earth terrain
-## and kits (assets/decor/earth/, assets/decor/farm/houses/).
+## and kits (assets/decor/earth/, assets/decor/farm/: corn and buildings).
 ##   godot --headless --path . res://tools/build_harvest_hollow.tscn
 
 const PATH := "res://scenes/arenas/arena_world_10_level_01.tscn"
@@ -14,7 +14,6 @@ const FARM_KIT := "res://assets/decor/farm/"
 const FARM := "res://assets/decor/earth/farm/farm_elements/image_%s.png"
 const ANIMAL := "res://assets/decor/earth/farm/farm_elements/image_%s.png"
 const FOLK := "res://assets/decor/earth/misc/%s.png"
-const HOUSE := "res://assets/decor/farm/houses/image_%s.png"
 const FARM_K := 0.33  # farm kit: units per art pixel (as in the Farm Invasion arena)
 const FOLK_K := 0.5
 const N := 80  # tiles a side
@@ -386,8 +385,8 @@ func _gameplay() -> void:
 	well.name = "OldWell"
 	well.object_id = "well"
 	well.core_name = "the Old Well"
-	well.look = load(FARM % "008")
-	well.look_width = 46.0
+	well.look = load("res://assets/decor/farm/buildings/bld_40.png")
+	well.look_width = 50.0
 	well.health = 1200.0
 	well.danger_radius = 56.0
 	well.drain_per_alien = 5.0
@@ -399,7 +398,7 @@ func _gameplay() -> void:
 	barn.name = "Barn"
 	barn.object_id = "barn"
 	barn.core_name = "the barn"
-	barn.look = load(HOUSE % "001")
+	barn.look = load("res://assets/decor/farm/buildings/bld_07.png")
 	barn.look_width = 150.0
 	barn.health = 800.0
 	barn.danger_radius = 90.0
@@ -595,25 +594,26 @@ func _circle_talk() -> DialogueData:
 
 func _village() -> void:
 	var sq := _cell(SQUARE)
-	# houses round the square
-	var home := _scenery(HOUSE % "002", 180.0, sq + Vector2(-330, -200), false)
-	home.footprint = Vector2(144, 27)
-	home.shadow = true
-	home.fade_behind = true
-	_put(home)
+	# houses round the square (farm kit Buildings, tools/farm_buildings_ref.webp)
+	var home := _bld(1, sq + Vector2(-330, -200), false, 1.25)
 	_clear(home.position + Vector2(0, -40), 110.0)
-	_farm("003", _cell(Vector2(58.5, 35)), Vector2(0.55, 0.16), 1.2)  # silo
-	_farm("004", sq + Vector2(-330, 270), Vector2(0.3, 0.12), 1.3)  # windmill
-	_farm("005", sq + Vector2(170, 300), Vector2(0.75, 0.14))  # market and scarecrow
-	_clear(sq + Vector2(170, 280), 80.0)
-	for h: Array in [["002", Vector2(-560, -60), false], ["001", Vector2(380, 150), true], ["002", Vector2(-170, -330), true]]:
-		var cottage := _farm(h[0], sq + h[1], Vector2(0.8, 0.15), 1.1, h[2])
-		cottage.fade_behind = true
+	for h: Array in [[2, Vector2(-560, -60), false], [5, Vector2(-170, -330), true], [3, Vector2(380, 150), true],
+			[4, Vector2(-480, 230), false], [6, Vector2(150, -330), false]]:
+		var cottage := _bld(h[0], sq + h[1], h[2], 1.1)
 		_clear(cottage.position + Vector2(0, -30), 80.0)
+	_bld(48, _cell(Vector2(58.5, 35)))  # silo
+	_bld(49, _cell(Vector2(48.5, 34)))  # water tower
+	_bld(50, sq + Vector2(-330, 270), false, 1.3)  # windmill
+	_bld(51, Vector2((ROAD + 1) * T, sq.y + 262))  # lantern gate over the road into the village
+	# market stalls south-east of the square
+	for k in 3:
+		_bld([39, 47, 37][k], sq + Vector2(110 + k * 76, 300))
+	_bld(44, sq + Vector2(80, 330))
+	_bld(53, sq + Vector2(330, 320))
+	_clear(sq + Vector2(190, 280), 90.0)
 	for k in 3:  # villagers who stayed, waving from the square
 		_piece("farm:villagers/boy_animated.png", sq + Vector2(-140 + k * 60, 130 - (k % 2) * 30), k == 1)
-	_farm("006", home.position + Vector2(-130, 30), Vector2(0.6, 0.2))  # hay shed
-	_farm("007", sq + Vector2(130, 130), Vector2(0.7, 0.2))  # hay cart
+	_bld(54, sq + Vector2(130, 130))  # hay cart
 	_farm("036", home.position + Vector2(110, 40))  # mailbox
 	_farm("034", sq + Vector2(-160, 40))  # signpost at the crossroads
 	_farm("034", sq + Vector2(170, -40), Vector2.ZERO, 1.0, true)
@@ -622,29 +622,35 @@ func _village() -> void:
 		var p := sq + Vector2(cos(a) * 250, sin(a) * 185)
 		if absf(p.x - (ROAD + 1) * T) > 40 and absf(p.y - sq.y) > 30:
 			_farm("017", p, Vector2(0.3, 0.12))
-	_farm("014", sq + Vector2(70, 40), Vector2(0.8, 0.2))  # trough by the well
+	_bld(36, sq + Vector2(70, 40))  # trough by the well
 	for k in 4:
-		_farm(["009", "013", "015", "024"][k], sq + Vector2(-110 + k * 18, -70 + (k % 2) * 8), Vector2(0.6, 0.25))
-	for k in 5:
-		_farm(["010", "019", "027", "049", "041"][k], sq + Vector2(90 + k * 26, -80), Vector2(0.7, 0.25))
-	# flowers and sunflowers by the farmhouse
+		_bld([44, 45, 46, 44][k], sq + Vector2(-110 + k * 18, -70 + (k % 2) * 8))
+	for k in 4:
+		_bld([43, 53, 38, 43][k], sq + Vector2(90 + k * 30, -80))
+	# flowers and sunflowers by the farmhouse, a fence round its garden
 	for k in 7:
 		_farm("028", home.position + Vector2(-80 + k * 24, 60))
 	for k in 4:
 		_farm(["018", "040", "041", "037"][k], home.position + Vector2(-70 + k * 46, 82))
+	for k in 2:
+		_bld(21, home.position + Vector2(-262 + k * 70, 52))
 	# round the barn: hay
 	var barn := _cell(Vector2(53, 36))
 	for k in 6:
-		_farm(["012", "020", "021", "020", "021", "022"][k], barn + Vector2(-110 + k * 38, 70 + (k % 2) * 14), Vector2(0.7, 0.25))
+		_bld([41, 52, 42, 52, 41, 42][k], barn + Vector2(-110 + k * 38, 70 + (k % 2) * 14))
 	for k in 3:
-		_farm(["020", "021", "012"][k], _cell(Vector2(58, 47)) + Vector2(-40 + k * 40, -30), Vector2(0.7, 0.25))  # the burning stack
-	# the animal pen south-west of the square
-	var pen := Rect2(_cell(Vector2(20, 54)), Vector2(10, 7) * T)
-	_pen(pen)
-	var beasts := ["050", "051", "052", "053", "055", "060", "064", "065", "056", "059", "062", "058", "061", "068", "063"]
-	for k in beasts.size():
-		var p := pen.position + Vector2(rng.randf_range(30, pen.size.x - 30), rng.randf_range(40, pen.size.y - 20))
-		_farm(beasts[k], p, Vector2.ZERO, 0.6 if beasts[k] in ["050", "051", "052", "053"] else 0.75, rng.randf() < 0.5)
+		_bld([41, 42, 52][k], _cell(Vector2(58, 47)) + Vector2(-40 + k * 40, -30))  # the burning stack
+	# the animal yard south-west of the square: stables, coop, duck pen and the sheep fold
+	var yard := Rect2(_cell(Vector2(20, 54)), Vector2(10, 7) * T)
+	for k in 3:
+		_bld([14, 15, 16][k], yard.position + Vector2(45 + k * 112, 70))
+	for k in 3:
+		_bld([17, 18, 30][k], yard.position + Vector2(55 + k * 118, 205))
+	for k in 3:  # sheep in the fold
+		_farm(["060", "064", "060"][k], yard.position + Vector2(265 + k * 22, 185 + (k % 2) * 8), Vector2.ZERO, 0.6, k == 1)
+	for k in 5:  # hens and chicks about the yard
+		_farm(["056", "059", "062", "058", "066"][k], yard.position + Vector2(rng.randf_range(20, yard.size.x - 20), rng.randf_range(110, 135)), Vector2.ZERO, 0.75, rng.randf() < 0.5)
+	keep_clear.append(yard.grow(30))
 	_farm("054", sq + Vector2(-50, 90))  # the farm dog
 	_farm("067", home.position + Vector2(60, 70))  # the cat
 	# the elder waits by the well
@@ -660,23 +666,10 @@ func _village() -> void:
 		_corn(FLOWERS[k % FLOWERS.size()], home.position + Vector2(-270 + k * 18, 32))
 
 
-## A fenced pen with a gate on the north side.
-func _pen(r: Rect2) -> void:
-	var step := 28.0
-	var x := r.position.x
-	while x <= r.end.x:
-		if absf(x - r.get_center().x) > step:
-			_farm("030", Vector2(x, r.position.y), Vector2(0.9, 0.12))
-		else:
-			_farm("033", Vector2(x, r.position.y), Vector2.ZERO)
-		_farm("031", Vector2(x, r.end.y), Vector2(0.9, 0.12))
-		x += step
-	var y := r.position.y + step
-	while y < r.end.y:
-		_farm("039", Vector2(r.position.x, y), Vector2(0.3, 0.12))
-		_farm("039", Vector2(r.end.x, y), Vector2(0.3, 0.12))
-		y += step * 0.6
-	keep_clear.append(r.grow(20))
+## Farm building piece n (assets/decor/farm/buildings/bld_NN.png): size and collision
+## from kit.json, no shadow.
+func _bld(n: int, p: Vector2, flip := false, size_k := 1.0) -> ArenaScenery:
+	return _piece("farm:buildings/bld_%02d.png" % n, p, flip, size_k)
 
 
 # ------------------------------------------------------------------ fields
@@ -709,9 +702,10 @@ func _fields() -> void:
 		var p := yard + Vector2(rng.randf_range(-170, 170), rng.randf_range(-60, 60))
 		if _free_spot(p, 34.0):
 			taken.append(p)
-			_farm(["012", "020", "021"][k % 3], p, Vector2(0.7, 0.25), 1.1)
-	_farm("002", yard + Vector2(-200, -20), Vector2(0.8, 0.15))
-	_farm("007", yard + Vector2(150, 40), Vector2(0.7, 0.2), 1.0, true)
+			_bld([41, 52, 42][k % 3], p)
+	_bld(9, yard + Vector2(-200, -20))
+	_bld(10, yard + Vector2(-60, -60))
+	_bld(54, yard + Vector2(150, 40), true)
 
 
 ## Corn piece n of the farm kit (assets/decor/farm/corn/, tools/corn_sheet_ref.webp).
@@ -822,9 +816,11 @@ func _wilds() -> void:
 	# bridges over the creek: the main road and the farmstead lane
 	for bx: float in [ROAD + 1.0, 67.0]:
 		var top := roundf(_creek_y(floorf(bx))) - 0.6
-		var b := _piece("water/bridge_1.png", Vector2(bx * T, (top + 3.6) * T))
-		b.width = roundf(3.6 * T * b.texture.get_width() / b.texture.get_height())
+		var tex: Texture2D = load(KIT + "water/bridge_5.png")
+		var b := _scenery(KIT + "water/bridge_5.png", roundf(4.2 * T * tex.get_width() / tex.get_height()), Vector2(bx * T, (top + 4.0) * T), false)
+		b.flat = true
 		b.bridge = true
+		_put(b)
 	# undergrowth, rocks, logs, flowers
 	var mid := Vector2(N, N) * T * 0.5
 	_patch(["plants/bush_flowers.png", "plants/bushes_flowers.png", "plants/bush_yellow.png", "plants/bush_tiny.png", "plants/fern.png"], mid, N * T * 0.7, 70, 30.0)

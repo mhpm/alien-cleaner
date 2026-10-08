@@ -33,6 +33,6 @@ func clean() -> void:
 func _draw() -> void:
 	var fade := clampf((life - t) / 0.8, 0.0, 1.0) * clampf(t / 0.2, 0.0, 1.0)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.7))
-	draw_circle(Vector2.ZERO, radius, Color(0.22, 0.72, 0.39, 0.75 * fade))
-	draw_circle(Vector2(-3, -2), radius * 0.6, Color(0.65, 0.94, 0.44, 0.5 * fade))
-	draw_arc(Vector2.ZERO, radius, 0.0, TAU, 32, Color(0.15, 0.44, 0.47, fade), 1.0)
+	FastDraw.disc(self, Vector2.ZERO, radius, Color(0.22, 0.72, 0.39, 0.75 * fade))
+	FastDraw.disc(self, Vector2(-3, -2), radius * 0.6, Color(0.65, 0.94, 0.44, 0.5 * fade))
+	FastDraw.ring(self, Vector2.ZERO, radius, Color(0.15, 0.44, 0.47, fade), 1.0)

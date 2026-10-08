@@ -7,9 +7,15 @@ extends RefCounted
 ## Source ids are stable: painted arenas keep pointing at the same source after a sync.
 ## New tiles are created for every non-empty cell of each atlas; "solid" tiles get a
 ## full-tile collision polygon on physics layer 0 (collision layer 1 = "world").
+## Single tiles override their source: "solid_tiles" (indices that block, a full square
+## unless the source already has polygons for them) and "walk_tiles" (no collision).
 
 const CONFIG := "res://assets/arena/terrain/terrain.json"
-const WALKABLE := 1  # alternative tile id of a solid tile without its collision
+## Every tile also has two alternatives with the same picture, so single painted cells
+## can change their collision (Collision brush, bridges): WALKABLE never blocks,
+## BLOCKED blocks the whole cell.
+const WALKABLE := 1
+const BLOCKED := 2
 
 
 static func config() -> Dictionary:
@@ -95,22 +101,48 @@ static func sync() -> TileSet:
 						polys.append(pts)
 				elif bool(solid):
 					polys = [square]
-				if not polys.is_empty():
-					data.set_collision_polygons_count(0, polys.size())
-					for k in polys.size():
-						data.set_collision_polygon_points(0, k, polys[k])
-					# alternative 1: the same tile, walkable (bridges switch water to it)
-					if not atlas.has_alternative_tile(c, WALKABLE):
-						atlas.create_alternative_tile(c, WALKABLE)
-					atlas.get_tile_data(c, WALKABLE).set_collision_polygons_count(0, 0)
-				else:
-					data.set_collision_polygons_count(0, 0)
+				if is_tile_listed(src, "walk_tiles", index):
+					polys = []
+				elif polys.is_empty() and is_tile_listed(src, "solid_tiles", index):
+					polys = [square]
+				data.set_collision_polygons_count(0, polys.size())
+				for k in polys.size():
+					data.set_collision_polygon_points(0, k, polys[k])
+				if not atlas.has_alternative_tile(c, WALKABLE):
+					atlas.create_alternative_tile(c, WALKABLE)
+				atlas.get_tile_data(c, WALKABLE).set_collision_polygons_count(0, 0)
+				if not atlas.has_alternative_tile(c, BLOCKED):
+					atlas.create_alternative_tile(c, BLOCKED)
+				var blocked := atlas.get_tile_data(c, BLOCKED)
+				blocked.set_collision_polygons_count(0, 1)
+				blocked.set_collision_polygon_points(0, 0, square)
 	DirAccess.make_dir_recursive_absolute(path.get_base_dir())
 	var err := ResourceSaver.save(ts, path)
 	if err != OK:
 		push_error("Arena Editor: could not save %s (%s)" % [path, error_string(err)])
 		return null
 	return ts
+
+
+## `index` (atlas reading order) is in the source's list `key` (JSON numbers are floats).
+static func is_tile_listed(src: Dictionary, key: String, index: int) -> bool:
+	for v: Variant in src.get(key, []):
+		if int(v) == index:
+			return true
+	return false
+
+
+## Does tile `index` of a source block (after its single-tile overrides)?
+static func tile_blocks(src: Dictionary, index: int) -> bool:
+	if is_tile_listed(src, "walk_tiles", index):
+		return false
+	if is_tile_listed(src, "solid_tiles", index):
+		return true
+	var solid: Variant = src.get("solid", false)
+	if solid is String:
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(solid))
+		return parsed is Dictionary and not (parsed as Dictionary).get(str(index), []).is_empty()
+	return bool(solid)
 
 
 ## One terrain set (corners): its terrains named and coloured from terrain.json.

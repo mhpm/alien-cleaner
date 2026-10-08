@@ -50,7 +50,8 @@ func _run() -> void:
 	await _frames(20)
 	_check(not hud.boss_box.visible, "Bar hides once no boss is left")
 	var late := w.spawn_enemy("magma_drake", w.player.position + Vector2(0, -90))
-	await _frames(20)
+	# the HUD looks for bosses every 0.25 s: wait by time (fast frames finish 20 early)
+	await get_tree().create_timer(0.6).timeout
 	_check(hud.boss_box.visible and hud.boss_ref == late, "Bar must find a boss spawned without show_boss")
 
 	if failures.is_empty():

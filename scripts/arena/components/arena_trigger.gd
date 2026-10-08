@@ -207,11 +207,12 @@ func _draw() -> void:
 	var r := rect()
 	if action == Action.ACTIVATE:
 		_standing(ArenaArt.tex(CONSOLE), 16.0, Color.WHITE if not _fired else Color(0.6, 0.7, 0.8))
-		draw_set_transform(Vector2(0, -1), 0.0, Vector2(1.0, 0.45))
+		var flat := Transform2D(0.0, Vector2(1.0, 0.45), 0.0, Vector2(0, -1))
+		draw_set_transform_matrix(flat)
 		var rad := maxf(r.size.x, r.size.y) * 0.5
-		draw_arc(Vector2.ZERO, rad, 0.0, TAU, 40, Color(c, 0.35 + 0.25 * pulse), 1.5)
+		FastDraw.ring(self, Vector2.ZERO, rad, Color(c, 0.35 + 0.25 * pulse), 1.5)
 		if _hold > 0.0:
-			draw_arc(Vector2.ZERO, rad, -PI * 0.5, -PI * 0.5 + TAU * _hold / hold_time, 40, c, 3.0)
+			FastDraw.arc(self, Vector2.ZERO, rad, -PI * 0.5, -PI * 0.5 + TAU * _hold / hold_time, c, 3.0, flat)
 		draw_set_transform(Vector2.ZERO)
 		return
 	draw_rect(r, Color(c, 0.06 + 0.06 * pulse))

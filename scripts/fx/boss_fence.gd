@@ -120,14 +120,14 @@ func _new_arcs() -> void:
 func _draw() -> void:
 	var up := rise * rise
 	# glowing ring on the floor
-	draw_arc(Vector2.ZERO, radius, 0.0, TAU, 160, Color(COL, 0.10 * up), 10.0)
-	draw_arc(Vector2.ZERO, radius, 0.0, TAU, 160, Color(COL, 0.35 * up), 1.5)
+	FastDraw.ring(self, Vector2.ZERO, radius, Color(COL, 0.10 * up), 10.0)
+	FastDraw.ring(self, Vector2.ZERO, radius, Color(COL, 0.35 * up), 1.5)
 	if rise >= 0.9:
 		var flick := 0.7 + 0.3 * sin(t * 40.0)
 		for pts in arcs:
-			draw_polyline(pts, Color(COL, 0.35 * flick), 4.0)
-			draw_polyline(pts, Color(COL, 0.9 * flick), 2.0)
-			draw_polyline(pts, Color(1, 1, 1, 0.9 * flick), 1.0)
+			FastDraw.polyline(self, pts, Color(COL, 0.35 * flick), 4.0)
+			FastDraw.polyline(self, pts, Color(COL, 0.9 * flick), 2.0)
+			FastDraw.polyline(self, pts, Color(1, 1, 1, 0.9 * flick), 1.0)
 	# pylons
 	for i in POSTS:
 		var q := _post(i) - global_position
@@ -135,5 +135,5 @@ func _draw() -> void:
 		draw_rect(Rect2(q + Vector2(-2.5, -h), Vector2(5, h)), Color("1a1c2c"))
 		draw_rect(Rect2(q + Vector2(-1.5, -h), Vector2(3, h)), Color("566c86"))
 		var glow := 0.6 + 0.4 * sin(t * 8.0 + i)
-		draw_circle(q + Vector2(0, -h - 1.5), 3.2, Color(COL, 0.35 * glow * up))
-		draw_circle(q + Vector2(0, -h - 1.5), 1.8, Color(1, 1, 1, glow * up))
+		FastDraw.disc(self, q + Vector2(0, -h - 1.5), 3.2, Color(COL, 0.35 * glow * up))
+		FastDraw.disc(self, q + Vector2(0, -h - 1.5), 1.8, Color(1, 1, 1, glow * up))

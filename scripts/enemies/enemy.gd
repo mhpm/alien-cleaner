@@ -41,7 +41,13 @@ var hurt_t := 0.0
 var tint := Color.WHITE
 var art := ""
 var _ufo_attacks := 0
-var _sep := Vector2.ZERO  # last separation push (refreshed every other frame)
+var _sep := Vector2.ZERO  # separation push, set by GameWorld._separate_enemies
+const LOD_EVERY := 4
+var _lod_acc := 0.0
+var _far := false
+var _anim_cache: Dictionary = {}  # animation name -> the sprite set has it
+var _shadow_air := -1.0
+var _ai_kind := ""
 var elite := false  # tougher golden variant with a crown (final waves)
 ## Arena raiders: the DefendCore (village well, house...) this alien marches on instead
 ## of the astronaut, until he comes within LURE_BREAK (then it is his again for good).
@@ -157,6 +163,24 @@ func player() -> Player:
 func _physics_process(delta: float) -> void:
 	if dead:
 		return
+	# Level of detail (bosses always run in full):
+	# - far off screen (open maps): think and move only every LOD_EVERY frames, with the
+	#   time saved up, and skip the looks;
+	# - a big crowd on screen (GameWorld.crowd_every): think, animate and touch every few
+	#   frames, staggered, and only glide with the last velocity in between.
+	var w := Game.world
+	var far := w.lod_on and not is_boss and not w.lod_rect.has_point(global_position)
+	var every := 1 if is_boss else (LOD_EVERY if far else w.crowd_every)
+	var glided := _lod_acc > 0.0 and not _far  # the frames saved up were already moved
+	if every > 1 or _lod_acc > 0.0:
+		_lod_acc += delta
+		if every > 1 and (Engine.get_physics_frames() + get_instance_id()) % every != 0:
+			if not far:
+				_glide()
+			return
+		delta = _lod_acc
+		_lod_acc = 0.0
+	_far = far
 	t += delta
 	flash_t = maxf(0.0, flash_t - delta)
 	if spawn_t > 0.0:
@@ -179,15 +203,20 @@ func _physics_process(delta: float) -> void:
 		_tick_status(delta)
 		if dead:
 			return
-	# crowds: each alien re-checks its neighbours every other frame (halves the cost)
-	if (Engine.get_physics_frames() + get_instance_id()) % 2 == 0:
-		_sep = _separation()
+	# crowds: GameWorld pushes overlapping aliens apart (its grid, every other frame)
 	vel += _sep
 	velocity = vel + knock
 	knock = knock.move_toward(Vector2.ZERO, 520.0 * delta)
 	var fast_knock := knock.length() > 140.0
-	move_and_slide()
-	hit_wall = get_slide_collision_count() > 0
+	if not glided:
+		velocity *= delta / get_physics_process_delta_time()  # the frames it skipped (if any)
+	if is_boss or w.near_solid(global_position):
+		move_and_slide()
+		hit_wall = get_slide_collision_count() > 0
+	else:
+		# in the open (nothing solid around): a full move_and_slide would change nothing
+		global_position += velocity * get_physics_process_delta_time()
+		hit_wall = false
 	if hit_wall and fast_knock and not is_boss:
 		# slammed into a wall by knockback: bonus damage
 		knock = Vector2.ZERO
@@ -198,40 +227,26 @@ func _physics_process(delta: float) -> void:
 			return
 	if absf(vel.x) > 1.0:
 		face = signf(vel.x)
+	if _far:
+		return  # nobody sees it and the astronaut is far away
 	_animate(delta)
 	_contact()
 
 
+## Crowd frames between two full updates: keep sliding with the last velocity (a
+## move_and_slide only near walls; in the open just the position).
+func _glide() -> void:
+	if dead or frozen_t > 0.0 or stun_t > 0.0:
+		return
+	var w := Game.world
+	if w.near_solid(global_position):
+		move_and_slide()
+	else:
+		global_position += velocity * get_physics_process_delta_time()
+
+
 func _can_target() -> bool:
 	return true
-
-
-## Push away from overlapping aliens (only the 3x3 cells around, GameWorld.enemy_grid;
-## in a packed horde the first SEP_MAX overlaps are enough).
-const SEP_MAX := 6
-
-
-func _separation() -> Vector2:
-	var sep := Vector2.ZERO
-	var hits := 0
-	var grid := Game.world.enemy_grid
-	var c := Vector2i((global_position / GameWorld.GRID_CELL).floor())
-	for dy in range(-1, 2):
-		for dx in range(-1, 2):
-			var bucket: Array = grid.get(c + Vector2i(dx, dy), [])
-			for n in bucket:
-				if n == self or not is_instance_valid(n):  # freed since the grid was built
-					continue
-				var o := n as Enemy
-				var d := global_position - o.global_position
-				var min_d := (radius + o.radius) * 0.8
-				var l := d.length()
-				if l < min_d and l > 0.01:
-					sep += d / l * (min_d - l) * 8.0
-					hits += 1
-					if hits >= SEP_MAX:
-						return sep
-	return sep
 
 
 func _contact() -> void:
@@ -249,9 +264,18 @@ func _contact() -> void:
 func _anim_name() -> String:
 	if hurt_t > 0.0 and sprite.sprite_frames.has_animation("hurt"):
 		return "hurt"
-	if sprite.sprite_frames.has_animation(state):
+	if _has_state_anim(state):
 		return state
 	return "walk"
+
+
+## sprite_frames.has_animation, remembered per state name (asked every frame).
+func _has_state_anim(s: String) -> bool:
+	var known: Variant = _anim_cache.get(s)
+	if known == null:
+		known = sprite.sprite_frames.has_animation(s)
+		_anim_cache[s] = known
+	return known
 
 
 func _animate(delta: float) -> void:
@@ -285,8 +309,11 @@ func _animate(delta: float) -> void:
 		sprite.self_modulate = Color(1.1, 1.1, 0.8)
 	else:
 		sprite.self_modulate = tint
-	alert.position = Vector2(0, -tex_h * base_scale - 4.0 - air)
-	shadow.scale = Vector2.ONE * (radius * 2.2 / 12.0) * clampf(1.0 - air / 150.0, 0.4, 1.0)
+	if alert.visible:
+		alert.position = Vector2(0, -tex_h * base_scale - 4.0 - air)
+	if air != _shadow_air:  # most aliens never leave the floor: no transform update
+		_shadow_air = air
+		shadow.scale = Vector2.ONE * (radius * 2.2 / 12.0) * clampf(1.0 - air / 150.0, 0.4, 1.0)
 
 
 # ---------------------------------------------------------------- damage & status
@@ -387,7 +414,8 @@ func _on_death() -> void:
 # ---------------------------------------------------------------- AI
 
 func _init_ai() -> void:
-	match str(def.ai):
+	_ai_kind = str(def.ai)
+	match _ai_kind:
 		"runner":
 			state = "wander"
 			state_t = randf_range(1.0, 1.6)
@@ -409,7 +437,7 @@ func _init_ai() -> void:
 
 
 func _ai(delta: float) -> Vector2:
-	match str(def.ai):
+	match _ai_kind:
 		"runner":
 			return _ai_runner(delta)
 		"spitter":

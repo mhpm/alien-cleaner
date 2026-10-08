@@ -9,6 +9,7 @@ extends AcceptDialog
 signal library_changed
 
 const Lib := preload("../editor/tile_library.gd")
+const Terrain := preload("../editor/terrain_tileset_builder.gd")
 
 var _tree: Tree
 var _cfg: Dictionary = {}
@@ -76,12 +77,20 @@ func _build() -> void:
 	row.add_child(_btn("Delete Selected Tiles", "Remove", _delete_tiles, "Delete the tiles you selected below (only those)"))
 	row.add_child(_btn("Restore Hidden", "Reload", _restore_tiles, "Bring back deleted tiles of built-in art"))
 	row.add_child(_btn("Remove Source", "Remove", _remove, "Delete this tile source (cells painted with it go blank)"))
+	var coll := HBoxContainer.new()
+	right.add_child(coll)
+	coll.add_child(_btn("Make Solid", "CollisionShape2D", func() -> void: _tile_collision("solid"),
+		"The selected tiles block the astronaut and the aliens (water, rocks...)"))
+	coll.add_child(_btn("Make Walkable", "GuiVisibilityVisible", func() -> void: _tile_collision("walk"),
+		"The selected tiles never block (a shallow ford, a painted path over water...)"))
+	coll.add_child(_btn("Reset Collision", "Reload", func() -> void: _tile_collision("reset"),
+		"The selected tiles go back to what the source says (Blocks (solid))"))
 	_info = Label.new()
 	_info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_info.modulate = Color(1, 1, 1, 0.65)
 	right.add_child(_info)
 	var hint := Label.new()
-	hint.text = "Click tiles to select them (blue), then Delete Selected Tiles. Faded = deleted."
+	hint.text = "Click tiles to select them (blue), then Make Solid / Make Walkable / Delete. Red = blocks. Faded = deleted."
 	hint.modulate = Color(1, 1, 1, 0.5)
 	right.add_child(hint)
 	var scroll := ScrollContainer.new()
@@ -168,11 +177,13 @@ func _show(id: int) -> void:
 		b.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
 		b.custom_minimum_size = Vector2(56, 56) * _scale
 		b.toggle_mode = true
-		b.tooltip_text = "Tile %d%s" % [i, " (deleted)" if _excluded.has(i) else ""]
-		b.modulate = Color(1, 1, 1, 0.22) if _excluded.has(i) else Color.WHITE
+		var blocks := Terrain.tile_blocks(src, i)
+		var base := Color(1.0, 0.55, 0.55) if blocks else Color.WHITE
+		b.tooltip_text = "Tile %d%s%s" % [i, " · blocks" if blocks else " · walkable", " (deleted)" if _excluded.has(i) else ""]
+		b.modulate = Color(1, 1, 1, 0.22) if _excluded.has(i) else base
 		b.disabled = _excluded.has(i)
 		b.toggled.connect(func(on: bool) -> void:
-			b.modulate = Color(0.45, 0.75, 1.0) if on else Color.WHITE
+			b.modulate = Color(0.45, 0.75, 1.0) if on else base
 			if on and not _picked.has(i):
 				_picked.append(i)
 			elif not on:
@@ -208,6 +219,13 @@ Cells painted with them will be blank." % _picked.size()
 	ask.canceled.connect(ask.queue_free)
 	add_child(ask)
 	ask.popup_centered()
+
+
+func _tile_collision(mode: String) -> void:
+	if _id < 0 or _picked.is_empty():
+		return
+	await Lib.set_tile_collision(_id, _picked.duplicate(), mode)
+	_changed()
 
 
 func _restore_tiles() -> void:

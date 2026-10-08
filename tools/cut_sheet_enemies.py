@@ -300,6 +300,26 @@ SHEETS = {
             ("die", 700, 842, 0, 1500, [220, 428, 625, 842, 1012, 1160]),
         ],
     },
+    # saucer sheet: only the ALIEN TROOPER for now (its walk/idle/attack come from
+    # tools/make_alien_walk.py; here just the death and the pink plasma orb)
+    "enemies_saucers_ref.webp": {
+        "alien_trooper": [
+            ("die", 300, 418, 85, 538, [192, 302, 432]),
+            ("shot", 225, 268, 492, 553, []),
+        ],
+        "saucer_pilot": [
+            ("idle", 58, 172, 655, 1082, [762, 866, 973]),
+            ("attack", 183, 296, 655, 997, [767, 887]),
+            ("shot", 196, 285, 997, 1112, None),  # charge ring + plasma bolt
+            ("die", 298, 422, 648, 1120, [773, 878, 1006]),
+        ],
+        "jelly_saucer": [
+            ("idle", 478, 598, 650, 1096, [768, 876, 983]),
+            ("jattack", 598, 720, 650, 1027, [770, 893]),
+            ("bubble", 622, 718, 1028, 1118, None),
+            ("die", 718, 844, 638, 1120, [767, 892, 1008]),
+        ],
+    },
 }
 
 
@@ -332,7 +352,7 @@ def main_piece(fr):
 
 
 # rows whose first N frames keep only their biggest piece (TOXIC ANGLER's spore mine)
-MAIN_ONLY = {"pod0": 1, "j1": 1, "j2": 1, "j3": 1, "j4": 1, "j5": 1, "j6": 1, "j7": 1, "j8": 1, "j9": 1, "j10": 1, "mine": 5, "rear": 1, "rock": 1, "m1": 1, "m2": 1, "m3": 1, "m4": 1, "m5": 1, "m6": 1}
+MAIN_ONLY = {"jattack": 3, "pod0": 1, "j1": 1, "j2": 1, "j3": 1, "j4": 1, "j5": 1, "j6": 1, "j7": 1, "j8": 1, "j9": 1, "j10": 1, "mine": 5, "rear": 1, "rock": 1, "m1": 1, "m2": 1, "m3": 1, "m4": 1, "m5": 1, "m6": 1}
 # rows whose left edge fades out over N px (a long trail cut off by the frame box)
 FADE_LEFT = {"dash_b": 50, "dash_c": 70, "dash_d": 60}
 

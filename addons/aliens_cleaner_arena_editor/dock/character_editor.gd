@@ -376,11 +376,11 @@ func _delete() -> void:
 	if _cur == null:
 		return
 	if _cur.is_default():
-		_status.text = "The astronaut is the default player: it cannot be deleted."
+		_status.text = "This is the default player: it cannot be deleted."
 		return
 	var c := _cur
 	var ask := ConfirmationDialog.new()
-	ask.dialog_text = "Delete \"%s\" and its frames (%s)?\nArenas that use it go back to the astronaut." % [
+	ask.dialog_text = "Delete \"%s\" and its frames (%s)?\nArenas that use it go back to the default player." % [
 		c.display_name, CharacterData.DIR + c.character_id]
 	ask.confirmed.connect(func() -> void:
 		var dir := CharacterData.DIR + c.character_id

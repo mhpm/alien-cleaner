@@ -217,6 +217,29 @@ const TYPES := {
 		"color": Color("b05cff"), "kb": 1.0,
 		"script": "res://scripts/enemies/nebula_pod.gd",
 	},
+	# saucer: bracket fans and bombing dives along a lane (enemies/saucer_pilot.gd)
+	"saucer_pilot": {
+		"name": "Saucer Pilot", "hp": 34.0, "speed": 32.0, "damage": 11.0, "coins": 4, "cost": 3,
+		"radius": 10.0, "art": "saucer_pilot", "scale": 0.275, "ai": "saucer_pilot", "shoots": true,
+		"color": Color("ff4fd8"), "kb": 0.9,
+		"script": "res://scripts/enemies/saucer_pilot.gd",
+	},
+	# octopus saucer: a ring of bubbles round you that closes in; tentacle slap up close
+	# (enemies/jelly_saucer.gd)
+	"jelly_saucer": {
+		"name": "Jelly Saucer", "hp": 40.0, "speed": 24.0, "damage": 11.0, "coins": 4, "cost": 3,
+		"radius": 10.5, "art": "jelly_saucer", "scale": 0.253, "ai": "jelly_saucer", "shoots": true,
+		"color": Color("ff3cf0"), "kb": 0.9,
+		"script": "res://scripts/enemies/jelly_saucer.gd",
+	},
+	# infantry: leads its shots (aim lane + 3-orb burst), dodge-rolls when focused
+	# (enemies/alien_trooper.gd)
+	"alien_trooper": {
+		"name": "Alien Trooper", "hp": 30.0, "speed": 30.0, "damage": 10.0, "coins": 3, "cost": 2,
+		"radius": 9.0, "art": "alien_trooper", "scale": 0.245, "ai": "trooper", "shoots": true,
+		"color": Color("a7f070"), "kb": 1.0,
+		"script": "res://scripts/enemies/alien_trooper.gd",
+	},
 	# sniper: tracking line, then one very fast orb (enemies/ring_eye.gd)
 	"ring_eye": {
 		"name": "Ring-Eye Shuttle", "hp": 34.0, "speed": 26.0, "damage": 12.0, "coins": 4, "cost": 3,

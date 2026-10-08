@@ -101,10 +101,10 @@ func _draw_charge() -> void:
 		return
 	var c := Vector2(0, -tex_h * base_scale * 0.5 - air)
 	var k := 1.0 - clampf(state_t / CHARGE_TIME, 0.0, 1.0)
-	_ring.draw_arc(c, 20.0, -PI * 0.5, -PI * 0.5 + TAU * k, 32, Color(0.4, 0.85, 1.0, 0.9), 2.0)
+	FastDraw.arc(_ring, c, 20.0, -PI * 0.5, -PI * 0.5 + TAU * k, Color(0.4, 0.85, 1.0, 0.9), 2.0)
 	var hurt := clampf(_taken / (max_hp * INTERRUPT_SHARE), 0.0, 1.0)
 	if hurt > 0.0:
-		_ring.draw_arc(c, 23.5, -PI * 0.5, -PI * 0.5 + TAU * hurt, 32, Color(1.0, 0.8, 0.3, 0.9), 2.0)
+		FastDraw.arc(_ring, c, 23.5, -PI * 0.5, -PI * 0.5 + TAU * hurt, Color(1.0, 0.8, 0.3, 0.9), 2.0)
 
 
 func _anim_name() -> String:

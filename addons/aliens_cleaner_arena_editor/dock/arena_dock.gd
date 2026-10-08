@@ -14,6 +14,7 @@ signal refit_requested(cfg: Dictionary)
 signal entry_armed(entry: RefCounted)
 signal grid_changed(size: int, snap: bool, visible: bool)
 signal terrain_layer_requested(layer_name: String)
+signal collision_brush_toggled(on: bool)
 signal sync_tileset_requested
 signal validate_requested
 signal play_requested(invincible: bool, start_wave: int)
@@ -28,6 +29,7 @@ const Terrain := preload("../editor/terrain_tileset_builder.gd")
 const Missions := preload("missions_page.gd")
 const Waves := preload("waves_page.gd")
 const Decor := preload("decor_page.gd")
+const Brush := preload("brush_panel.gd")
 const TileLibrary := preload("tile_library_dialog.gd")
 const SheetImport := preload("sheet_import_dialog.gd")
 const ObjectImport := preload("object_import_dialog.gd")
@@ -41,6 +43,7 @@ var catalog  # palette_catalog.gd
 var missions: Missions
 var waves: Waves
 var decor: Decor
+var brush: Brush  # OBJECTS > Brush: one copy per click or random copies in an area
 var _scale := 1.0
 var _arena: Arena
 var _arena_label: Label
@@ -67,6 +70,7 @@ var _new_dialog: ConfirmationDialog
 var _dup_dialog: ConfirmationDialog
 var _refit_dialog: ConfirmationDialog
 var _dlg: Dictionary = {}
+var _collision: Button
 var _shown: Array = []  # entries listed in _items
 
 
@@ -119,13 +123,23 @@ func setup(palette_catalog: RefCounted, grid: RefCounted, undo: EditorUndoRedoMa
 	row.add_child(_grid_visible)
 
 	var tl := _section("PAINT", true)
-	var pick := _button("Select", "ToolSelect", func() -> void: select_requested.emit())
+	var pick := _button("Select", "ToolSelect", func() -> void:
+		set_collision_brush(false)
+		select_requested.emit())
 	pick.tooltip_text = "Stop painting terrain: click objects to select, drag to move, Supr to delete"
 	tl.add_child(pick)
 	for layer_name: String in Arena.TERRAIN + ["Walls"]:
-		var paint := _button(layer_name, "", func() -> void: terrain_layer_requested.emit(layer_name))
+		var paint := _button(layer_name, "", func() -> void:
+			set_collision_brush(false)
+			terrain_layer_requested.emit(layer_name))
 		paint.tooltip_text = "Select the %s layer and paint it with Godot's TileMap panel (bottom)." % layer_name
 		tl.add_child(paint)
+	_collision = _button("Collision", "CollisionShape2D", func() -> void: collision_brush_toggled.emit(_collision.button_pressed))
+	_collision.toggle_mode = true
+	_collision.tooltip_text = "Collision brush: paint on the map which cells block.
+Click / drag = blocks · Right click = walkable · Red = blocks.
+Only the cells you paint change (Ctrl+Z undoes a stroke)."
+	tl.add_child(_collision)
 	var lib := _button("Tiles…", "TileSet", func() -> void: _tiles.open())
 	lib.tooltip_text = "Tile library: import sheets or pictures, groups, remove tiles, autotiles, terrains"
 	tl.add_child(lib)
@@ -283,6 +297,13 @@ func _build_objects(objects: VBoxContainer) -> void:
 	_dialogue_btn.add_theme_color_override("font_color", Color(0.45, 0.94, 0.97))
 	_dialogue_btn.visible = false
 	objects.add_child(_dialogue_btn)
+	brush = Brush.new()
+	objects.add_child(brush)
+	brush.build(_scale)
+	brush.mode_changed.connect(func(_area: bool) -> void:
+		var picked := _items.get_selected_items()
+		if not picked.is_empty():
+			_on_item_multi_selected(picked[0], true))
 	_placing = Label.new()
 	_placing.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_placing.add_theme_color_override("font_color", Color(1, 0.85, 0.3))
@@ -336,8 +357,21 @@ func clear_armed() -> void:
 
 
 func show_placing(entry: RefCounted) -> void:
-	_placing.text = "Placing %s in %s — click the 2D view (drag paints with snap). Esc / right-click to stop." % [entry.name, entry.layer]
+	var mix := picked_entries()
+	if brush.is_area():
+		var what: String = entry.name if mix.size() <= 1 else "%d objects (mixed)" % mix.size()
+		_placing.text = "Area brush: %s — drag a rectangle in the 2D view to fill it. Esc / right-click to stop." % what
+	else:
+		_placing.text = "Placing %s in %s — click the 2D view (drag paints with snap). Esc / right-click to stop." % [entry.name, entry.layer]
 	_tabs.current_tab = 0
+
+
+## The palette entries picked now (several with Ctrl / Shift + click).
+func picked_entries() -> Array:
+	var out := []
+	for i in _items.get_selected_items():
+		out.append(_shown[i])
+	return out
 
 
 func show_report(report: ArenaReport) -> void:
@@ -438,11 +472,11 @@ func _refresh_items() -> void:
 ## stops placing.
 func _on_item_multi_selected(_i: int, selected: bool) -> void:
 	var picked := _items.get_selected_items()
-	if picked.size() == 1:
-		_on_item_selected(picked[0])
+	if picked.size() == 1 or (picked.size() > 1 and brush.is_area()):
+		_on_item_selected(picked[0])  # the area brush mixes every picked object
 	elif picked.size() > 1:
 		entry_cleared_request.emit()
-		_placing.text = "%d objects selected (Edit / Delete). Click one to place it." % picked.size()
+		_placing.text = "%d objects selected (Edit / Delete). Click one to place it, or Brush: Area to scatter them all." % picked.size()
 	elif not selected:
 		entry_cleared_request.emit()
 
@@ -661,3 +695,10 @@ func _spin(g: GridContainer, text: String, lo: int, hi: int, value: int) -> Spin
 	s.value = value
 	g.add_child(s)
 	return s
+
+
+## Turns the Collision brush button on / off (and tells the plugin).
+func set_collision_brush(on: bool) -> void:
+	if _collision != null and _collision.button_pressed != on:
+		_collision.set_pressed_no_signal(on)
+		collision_brush_toggled.emit(on)

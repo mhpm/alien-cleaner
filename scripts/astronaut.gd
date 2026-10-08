@@ -65,7 +65,7 @@ func _ready() -> void:
 	refresh()
 
 
-## Swap the playable character (null = the astronaut). Safe before or after _ready.
+## Swap the playable character (null = the default player, the kid astronaut). Safe before or after _ready.
 func set_character(c: CharacterData) -> void:
 	if c == null or c.frames == null:
 		c = CharacterData.default_character()
@@ -89,8 +89,10 @@ func set_character(c: CharacterData) -> void:
 	_pose()
 
 
+## Any character but the helmeted astronaut: keeps its own frames while mutated (only
+## the helmeted one has mutant sprite sets).
 func _custom() -> bool:
-	return character != null and not character.is_default()
+	return character != null and character.character_id != CharacterData.HELMET_ID
 
 
 func _in_sprite() -> bool:

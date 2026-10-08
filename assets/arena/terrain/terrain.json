@@ -169,6 +169,28 @@
 				"from": "res://tools/farm_tiles/patch_1.png",
 				"seamless": false
 			}
+		},
+		{
+			"id": 13,
+			"name": "Terrain",
+			"group": "Grass",
+			"path": "res://assets/arena/terrain/custom/13_terrain.png",
+			"origin": {
+				"tile": [
+					128,
+					128
+				],
+				"margin": [
+					0,
+					0
+				],
+				"separation": [
+					0,
+					0
+				],
+				"from": "C:/Users/miche/Documents/alien-cleaner/assets/arena/terrain/Cartoon Grass and Dirt Tileset.png",
+				"seamless": true
+			}
 		}
 	]
 }

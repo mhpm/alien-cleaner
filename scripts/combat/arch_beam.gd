@@ -63,4 +63,4 @@ func _draw() -> void:
 	draw_line(Vector2.ZERO, d, Color(0.85, 0.2, 1.0, 0.25 * k), width * 2.4)
 	draw_line(Vector2.ZERO, d, Color(0.9, 0.3, 1.0, 0.6 * k), width * 1.3)
 	draw_line(Vector2.ZERO, d, Color(1.0, 0.85, 1.0, 0.95 * k), width * 0.5)
-	draw_circle(Vector2.ZERO, width * 1.2 * k, Color(1.0, 0.8, 1.0, 0.8 * k))
+	FastDraw.disc(self, Vector2.ZERO, width * 1.2 * k, Color(1.0, 0.8, 1.0, 0.8 * k))

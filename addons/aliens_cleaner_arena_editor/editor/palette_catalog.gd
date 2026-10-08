@@ -103,6 +103,9 @@ class Entry:
 				sc.flat = bool(scenery.get("flat", false))
 				sc.bridge = bool(scenery.get("bridge", false))
 				sc.shadow = bool(scenery.get("shadow", false))
+				sc.blocks_bullets = bool(scenery.get("blocks_bullets", false))
+				if scenery.has("tint"):
+					sc.tint = Color(str(scenery.tint))
 				var anim: Dictionary = scenery.get("anim", {})
 				if not anim.is_empty():
 					sc.columns = int(anim.get("columns", 1))

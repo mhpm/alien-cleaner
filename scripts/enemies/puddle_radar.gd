@@ -115,8 +115,8 @@ func _draw_ping() -> void:
 		return
 	var a := 1.0 - _ping / PING_R
 	_ring.draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.75))
-	_ring.draw_arc(Vector2.ZERO, _ping, 0.0, TAU, 48, Color(1.0, 0.4, 0.9, 0.6 * a), 2.0)
-	_ring.draw_arc(Vector2.ZERO, maxf(_ping - 6.0, 0.0), 0.0, TAU, 48, Color(1.0, 0.4, 0.9, 0.25 * a), 4.0)
+	FastDraw.ring(_ring, Vector2.ZERO, _ping, Color(1.0, 0.4, 0.9, 0.6 * a), 2.0)
+	FastDraw.ring(_ring, Vector2.ZERO, maxf(_ping - 6.0, 0.0), Color(1.0, 0.4, 0.9, 0.25 * a), 4.0)
 
 
 func _anim_name() -> String:

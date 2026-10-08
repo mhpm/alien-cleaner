@@ -55,6 +55,9 @@ const STYLES := {
 	"bell": {"art": "bell_bubble", "scale": 0.13, "pop": "glob_pop", "pop_s": 0.12, "tint": Color(1.6, 0.6, 1.6), "color": Color("ff5fe0"), "hit": 6.0},
 	# world 4, third sheet: Nebula Pod's orb, Ring-Eye's sniper orb, Puddle Radar's bubble, Comet Baby's glob (art points +x)
 	"nebula": {"art": "nebula_orb", "scale": 0.16, "pop": "glob_pop", "pop_s": 0.12, "tint": Color(1.6, 0.6, 1.6), "color": Color("ff4fd8"), "hit": 6.0},
+	"saucer_bolt": {"art": "saucer_bolt", "scale": 0.24, "pop": "glob_pop", "pop_s": 0.12, "tint": Color.WHITE, "color": Color("ff4fd8"), "hit": 6.0},
+	"jelly_bubble": {"art": "jelly_bubble", "scale": 0.42, "pop": "glob_pop", "pop_s": 0.12, "tint": Color(1.5, 0.6, 1.6), "color": Color("ff3cf0"), "hit": 6.5},
+	"trooper": {"art": "trooper_orb", "scale": 0.24, "pop": "glob_pop", "pop_s": 0.12, "tint": Color.WHITE, "color": Color("ff4fd8"), "hit": 6.0},
 	"ring_eye": {"art": "ring_eye_orb", "scale": 0.2, "pop": "droid_pop", "pop_s": 0.14, "tint": Color(0.6, 1.3, 1.8), "color": Color("5fd0ff"), "hit": 7.0},
 	"radar": {"art": "radar_bubble", "scale": 0.16, "pop": "glob_pop", "pop_s": 0.14, "tint": Color(1.6, 0.6, 1.6), "color": Color("ff5fe0"), "hit": 6.5},
 	"baby": {"art": "baby_glob", "scale": 0.16, "pop": "glob_pop", "pop_s": 0.12, "tint": Color(0.9, 1.6, 0.6), "color": Color("a7f070"), "hit": 6.0},

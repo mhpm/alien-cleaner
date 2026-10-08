@@ -4,6 +4,8 @@ extends Node2D
 ## alien's colour (elites gold, bosses red and bigger), so nobody sneaks up unseen.
 ## Survival supply crates out of view get a gold arrow too.
 
+const MAX_ARROWS := 40
+
 var camera: Camera2D
 var t := 0.0
 
@@ -21,12 +23,20 @@ func _draw() -> void:
 	var view := Rect2(camera.get_screen_center_position() - size * 0.5, size)
 	# keep clear of the top bar and the screen edges
 	var inner := view.grow_individual(-7.0, -30.0, -7.0, -10.0)
+	var shown := 0
 	for n in w.enemy_cache:
 		if not is_instance_valid(n):  # freed since the cache was refreshed
 			continue
 		var e := n as Enemy
-		if e == null or not is_instance_valid(e) or e.dead:
+		if e == null or e.dead:
 			continue
+		# a big horde: past MAX_ARROWS only bosses and elites still get one (the rest
+		# would pile up on the same edge anyway and cost a polygon each)
+		if shown >= MAX_ARROWS and not e.is_boss and not e.elite:
+			continue
+		if view.has_point(e.global_position):
+			continue
+		shown += 1
 		var col: Color = e.def.color
 		var s := 3.2
 		if e.is_boss:

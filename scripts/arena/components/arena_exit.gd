@@ -72,11 +72,12 @@ func _draw() -> void:
 	var tex := ArenaArt.tex(PORTAL)
 	var k := 1.0 if Engine.is_editor_hint() else _k
 	var pulse := 0.8 + sin(_t * 5.0) * 0.2
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.5))
-	draw_circle(Vector2.ZERO, 30.0 * k, Color(0.45, 1.0, 0.55, 0.18 * pulse))
+	var flat := Transform2D(0.0, Vector2(1.0, 0.5), 0.0, Vector2.ZERO)
+	draw_set_transform_matrix(flat)
+	FastDraw.disc(self, Vector2.ZERO, 30.0 * k, Color(0.45, 1.0, 0.55, 0.18 * pulse))
 	for i in 3:
 		var a := _t * (2.0 + i) + i * 2.0
-		draw_arc(Vector2.ZERO, (16.0 + i * 6.0) * k, a, a + PI * 1.2, 20, Color(0.65, 1.0, 0.6, 0.7 * pulse * k), 1.5)
+		FastDraw.arc(self, Vector2.ZERO, (16.0 + i * 6.0) * k, a, a + PI * 1.2, Color(0.65, 1.0, 0.6, 0.7 * pulse * k), 1.5, flat)
 	draw_set_transform(Vector2.ZERO)
 	if tex != null:
 		var sz := Vector2(44.0, 44.0 * tex.get_height() / tex.get_width())

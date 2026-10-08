@@ -95,16 +95,17 @@ func _draw() -> void:
 	if opened:
 		# a faint light column left behind
 		draw_set_transform(Vector2(0, -2), 0.0, Vector2(1.0, 0.35))
-		draw_circle(Vector2.ZERO, 14.0, Color(c, 0.12))
+		FastDraw.disc(self, Vector2.ZERO, 14.0, Color(c, 0.12))
 		draw_set_transform(Vector2.ZERO)
 		return
 	# glow pad on the floor, pulsing
 	var p := 0.5 + 0.5 * sin(t * 3.0)
-	draw_set_transform(Vector2(0, -2), 0.0, Vector2(1.0, 0.38))
-	draw_circle(Vector2.ZERO, 18.0 + p * 2.0, Color(c, 0.18 + 0.1 * p))
-	draw_arc(Vector2.ZERO, ChestData.OPEN_R, 0.0, TAU, 40, Color(c, 0.25 if not near else 0.5), 1.5)
+	var flat := Transform2D(0.0, Vector2(1.0, 0.38), 0.0, Vector2(0, -2))
+	draw_set_transform_matrix(flat)
+	FastDraw.disc(self, Vector2.ZERO, 18.0 + p * 2.0, Color(c, 0.18 + 0.1 * p))
+	FastDraw.ring(self, Vector2.ZERO, ChestData.OPEN_R, Color(c, 0.25 if not near else 0.5), 1.5)
 	if progress > 0.0:
-		draw_arc(Vector2.ZERO, ChestData.OPEN_R, -PI * 0.5, -PI * 0.5 + TAU * progress, 40, Color(c.lightened(0.4), 0.95), 3.5)
+		FastDraw.arc(self, Vector2.ZERO, ChestData.OPEN_R, -PI * 0.5, -PI * 0.5 + TAU * progress, Color(c.lightened(0.4), 0.95), 3.5, flat)
 	draw_set_transform(Vector2.ZERO)
 	if near or progress > 0.0:
 		var secs := ChestData.OPEN_TIME * (1.0 - progress)

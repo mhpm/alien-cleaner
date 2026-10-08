@@ -60,11 +60,8 @@ func _physics_process(delta: float) -> void:
 	# stretches a little as it leaves the barrel, then wobbles
 	var k := minf(t / 0.08, 1.0)
 	sprite.scale = Vector2(base_scale * (0.6 + 0.4 * k) * (1.0 + sin(t * 40.0) * 0.05), base_scale)
-	for node in Game.world.enemy_cache:
-		if not is_instance_valid(node):
-			continue
-		var e := node as Enemy
-		if e == null or not e.targetable:
+	for e in Game.world.enemies_near(global_position, hit_r + 8.0):
+		if not e.targetable:
 			continue
 		var id := e.get_instance_id()
 		if hit_list.has(id):

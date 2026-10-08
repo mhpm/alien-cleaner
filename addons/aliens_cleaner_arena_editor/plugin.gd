@@ -29,6 +29,8 @@ const CharacterEditor := preload("dock/character_editor.gd")
 const SpawnInspector := preload("editor/spawn_inspector.gd")
 const SurvivorInspector := preload("editor/survivor_inspector.gd")
 const EnemyInspector := preload("editor/enemy_inspector.gd")
+const SceneryInspector := preload("editor/scenery_inspector.gd")
+const CollisionBrush := preload("editor/collision_brush.gd")
 
 var dock_host: EditorDock
 var dock: Dock
@@ -44,6 +46,8 @@ var character_editor: CharacterEditor
 var spawn_inspector: SpawnInspector
 var survivor_inspector: SurvivorInspector
 var enemy_inspector: EnemyInspector
+var scenery_inspector: SceneryInspector
+var collision_brush: CollisionBrush
 
 
 func _enter_tree() -> void:
@@ -56,6 +60,7 @@ func _enter_tree() -> void:
 		update_overlays())
 	bounds_tool = BoundsHandles.new(self, grid)
 	select_tool = SelectTool.new(self, grid)
+	collision_brush = CollisionBrush.new(self)
 	area_tool = AreaTool.new(grid)
 	area_tool.area_drawn.connect(func(r: Rect2) -> void:
 		dock.decor.set_area(r)
@@ -68,6 +73,9 @@ func _enter_tree() -> void:
 	dock_host.add_child(dock)
 	add_dock(dock_host)
 	dock.setup(catalog, grid, get_undo_redo())
+	placement.brush = dock.brush
+	placement.picked = dock.picked_entries
+	dock.brush.mode_changed.connect(func(_area: bool) -> void: update_overlays())
 	dock.object_edit.plugin = self
 	dock.new_arena_requested.connect(_new_arena)
 	dock.duplicate_requested.connect(_duplicate_arena)
@@ -78,6 +86,13 @@ func _enter_tree() -> void:
 	dock.entry_armed.connect(_arm)
 	dock.grid_changed.connect(grid.set_values)
 	dock.terrain_layer_requested.connect(_edit_terrain)
+	dock.collision_brush_toggled.connect(func(on: bool) -> void:
+		collision_brush.active = on
+		if on:
+			placement.disarm()
+			area_tool.cancel()
+			_select_mode()  # back to the 2D view with the arena selected (its input comes here)
+		update_overlays())
 	dock.sync_tileset_requested.connect(_sync_tileset)
 	dock.validate_requested.connect(_validate)
 	dock.play_requested.connect(_play)
@@ -128,6 +143,9 @@ func _enter_tree() -> void:
 	add_inspector_plugin(survivor_inspector)
 	enemy_inspector = EnemyInspector.new()
 	add_inspector_plugin(enemy_inspector)
+	scenery_inspector = SceneryInspector.new()
+	scenery_inspector.undo = get_undo_redo()
+	add_inspector_plugin(scenery_inspector)
 	set_force_draw_over_forwarding_enabled()
 	_on_scene_changed(EditorInterface.get_edited_scene_root())
 
@@ -149,6 +167,8 @@ func _exit_tree() -> void:
 		remove_inspector_plugin(survivor_inspector)
 	if enemy_inspector != null:
 		remove_inspector_plugin(enemy_inspector)
+	if scenery_inspector != null:
+		remove_inspector_plugin(scenery_inspector)
 	if is_instance_valid(character_editor):
 		character_editor.queue_free()
 	if dialogue_inspector != null:
@@ -176,6 +196,9 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 	if arena == null:
 		return false
 	var xf := _xform(arena)
+	if collision_brush.handle_input(event, arena, xf):
+		update_overlays()
+		return true
 	if _dialogue_double_click(event, arena, xf):
 		return true
 	var used := area_tool.handle_input(event, xf) or placement.handle_input(event, arena, xf) \
@@ -230,6 +253,7 @@ func _forward_canvas_force_draw_over_viewport(overlay: Control) -> void:
 	if dock._tabs.get_current_tab_control() == dock.decor or area_tool.drawing:
 		area_tool.draw(overlay, xf)
 	placement.draw(overlay, xf)
+	collision_brush.draw(overlay, xf, arena)
 
 
 ## Mission links: from the selected objective / wave (dock) to the objects it is about.
@@ -287,6 +311,7 @@ func _select_mode() -> void:
 
 
 func _on_scene_changed(_root: Node) -> void:
+	dock.set_collision_brush(false)
 	placement.disarm()
 	area_tool.cancel()
 	area_tool.rect = Rect2()

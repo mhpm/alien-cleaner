@@ -12,6 +12,9 @@ extends ArenaObject
 enum Type { ACID, RADIATION, ALIEN_SLIME, ELECTRIC, FIRE, VACUUM }
 const COLORS := [Color("a7f070"), Color("e8e04a"), Color("c75bd6"), Color("73eff7"), Color("ff7a2a"), Color("6f86b8")]
 const WARN := 0.7  # ELECTRIC: seconds of flicker before it goes live
+## Animated details (blobs, flames) redrawn every frame, at most: a huge hazard gets
+## bigger blobs instead of more of them (performance, see FastDraw).
+const MAX_DETAILS := 70
 
 @export var type := Type.ACID:
 	set(value):
@@ -129,6 +132,11 @@ func _warning() -> bool:
 
 func _process(delta: float) -> void:
 	_t += delta
+	# animated looks are redrawn only while near the camera (off screen they cost the
+	# same CPU to rebuild and nobody sees them)
+	var w: GameWorld = Game.world
+	if w != null and w.lod_on and not w.lod_rect.intersects(Rect2(global_position - size * 0.5, size)):
+		return
 	queue_redraw()
 
 
@@ -165,20 +173,15 @@ func _physics_process(delta: float) -> void:
 
 func _hurt_aliens(w: GameWorld) -> void:
 	var r := Rect2(global_position - size * 0.5, size)
-	var c0 := Vector2i((r.position / GameWorld.GRID_CELL).floor())
-	var c1 := Vector2i((r.end / GameWorld.GRID_CELL).floor())
-	for cy in range(c0.y, c1.y + 1):
-		for cx in range(c0.x, c1.x + 1):
-			for n in w.enemy_grid.get(Vector2i(cx, cy), []):
-				var e := n as Enemy
-				if not is_instance_valid(e) or e.dead or e.is_boss or not covers(to_local(e.global_position)):
-					continue
-				if damage > 0.0:
-					e.take_damage(damage * 1.5, Vector2.ZERO)
-				if slow_percentage > 0.0:
-					e.slow_t = maxf(e.slow_t, damage_interval)
-				if type == Type.VACUUM:
-					e.knock += (global_position - e.global_position).normalized() * pull
+	for e in w.enemies_near(r.get_center(), r.size.length() * 0.5):
+		if not is_instance_valid(e) or e.dead or e.is_boss or not covers(to_local(e.global_position)):
+			continue
+		if damage > 0.0:
+			e.take_damage(damage * 1.5, Vector2.ZERO)
+		if slow_percentage > 0.0:
+			e.slow_t = maxf(e.slow_t, damage_interval)
+		if type == Type.VACUUM:
+			e.knock += (global_position - e.global_position).normalized() * pull
 
 
 func validate_arena(report: ArenaReport, arena: Arena) -> void:
@@ -214,15 +217,17 @@ func _draw_hazard(k: float) -> void:
 			draw_colored_polygon(_outline(1.06), Color(c.darkened(0.6), 0.35 * k))  # wet rim
 			draw_colored_polygon(_outline(), Color(c.darkened(0.45), 0.6 * k))
 			draw_colored_polygon(_outline(0.7), Color(c.darkened(0.25), 0.35 * k))
-			var n := int(r.size.x * r.size.y / 260.0)
+			var want := r.size.x * r.size.y / 260.0
+			var n := mini(int(want), MAX_DETAILS)
+			var grow := sqrt(maxf(want / MAX_DETAILS, 1.0))
 			for i in n:  # blobs that wobble and bubbles that pop
 				var p := Vector2(rng.randf_range(r.position.x, r.end.x), rng.randf_range(r.position.y, r.end.y))
 				if not covers(p * 1.12):
 					continue
-				var s := rng.randf_range(3.0, 8.0) * (1.0 + 0.15 * sin(_t * 3.0 + i))
-				draw_circle(p, s, Color(c, 0.35 * k))
+				var s := rng.randf_range(3.0, 8.0) * grow * (1.0 + 0.15 * sin(_t * 3.0 + i))
+				FastDraw.disc(self, p, s, Color(c, 0.35 * k))
 				var life := fmod(_t * rng.randf_range(0.4, 0.9) + rng.randf(), 1.0)
-				draw_arc(p + Vector2(0, -life * 4.0), 1.0 + life * 2.5, 0.0, TAU, 8, Color(c.lightened(0.4), (1.0 - life) * 0.8 * k), 1.0)
+				FastDraw.ring(self, p + Vector2(0, -life * 4.0), 1.0 + life * 2.5, Color(c.lightened(0.4), (1.0 - life) * 0.8 * k), 1.0)
 		Type.RADIATION:
 			var pulse := 0.5 + 0.5 * sin(_t * 2.5)
 			draw_rect(r, Color(c, (0.12 + 0.1 * pulse) * k))
@@ -230,8 +235,8 @@ func _draw_hazard(k: float) -> void:
 			var rad := minf(r.size.x, r.size.y) * 0.28
 			for i in 3:  # trefoil
 				var a := _t * 0.4 + TAU * i / 3.0
-				draw_arc(Vector2.ZERO, rad * 0.6, a - 0.5, a + 0.5, 10, Color(c, 0.75 * k), rad * 0.7)
-			draw_circle(Vector2.ZERO, rad * 0.18, Color(c, 0.85 * k))
+				FastDraw.arc(self, Vector2.ZERO, rad * 0.6, a - 0.5, a + 0.5, Color(c, 0.75 * k), rad * 0.7)
+			FastDraw.disc(self, Vector2.ZERO, rad * 0.18, Color(c, 0.85 * k))
 		Type.ELECTRIC:
 			var on := is_live()
 			var warn := _warning() and fmod(_t * 12.0, 1.0) < 0.5
@@ -254,11 +259,11 @@ func _draw_hazard(k: float) -> void:
 					for j in 4:
 						a += Vector2(arc.randf_range(-10, 10), arc.randf_range(-10, 10))
 						pts.append(a.clamp(r.position, r.end))
-					draw_polyline(pts, Color(0.85, 1.0, 1.0, 0.9), 1.5)
+					FastDraw.polyline(self, pts, Color(0.85, 1.0, 1.0, 0.9), 1.5)
 			draw_rect(r, Color(c, 0.7 * k), false, 1.5)
 		Type.FIRE:
 			draw_colored_polygon(_outline(), Color(0.35, 0.08, 0.02, 0.45 * k))
-			var n := int(r.size.x / 7.0) * maxi(1, int(r.size.y / 24.0))
+			var n := mini(int(r.size.x / 7.0) * maxi(1, int(r.size.y / 24.0)), MAX_DETAILS)
 			for i in n:
 				var base := Vector2(rng.randf_range(r.position.x + 3, r.end.x - 3), rng.randf_range(r.position.y + 8, r.end.y))
 				if not covers(base):
@@ -276,17 +281,17 @@ func _draw_hazard(k: float) -> void:
 				for j in 12:
 					var f := j / 11.0
 					pts.append(Vector2.from_angle(a + f * 2.4) * rad * (1.0 - f * 0.9))
-				draw_polyline(pts, Color(c.lightened(0.3), 0.55 * k), 1.5)
+				FastDraw.polyline(self, pts, Color(c.lightened(0.3), 0.55 * k), 1.5)
 			for i in 10:  # streaks falling in
 				var life := fmod(_t * 0.8 + rng.randf(), 1.0)
 				var dir := Vector2.from_angle(rng.randf() * TAU)
 				draw_line(dir * rad * (1.0 - life), dir * rad * maxf(0.0, 1.0 - life - 0.12), Color(1, 1, 1, 0.6 * (1.0 - life) * k), 1.0)
-			draw_circle(Vector2.ZERO, 4.0, Color(0, 0, 0, 0.9 * k))
-			draw_arc(Vector2.ZERO, 5.0, 0.0, TAU, 16, Color(c, 0.8 * k), 1.0)
+			FastDraw.disc(self, Vector2.ZERO, 4.0, Color(0, 0, 0, 0.9 * k))
+			FastDraw.ring(self, Vector2.ZERO, 5.0, Color(c, 0.8 * k), 1.0)
 	if is_round():
 		var line := _outline()
 		line.append(line[0])
-		draw_polyline(line, Color(c, 0.5 * k), 1.0)
+		FastDraw.polyline(self, line, Color(c, 0.5 * k), 1.0)
 
 
 func _stripes(r: Rect2, c: Color, k: float) -> void:

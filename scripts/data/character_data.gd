@@ -8,10 +8,13 @@ extends Resource
 ## shoot_up (aiming down / up), hurt, death; missing ones fall back (walk_up -> walk,
 ## shoot_down / shoot_up -> shoot -> idle, hurt -> idle, death -> hurt). Frames share one canvas whose
 ## feet (`anchor`) sit on the horizontal middle, so flip_h is safe. The Player Spawn of an
-## arena picks the character; empty = the astronaut (`default_character`).
+## arena picks the character; empty = the default player (`default_character`, the kid
+## astronaut without a helmet).
 
 const DIR := "res://assets/characters/"
-const DEFAULT_ID := "astronaut"
+const DEFAULT_ID := "kid_astronaut"
+## The helmeted astronaut: the only one with Infected-mode mutant sets (mutant<n>).
+const HELMET_ID := "astronaut"
 const ANIMS := ["idle", "walk", "walk_up", "shoot", "shoot_down", "shoot_up", "hurt", "death"]
 ## Shoot pose -> the hand point that holds the weapon in it.
 const POSE_HANDS := {"shoot": "shoot_hand", "shoot_down": "shoot_down_hand", "shoot_up": "shoot_up_hand"}
@@ -118,7 +121,7 @@ static func default_character() -> CharacterData:
 	return load_id(DEFAULT_ID)
 
 
-## Every character in assets/characters/ (the astronaut first).
+## Every character in assets/characters/ (the default player first).
 static func all() -> Array[CharacterData]:
 	var out: Array[CharacterData] = []
 	var d := DirAccess.open(DIR)

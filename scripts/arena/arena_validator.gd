@@ -6,6 +6,14 @@ extends RefCounted
 ## An arena with errors is not production ready (the dock says so).
 
 const REACH_CELL := 16.0
+## Performance budget (tests/arena_perf_bench.tscn): past CROWD the aliens think every
+## few frames (GameWorld.crowd_every); past WARN a weak phone drops below ~30 fps; past
+## MAX it stutters on a laptop too.
+const ALIVE_CROWD := 120
+const ALIVE_WARN := 300
+const ALIVE_MAX := 600
+const OBJECTS_WARN := 5000  # placed pieces (y-sorted every frame with the aliens)
+const ANIMATED_WARN := 400  # animated scenery runs a _process each
 
 
 static func validate(arena: Arena) -> ArenaReport:
@@ -45,6 +53,7 @@ static func validate(arena: Arena) -> ArenaReport:
 		_waves(arena, report, objects)
 		_boss(arena, report, objects)
 	_android_elsewhere(arena, report, objects)
+	_performance(arena, report, objects)
 	if bounds != null and not spawns.is_empty():
 		_reachability(arena, report, objects, bounds, spawns[0])
 	report.info("%d objects placed." % objects.size(), arena)
@@ -162,6 +171,85 @@ static func _boss(arena: Arena, report: ArenaReport, objects: Array[ArenaObject]
 	var via_wave := arena.data.waves.any(func(w: WaveData) -> bool: return w != null and w.boss_id == id)
 	if not via_trigger and not via_wave:
 		report.error("Arena boss \"%s\" has no BossTrigger and no wave that brings it." % id, arena)
+
+
+## Same performance for every arena: missing files, how many aliens can be alive at
+## once at the worst moment, and how heavy the map itself is.
+static func _performance(arena: Arena, report: ArenaReport, objects: Array[ArenaObject]) -> void:
+	_missing_files(arena, report)
+	var peak := peak_alive(arena, objects)
+	var where := "worst moment: %s" % peak.where
+	if peak.total > ALIVE_MAX:
+		report.error("Up to %d aliens alive at once (%s): over %d the game stutters. Lower max_alive / horde_alive / roaming_alive." % [peak.total, where, ALIVE_MAX], arena)
+	elif peak.total > ALIVE_WARN:
+		report.warning("Up to %d aliens alive at once (%s): over %d weak phones drop below 30 fps." % [peak.total, where, ALIVE_WARN], arena)
+	elif peak.total > ALIVE_CROWD:
+		report.info("Up to %d aliens alive at once (%s): crowd mode (aliens think every 2-3 frames)." % [peak.total, where], arena)
+	if objects.size() > OBJECTS_WARN:
+		report.warning("%d objects placed: over %d the map itself costs frame time (merge decoration into the terrain)." % [objects.size(), OBJECTS_WARN], arena)
+	var animated := objects.filter(func(o: ArenaObject) -> bool: return o is ArenaScenery and (o as ArenaScenery).is_animated()).size()
+	if animated > ANIMATED_WARN:
+		report.warning("%d animated scenery pieces (each runs every frame): keep it under %d." % [animated, ANIMATED_WARN], arena)
+	var b := arena.get_bounds()
+	if b != null and b.global_rect().get_area() > 1500.0 * 1500.0:
+		var awake := objects.filter(func(o: ArenaObject) -> bool:
+			return o is EnemySpawner and (o as EnemySpawner).activation_range <= 0.0 and (o as EnemySpawner).spawn_count == 0)
+		for o in awake:
+			report.info("Endless spawner %s works anywhere on this big map: an activation_range lets it sleep while you are far." % o.name, o)
+
+
+## The most aliens that can be alive together: always-on sources (roaming, nests,
+## spawners outside waves) plus the busiest wave. {"total": int, "where": String}
+static func peak_alive(arena: Arena, objects: Array[ArenaObject]) -> Dictionary:
+	var data := arena.data
+	var wave_ids := {}
+	if data != null:
+		for w: WaveData in data.waves:
+			if w != null:
+				wave_ids[w.wave_id] = true
+	var always := data.roaming_alive if data != null and not data.roaming.is_empty() else 0
+	for o in objects:
+		if o is AlienNest:
+			always += (o as AlienNest).max_enemies
+		elif o is EnemySpawner:
+			var sp := o as EnemySpawner
+			if sp.enabled and not wave_ids.has(sp.wave_id) and (sp.auto_start or sp.trigger_required):
+				always += sp.max_alive
+	var best := 0
+	var best_name := "no waves"
+	if data != null:
+		for w: WaveData in data.waves:
+			if w == null:
+				continue
+			var n := 0
+			if w.spawn_mode != WaveData.SpawnMode.AROUND_PLAYER:
+				for o in objects:
+					if o is EnemySpawner and (o as EnemySpawner).enabled and (o as EnemySpawner).wave_id == w.wave_id:
+						n += (o as EnemySpawner).max_alive
+			if w.spawn_mode != WaveData.SpawnMode.SPAWNERS:
+				n += w.horde_alive
+			if not w.boss_id.is_empty():
+				n += 1
+			if n > best:
+				best = n
+				best_name = "wave %s" % w.wave_id
+	return {"total": always + best, "where": "%s + %d always on" % [best_name, always]}
+
+
+## Files the scene points at that are gone (a renamed or deleted texture loads as an
+## empty picture in the game and floods the log).
+static func _missing_files(arena: Arena, report: ArenaReport) -> void:
+	var path := arena.scene_file_path
+	if path.is_empty() or not FileAccess.file_exists(path):
+		return
+	var missing := {}
+	var re := RegEx.create_from_string("\\[ext_resource[^\\]]*path=\"([^\"]+)\"")
+	for m in re.search_all(FileAccess.get_file_as_string(path)):
+		var res := m.get_string(1)
+		if not ResourceLoader.exists(res) and not FileAccess.file_exists(res):
+			missing[res] = true
+	for res: String in missing:
+		report.error("Missing file: %s (renamed or deleted; re-pick it or remove the pieces that use it)." % res, arena)
 
 
 ## Android part ids must be unique in the whole game: look into the other arena scenes.

@@ -4076,5 +4076,176 @@
     "loop": false
    }
   }
+ },
+ "alien_trooper": {
+  "size": [
+   162,
+   122
+  ],
+  "anchor": [
+   81,
+   122
+  ],
+  "body_h": 119.0,
+  "anims": {
+   "walk": {
+    "frames": 8,
+    "fps": 11,
+    "loop": true
+   },
+   "idle": {
+    "frames": 6,
+    "fps": 7,
+    "loop": true
+   },
+   "charge": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "attack": {
+    "frames": 4,
+    "fps": 14,
+    "loop": false
+   },
+   "splat": {
+    "frames": 4,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "trooper_orb": {
+  "size": [
+   56,
+   26
+  ],
+  "anchor": [
+   28,
+   13.0
+  ],
+  "body_h": 26.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "saucer_pilot": {
+  "size": [
+   120,
+   107
+  ],
+  "anchor": [
+   60,
+   107
+  ],
+  "body_h": 102.0,
+  "anims": {
+   "walk": {
+    "frames": 4,
+    "fps": 7,
+    "loop": true
+   },
+   "charge": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "attack": {
+    "frames": 2,
+    "fps": 7,
+    "loop": false
+   },
+   "death": {
+    "frames": 4,
+    "fps": 9,
+    "loop": false
+   }
+  }
+ },
+ "saucer_ring": {
+  "size": [
+   42,
+   48
+  ],
+  "anchor": [
+   21,
+   24.0
+  ],
+  "body_h": 48.0,
+  "anims": {
+   "pop": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   }
+  }
+ },
+ "saucer_bolt": {
+  "size": [
+   54,
+   27
+  ],
+  "anchor": [
+   27,
+   13.5
+  ],
+  "body_h": 27.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "jelly_saucer": {
+  "size": [
+   132,
+   116
+  ],
+  "anchor": [
+   66,
+   116
+  ],
+  "body_h": 110.5,
+  "anims": {
+   "walk": {
+    "frames": 4,
+    "fps": 7,
+    "loop": true
+   },
+   "attack": {
+    "frames": 3,
+    "fps": 9,
+    "loop": false
+   },
+   "splat": {
+    "frames": 4,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "jelly_bubble": {
+  "size": [
+   30,
+   23
+  ],
+  "anchor": [
+   15,
+   11.5
+  ],
+  "body_h": 23.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
  }
 }
