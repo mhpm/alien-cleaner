@@ -19,7 +19,7 @@ const TYPES := {
 	},
 	"orbit_spawn": {
 		"name": "Orbit Hatchling", "hp": 16.0, "speed": 35.0, "damage": 7.0, "coins": 1, "cost": 1,
-		"radius": 6.0, "art": "orbit_spawn", "scale": 0.24, "ai": "chaser",
+		"radius": 7.5, "art": "orbit_spawn", "scale": 0.34, "ai": "chaser",
 		"color": Color("c8ff3a"), "kb": 1.3,
 	},
 	"slime": {
@@ -345,6 +345,13 @@ const TYPES := {
 		"color": Color("c060ff"), "kb": 0.9,
 		"script": "res://scripts/enemies/goo_lantern.gd",
 	},
+	# world 5: one-eyed blob saucer, ricochet laser that banks off walls (enemies/eye_blob.gd)
+	"eye_blob": {
+		"name": "Eye Blob Saucer", "hp": 40.0, "speed": 24.0, "damage": 11.0, "coins": 4, "cost": 3,
+		"radius": 10.0, "art": "eye_blob", "scale": 0.27, "ai": "ricochet", "shoots": true,
+		"color": Color("a7f070"), "kb": 0.9,
+		"script": "res://scripts/enemies/eye_blob.gd",
+	},
 	"big_red": {
 		"name": "Big Red", "hp": 85.0, "speed": 17.0, "damage": 14.0, "coins": 5, "cost": 4,
 		"radius": 12.6, "art": "big_red", "scale": 0.151, "ai": "chaser",
@@ -427,9 +434,9 @@ const TYPES := {
 		"color": Color("5fe6ff"), "kb": 1.2,
 		"script": "res://scripts/enemies/zorp_drone.gd",
 	},
-	# world 4 mini boss (wave 11): little lava dragon (enemies/boss_magma.gd)
+	# world 5 final boss: little lava dragon (enemies/boss_magma.gd)
 	"magma_drake": {
-		"name": "MAGMA DRAKE", "hp": 1600.0, "speed": 32.0, "damage": 22.0, "coins": 80, "cost": 0,
+		"name": "MAGMA DRAKE", "hp": 3000.0, "speed": 32.0, "damage": 22.0, "coins": 80, "cost": 0,
 		"radius": 16.0, "art": "magma_drake", "scale": 0.4, "ai": "boss",
 		"color": Color("ff8a2a"), "kb": 0.0, "boss": true,
 		"script": "res://scripts/enemies/boss_magma.gd",
@@ -476,9 +483,31 @@ const TYPES := {
 		"color": Color("d43cff"), "kb": 1.2,
 		"script": "res://scripts/enemies/arcane_eye.gd",
 	},
-	# world 2 final boss (room 30): the alien mothership
+	# world 6 (GENE VAULT) objective: a cloning vat that breeds specimens until broken
+	# (enemies/specimen_vat.gd); placed by Explore ("vats"), never by the waves
+	"specimen_vat": {
+		"name": "Specimen Vat", "hp": 420.0, "speed": 0.0, "damage": 0.0, "coins": 15, "cost": 4,
+		"radius": 20.0, "art": "specimen_vat", "scale": 0.17, "ai": "vat", "internal": true,
+		"color": Color("5fe8ff"), "kb": 0.0,
+		"script": "res://scripts/enemies/specimen_vat.gd",
+	},
+	# world 6: egg clusters laid around the map (Explore "eggs"): hatch octolings when you
+	# come near unless shot first (enemies/egg_cluster.gd)
+	"egg_cluster": {
+		"name": "Egg Cluster", "hp": 55.0, "speed": 0.0, "damage": 0.0, "coins": 2, "cost": 2,
+		"radius": 15.0, "art": "egg_cluster", "scale": 0.145, "ai": "egg_cluster", "internal": true,
+		"color": Color("e86bff"), "kb": 0.0,
+		"script": "res://scripts/enemies/egg_cluster.gd",
+	},
+	# the baby octopus out of an egg cluster: small, quick, comes straight at you
+	"octoling": {
+		"name": "Octoling", "hp": 16.0, "speed": 50.0, "damage": 7.0, "coins": 1, "cost": 1,
+		"radius": 7.0, "art": "octoling", "scale": 0.09, "ai": "chaser",
+		"color": Color("9b7bff"), "kb": 1.3,
+	},
+	# world 6 (GENE VAULT) final boss: the alien mothership (enemies/boss_mothership.gd)
 	"mothership": {
-		"name": "THE MOTHERSHIP", "hp": 2400.0, "speed": 34.0, "damage": 22.0, "coins": 100, "cost": 0,
+		"name": "THE MOTHERSHIP", "hp": 3000.0, "speed": 34.0, "damage": 22.0, "coins": 100, "cost": 0,
 		"radius": 20.0, "art": "ufo", "scale": 0.62, "ai": "boss",
 		"color": Color("a7f070"), "kb": 0.0, "boss": true, "tint": Color(1.15, 0.85, 0.85),
 		"script": "res://scripts/enemies/boss_mothership.gd",

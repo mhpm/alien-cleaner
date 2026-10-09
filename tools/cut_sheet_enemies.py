@@ -313,6 +313,13 @@ SHEETS = {
             ("shot", 196, 285, 997, 1112, None),  # charge ring + plasma bolt
             ("die", 298, 422, 648, 1120, [773, 878, 1006]),
         ],
+        # EYE BLOB SAUCER (world 5): attack 3 = the eye firing, cut before its laser (the
+        # beam is drawn in code, enemies/eye_blob.gd)
+        "eye_blob": [
+            ("idle", 480, 594, 92, 540, [202, 315, 428]),
+            ("attack", 594, 712, 92, 455, [201, 325]),
+            ("die", 714, 832, 92, 556, [202, 320, 430]),
+        ],
         "jelly_saucer": [
             ("idle", 478, 598, 650, 1096, [768, 876, 983]),
             ("jattack", 598, 720, 650, 1027, [770, 893]),

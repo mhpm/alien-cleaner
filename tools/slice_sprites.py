@@ -864,6 +864,17 @@ SETS = {
         },
         "body": "fly",
     },
+    # EYE BLOB SAUCER, world 5 (tools/enemies_saucers_ref.webp -> cut_sheet_enemies.py eye_blob;
+    # enemies/eye_blob.gd): the bouncing laser is drawn in code; splat = melts into goo
+    "eye_blob": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("eye_blob", "idle", i) for i in (1, 2, 3, 4, 3, 2)], 7, True),
+            "attack": ([W4 % ("eye_blob", "attack", i) for i in (1, 2)], 6, False),
+            "splat": ([W4 % ("eye_blob", "die", i) for i in (1, 2, 3, 4)], 8, False),
+        },
+        "body": "walk",
+    },
     "jelly_spore": {"anchor": "center", "anims": {"fly": ([JP % ("attack", i) for i in ("093", "098")], 6, True)}, "body": "fly"},
     # VOID ARCHMAGE, world 3 final boss (loose frames in assets/sprites/enemies/bosses/
     # boss_3_elements, cut from the sheet; enemies/boss_archmage.gd): a hooded one-eyed
@@ -982,6 +993,33 @@ SETS = {
     "hive_burst": {"anchor": "center", "anims": {"pop": ([HQ % 55], 1, False)}, "body": "pop"},
     "hive_drop": {"anchor": "center", "anims": {"fly": ([HQ % i for i in (97, 101, 102)], 10, True)}, "body": "fly"},
     # goo egg the queen drools: pulses, then hatches greenies (enemies/hive_egg.gd)
+    # world 6 GENE VAULT objective: a cloning capsule (tools/make_gene_vault_assets.py from
+    # tools/specimen_vat_ref.webp); walk = intact, crack = cracked glass, splat = bursts,
+    # breaks apart and leaves its remains
+    "specimen_vat": {
+        "anchor": "bottom",
+        "anims": {
+            "walk": (["enemies/specimen_vat/idle/image_01.png"], 1, True),
+            "crack": (["enemies/specimen_vat/hurt/image_01.png"], 1, True),
+            "splat": (["enemies/specimen_vat/die/image_%02d.png" % i for i in (1, 2, 3)], 8, False),
+        },
+        "body": "walk",
+    },
+    # world 6: egg clusters that hatch an octoling when you come near (enemies/egg_cluster.gd);
+    # walk = intact, crack = splitting, hatch = the octoling climbs out, spent = empty nest
+    "egg_cluster": {
+        "anchor": "bottom",
+        "anims": {
+            "walk": (["enemies/egg_cluster/idle/image_01.png"], 1, True),
+            "crack": (["enemies/egg_cluster/crack/image_01.png"], 1, True),
+            "hatch": (["enemies/egg_cluster/hatch/image_%02d.png" % i for i in (1, 2, 3)], 5, False),
+            "spent": (["enemies/egg_cluster/spent/image_01.png"], 1, True),
+            "splat": (["enemies/egg_cluster/spent/image_01.png"], 1, False),
+        },
+        "body": "walk",
+    },
+    # the baby octopus out of an egg cluster: a quick little chaser
+    "octoling": {"anchor": "bottom", "anims": {"walk": (["enemies/octoling/walk/image_%02d.png" % i for i in range(1, 7)], 10, True)}, "body": "walk"},
     "hive_egg": {
         "anchor": "bbox",
         "anims": {"walk": ([HQ % i for i in (99, 104, 106, 104)], 4, True), "splat": ([HQ % 108], 1, False)},

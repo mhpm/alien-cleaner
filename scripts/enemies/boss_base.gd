@@ -20,6 +20,12 @@ func _size_to_player(secs := TARGET_SECS) -> void:
 	if need > max_hp:
 		max_hp = need
 		hp = max_hp
+	# world 5: every overheating reactor vented = the forge cooled, bosses arrive weaker
+	var ex: Explore = Game.world.explore if Game.world != null else null
+	if ex != null and ex.forge_cooled():
+		max_hp *= Explore.COOLED_HP
+		hp = max_hp
+		Game.world.popup_text(global_position + Vector2(0, -40), "FORGE COOLED: -%d%% HP" % roundi((1.0 - Explore.COOLED_HP) * 100.0), ReactorCore.COOL, 11)
 
 
 ## The astronaut's damage per second right now: the ARMORY weapon (its level, blaster

@@ -100,9 +100,11 @@ var _flash_shader: Shader
 var _shot_shader: Shader
 var _manifest: Dictionary = {}
 var _frames_cache: Dictionary = {}
+var _warming: Array = []  # [set, [png paths]] loading on worker threads (warm)
 
 
 func _ready() -> void:
+	set_process(false)
 	_flash_shader = load("res://assets/shaders/flash.gdshader")
 	_shot_shader = load("res://assets/shaders/shot_tint.gdshader")
 	var f := FileAccess.open(SPRITE_DIR + "manifest.json", FileAccess.READ)
@@ -154,6 +156,65 @@ func frames(set_name: String) -> SpriteFrames:
 		sf.remove_animation("default")
 	_frames_cache[set_name] = sf
 	return sf
+
+
+## Loads the frames of sprite sets on worker threads (ResourceLoader threaded requests), so
+## the first alien of a kind does not freeze the game while its PNGs load. Each set is
+## built into its SpriteFrames as soon as its pictures are in. Sets that are already
+## built or unknown are skipped. Survival warms its world's aliens at the start.
+func warm(sets: Array) -> void:
+	for set_name: String in sets:
+		if _frames_cache.has(set_name) or not _manifest.has(set_name):
+			continue
+		var paths: Array[String] = []
+		var anims: Dictionary = sheet(set_name).anims
+		for anim: String in anims:
+			for i in int((anims[anim] as Dictionary).frames):
+				var path := "%s%s/%s_%d.png" % [SPRITE_DIR, set_name, anim, i]
+				if not ResourceLoader.has_cached(path):
+					ResourceLoader.load_threaded_request(path, "Texture2D")
+				paths.append(path)
+		_warming.append([set_name, paths])
+	set_process(not _warming.is_empty())
+
+
+## Every sprite set an alien kind uses: its art plus the sets named after it (shots,
+## orbs, effects: "<art>_..."), for warm.
+func sets_for(ids: Array) -> Array:
+	var out := {}
+	for id: String in ids:
+		var d: Dictionary = EnemyData.TYPES.get(id, {})
+		var art := str(d.get("art", id))
+		out[art] = true
+		for k: String in _manifest:
+			if k.begins_with(art + "_") or k.begins_with(id + "_"):
+				out[k] = true
+	return out.keys()
+
+
+func _process(_delta: float) -> void:
+	# one finished set per frame: building its SpriteFrames is cheap once loaded
+	for i in _warming.size():
+		var w: Array = _warming[i]
+		var ready := true
+		for path: String in w[1]:
+			if ResourceLoader.has_cached(path):
+				continue
+			var st := ResourceLoader.load_threaded_get_status(path)
+			if st == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+				ready = false
+				break
+		if not ready:
+			continue
+		var keep: Array = []  # hold the textures until the SpriteFrames references them
+		for path: String in w[1]:
+			if ResourceLoader.load_threaded_get_status(path) == ResourceLoader.THREAD_LOAD_LOADED:
+				keep.append(ResourceLoader.load_threaded_get(path))
+		frames(str(w[0]))
+		_warming.remove_at(i)
+		break
+	if _warming.is_empty():
+		set_process(false)
 
 
 ## Blaster image (assets/suits/<variant>_<slot>.png, from tools/make_suit_parts.py) with

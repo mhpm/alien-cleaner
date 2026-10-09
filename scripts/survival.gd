@@ -111,10 +111,34 @@ func setup(w: GameWorld, d: Dictionary) -> void:
 	def = d
 	waves = d.waves
 	rush = Game.boss_rush
+	Art.warm(Art.sets_for(alien_ids()))  # no hitch when a new kind first shows up
 	if rush:
 		# the fight happens at the end of the clock: bosses and helpers as tough as then
 		t = duration() - RUSH_INTRO
 		wave = waves.size() - 1
+
+
+## Every alien kind this stage can send: wave pools and events, the final wave, the
+## bosses and their reinforcements.
+func alien_ids() -> Array:
+	var ids := {}
+	var add := func(v: Variant) -> void:
+		if v is String and EnemyData.TYPES.has(v):
+			ids[v] = true
+		elif v is Array:
+			for x: Variant in v:
+				if x is String and EnemyData.TYPES.has(x):
+					ids[x] = true
+	add.call(def.get("boss", ""))
+	add.call((def.get("final", {}) as Dictionary).get("pool", []))
+	add.call((def.get("boss_help", {}) as Dictionary).get("pool", []))
+	for wv: Dictionary in waves:
+		for key: String in ["pool", "id", "minion"]:
+			add.call(wv.get(key, ""))
+		for ev: Dictionary in wv.get("events", []):
+			for key: String in ["pool", "id", "minion"]:
+				add.call(ev.get(key, ""))
+	return ids.keys()
 
 
 ## Distance from the player to just past the screen edge in direction `a` (aliens
@@ -321,6 +345,8 @@ func _send_final() -> void:
 		c = c.clamp(b.position, b.end)
 	fence = BossFence.new().setup(c, FENCE_R)
 	world.effects.add_child(fence)
+	if world.explore != null:
+		world.explore.clear_ring(c, FENCE_R)  # nothing solid inside the boss ring
 	world.hud.banner("FINAL BOSS!", Color("ff5566"), 40, 1.2)
 	Sfx.play_music("boss")
 	Sfx.play("roar", 0.0)
@@ -336,6 +362,8 @@ func _boss_help(delta: float) -> void:
 	var h: Dictionary = def.get("boss_help", {})
 	if h.is_empty() or done or fence == null or not is_instance_valid(fence):
 		return
+	if world.explore != null and world.explore.vault_purged():
+		return  # world 6: every specimen vat broken, no reinforcements
 	var boss: Enemy = null
 	var helpers := 0
 	for n in world.enemy_cache:
@@ -378,7 +406,7 @@ func _wipe_horde() -> void:
 		if not is_instance_valid(n):
 			continue
 		var e := n as Enemy
-		if e.is_boss or e.dead:
+		if e.is_boss or e.dead or e.anchored:
 			continue
 		e.dead = true
 		e.targetable = false
@@ -598,7 +626,7 @@ func _ring_pos(r: float, angle := INF) -> Vector2:
 		if b.has_point(q) and world.room.is_open(q):
 			return q
 	var q2 := p + Vector2.from_angle(randf() * TAU) * r
-	return q2.clamp(b.position, b.end)
+	return world.room.open_near(q2.clamp(b.position, b.end))  # never inside a wall
 
 
 ## A spot just off screen in direction `angle` (random if INF), inside the arena.
@@ -611,7 +639,7 @@ func _edge_pos(angle := INF) -> Vector2:
 		if b.has_point(q) and world.room.is_open(q):
 			return q
 	var a2 := randf() * TAU
-	return (p + Vector2.from_angle(a2) * edge_dist(a2)).clamp(b.position, b.end)
+	return world.room.open_near((p + Vector2.from_angle(a2) * edge_dist(a2)).clamp(b.position, b.end))  # never inside a wall
 
 
 func _swarm(id: String, count: int, angle := INF, ev := {}) -> void:
@@ -774,7 +802,7 @@ func _leash() -> void:
 		if not is_instance_valid(n):  # freed since the cache was refreshed
 			continue
 		var e := n as Enemy
-		if e == null or e.dead or e.is_boss:
+		if e == null or e.dead or e.is_boss or e.anchored:
 			continue
 		var off := e.global_position - p
 		if off.length() > edge_dist(off.angle(), 140.0):

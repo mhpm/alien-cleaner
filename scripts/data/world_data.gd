@@ -202,6 +202,20 @@ const SPACE_START := ["ufo_alien", "comet_hopper", "comet_baby", "comet_baby", "
 const SPACE_MID := ["ufo_alien", "comet_hopper", "slime", "runner", "splitter", "scout", "gunship", "jelly_pod", "spike_mine", "ring_bug", "drill_orbiter", "nova_puffer", "blade_drone", "tesla_drone", "goo_hopper", "bubble_brain", "comet_baby", "nebula_pod", "ring_eye", "tadpole_saucer", "plasma_pupil", "martian_scout", "cyclops_pod", "blink_saucer", "bean_cruiser"]
 const SPACE := ["ufo_alien", "comet_hopper", "comet_hopper", "slime", "runner", "splitter", "scout", "gunship", "jelly_pod", "spike_mine", "ring_bug", "drill_orbiter", "nova_puffer", "blade_drone", "tesla_drone", "crab_drone", "prism_drone", "goo_hopper", "bubble_brain", "meteor_peeper", "bell_cruiser", "comet_baby", "nebula_pod", "ring_eye", "puddle_radar", "tadpole_saucer", "plasma_pupil", "tentacle_pod", "pearl_flyer", "martian_scout", "cyclops_pod", "tentacle_orbiter", "slime_comet", "blink_saucer", "bean_cruiser", "nugget_ship", "goo_lantern", "droid", "ufo", "octopus", "eyeclops", "octo_wizard", "big_red"]
 const SPACE_SHOOTERS := ["scout", "gunship", "jelly_pod", "ring_bug", "drill_orbiter", "nova_puffer", "tesla_drone", "prism_drone", "crab_drone", "meteor_peeper", "bell_cruiser", "bubble_brain", "ring_eye", "puddle_radar", "tadpole_saucer", "plasma_pupil", "tentacle_pod", "pearl_flyer", "cyclops_pod", "tentacle_orbiter", "slime_comet", "blink_saucer", "nugget_ship"]
+## world 5 (THE FORGE): its 3 new aliens (orbit_raider, orbit_spawn, eye_blob) and the
+## world-4 ones that suit a lava plant; the oldest chasers (slime, runner, splitter) are out
+const FORGE_START := ["orbit_spawn", "orbit_spawn", "orbit_spawn", "eye_blob", "orbit_raider", "comet_baby", "goo_hopper"]
+const FORGE_MID := ["orbit_spawn", "orbit_spawn", "eye_blob", "orbit_raider", "comet_baby", "comet_hopper", "goo_hopper", "spike_mine", "tesla_drone", "blade_drone", "meteor_peeper"]
+const FORGE := ["orbit_spawn", "orbit_spawn", "orbit_spawn", "eye_blob", "orbit_raider", "comet_baby", "comet_hopper", "goo_hopper", "big_red", "spike_mine", "tesla_drone", "blade_drone", "crab_drone", "prism_drone", "meteor_peeper", "nugget_ship", "goo_lantern", "gunship"]
+const FORGE_SHOOTERS := ["eye_blob", "orbit_raider", "tesla_drone", "prism_drone", "meteor_peeper", "nugget_ship"]
+## world 6 (GENE VAULT): the cloning lab's specimens. New in the waves: Slimelets
+## (mini_slime) and Splitlets, cloned in bulk; the octopus / tentacle / jelly aliens of
+## the earlier worlds are the lab's experiments; the world-5 hatchlings, eye blobs and
+## comet babies are out. The vats (SpecimenVat) breed more on their own.
+const GENE_START := ["mini_slime", "mini_slime", "mini_slime", "splitlet", "splitlet", "jelly_pod", "octo_wizard"]
+const GENE_MID := ["mini_slime", "mini_slime", "splitlet", "splitlet", "splitter", "jelly_pod", "octo_wizard", "tentacle_pod", "tentacle_plant", "bubble_brain", "plasma_pupil"]
+const GENE := ["mini_slime", "mini_slime", "mini_slime", "splitlet", "splitlet", "splitter", "jelly_pod", "octo_wizard", "tentacle_pod", "tentacle_plant", "bubble_brain", "plasma_pupil", "tentacle_orbiter", "eyeclops", "jelly_saucer", "goo_lantern", "bell_cruiser", "pearl_flyer"]
+const GENE_SHOOTERS := ["jelly_pod", "octo_wizard", "tentacle_pod", "bubble_brain", "plasma_pupil", "tentacle_orbiter", "jelly_saucer", "bell_cruiser"]
 const HIVE_ROOMS := ["hive_entry", "nest", "biolab", "sludge", "overgrown_cargo", "spires", "pods", "reactor_core"]
 
 const WORLDS := [
@@ -406,7 +420,7 @@ const WORLDS := [
 						{"at": 16.0, "event": "dropship", "id": "big_red", "count": 4, "label": "HEAVY DROP!"},
 						{"at": 24.0, "event": "swarm", "id": "comet_baby", "count": 14, "label": "BABY RUSH!"},
 						{"at": 8.0, "event": "pincer", "id": "slime_comet", "count": 4, "label": "SLIME RUN!"}]},
-					{"pool": SPACE, "alive": 36, "rate": 3.4, "elite": 0.06, "event": "boss", "id": "magma_drake", "label": "MAGMA DRAKE!", "events": [
+					{"pool": SPACE, "alive": 36, "rate": 3.4, "elite": 0.06, "event": "boss", "id": "brood_mother", "count": 2, "events": [
 						{"at": 14.0, "event": "crossfire", "pool": SPACE_SHOOTERS, "count": 8},
 						{"at": 24.0, "event": "ring", "id": "tesla_drone", "count": 6, "label": "TESLA CAGE!"}]},
 					# 12-15: the whole fleet
@@ -426,6 +440,149 @@ const WORLDS := [
 						{"at": 21.0, "event": "crossfire", "pool": SPACE_SHOOTERS, "count": 8}]},
 					{"pool": SPACE, "alive": 84, "rate": 5.8, "elite": 0.1, "invasion": 260, "events": [
 						{"at": 14.0, "event": "meteor", "pool": SPACE_MID, "count": 22, "hatch": 0.3, "label": "METEOR STORM!"}]},
+				],
+			}},
+		],
+	},
+	{
+		# world 5: THE FORGE, a reactor plant glowing with lava, played as an EXPLORE map
+		# built wall by wall from the forge kit (ForgeMap: halls, corridors, mazes, pillared
+		# halls, lava pits, machinery in the corners; kit "w5" in the middle of the halls).
+		# Besides chests and crew to rescue, 4 rooms hold an overheating REACTOR CORE: it
+		# sends out heat waves while you are near (they burn the aliens too) and venting it
+		# on its coolant pad heals you; vent all 4 and every boss arrives with 25% less
+		# health. New aliens: Orbit Hatchling, Orbit Raider, Eye Blob Saucer (ricochet
+		# laser); mini bosses ORBIT WARDEN and THE SLIME KING; final boss MAGMA DRAKE.
+		"name": "THE FORGE", "theme": "forge", "enemy_mult": 1.6, "difficulty": [1.0, 0.0],
+		"pic": "world_5.png", "chest": 1500,
+		"rooms": [
+			{"final": true, "survival": {
+				"arena": Vector2i(64, 96), "duration": 450.0, "hp_per_min": 0.25,
+				"explore": {"build": "forge", "cells": [18, 14], "chests": 8, "alarms": true,
+					"maze": 0.35, "interior": "w5", "cores": 4},
+				"t_offset": 240.0, "boss": "magma_drake",
+				"boss_help": {"pool": ["orbit_spawn", "orbit_spawn", "comet_baby", "orbit_raider"], "max": 8, "every": [15.0, 7.0], "squad": 3},
+				"final": {"pool": FORGE, "alive": 34, "rate": 3.0},
+				"waves": [
+					# 1-4: the hatchlings swarm out of the vents, the new saucers join one by one
+					{"pool": FORGE_START, "alive": 20, "rate": 2.4, "shooters": 0.25, "events": [
+						{"at": 12.0, "event": "breach", "id": "orbit_spawn", "count": 12, "points": 3, "label": "VENT BURST!"}]},
+					{"pool": FORGE_START, "alive": 24, "rate": 2.7, "shooters": 0.3, "events": [
+						{"at": 6.0, "event": "crossfire", "id": "eye_blob", "count": 3, "label": "RICOCHET!"},
+						{"at": 18.0, "event": "swarm", "id": "orbit_spawn", "count": 14}]},
+					{"pool": FORGE_MID, "alive": 28, "rate": 3.0, "elite": 0.03, "events": [
+						{"at": 0.0, "event": "escort", "id": "orbit_raider", "minion": "orbit_spawn", "count": 6, "label": "RAIDER PACK!"},
+						{"at": 16.0, "event": "meteor", "pool": ["orbit_spawn", "comet_baby"], "count": 8, "hatch": 0.4, "label": "LAVA RAIN!"}]},
+					{"pool": FORGE_MID, "alive": 32, "rate": 3.2, "elite": 0.04, "event": "pincer", "id": "comet_baby", "count": 16, "events": [
+						{"at": 15.0, "event": "breach", "pool": ["orbit_spawn", "goo_hopper"], "count": 16, "points": 4, "label": "VENT BURST!"}]},
+					# 5: invasion
+					{"pool": FORGE_MID, "alive": 38, "rate": 3.4, "elite": 0.04, "invasion": 120, "events": [
+						{"at": 18.0, "event": "crossfire", "pool": FORGE_SHOOTERS, "count": 5}]},
+					# 6: first mini boss
+					{"pool": FORGE_MID, "alive": 26, "rate": 2.6, "elite": 0.04, "events": [
+						{"at": 6.0, "event": "boss", "id": "orbit_warden", "label": "ORBIT WARDEN!"},
+						{"at": 20.0, "event": "swarm", "id": "orbit_spawn", "count": 10}]},
+					# 7-10: two events a wave
+					{"pool": FORGE, "alive": 42, "rate": 3.8, "elite": 0.05, "events": [
+						{"at": 0.0, "event": "spiral", "id": "orbit_spawn", "count": 24},
+						{"at": 15.0, "event": "crossfire", "id": "eye_blob", "count": 5, "label": "RICOCHET!"}]},
+					{"pool": FORGE, "alive": 46, "rate": 4.0, "elite": 0.05, "events": [
+						{"at": 0.0, "event": "meteor", "pool": FORGE_MID, "count": 14, "hatch": 0.35, "label": "LAVA RAIN!"},
+						{"at": 15.0, "event": "escort", "id": "big_red", "minion": "comet_baby", "count": 8, "label": "MOLTEN SQUAD!"}]},
+					{"pool": FORGE, "alive": 50, "rate": 4.2, "elite": 0.06, "event": "pincer", "id": "orbit_raider", "count": 8, "events": [
+						{"at": 14.0, "event": "breach", "pool": ["orbit_spawn", "goo_hopper", "comet_baby"], "count": 24, "points": 4, "label": "VENT BURST!"}]},
+					{"pool": FORGE, "alive": 54, "rate": 4.4, "elite": 0.06, "invasion": 180, "events": [
+						{"at": 18.0, "event": "spiral", "id": "spike_mine", "count": 8, "label": "MINEFIELD!"}]},
+					# 11: second mini boss
+					{"pool": FORGE, "alive": 34, "rate": 3.2, "elite": 0.06, "events": [
+						{"at": 4.0, "event": "boss", "id": "slime_king", "label": "THE SLIME KING!"},
+						{"at": 18.0, "event": "crossfire", "pool": FORGE_SHOOTERS, "count": 6}]},
+					# 12-15: the forge melts down
+					{"pool": FORGE, "alive": 62, "rate": 4.8, "elite": 0.07, "events": [
+						{"at": 0.0, "event": "escort", "id": "goo_lantern", "minion": "orbit_raider", "count": 4, "label": "FIELD MEDIC!"},
+						{"at": 12.0, "event": "meteor", "pool": FORGE_MID, "count": 18, "hatch": 0.35, "label": "LAVA RAIN!"},
+						{"at": 22.0, "event": "swarm", "id": "comet_baby", "count": 14}]},
+					{"pool": FORGE, "alive": 68, "rate": 5.0, "elite": 0.08, "events": [
+						{"at": 0.0, "event": "crossfire", "id": "eye_blob", "count": 6, "label": "RICOCHET!"},
+						{"at": 14.0, "event": "breach", "pool": FORGE_MID, "count": 30, "points": 5, "label": "MELTDOWN!"}]},
+					{"pool": FORGE, "alive": 74, "rate": 5.3, "elite": 0.09, "events": [
+						{"at": 0.0, "event": "escort", "id": "big_red", "minion": "big_red", "count": 3, "label": "BRUTE SQUAD!"},
+						{"at": 10.0, "event": "spiral", "pool": ["orbit_spawn", "comet_baby"], "count": 32},
+						{"at": 21.0, "event": "pincer", "id": "orbit_raider", "count": 8}]},
+					{"pool": FORGE, "alive": 80, "rate": 5.6, "elite": 0.1, "invasion": 230, "events": [
+						{"at": 16.0, "event": "meteor", "pool": FORGE_MID, "count": 22, "hatch": 0.3, "label": "LAVA RAIN!"}]},
+				],
+			}},
+		],
+	},
+	{
+		# world 6: GENE VAULT, the cloning lab where the mothership grows its specimens:
+		# an EXPLORE map built wall by wall from the bio-lab kit (ForgeMap set "w6": halls,
+		# corridors, mazes, pillared halls, goo pits, cloning machinery in the corners).
+		# Besides chests and crew to rescue, 5 halls hold a SPECIMEN VAT that keeps breeding
+		# specimens while you are near (egg clusters around the map hatch octolings as you
+		# pass by): shoot them all down to purge the vault (coins, and
+		# the final boss fights with no reinforcements). New in the waves: Slimelets and
+		# Splitlets cloned in bulk; mini bosses BLOBULUS and TOXIC ANGLER; final boss THE
+		# MOTHERSHIP (its first appearance).
+		"name": "GENE VAULT", "theme": "gene", "enemy_mult": 1.7, "difficulty": [1.0, 0.0],
+		"pic": "world_6.png", "chest": 1800,
+		"rooms": [
+			{"final": true, "survival": {
+				"arena": Vector2i(64, 96), "duration": 450.0, "hp_per_min": 0.25,
+				"explore": {"build": "kit", "set": "w6", "cells": [18, 14], "chests": 8, "alarms": true,
+					"maze": 0.4, "mazes": 3, "vats": 5, "eggs": 14},
+				"t_offset": 270.0, "boss": "mothership",
+				"boss_help": {"pool": ["mini_slime", "mini_slime", "splitlet", "jelly_pod"], "max": 8, "every": [15.0, 7.0], "squad": 3},
+				"final": {"pool": GENE, "alive": 34, "rate": 3.0},
+				"waves": [
+					# 1-4: clones pour out of the lab, the experiments join one by one
+					{"pool": GENE_START, "alive": 22, "rate": 2.6, "shooters": 0.2, "events": [
+						{"at": 12.0, "event": "breach", "id": "mini_slime", "count": 14, "points": 3, "label": "VAT LEAK!"}]},
+					{"pool": GENE_START, "alive": 26, "rate": 2.8, "shooters": 0.25, "events": [
+						{"at": 6.0, "event": "escort", "id": "octo_wizard", "minion": "mini_slime", "count": 6, "label": "LAB COAT!"},
+						{"at": 18.0, "event": "swarm", "id": "splitlet", "count": 16}]},
+					{"pool": GENE_MID, "alive": 30, "rate": 3.0, "elite": 0.03, "events": [
+						{"at": 0.0, "event": "ring", "id": "mini_slime", "count": 18, "label": "CLONE RING!"},
+						{"at": 16.0, "event": "crossfire", "id": "jelly_pod", "count": 4, "label": "JELLY BLOOM!"}]},
+					{"pool": GENE_MID, "alive": 34, "rate": 3.2, "elite": 0.04, "event": "pincer", "id": "splitlet", "count": 18, "events": [
+						{"at": 15.0, "event": "breach", "pool": ["mini_slime", "splitlet", "splitter"], "count": 18, "points": 4, "label": "VAT LEAK!"}]},
+					# 5: invasion
+					{"pool": GENE_MID, "alive": 40, "rate": 3.4, "elite": 0.04, "invasion": 120, "events": [
+						{"at": 18.0, "event": "crossfire", "pool": GENE_SHOOTERS, "count": 5}]},
+					# 6: first mini boss
+					{"pool": GENE_MID, "alive": 26, "rate": 2.6, "elite": 0.04, "events": [
+						{"at": 6.0, "event": "boss", "id": "blobulus", "label": "BLOBULUS!"},
+						{"at": 22.0, "event": "swarm", "id": "mini_slime", "count": 12}]},
+					# 7-10: two events a wave
+					{"pool": GENE, "alive": 44, "rate": 3.8, "elite": 0.05, "events": [
+						{"at": 0.0, "event": "spiral", "id": "splitlet", "count": 26},
+						{"at": 15.0, "event": "escort", "id": "tentacle_orbiter", "minion": "mini_slime", "count": 8, "label": "GRAVITY TEST!"}]},
+					{"pool": GENE, "alive": 48, "rate": 4.0, "elite": 0.05, "events": [
+						{"at": 0.0, "event": "crossfire", "id": "plasma_pupil", "count": 5, "label": "EYES EVERYWHERE!"},
+						{"at": 15.0, "event": "escort", "id": "goo_lantern", "minion": "splitter", "count": 5, "label": "FIELD MEDIC!"}]},
+					{"pool": GENE, "alive": 52, "rate": 4.2, "elite": 0.06, "event": "pincer", "id": "tentacle_pod", "count": 8, "events": [
+						{"at": 14.0, "event": "breach", "pool": ["mini_slime", "splitlet", "jelly_pod"], "count": 26, "points": 4, "label": "VAT LEAK!"}]},
+					{"pool": GENE, "alive": 56, "rate": 4.4, "elite": 0.06, "invasion": 180, "events": [
+						{"at": 18.0, "event": "ring", "id": "jelly_saucer", "count": 6, "label": "JELLY FLEET!"}]},
+					# 11: second mini boss
+					{"pool": GENE, "alive": 34, "rate": 3.2, "elite": 0.06, "events": [
+						{"at": 4.0, "event": "boss", "id": "toxic_angler", "label": "TOXIC ANGLER!"},
+						{"at": 18.0, "event": "crossfire", "pool": GENE_SHOOTERS, "count": 6}]},
+					# 12-15: containment breach
+					{"pool": GENE, "alive": 64, "rate": 4.8, "elite": 0.07, "events": [
+						{"at": 0.0, "event": "escort", "id": "eyeclops", "minion": "splitlet", "count": 8},
+						{"at": 12.0, "event": "spiral", "pool": ["mini_slime", "splitlet"], "count": 30},
+						{"at": 22.0, "event": "swarm", "id": "mini_slime", "count": 16}]},
+					{"pool": GENE, "alive": 70, "rate": 5.0, "elite": 0.08, "events": [
+						{"at": 0.0, "event": "crossfire", "id": "bell_cruiser", "count": 5},
+						{"at": 14.0, "event": "breach", "pool": GENE_MID, "count": 32, "points": 5, "label": "CONTAINMENT BREACH!"}]},
+					{"pool": GENE, "alive": 76, "rate": 5.3, "elite": 0.09, "events": [
+						{"at": 0.0, "event": "escort", "id": "pearl_flyer", "minion": "tentacle_pod", "count": 4, "label": "BUBBLE FLEET!"},
+						{"at": 10.0, "event": "ring", "pool": ["mini_slime", "splitlet"], "count": 28},
+						{"at": 21.0, "event": "pincer", "id": "octo_wizard", "count": 8}]},
+					{"pool": GENE, "alive": 82, "rate": 5.6, "elite": 0.1, "invasion": 230, "events": [
+						{"at": 16.0, "event": "breach", "pool": GENE_MID, "count": 26, "points": 5, "label": "CONTAINMENT BREACH!"}]},
 				],
 			}},
 		],

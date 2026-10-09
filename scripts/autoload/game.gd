@@ -260,7 +260,15 @@ func clear_bonus(first: bool) -> int:
 	return n
 
 
+## Debug builds (editor / dev runs): every world in WorldData is open, the new ones too.
+## Turn it off with the project setting debug/worlds/unlock_all = false; Release builds
+## always use the normal unlocking (clear a world to open the next).
+const UNLOCK_ALL := "debug/worlds/unlock_all"
+
+
 func world_unlocked(i: int) -> bool:
+	if OS.is_debug_build() and bool(ProjectSettings.get_setting(UNLOCK_ALL, true)):
+		return true
 	return i <= worlds_cleared
 
 

@@ -1,4 +1,4 @@
-"""Salas modulares de los mapas EXPLORE (mundo 1 = "lab", mundo 2 = "w2").
+"""Salas modulares de los mapas EXPLORE (mundo 1 = "lab", 2 = "w2", 3 = "w3", 5 = "w5").
 
 python tools/make_lab_pieces.py [lab|w2]   (SETS: pinturas, sala de las puertas, manchas)
 Mundo 1: tools/rooms/lab_1..5.webp; mundo 2: tools/rooms/w2_1..8.webp (mismo marco, suelo
@@ -69,18 +69,28 @@ W3_DECALS = [(1, (283, 548, 393, 622)), (1, (470, 772, 577, 842)), (1, (1083, 38
              (1, (380, 625, 440, 665)), (2, (890, 440, 960, 490)), (3, (580, 820, 640, 860)),
              (1, (840, 445, 880, 470)), (4, (1180, 545, 1230, 580))]
 
+# world 5 (THE FORGE: the same frame, a reactor plant glowing with lava): its vents
+W5_DECALS = [(1, (358, 585, 462, 657)), (1, (935, 736, 1027, 810)), (2, (515, 243, 607, 314)),
+             (2, (308, 643, 402, 714)), (3, (285, 548, 387, 624)), (3, (468, 770, 577, 842)),
+             (4, (288, 556, 382, 627)), (4, (1013, 357, 1102, 425))]
+
 # room sets: painting file pattern, how many give corners, which one gives the base doors
 SETS = {
     "lab": {"src": "lab_%d", "paintings": 4, "doors": 5, "decals": "DECALS", "furniture": "FURNITURE"},
     "w2": {"src": "w2_%d", "paintings": 8, "doors": 1, "decals": "W2_DECALS", "furniture": None},
     "w3": {"src": "w3_%d", "paintings": 8, "doors": 1, "decals": "W3_DECALS", "furniture": None},
+    "w5": {"src": "w5_%d", "paintings": 4, "doors": 1, "decals": "W5_DECALS", "furniture": None},
 }
 INTERIOR = (120, 205, 1330, 875)  # floor inside the walls (painting px)
 CELL = 22  # auto-solid grid (painting px)
 # floor vents of the template (walkable, but dark: auto_solid must not block them)
 VENTS = [(280, 545, 400, 625), (465, 765, 585, 850), (1080, 375, 1180, 460), (990, 755, 1090, 840),
          (595, 240, 670, 310), (970, 820, 1055, 890), (1085, 730, 1170, 815), (330, 365, 415, 440),
-         (260, 535, 395, 615), (950, 360, 1045, 430), (1065, 630, 1160, 715)]
+         (260, 535, 395, 615), (950, 360, 1045, 430), (1065, 630, 1160, 715),
+         # world 5
+         (355, 580, 465, 660), (930, 730, 1030, 815), (510, 240, 610, 318), (305, 640, 405, 718),
+         (280, 545, 390, 628), (465, 765, 580, 846), (285, 552, 385, 630), (1010, 352, 1105, 430),
+         (590, 240, 670, 312), (1055, 355, 1150, 428), (1055, 640, 1145, 705), (465, 775, 565, 845)]
 
 # blocked furniture, per painting and corner (x, y, w, h in px of the painting)
 FURNITURE = {

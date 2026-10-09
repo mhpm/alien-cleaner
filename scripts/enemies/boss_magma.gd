@@ -1,6 +1,6 @@
 class_name BossMagma
 extends BossBase
-## MAGMA DRAKE (world 4 mini boss, wave 11): a little lava dragon with bat wings.
+## MAGMA DRAKE (world 5 final boss, THE FORGE): a little lava dragon with bat wings.
 ## Calm (above half health), in turn:
 ##   breath    turns to you ("breath") and SWEEPS a stream of fireballs across a wide arc
 ##   crescents ("cast") a fan of lava crescent waves, then a second fan through the gaps
@@ -16,7 +16,7 @@ extends BossBase
 
 const CALM := ["breath", "crescents", "dive", "mines", "crescents", "breath", "dive"]
 const FURY := ["dive", "meteor", "breath", "mines", "dive", "crescents", "meteor", "breath"]
-const FIGHT_SECS := 45.0  # mini boss: a shorter fight than the final bosses
+const FIGHT_SECS := 45.0  # as a mini boss: a shorter fight than as a final boss
 const FIRE_SPEED := 120.0
 const CRESCENT_SPEED := 95.0
 const DIVE_HEIGHT := 120.0
@@ -40,7 +40,10 @@ var mark: Telegraph
 
 
 func _init_ai() -> void:
-	_size_to_player(FIGHT_SECS)
+	# a mini boss (an event of another boss's stage) fights shorter than as a final boss
+	var sv := Game.world.survival if Game.world != null else null
+	var mini := sv != null and str(sv.def.get("boss", "")) != type_id
+	_size_to_player(FIGHT_SECS if mini else TARGET_SECS)
 	state = "intro"
 	state_t = 1.4
 	Sfx.play("roar", 0.0)

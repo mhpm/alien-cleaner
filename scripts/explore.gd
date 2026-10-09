@@ -14,9 +14,14 @@ extends Node2D
 ## power failing) | "alarms": true (only a few discreet red alarm lights), "maze": k
 ## (rooms joined by a random spanning tree plus share k of the other doorways: a maze of
 ## rooms; without it every doorway is open), "interior": "w3" (RoomKit pieces in the
-## middle of each room)}.
+## middle of each room), "cores": n (world 5: n overheating ReactorCores, one in the
+## middle of n rooms instead of the RoomKit pieces; venting them all = forge_cooled),
+## "build": "forge" (world 5: no room paintings, ForgeMap builds halls, corridors, mazes
+## and pits wall by wall from the forge kit on a "cells": [w, h] lattice; `rooms` are its
+## areas and the aliens get a flow field to walk around the walls, flow_dir)}.
 
 const SEAM := 6.0  # black gap between two rooms (world units)
+const COOLED_HP := 0.75  # bosses' health once every reactor core is vented
 
 var world: GameWorld
 var cols := 3
@@ -43,6 +48,16 @@ var set_id := "lab"
 var has_zero := true
 var links := {}  # "x,y>x,y" of connected neighbour pairs (maze)
 var interior := ""
+var cores: Array[ReactorCore] = []
+var core_cells := {}  # Vector2i -> true: rooms that get a reactor core
+var vented := 0
+var vats: Array[Enemy] = []  # world 6: SpecimenVats ("vats": n)
+var vats_broken := 0
+var forge: ForgeMap  # "build": "forge" / "kit"
+var props: Array = []  # [node, solid rect]: furniture and cores (cleared with the ring)
+var ring := Vector3.ZERO  # final fight arena cleared on a painted map: x, y, radius
+var nav_cell := -1  # the astronaut's cell the flow field leads to
+var flow_to := PackedVector2Array()
 
 
 func setup(w: GameWorld, cfg: Dictionary) -> Explore:
@@ -55,6 +70,8 @@ func setup(w: GameWorld, cfg: Dictionary) -> Explore:
 	has_zero = bool(cfg.get("zero", true))
 	show_behind_parent = true
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	if str(cfg.get("build", "")) in ["forge", "kit"]:
+		return _setup_forge(cfg)
 	var rs := LabRoomData.ROOM
 	cell = rs + Vector2(SEAM, SEAM)
 	zero_cell = Vector2i(int(cols / 2.0), 0) if has_zero else Vector2i(-1, -1)
@@ -62,6 +79,7 @@ func setup(w: GameWorld, cfg: Dictionary) -> Explore:
 	_resize_arena(Vector2(cols * rs.x + (cols - 1) * SEAM, rows * rs.y + (rows - 1) * SEAM))
 	_link_rooms(cfg.get("maze", -1.0))
 	interior = str(cfg.get("interior", ""))
+	_pick_core_rooms(int(cfg.get("cores", 0)))
 	_lay_rooms()
 	_build_collision()
 	w.room.blockers = walls.duplicate()
@@ -71,6 +89,117 @@ func setup(w: GameWorld, cfg: Dictionary) -> Explore:
 
 
 # ---------------------------------------------------------------- building
+
+## World 5: the map is a ForgeMap (no room grid); its areas stand in for the rooms.
+func _setup_forge(cfg: Dictionary) -> Explore:
+	set_id = str(cfg.get("set", "w5"))
+	has_zero = false
+	zero_cell = Vector2i(-1, -1)
+	interior = str(cfg.get("interior", ""))
+	forge = ForgeMap.new().generate(cfg, rng)
+
+	_resize_arena(forge.size())
+	start_cell = Vector2i(forge.start_leaf, 0)
+	start = forge.cell_rect(forge.start_cell()).get_center()
+	for li in forge.leaves.size():
+		if forge.leaves[li].type == "solid":
+			continue
+		rooms.append([forge.leaf_rect(li), {"spots": forge.spots(li)}, Vector2i(li, 0)])
+
+	walls = forge.solids()
+	var n_cores := int(cfg.get("cores", 0))
+	for i in forge.core_leaves.size():
+		var r := forge.leaf_rect(forge.core_leaves[i])
+		if i < n_cores:
+			_place_core(r)
+		else:
+			_place_vat(r)
+	_place_eggs(int(cfg.get("eggs", 0)))
+	for f: Array in (forge.furnish if interior != "" else []):
+		if str(f[1]) == "pattern":
+			_furnish(forge.leaf_rect(int(f[0])), true)
+		else:
+			_furnish_one(forge.leaf_rect(int(f[0])))
+
+	_build_collision()
+	world.room.blockers = walls.duplicate()
+	forge.make_nodes(self)
+
+	_hide_chests(int(cfg.get("chests", 8)), int(cfg.get("survivors", 5)))
+	_build_counter()
+	return self
+
+
+## World 6: a specimen vat in the middle of hall r (an anchored Enemy: shoot it down).
+func _place_vat(r: Rect2) -> void:
+	var at := r.get_center() + Vector2(0, 24)
+	var v := world.spawn_enemy("specimen_vat", at, Game.enemy_mult(), 1.0, false, true)
+	if v != null:
+		vats.append(v)
+
+
+## World 6: n egg clusters spread over the map (open cells, away from the start, the
+## objectives and each other); they hatch octolings when the astronaut walks by.
+func _place_eggs(n: int) -> void:
+	if n <= 0:
+		return
+	Art.warm(Art.sets_for(["egg_cluster", "octoling"]))
+	var cells: Array[Vector2i] = []
+	for j in forge.h:
+		for i in forge.w:
+			var c := Vector2i(i, j)
+			if forge.walkable(c) and not forge.machines.any(func(m: Array) -> bool: return m[0] == c):
+				cells.append(c)
+	cells.shuffle()
+	var taken: Array[Vector2] = [start]
+	for li in forge.core_leaves:
+		taken.append(forge.leaf_rect(li).get_center())
+	for c in cells:
+		if n <= 0:
+			break
+		var p := forge.cell_rect(c).get_center() + Vector2(rng.randf_range(-24, 24), rng.randf_range(-16, 20))
+		var ok := p.distance_to(start) > 260.0
+		for q in taken:
+			if q.distance_to(p) < 170.0:
+				ok = false
+		if not ok or not world.room.is_open(p, 18.0):
+			continue
+		taken.append(p)
+		world.spawn_enemy("egg_cluster", p, Game.enemy_mult(), 1.0, false, true)
+		n -= 1
+
+
+## One or two kit pieces in the middle of a small hall.
+func _furnish_one(r: Rect2) -> void:
+	var c := r.get_center() + Vector2(0, 20)
+	var n := 2 if r.size.x >= 300.0 and rng.randf() < 0.5 else 1
+	for i in n:
+		var k: int = ForgeMap.SMALL_FURNITURE[rng.randi() % ForgeMap.SMALL_FURNITURE.size()]
+		var at := c + Vector2((i - (n - 1) * 0.5) * 70.0, 0)
+		_kit_piece(k, at, rng.randf() < 0.5)
+
+
+func _physics_process(_delta: float) -> void:
+	if forge == null or world.player == null:
+		return
+	var c := forge.cell_at(world.player.global_position)
+	if c >= 0 and c != nav_cell and forge.blocked[c] == 0:
+		nav_cell = c
+		flow_to = forge.flow(c)
+
+
+## Where an alien at `p` should head to reach the astronaut around the walls (ZERO: go
+## straight, it is in the astronaut's cell or there is no map).
+func flow_dir(p: Vector2) -> Vector2:
+	if flow_to.is_empty():
+		return Vector2.ZERO
+	var c := forge.cell_at(p)
+	if c < 0 or c == nav_cell:
+		return Vector2.ZERO
+	var t := flow_to[c]
+	if t == Vector2.ZERO:
+		return Vector2.ZERO
+	return (t - p).normalized()
 
 ## The arena becomes exactly the room grid (walls, camera limits, spawns follow it).
 func _resize_arena(sz: Vector2) -> void:
@@ -101,7 +230,9 @@ func _lay_rooms() -> void:
 			if c == start_cell:
 				start = r.position + (rm.start as Vector2)
 			_doors(c, r, rm)
-			if interior != "" and c != start_cell:
+			if core_cells.has(c):
+				_place_core(r)
+			elif interior != "" and c != start_cell:
 				_furnish(r)
 
 
@@ -154,29 +285,79 @@ func _link_rooms(maze: Variant) -> void:
 			links[_key(p[0], p[1])] = true
 
 
+## Rooms for the reactor cores: spread out (never two side by side, if the grid allows
+## it), never the start room, its neighbours nor ZONE ZERO.
+func _pick_core_rooms(n: int) -> void:
+	var cand: Array[Vector2i] = []
+	for y in rows:
+		for x in cols:
+			var c := Vector2i(x, y)
+			if c != start_cell and c != zero_cell and c.distance_to(start_cell) > 1.0:
+				cand.append(c)
+	var best := {}
+	for attempt in 30:  # a few shuffles, keep the one that fits the most
+		cand.shuffle()
+		var got := {}
+		for c in cand:
+			if got.size() >= n:
+				break
+			var close := false
+			for o: Vector2i in got:
+				if absi(o.x - c.x) + absi(o.y - c.y) < 2:
+					close = true
+			if not close:
+				got[c] = true
+		if got.size() > best.size():
+			best = got
+		if best.size() >= n:
+			break
+	for c in cand:  # still short: fill up with any room left
+		if best.size() >= n:
+			break
+		best[c] = true
+	core_cells = best
+
+
+func _place_core(r: Rect2) -> void:
+	var at := r.get_center() + Vector2(0, 5)
+	var core := ReactorCore.new()
+	core.position = at
+	world.entities.add_child(core)
+	world.room.spawned.append(core)
+	cores.append(core)
+	walls.append(ReactorCore.foot(at))
+	props.append([core, ReactorCore.foot(at)])
+
+
 ## A RoomKit pattern in the middle of room `r` (sometimes mirrored, sometimes empty).
-func _furnish(r: Rect2) -> void:
-	if rng.randf() < 0.15:
+func _furnish(r: Rect2, always := false) -> void:
+	if not always and rng.randf() < 0.15:
 		return
-	var names := RoomKit.PATTERNS.keys()
-	var pat: Array = RoomKit.PATTERNS[names[rng.randi() % names.size()]]
+	var pats := RoomKit.patterns(interior)
+	var names := pats.keys()
+	var pat: Array = pats[names[rng.randi() % names.size()]]
 	var flip := -1.0 if rng.randf() < 0.5 else 1.0
 	var c := r.get_center()
 	for it: Array in pat:
 		var k := int(it[0])
-		var at := c + Vector2(float(it[1]) * flip, float(it[2]))
-		var s := Sprite2D.new()
-		s.texture = RoomKit.tex(k)
-		s.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-		s.centered = false
-		var ts := s.texture.get_size()
-		s.offset = Vector2(-ts.x * 0.5, -ts.y)
-		s.scale = Vector2.ONE * RoomKit.SCALE
-		s.flip_h = flip < 0.0
-		s.position = at
-		world.entities.add_child(s)
-		world.room.spawned.append(s)
-		walls.append(RoomKit.foot(k, at))
+		_kit_piece(k, c + Vector2(float(it[1]) * flip, float(it[2])), flip < 0.0)
+
+
+## Kit piece k standing with its bottom centre at `at` (y-sorted, its foot is solid).
+func _kit_piece(k: int, at: Vector2, flip: bool) -> void:
+	var s := Sprite2D.new()
+	s.texture = RoomKit.tex(k, interior)
+	s.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	s.centered = false
+	var ts := s.texture.get_size()
+	s.offset = Vector2(-ts.x * 0.5, -ts.y)
+	s.scale = Vector2.ONE * RoomKit.scale(interior)
+	s.flip_h = flip
+	s.position = at
+	world.entities.add_child(s)
+	world.room.spawned.append(s)
+	walls.append(RoomKit.foot(k, at, interior))
+	props.append([s, RoomKit.foot(k, at, interior)])
 
 
 ## Seams and doorways of room `c`: towards a linked right / bottom neighbour a floor
@@ -215,6 +396,49 @@ func _doors(c: Vector2i, r: Rect2, rm: Dictionary) -> void:
 			layers.append([door[0], Rect2(r.position + (door[1] as Rect2).position, (door[1] as Rect2).size)])
 		else:
 			plates.append(Rect2(r.position + o.position, o.size))
+
+
+## The final boss fight (Survival._send_final): nothing solid inside its fence. Walls,
+## furniture, machinery, pits and vats within (c, r) go; a ForgeMap rebuilds that part of
+## the map as open floor, a painted map gets a disc of floor drawn over it. Reactor cores
+## stay counted but are put away.
+func clear_ring(c: Vector2, r: float) -> void:
+	var hits := func(q: Rect2) -> bool: return (c.clamp(q.position, q.end) - c).length() < r + 6.0
+	var gone: Array = []
+	for p: Array in props:
+		if hits.call(p[1]):
+			gone.append(p)
+			var n: Node = p[0]
+			if is_instance_valid(n):
+				if n is ReactorCore:
+					(n as ReactorCore).visible = false
+					n.process_mode = Node.PROCESS_MODE_DISABLED
+				else:
+					n.queue_free()
+	for p: Array in gone:
+		props.erase(p)
+	for n in world.enemy_cache:  # vats, egg clusters: anything rooted to the floor
+		var e := n as Enemy
+		if is_instance_valid(e) and not e.dead and e.anchored and e.global_position.distance_to(c) < r + 45.0:
+			vats.erase(e)  # its art reaches past its feet
+			e.dead = true
+			e.remove_from_group("enemies")
+			e.queue_free()
+	if forge != null:
+		forge.clear_circle(c, r)
+		walls = forge.solids()
+		for p: Array in props:
+			walls.append(p[1])
+		nav_cell = -1  # the flow field follows the new floor
+	else:
+		walls = walls.filter(func(q: Rect2) -> bool: return not hits.call(q))
+		ring = Vector3(c.x, c.y, r)
+		queue_redraw()
+	body.queue_free()
+	_build_collision()
+	world.room.blockers = walls.duplicate()
+	if counter != null:
+		_refresh_counter()
 
 
 func _build_collision() -> void:
@@ -298,6 +522,10 @@ func _build_counter() -> void:
 
 func _refresh_counter() -> void:
 	counter.text = "CHESTS %d/%d" % [opened, chests.size()]
+	if not cores.is_empty():
+		counter.text += "    CORES %d/%d" % [vented, cores.size()]
+	if not vats.is_empty():
+		counter.text += "    VATS %d/%d" % [vats_broken, vats.size()]
 	if rescue_panel != null:
 		rescue_panel.set_count(rescued)
 
@@ -307,6 +535,38 @@ func chest_opened(_c: SupplyChest) -> void:
 	_refresh_counter()
 	if opened == chests.size():
 		world.hud.banner("ALL CHESTS FOUND!", Color("ffcd75"), 26, 1.4)
+
+
+func core_vented(_c: ReactorCore) -> void:
+	vented += 1
+	_refresh_counter()
+	if forge_cooled():
+		world.hud.banner("FORGE COOLED! BOSSES -%d%% HP" % roundi((1.0 - COOLED_HP) * 100.0), ReactorCore.COOL, 22, 1.8)
+		world.hud.tint_flash(ReactorCore.COOL, 0.3, 0.7)
+	else:
+		world.hud.banner("CORE STABILIZED %d/%d" % [vented, cores.size()], ReactorCore.COOL, 22, 1.0)
+
+
+func vat_broken(_v: Enemy) -> void:
+	vats_broken += 1
+	_refresh_counter()
+	if vault_purged():
+		world.hud.banner("VAULT PURGED! NO BOSS BACKUP", Color("5fe8ff"), 22, 1.8)
+		world.hud.tint_flash(Color("5fe8ff"), 0.3, 0.7)
+		Game.add_coins(30 * vats.size())
+		world.popup_text(world.player.global_position + Vector2(0, -30), "+%d COINS" % (30 * vats.size()), Color("ffcd75"), 13)
+	else:
+		world.hud.banner("VAT DESTROYED %d/%d" % [vats_broken, vats.size()], Color("5fe8ff"), 22, 1.0)
+
+
+## Every specimen vat broken (false on maps without vats): the final boss fights alone.
+func vault_purged() -> bool:
+	return not vats.is_empty() and vats_broken >= vats.size()
+
+
+## Every reactor core vented (false on maps without cores).
+func forge_cooled() -> bool:
+	return not cores.is_empty() and vented >= cores.size()
 
 
 func survivor_saved(s: Survivor) -> void:
@@ -332,6 +592,9 @@ func _exit_tree() -> void:
 # ---------------------------------------------------------------- drawing
 
 func _draw() -> void:
+	if forge != null:
+		draw_rect(Rect2(Vector2.ZERO, Vector2(world.room.room_w, world.room.room_h)), ForgeMap.VOID)
+		return  # ForgeMap's chunks draw the rest
 	draw_rect(Rect2(Vector2.ZERO, Vector2(world.room.room_w, world.room.room_h)), Color.BLACK)  # seams
 	for l: Array in layers:
 		draw_texture_rect(l[0], l[1], false)
@@ -339,6 +602,30 @@ func _draw() -> void:
 		draw_rect(b, LabRoomData.floor_color(set_id))
 	for p in plates:
 		_draw_shutter(p)
+	if ring.z > 0.0:
+		_draw_ring_floor()
+
+
+## Painted maps: the cleared final-fight ring is a disc of floor (the room floor art).
+func _draw_ring_floor() -> void:
+	var tex: Texture2D = null
+	for rm: Array in rooms:
+		if rm[2] != zero_cell and not (rm[1].layers as Array).is_empty():
+			tex = rm[1].layers[0][0]
+			break
+	var c := Vector2(ring.x, ring.y)
+	var r := ring.z + 8.0
+	var pts := PackedVector2Array()
+	var uvs := PackedVector2Array()
+	var n := 48
+	for i in n:
+		var d := Vector2.from_angle(TAU * i / n)
+		pts.append(c + d * r)
+		uvs.append(Vector2(0.5, 0.5) + d * Vector2(0.3, 0.2))  # the middle of a room: plain floor
+	if tex != null:
+		draw_colored_polygon(pts, Color.WHITE, uvs, tex)
+	else:
+		draw_colored_polygon(pts, LabRoomData.floor_color(set_id))
 
 
 ## A shut blast door on the map edge: dark plate with hazard stripes.

@@ -78,7 +78,8 @@ func alarms_only(ex: Explore) -> DarkLights:
 		var r: Rect2 = rm[0]
 		var spots := [Vector2(0.18, 0.22), Vector2(0.82, 0.22), Vector2(0.18, 0.8), Vector2(0.82, 0.8)]
 		spots.shuffle()
-		for i in rng.randi_range(1, 2):
+		# many small areas (world 5 ForgeMap): one light each, so they stay few
+		for i in rng.randi_range(1, 2 if ex.rooms.size() <= 12 else 1):
 			var l := _light(self, r.position + r.size * (spots[i] as Vector2), rng.randf_range(80.0, 110.0),
 					Color(1.0, 0.12, 0.1), 0.45)
 			flicker.append([l, 0.45, "alarm_slow", rng.randf() * TAU])

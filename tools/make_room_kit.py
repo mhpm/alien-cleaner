@@ -1,9 +1,10 @@
-"""Kit de piezas para el interior de las salas EXPLORE (mundo 3: muros, columnas, tanques).
+"""Kit de piezas para el interior de las salas EXPLORE (mundo 3: muros, columnas, tanques;
+mundo 5: muros con lava, bobinas, reactores, tuberías, cajas).
 
-python tools/make_room_kit.py
-Lee tools/w3_kit_ref.webp (piezas sueltas sobre transparente) y escribe
-assets/rooms/w3/kit/k_NN.png (NN = orden de lectura por filas, el mismo que usa
-RoomKit.PIECES en scripts/data/room_kit.gd) + tools/w3_kit_index.png con cada número.
+python tools/make_room_kit.py [w3|w5]
+Lee tools/<set>_kit_ref.webp (piezas sueltas sobre transparente) y escribe
+assets/rooms/<set>/kit/k_NN.png (NN = orden de lectura por filas, el mismo que usa
+RoomKit.KITS[set] en scripts/data/room_kit.gd) + tools/<set>_kit_index.png con cada número.
 """
 import os
 
@@ -11,10 +12,13 @@ import cv2
 import numpy as np
 from PIL import Image, ImageDraw
 
+import sys
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC = os.path.join(ROOT, "tools", "w3_kit_ref.webp")
-OUT = os.path.join(ROOT, "assets", "rooms", "w3", "kit")
-INDEX = os.path.join(ROOT, "tools", "w3_kit_index.png")
+SET = sys.argv[1] if len(sys.argv) > 1 else "w3"
+SRC = os.path.join(ROOT, "tools", "%s_kit_ref.webp" % SET)
+OUT = os.path.join(ROOT, "assets", "rooms", SET, "kit")
+INDEX = os.path.join(ROOT, "tools", "%s_kit_index.png" % SET)
 
 
 def main() -> None:

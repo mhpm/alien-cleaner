@@ -30,6 +30,8 @@ var state := ""
 var state_t := 0.0
 var aim := Vector2.ZERO
 var hit_wall := false
+var detour_t := 0.0  # following the Explore flow field around a wall
+var anchored := false  # objectives that never move (SpecimenVat): no leash, no wipe
 var spawn_t := 0.3
 var tex_h := 16.0
 var base_scale := 1.0
@@ -42,6 +44,8 @@ var tint := Color.WHITE
 var art := ""
 var _ufo_attacks := 0
 var _sep := Vector2.ZERO  # separation push, set by GameWorld._separate_enemies
+const DETOUR_TIME := 1.2
+static var no_detour := false  # benches
 const LOD_EVERY := 4
 var _lod_acc := 0.0
 var _far := false
@@ -160,6 +164,22 @@ func player() -> Player:
 	return Game.world.player
 
 
+## Mazes (Explore.flow_dir, world 5): an alien that bumped into a wall while coming for
+## the astronaut follows the way around it for DETOUR_TIME instead of pushing on.
+func _detour(vel: Vector2, delta: float) -> Vector2:
+	if hit_wall:
+		detour_t = DETOUR_TIME
+	detour_t -= delta
+	var ex := Game.world.explore
+	if is_boss or ex == null or ex.forge == null:
+		return vel
+	var sp := vel.length()
+	if sp < 1.0 or vel.dot(player().global_position - global_position) <= 0.0:
+		return vel
+	var f := ex.flow_dir(global_position)
+	return vel if f == Vector2.ZERO else f * sp
+
+
 func _physics_process(delta: float) -> void:
 	if dead:
 		return
@@ -196,6 +216,8 @@ func _physics_process(delta: float) -> void:
 		stun_t -= delta
 	elif spawn_t <= 0.0:
 		vel = _ai(delta * aggro)  # aggro > 1: attack timers and windups run faster
+		if (hit_wall or detour_t > 0.0) and not no_detour:
+			vel = _detour(vel, delta)
 	if slow_t > 0.0:
 		slow_t -= delta
 		vel *= 0.5
