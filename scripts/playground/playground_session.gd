@@ -6,7 +6,7 @@ const PICKER := "res://scenes/playground.tscn"
 const COMBAT := "res://scenes/playground_combat.tscn"
 const MAX_TOTAL := 100
 const STATE_KEYS := ["bank", "perm", "best_room", "runs", "worlds_cleared", "best_time",
-	"chests", "boss_best", "boss_chests", "total_xp", "guns", "gun", "stats", "upgrades",
+	"chests", "boss_best", "boss_chests", "intro_seen", "total_xp", "guns", "gun", "stats", "upgrades",
 	"world_index", "room_index", "run_coins", "boss_rush", "menu_scene"]
 
 static var counts: Dictionary = {}

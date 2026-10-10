@@ -11,6 +11,7 @@ extends Control
 ## bar: SHOP (crew upgrades), GEAR (suits & blasters), BATTLE, TALENTS (soon), LAB
 ## (Infected Mode).
 
+const INTRO_SCENE := "res://scenes/intro.tscn"
 const GAME_SCENE := "res://scenes/game.tscn"
 const SELF_SCENE := "res://scenes/world_select.tscn"
 const DIR := "res://assets/ui/world/"
@@ -34,6 +35,8 @@ const NAV := ["shop", "gear", "battle", "talents", "lab"]
 const WORLD_RECT := Rect2(118, 398, 740, 614)
 ## BOSS CHALLENGE button (drawn in code, right of the chest): only once the world is cleared
 const BOSS_RECT := Rect2(626, 1004, 296, 176)
+## STORY: replay the intro cinematic (WORLD 1 only), top-left over the world's picture
+const STORY_RECT := Rect2(128, 410, 196, 66)
 const RED := Color("ff4f6a")
 const GOLD := Color("ffc933")
 const SHOP_IDS := ["health", "power", "speed"]
@@ -42,6 +45,7 @@ const GREEN := Color("a7f070")
 
 var t := 0.0
 var stage: Control
+var story_btn: Button
 var buttons: Dictionary = {}
 var sel := 0
 var pic: TextureRect
@@ -228,6 +232,7 @@ func _build() -> void:
 		badges[id] = dot
 
 	_build_boss_button()
+	_build_story_button()
 
 	toast = UiTheme.label("", 16, Color("ffcd75"))
 	toast.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -240,6 +245,38 @@ func _build() -> void:
 
 ## BOSS CHALLENGE: a red neon card with the world's final boss, "BOSS / CHALLENGE" and
 ## the best time. Starts a run that goes straight to the boss fight.
+## STORY button: replays the intro cinematic, then comes back here.
+func _build_story_button() -> void:
+	story_btn = Button.new()
+	story_btn.position = STORY_RECT.position
+	story_btn.size = STORY_RECT.size
+	story_btn.pivot_offset = STORY_RECT.size * 0.5
+	story_btn.focus_mode = Control.FOCUS_NONE
+	for st in ["normal", "hover", "pressed", "focus", "disabled"]:
+		story_btn.add_theme_stylebox_override(st, StyleBoxEmpty.new())
+	var f := NeonFrame.new()
+	f.color = CYAN
+	f.fill_top = Color(0.04, 0.12, 0.22, 0.9)
+	f.fill_bottom = Color(0.02, 0.05, 0.12, 0.9)
+	f.cut = 14.0
+	f.glow = 2
+	f.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	f.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	story_btn.add_child(f)
+	var l := _label("> STORY", 30, CYAN)
+	l.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	story_btn.add_child(l)
+	story_btn.button_down.connect(func() -> void: story_btn.scale = Vector2(0.95, 0.95))
+	story_btn.button_up.connect(func() -> void: story_btn.scale = Vector2.ONE)
+	story_btn.pressed.connect(func() -> void:
+		Sfx.play("select", 0.0)
+		IntroScreen.replay = true
+		get_tree().change_scene_to_file(INTRO_SCENE))
+	stage.add_child(story_btn)
+
+
 func _build_boss_button() -> void:
 	boss_btn = Button.new()
 	boss_btn.position = BOSS_RECT.position
@@ -420,6 +457,8 @@ func _show_world(fade := true) -> void:
 	(buttons.start as TextureButton).modulate = Color.WHITE if open else Color(0.45, 0.45, 0.5)
 	_show_chest()
 	_show_boss_button()
+	if story_btn != null:
+		story_btn.visible = sel == 0
 
 
 func _apply_world(tex: Texture2D, open: bool) -> void:
@@ -521,7 +560,9 @@ func _start(rush := false) -> void:
 	add_child(fade)
 	var tw := fade.create_tween()
 	tw.tween_property(fade, "color:a", 1.0, 0.25)
-	tw.tween_callback(func() -> void: get_tree().change_scene_to_file(GAME_SCENE))
+	# a new player's first WORLD 1: the intro cinematic first (it then starts the level)
+	var to := INTRO_SCENE if sel == 0 and not rush and not Game.intro_seen else GAME_SCENE
+	tw.tween_callback(func() -> void: get_tree().change_scene_to_file(to))
 
 
 func _open_chest() -> void:

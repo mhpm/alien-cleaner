@@ -31,6 +31,7 @@ var chests: Array = []
 var boss_best: Dictionary = {}
 ## worlds whose BOSS CHALLENGE chest (unlocked by winning the challenge once) was opened
 var boss_chests: Array = []
+var intro_seen := false  # the first-run intro cinematic (IntroScreen) was shown
 var total_xp := 0
 ## Android pieces found in arenas (AndroidPart part_id -> true), kept across runs.
 var android_parts: Dictionary = {}
@@ -342,6 +343,7 @@ func save() -> void:
 	cfg.set_value("worlds", "chests", chests)
 	cfg.set_value("worlds", "boss_best", boss_best)
 	cfg.set_value("worlds", "boss_chests", boss_chests)
+	cfg.set_value("meta", "intro_seen", intro_seen)
 	cfg.set_value("meta", "total_xp", total_xp)
 	cfg.set_value("android", "parts", android_parts)
 	cfg.set_value("armory", "guns", guns)
@@ -369,6 +371,8 @@ func load_save() -> void:
 	chests = cfg.get_value("worlds", "chests", [])
 	boss_best = cfg.get_value("worlds", "boss_best", {})
 	boss_chests = cfg.get_value("worlds", "boss_chests", [])
+	# saves from before the intro existed belong to players who already know the story
+	intro_seen = bool(cfg.get_value("meta", "intro_seen", runs > 0 or worlds_cleared > 0))
 	total_xp = int(cfg.get_value("meta", "total_xp", 0))
 	android_parts = cfg.get_value("android", "parts", {})
 	var owned: Dictionary = cfg.get_value("armory", "guns", {})
