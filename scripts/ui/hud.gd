@@ -5,6 +5,11 @@ extends CanvasLayer
 
 
 var game: GameWorld
+## In-level top bar kit (python tools/make_hud_assets.py): panel height on screen and the
+## 9-slice margins [left, top, right, bottom] in art px (the hp panel keeps its heart).
+const HUD_KIT := "res://assets/ui/hud/"
+const TOP_H := 30.0
+const HUD_SLICE := {"hp": [150, 50, 46, 50], "clock": [0, 0, 0, 0], "coins": [0, 0, 0, 0]}
 var root: Control
 var safe: Control  # top bar, touch controls and banners, kept clear of notches/rounded corners
 var controls: TouchControls
@@ -65,19 +70,20 @@ func setup(g: GameWorld) -> void:
 	safe.add_child(controls)
 	controls.ability_pressed.connect(func() -> void: game.player.blast())
 
-	# --- top bar: painted panels from the room art (assets/room/hud_*.png)
-	const K := 360.0 / 957.0  # art px -> screen px
-	var hp_panel := _hud_tex("hp", Vector2(0, 0), Vector2(6, 4), Vector2(338, 70) * K)
+	# --- top bar: the user's HUD kit (tools/hud_kit_ref.webp -> make_hud_assets.py ->
+	# assets/ui/hud/), 9-sliced to these widths at TOP_H tall
+	var hp_panel := _kit_panel("hp", Vector2(0, 0), Vector2(6, 3), 128.0)
 	safe.add_child(hp_panel)
 	hp_bar = Bar.new()
 	hp_bar.framed = false
 	hp_bar.fill = Color("e8323e")
 	hp_bar.font_size = 11
-	hp_bar.position = Vector2(72, 18) * K
-	hp_bar.size = Vector2(255, 34) * K
+	var hk := TOP_H / 160.0  # the slot of the wiped red bar, in the panel art
+	hp_bar.position = Vector2(150.0 * hk, 52.0 * hk)
+	hp_bar.size = Vector2(128.0 - 150.0 * hk - 35.0 * hk, 58.0 * hk)
 	hp_panel.add_child(hp_bar)
 
-	var room_panel := _hud_tex("room", Vector2(0.5, 0), Vector2(-46, 4), Vector2(244, 70) * K)
+	var room_panel := _kit_panel("clock", Vector2(0.5, 0), Vector2(-33, 3), 349.0 * TOP_H / 160.0)
 	safe.add_child(room_panel)
 	room_label = UiTheme.label("", 13)
 	room_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -85,13 +91,13 @@ func setup(g: GameWorld) -> void:
 	room_panel.add_child(room_label)
 	# wave progress + aliens left, just under the room panel
 	wave_label = UiTheme.label("", 10, Color("ffcd75"))
-	_place(wave_label, Vector2(0.5, 0), Vector2(-80, 4 + 70 * K), Vector2(160, 14))
+	_place(wave_label, Vector2(0.5, 0), Vector2(-80, 3 + TOP_H), Vector2(160, 14))
 	safe.add_child(wave_label)
 	xp_bar = Bar.new()
 	xp_bar.fill = Color("38b764")
 	xp_bar.font_size = 9
 	xp_bar.ratio = 0.0
-	_place(xp_bar, Vector2(0, 0), Vector2(6, 6 + 70 * K), Vector2(12, 11), true)
+	_place(xp_bar, Vector2(0, 0), Vector2(6, 5 + TOP_H), Vector2(12, 11), true)
 	xp_bar.offset_right = -6
 	xp_bar.visible = false
 	buff_bar = BuffBar.new()
@@ -100,26 +106,26 @@ func setup(g: GameWorld) -> void:
 	xp_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	safe.add_child(xp_bar)
 
-	var coin_panel := _hud_tex("coins", Vector2(1, 0), Vector2(-118, 4), Vector2(194, 70) * K)
+	var coin_panel := _kit_panel("coins", Vector2(1, 0), Vector2(-96, 3), 319.0 * TOP_H / 160.0)
 	safe.add_child(coin_panel)
-	coin_label = UiTheme.label("0", 14, Color.WHITE)
-	coin_label.position = Vector2(66, 0) * K
-	coin_label.size = Vector2(118, 70) * K
+	coin_label = UiTheme.label("0", 13, Color.WHITE)
+	coin_label.position = Vector2(118.0 * TOP_H / 160.0, 0)
+	coin_label.size = Vector2((319.0 - 118.0 - 30.0) * TOP_H / 160.0, TOP_H)
 	coin_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	coin_panel.add_child(coin_label)
 
 	var pause_btn := TextureButton.new()
-	pause_btn.texture_normal = load("res://assets/room/hud_pause.png")
+	pause_btn.texture_normal = load(HUD_KIT + "pause.png")
 	pause_btn.ignore_texture_size = true
-	pause_btn.stretch_mode = TextureButton.STRETCH_SCALE
-	pause_btn.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	_place(pause_btn, Vector2(1, 0), Vector2(-34, 3), Vector2(74, 74) * K)
+	pause_btn.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
+	pause_btn.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	_place(pause_btn, Vector2(1, 0), Vector2(-33, 3), Vector2(28, TOP_H))
 	pause_btn.pressed.connect(toggle_pause)
 	safe.add_child(pause_btn)
 
 	weapon_label = UiTheme.label("", 10, Color("73eff7"))
 	weapon_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	_place(weapon_label, Vector2(0, 0), Vector2(10, 31), Vector2(160, 14))
+	_place(weapon_label, Vector2(0, 0), Vector2(10, 3 + TOP_H), Vector2(160, 14))
 	safe.add_child(weapon_label)
 
 	# --- boss bar
@@ -170,6 +176,29 @@ func _place(c: Control, anchor: Vector2, pos: Vector2, sz: Vector2, full_width :
 	c.offset_bottom = pos.y + sz.y
 
 
+## A panel of the HUD kit 9-sliced to width w (screen px) and TOP_H tall. NinePatchRect
+## margins are in texture pixels, so the patch is laid out at art size and scaled down.
+func _kit_panel(name: String, anchor: Vector2, pos: Vector2, w: float) -> Control:
+	var box := Control.new()
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_place(box, anchor, pos, Vector2(w, TOP_H))
+	var tex: Texture2D = load(HUD_KIT + name + ".png")
+	var k := TOP_H / float(tex.get_height())
+	var m: Array = HUD_SLICE[name]
+	var np := NinePatchRect.new()
+	np.texture = tex
+	np.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	np.patch_margin_left = m[0]
+	np.patch_margin_top = m[1]
+	np.patch_margin_right = m[2]
+	np.patch_margin_bottom = m[3]
+	np.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	np.size = Vector2(w / k, tex.get_height())
+	np.scale = Vector2(k, k)
+	box.add_child(np)
+	return box
+
+
 func _hud_tex(name: String, anchor: Vector2, pos: Vector2, sz: Vector2) -> TextureRect:
 	var r := TextureRect.new()
 	r.texture = load("res://assets/room/hud_%s.png" % name)
@@ -217,11 +246,10 @@ func set_room(n: int, total: int) -> void:
 ## Survival stages: XP bar under the top panels, wave line and blaster tier below it.
 func enable_survival(on: bool) -> void:
 	xp_bar.visible = on
-	const K := 360.0 / 957.0
-	var y := 4 + 70 * K + (13.0 if on else 0.0)
+	var y := 3 + TOP_H + (13.0 if on else 0.0)
 	wave_label.offset_top = y
 	wave_label.offset_bottom = y + 14
-	weapon_label.offset_top = 31 + (13.0 if on else 0.0)
+	weapon_label.offset_top = 3 + TOP_H + (13.0 if on else 0.0)
 	weapon_label.offset_bottom = weapon_label.offset_top + 14
 	boss_box.offset_top = 44 + (14.0 if on else 0.0)
 	boss_box.offset_bottom = boss_box.offset_top + 34
@@ -822,99 +850,7 @@ func toggle_pause() -> void:
 	if overlay != null or game.state not in ["intro", "fight", "gap", "cleared", "exit", "explore", "survive"]:
 		return
 	var box := _open_overlay("pause", 0.75)
-	box.add_child(_center(_pause_panel()))
-
-
-## Pause screen: one neon panel with the run's stats (blaster, wave, time, coins), every
-## active upgrade with its level, and the RESUME / QUIT RUN buttons.
-func _pause_panel() -> Control:
-	var panel := PanelContainer.new()
-	var m := StyleBoxEmpty.new()
-	m.set_content_margin_all(14)
-	m.content_margin_top = 18
-	m.content_margin_bottom = 18
-	panel.add_theme_stylebox_override("panel", m)
-	panel.custom_minimum_size = Vector2(332, 0)
-	var frame := NeonFrame.new()
-	frame.color = Color("41a6f6")
-	frame.fill_top = Color(0.05, 0.07, 0.16, 0.94)
-	frame.fill_bottom = Color(0.03, 0.04, 0.1, 0.94)
-	frame.cut = 16.0
-	frame.notches = true
-	panel.add_child(frame)
-	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 10)
-	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	panel.add_child(v)
-	v.add_child(_upgrade_header("PAUSED", "Run temporarily halted", Color("73eff7"), Color("123a6b")))
-	v.add_child(_pause_stats())
-	if game.explore != null and not game.explore.saved_crew.is_empty():
-		v.add_child(_section_title("RESCUED CREW BONUSES"))
-		v.add_child(_pause_crew(game.explore.saved_crew))
-	if game.explore == null or game.explore.saved_crew.is_empty() or not Game.upgrades.is_empty():
-		v.add_child(_section_title("ACTIVE UPGRADES"))
-		v.add_child(_pause_upgrades())
-	v.add_child(_spacer(2))
-	var resume_row := HBoxContainer.new()
-	resume_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	resume_row.add_theme_constant_override("separation", 6)
-	resume_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	resume_row.add_child(UiTheme.label("<", 16, Color("73eff7")))
-	var resume := _neon_button("RESUME", Color("38b764"), Vector2(236, 50), 22)
-	resume.pressed.connect(toggle_pause)
-	resume_row.add_child(resume)
-	resume_row.add_child(UiTheme.label(">", 16, Color("73eff7")))
-	v.add_child(resume_row)
-	var quit := _neon_button("QUIT RUN", Color("d23c50"), Vector2(236, 44), 18, Art.tex("skull"))
-	quit.pressed.connect(_to_menu)
-	v.add_child(_center(quit))
-	return panel
-
-
-## WEAPON | WAVE (ROOM outside survival) | TIME | COINS columns in a framed strip.
-func _pause_stats() -> Control:
-	var p := PanelContainer.new()
-	var m := StyleBoxEmpty.new()
-	m.set_content_margin_all(8)
-	m.content_margin_top = 12
-	m.content_margin_bottom = 10
-	p.add_theme_stylebox_override("panel", m)
-	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var f := NeonFrame.new()
-	f.color = Color("41a6f6")
-	f.fill_top = Color(0.06, 0.09, 0.2)
-	f.fill_bottom = Color(0.03, 0.04, 0.1)
-	f.cut = 10.0
-	f.glow = 2
-	p.add_child(f)
-	var h := HBoxContainer.new()
-	h.add_theme_constant_override("separation", 0)
-	h.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	p.add_child(h)
-	var gid := str(Game.stats.get("gun", "pulse"))
-	var gun := _tex_rect(GunData.icon(gid), Vector2(52, 26))
-	var gun_col := _stat_col("WEAPON", gun, "Lv %d" % int(Game.stats.get("gun_lv", 1)), Color.WHITE, 11)
-	var tier := str(GunData.gun(gid).name)
-	var tl := UiTheme.label(tier, UiTheme.fit_size(UiTheme.FONT, tier, 10, 62.0))
-	tl.add_theme_constant_override("outline_size", 4)
-	gun_col.add_child(tl)
-	h.add_child(gun_col)
-	var sv := game.survival
-	var wave_txt := "%d / %d" % [Game.global_room(), WorldData.total_rooms()]
-	var secs := run_t
-	if sv != null:
-		wave_txt = "BOSS" if sv.final_sent else "%d / %d" % [maxi(sv.wave + 1, 1), sv.waves.size()]
-		secs = sv.t
-	h.add_child(_stat_sep())
-	var alien := _tex_rect(Art.frame_tex("green", "walk", 0), Vector2(26, 26))
-	h.add_child(_stat_col("WAVE" if sv != null else "ROOM", alien, wave_txt, Color("ffcd75")))
-	h.add_child(_stat_sep())
-	var clock := "%02d:%02d" % [floori(secs / 60.0), int(secs) % 60]
-	h.add_child(_stat_col("TIME", UiTheme.icon("clock", 24), clock, Color.WHITE))
-	h.add_child(_stat_sep())
-	var coin := _tex_rect(CollectibleData.tex("coin"), Vector2(24, 24))
-	h.add_child(_stat_col("COINS", coin, str(Game.run_coins), Color.WHITE))
-	return p
+	box.add_child(_center(PausePanel.build(self, toggle_pause, _to_menu)))
 
 
 func _tex_rect(tex: Texture2D, sz: Vector2) -> TextureRect:
@@ -926,222 +862,6 @@ func _tex_rect(tex: Texture2D, sz: Vector2) -> TextureRect:
 	r.custom_minimum_size = sz
 	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return r
-
-
-func _stat_col(title: String, icon: Control, value: String, col: Color, fs := 14) -> VBoxContainer:
-	var c := VBoxContainer.new()
-	c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	c.add_theme_constant_override("separation", 3)
-	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var t := UiTheme.label(title, 10, Color("73eff7"))
-	t.add_theme_constant_override("outline_size", 4)
-	c.add_child(t)
-	var ic := CenterContainer.new()
-	ic.custom_minimum_size = Vector2(0, 28)
-	ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	ic.add_child(icon)
-	c.add_child(ic)
-	c.add_child(UiTheme.label(value, fs, col))
-	return c
-
-
-## Thin vertical divider between the stat columns.
-func _stat_sep() -> Control:
-	var r := ColorRect.new()
-	r.color = Color(0.25, 0.65, 0.96, 0.45)
-	r.custom_minimum_size = Vector2(1, 0)
-	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	return r
-
-
-## "--  TITLE  --" divider.
-func _section_title(text: String) -> Control:
-	var row := HBoxContainer.new()
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_theme_constant_override("separation", 8)
-	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	for i in 3:
-		if i == 1:
-			row.add_child(UiTheme.label(text, 16, Color("73eff7")))
-			continue
-		var line := ColorRect.new()
-		line.color = Color("41a6f6")
-		line.custom_minimum_size = Vector2(22, 2)
-		line.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		line.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		row.add_child(line)
-	return row
-
-
-const ACTIVE_CARD := Vector2(96, 92)
-
-
-## Every upgrade taken this run as a small card (picture of its current level, name,
-## level and 5 pips), 3 per row; scrolls when there are more rows than fit.
-func _pause_upgrades() -> Control:
-	var ids: Array[String] = []
-	for id: String in Game.upgrades:
-		ids.append(id)
-	if ids.is_empty():
-		var none := UiTheme.label("No upgrades yet. Level up to pick some!", 12, Color("94b0c2"))
-		none.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		none.custom_minimum_size = Vector2(280, 40)
-		none.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		return none
-	var grid := GridContainer.new()
-	grid.columns = 3
-	grid.add_theme_constant_override("h_separation", 6)
-	grid.add_theme_constant_override("v_separation", 6)
-	grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	for id in ids:
-		grid.add_child(_active_card(id))
-	var row_h := ACTIVE_CARD.y + 6.0
-	var rows := ceili(ids.size() / 3.0)
-	# room left on screen once the header, stats and buttons are placed
-	var max_h := maxf(row_h * 2.0 - 6.0, root.size.y - 440.0)
-	if rows * row_h - 6.0 <= max_h:
-		return _center(grid)
-	var sc := ScrollContainer.new()
-	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	sc.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
-	# cut through a row so it is clear the list keeps going
-	sc.custom_minimum_size = Vector2(0, (floorf((max_h + 6.0) / row_h) - 0.5) * row_h)
-	grid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER | Control.SIZE_EXPAND
-	sc.add_child(grid)
-	return sc
-
-
-## Rescued crew and the bonus each one gave (pause menu): portrait in a frame of their
-## colour, name, gift. Scrolls after a few rows (fewer when there are upgrades too).
-func _pause_crew(crew: Array[int]) -> Control:
-	var list := VBoxContainer.new()
-	list.add_theme_constant_override("separation", 8)
-	list.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	for i in crew:
-		list.add_child(_crew_row(i))
-	var fit := 4 if Game.upgrades.is_empty() else 2  # rows shown before it scrolls
-	if crew.size() <= fit:
-		return list
-	var sc := ScrollContainer.new()
-	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	sc.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
-	sc.custom_minimum_size = Vector2(0, (fit + 0.5) * 62.0)  # cut through a row: the list goes on
-	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	sc.add_child(list)
-	return sc
-
-
-func _crew_row(i: int) -> Control:
-	var def: Dictionary = SurvivorData.CREW[i]
-	var col: Color = def.color
-	var row := PanelContainer.new()
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(0.05, 0.08, 0.17, 0.95)
-	sb.border_color = Color(col, 0.55)
-	sb.set_border_width_all(1)
-	sb.set_corner_radius_all(4)
-	sb.content_margin_left = 6
-	sb.content_margin_right = 10
-	sb.content_margin_top = 6
-	sb.content_margin_bottom = 6
-	row.add_theme_stylebox_override("panel", sb)
-	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var h := HBoxContainer.new()
-	h.add_theme_constant_override("separation", 12)
-	h.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(h)
-	# portrait: the happy face, cropped to the head, in a frame of their colour
-	var pf := Panel.new()
-	var psb := StyleBoxFlat.new()
-	psb.bg_color = col.darkened(0.6)
-	psb.border_color = col
-	psb.set_border_width_all(2)
-	psb.set_corner_radius_all(4)
-	pf.add_theme_stylebox_override("panel", psb)
-	pf.custom_minimum_size = Vector2(42, 42)
-	pf.clip_contents = true
-	pf.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var face := TextureRect.new()
-	var tex := SurvivorData.tex(i, true)
-	var at := AtlasTexture.new()
-	at.atlas = tex
-	var tw := float(tex.get_width())
-	at.region = Rect2(tw * 0.08, 0, tw * 0.84, tw * 0.84)
-	face.texture = at
-	face.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	face.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	face.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	face.position = Vector2(2, 2)
-	face.size = Vector2(38, 38)
-	face.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	pf.add_child(face)
-	h.add_child(pf)
-	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 5)
-	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	v.alignment = BoxContainer.ALIGNMENT_CENTER
-	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var name_l := UiTheme.label(str(def.name), 14, col.lightened(0.15))
-	name_l.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	name_l.add_theme_constant_override("outline_size", 4)
-	v.add_child(name_l)
-	var gift := UiTheme.body(str(def.gift), 12, Color("d6e6ff"))
-	gift.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	v.add_child(gift)
-	h.add_child(v)
-	return row
-
-
-func _active_card(id: String) -> Control:
-	var def: Dictionary = UpgradeData.UPGRADES[id]
-	var col: Color = def.color
-	var lv := UpgradeData.current_level(id)
-	var stacking := int(def.max) >= 99  # Space Snack: just a count
-	var c := Control.new()
-	c.custom_minimum_size = ACTIVE_CARD
-	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var f := NeonFrame.new()
-	f.color = Color("41a6f6")
-	f.fill_top = Color(0.07, 0.1, 0.22)
-	f.fill_bottom = Color(0.03, 0.04, 0.1)
-	f.cut = 8.0
-	f.glow = 1
-	f.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	c.add_child(f)
-	var v := VBoxContainer.new()
-	v.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	v.offset_top = 6
-	v.offset_bottom = -6
-	v.add_theme_constant_override("separation", 1)
-	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	c.add_child(v)
-	var pic := _tex_rect(UpgradeData.icon(id) if stacking else UpgradeData.level_tex(id, lv), Vector2(40, 40))
-	var pc := CenterContainer.new()
-	pc.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	pc.add_child(pic)
-	v.add_child(pc)
-	var nm := str(def.name)
-	var name_l := UiTheme.label(nm, UiTheme.fit_size(UiTheme.FONT, nm, 11, 88.0))
-	name_l.add_theme_constant_override("outline_size", 4)
-	v.add_child(name_l)
-	var maxed := not stacking and lv >= UpgradeData.LEVELS
-	var lv_txt := "x%d" % lv if stacking else ("Lv %d MAX" % lv if maxed else "Lv %d" % lv)
-	var lv_l := UiTheme.label(lv_txt, 11, Color("ffcd75") if maxed else col.lerp(Color.WHITE, 0.35))
-	lv_l.add_theme_constant_override("outline_size", 4)
-	v.add_child(lv_l)
-	if not stacking:
-		var pips := HBoxContainer.new()
-		pips.alignment = BoxContainer.ALIGNMENT_CENTER
-		pips.add_theme_constant_override("separation", 2)
-		pips.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		for i in UpgradeData.LEVELS:
-			var pip := ColorRect.new()
-			pip.custom_minimum_size = Vector2(10, 4)
-			pip.color = col.lerp(Color.WHITE, 0.2) if i < lv else Color(0.2, 0.25, 0.4)
-			pip.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			pips.add_child(pip)
-		v.add_child(pips)
-	return c
 
 
 ## Chunky neon button: glowing chamfered frame filled with `col`, optional icon on the left.
@@ -1185,14 +905,7 @@ func _neon_button(text: String, col: Color, sz: Vector2, fs: int, icon: Texture2
 
 func show_game_over() -> void:
 	var box := _open_overlay("gameover", 0.8)
-	box.add_child(UiTheme.title("WIPED OUT!", 44, Color("ff5566")))
-	box.add_child(UiTheme.label("The aliens made a mess of you.", 14, Color("94b0c2")))
-	box.add_child(_spacer(8))
-	box.add_child(UiTheme.label("Reached room %d" % Game.global_room(), 20))
-	box.add_child(UiTheme.label("+%d coins banked" % Game.run_coins, 20, Color("ffcd75")))
-	box.add_child(UiTheme.label("Bank: %d  (spend in UPGRADES)" % Game.bank, 13, Color("94b0c2")))
-	box.add_child(_spacer(12))
-	_end_buttons(box)
+	box.add_child(_center(GameOverPanel.build(self, _restart, _to_menu)))
 
 
 ## "WORLD n CLEARED!" (VictoryScreen): stats and rewards, animated.

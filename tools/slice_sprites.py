@@ -403,6 +403,110 @@ SETS = {
     "nova_bubble": {"anchor": "center", "anims": {"fly": ([W4 % ("nova_puffer", "attack", i) for i in (3, 4)], 6, True)}, "body": "fly"},
     # world 4 drones (tools/drones_w4_ref.webp -> tools/cut_sheet_enemies.py); "death" =
     # the die row, played once as an effect.
+    # world 7 (WARP NEXUS) drones, tools/enemies_w7_ref.webp (cut_sheet_enemies.py)
+    "laser_drone": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("laser_drone", "idle", i) for i in (1, 2, 3, 4)], 8, True),
+            "attack": ([W4 % ("laser_drone", "attack", i) for i in (1, 2)], 8, True),
+            "fire": ([W4 % ("laser_drone", "attack", 3)], 1, True),
+            "death": ([W4 % ("laser_drone", "die", i) for i in (1, 2, 3, 4)], 9, False),
+        },
+        "body": "walk",
+    },
+    "laser_beam": {"anchor": "center", "anims": {"fly": ([W4 % ("laser_drone", "shot", 1)], 1, True)}, "body": "fly"},
+    "laser_orb": {"anchor": "center", "anims": {"fly": ([W4 % ("laser_drone", "shot", 2)], 1, True)}, "body": "fly"},
+    "spider_bot": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("spider_bot", "idle", i) for i in (1, 2, 3, 4)], 10, True),
+            "attack": ([W4 % ("spider_bot", "attack", i) for i in (1, 2)], 8, False),
+            "death": ([W4 % ("spider_bot", "die", i) for i in (1, 2, 3, 4)], 9, False),
+        },
+        "body": "walk",
+    },
+    "spider_orb": {"anchor": "center", "anims": {"fly": ([W4 % ("spider_bot", "shot", 2)], 1, True)}, "body": "fly"},
+    "gravity_sentinel": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("gravity_sentinel", "idle", i) for i in (1, 2, 3, 4)], 7, True),
+            "attack": ([W4 % ("gravity_sentinel", "attack", i) for i in (1, 2)], 7, True),
+            "death": ([W4 % ("gravity_sentinel", "die", i) for i in (1, 2, 3, 4)], 9, False),
+        },
+        "body": "walk",
+    },
+    "gravity_well": {"anchor": "center", "anims": {"fly": ([W4 % ("gravity_sentinel", "shot", 1)], 1, True)}, "body": "fly"},
+    "gravity_orb": {"anchor": "center", "anims": {"fly": ([W4 % ("gravity_sentinel", "orb", 2)], 1, True)}, "body": "fly"},
+    "saw_drone": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("saw_drone", "idle", i) for i in (1, 2, 3, 4)], 12, True),
+            "attack": ([W4 % ("saw_drone", "attack", i) for i in (1, 2)], 10, True),
+            "death": ([W4 % ("saw_drone", "die", i) for i in (1, 2, 3, 4)], 9, False),
+        },
+        "body": "walk",
+    },
+    "plasma_saw": {"anchor": "center", "anims": {"fly": ([W4 % ("saw_drone", "shot", i) for i in (1, 2, 3)], 14, True)}, "body": "fly"},
+    # world 8 (BIODOME) aliens, tools/enemies_w8_ref.webp (cut_sheet_enemies.py)
+    "bio_droid": {"anchor": "bbox", "anims": {
+        "walk": ([W4 % ("bio_droid", "idle", i) for i in (1, 2, 3, 4)], 8, True),
+        "attack": ([W4 % ("bio_droid", "attack", i) for i in (1, 2, 3)], 8, True),
+        "death": ([W4 % ("bio_droid", "die", i) for i in (1, 2, 3, 4)], 9, False)}, "body": "walk"},
+    "bio_leaf": {"anchor": "center", "anims": {"fly": ([W4 % ("bio_droid", "shot", 1)], 1, True)}, "body": "fly"},
+    "spike_bloom": {"anchor": "bottom", "anims": {
+        "walk": ([W4 % ("spike_bloom", "idle", i) for i in (1, 2, 3, 4)], 7, True),
+        "attack": ([W4 % ("spike_bloom", "attack", i) for i in (1, 2)], 6, True),
+        "death": ([W4 % ("spike_bloom", "die", i) for i in (1, 2, 3, 4)], 8, False)}, "body": "walk"},
+    "spike_orb": {"anchor": "center", "anims": {"fly": ([W4 % ("spike_bloom", "shot", 1)], 1, True)}, "body": "fly"},
+    "vine_crawler": {"anchor": "bottom", "anims": {
+        "walk": ([W4 % ("vine_crawler", "idle", i) for i in (1, 2, 3, 4)], 8, True),
+        "attack": ([W4 % ("vine_crawler", "attack", 1)], 1, True),
+        "death": ([W4 % ("vine_crawler", "die", i) for i in (1, 2, 3, 4)], 8, False)}, "body": "walk"},
+    "spore_drone": {"anchor": "bbox", "anims": {
+        "walk": ([W4 % ("spore_drone", "idle", i) for i in (1, 2, 3, 4)], 7, True),
+        "attack": ([W4 % ("spore_drone", "attack", i) for i in (1, 2, 3)], 7, True),
+        "death": ([W4 % ("spore_drone", "die", i) for i in (1, 2, 3, 4)], 8, False)}, "body": "walk"},
+    "drone_spore": {"anchor": "center", "anims": {"fly": ([W4 % ("spore_drone", "shot", 2)], 1, True)}, "body": "fly"},
+    # BLOOM COLOSSUS, world 8 final boss (tools/boss_bloom_ref.webp, boss_bloom.gd)
+    "bloom": {
+        "anchor": "bottom",
+        "anims": {
+            "walk": ([W4 % ("bloom", "look", i) for i in (1, 1, 1, 1, 2, 1)], 6, True),
+            "angry": ([W4 % ("bloom", "look", 3)], 1, True),
+            "fury": ([W4 % ("bloom", "look", i) for i in (4, 3)], 5, True),
+            "stun": ([W4 % ("bloom", "look", 5)], 1, True),
+            "bud": ([W4 % ("bloom", "look", 6)], 1, True),
+            "shoot": ([W4 % ("bloom", "shoot", i) for i in (1, 2)], 8, True),
+            "summon": ([W4 % ("bloom", "summon", 1)], 1, True),
+            "death": ([W4 % ("bloom", "die", i) for i in (1, 2, 3, 4, 5, 6)], 6, False),
+        },
+        "body": "walk",
+    },
+    "bloom_seed": {"anchor": "center", "anims": {"fly": ([W4 % ("bloom", "seed", i) for i in (3, 4, 5, 6)], 6, False)}, "body": "fly"},
+    "bloom_spore": {"anchor": "center", "anims": {"fly": ([W4 % ("bloom", "seed", 2)], 1, True)}, "body": "fly"},
+    "bloom_burst": {"anchor": "center", "anims": {"pop": ([W4 % ("bloom", "seed", i) for i in (6, 7)], 10, False)}, "body": "pop"},
+    "bloom_roots": {"anchor": "bottom", "anims": {"pop": ([W4 % ("bloom", "roots", i) for i in (2, 1, 3, 3, 1)], 10, False)}, "body": "pop"},
+    "bloom_ring": {"anchor": "bottom", "anims": {"pop": ([W4 % ("bloom", "roots", i) for i in (4, 5, 4)], 8, False)}, "body": "pop"},
+    "bloom_wreck": {"anchor": "bottom", "anims": {"pop": ([W4 % ("bloom", "die", 6)], 1, False)}, "body": "pop"},
+    "bloom_sprout": {"anchor": "bottom", "anims": {"walk": ([W4 % ("bloom", "pods", i) for i in (3, 5, 6, 7)], 8, True)}, "body": "walk"},
+    # WARP OVERSEER, world 7 final boss (tools/boss_overseer_ref.webp, boss_overseer.gd)
+    "overseer": {
+        "anchor": "bbox",
+        "anims": {
+            "walk": ([W4 % ("overseer", "look", i) for i in (1, 1, 2, 3, 4, 3, 2, 1)], 6, True),
+            "glow": ([W4 % ("overseer", "glow", 1)], 1, True),
+            "stun": ([W4 % ("overseer", "stun", 1)], 1, True),
+            "fire": ([W4 % ("overseer", "fire", i) for i in (1, 2, 3, 4, 5, 6)], 12, False),
+            "charge": ([W4 % ("overseer", "cone", i) for i in (1, 2)], 6, True),
+            "blink": ([W4 % ("overseer", "blink", i) for i in (1, 2, 3, 4, 5)], 10, False),
+            "zip": ([W4 % ("overseer", "blink", i) for i in (6, 7, 8, 9, 10, 11)], 12, True),
+            "death": ([W4 % ("overseer", "die", i) for i in (1, 2, 3, 4, 5, 6, 7)], 9, False),
+        },
+        "body": "walk",
+    },
+    "overseer_ball": {"anchor": "center", "anims": {"fly": ([W4 % ("overseer", "ball", i) for i in (5, 4, 3, 2, 1)], 6, False)}, "body": "fly"},
+    "overseer_spark": {"anchor": "center", "anims": {"fly": ([W4 % ("overseer", "ball", 5)], 1, True)}, "body": "fly"},
+    "overseer_wreck": {"anchor": "bottom", "anims": {"pop": ([W4 % ("overseer", "broken", 2)], 1, False)}, "body": "pop"},
     "blade_drone": {
         "anchor": "bbox",
         "anims": {

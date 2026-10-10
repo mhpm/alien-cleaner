@@ -22,6 +22,10 @@ func _size_to_player(secs := TARGET_SECS) -> void:
 		hp = max_hp
 	# world 5: every overheating reactor vented = the forge cooled, bosses arrive weaker
 	var ex: Explore = Game.world.explore if Game.world != null else null
+	if ex != null and ex.gate_charged():  # world 7: every warp cell taken
+		max_hp *= Explore.GATE_HP
+		hp = max_hp
+		Game.world.popup_text(global_position + Vector2(0, -40), "GATE CHARGED: -%d%% HP" % roundi((1.0 - Explore.GATE_HP) * 100.0), WarpCell.COL, 11)
 	if ex != null and ex.forge_cooled():
 		max_hp *= Explore.COOLED_HP
 		hp = max_hp

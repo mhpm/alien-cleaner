@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://f3l33w2ju30q"
+path="res://.godot/imported/Sub UFO.mp3-dbbe5181dff4a9737de702a375516934.mp3str"
+
+[deps]
+
+source_file="res://assets/music/levels/Sub UFO.mp3"
+dest_files=["res://.godot/imported/Sub UFO.mp3-dbbe5181dff4a9737de702a375516934.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

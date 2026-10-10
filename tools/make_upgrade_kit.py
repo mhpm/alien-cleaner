@@ -6,6 +6,11 @@ Sources (loose PNGs cut from the level-up mock-up):
   assets/ui/upgrades/upgrade_elements/elements_NNN.png   frames, header, NEW, shield strip
   assets/ui/upgrades/marciano_elements/marciano_NNN.png  Martian UFO, its shots, level boxes
   tools/overdrive_ref.webp   OVERDRIVE: 5 framed level cards, their 5 shot pictures, portrait
+  tools/fire_rate_ref.webp   RAPID FIRE: same layout (5 comet shots, chevron portrait)
+  tools/helper_drone_ref.webp  SCRUB-BOTS: drone portrait, 5 red level cards, 8 spin frames
+  tools/hunter_drone_ref.webp  HUNTER DRONE: red level cards, drone, blade, whirl, pinwheel
+  tools/coin_magnet_ref.webp   COIN MAGNET: overdrive layout (5 vortexes, portrait)
+  tools/bomber_drone_ref.webp  BOMBER DRONE: orange level cards, drone, bomb, explosion frames
 
 Output: assets/ui/upgrades/kit/
   header.png            "LEVEL UP / Choose an upgrade" plate
@@ -41,6 +46,48 @@ OUT = os.path.join(UP, "kit")
 OVERDRIVE_LEVELS = [(20, 570, 290, 715), (300, 540, 550, 740), (565, 505, 825, 785),
                     (825, 560, 1113, 745), (1108, 450, 1440, 800)]
 OVERDRIVE_PORTRAIT = (606, 824, 858, 1038)
+# RAPID FIRE (tools/fire_rate_ref.webp, same layout): the 5 loose comet shots and the
+# octagon chevron portrait
+RAPID_LEVELS = [(20, 582, 258, 772), (290, 582, 537, 772), (555, 582, 838, 772),
+                (838, 582, 1118, 772), (1118, 582, 1434, 772)]
+RAPID_PORTRAIT = (580, 792, 868, 1068)
+# SCRUB-BOTS (tools/helper_drone_ref.webp): portrait drone on the left, 5 red level cards
+# (the drone is cut out of each card's red fill), 8 spin frames on the bottom row
+SCRUB_PORTRAIT = (10, 60, 480, 520)
+SCRUB_CARDS = [(498, 752), (789, 1040), (1070, 1325), (1353, 1613), (1637, 1907)]
+SCRUB_CARD_Y = (195, 395)
+SCRUB_SPIN = [(25, 236), (264, 470), (501, 692), (726, 928), (970, 1180), (1234, 1424),
+              (1468, 1673), (1708, 1917)]
+SCRUB_SPIN_Y = (555, 770)
+# HUNTER DRONE (tools/hunter_drone_ref.webp): the boomerang drone. Row 1 = 5 red level
+# cards (cut out of their red fill), row 2 = the drone turning (only frame 1 is used: it
+# floats without animation, the user's call),
+# row 3 = its blade thrown (a clean crescent at 167..287), row 4 = the drone whirling and
+# the 4-blade pinwheel. Boxes from a connected-components pass over the sheet.
+HUNTER_CARDS = [(255, 494), (504, 746), (766, 1008), (1022, 1265), (1280, 1524)]
+HUNTER_CARD_Y = (46, 215)
+HUNTER_TURN = [(28, 332, 200, 510), (222, 324, 419, 502), (448, 328, 598, 505),
+               (632, 319, 828, 529), (939, 317, 1151, 529), (1187, 329, 1325, 509),
+               (1355, 318, 1552, 496), (1577, 329, 1747, 504)]
+HUNTER_BLADE = (219, 585, 287, 674)
+HUNTER_WHIRL = (414, 716, 640, 881)
+HUNTER_PINWHEEL = (931, 722, 1099, 871)
+# BOMBER DRONE (tools/bomber_drone_ref.webp): 5 orange level cards (drone cut out of
+# their dark fill), the drone from the front (row 2), a clean bomb, 8 explosion frames
+BOMBER_CARDS = [(43, 290), (305, 559), (575, 838), (842, 1118), (1125, 1418)]
+BOMBER_CARD_Y = (52, 236)
+BOMBER_BODY = (14, 309, 235, 484)
+BOMBER_BOMB = (273, 738, 382, 851)
+BOMBER_BOOM_X = [(34, 88), (107, 180), (201, 277), (296, 410), (426, 568), (583, 800),
+                 (808, 1053), (1056, 1433)]
+BOMBER_BOOM_Y = (872, 1070)
+BOOM_CANVAS = (384, 200)
+
+# COIN MAGNET (tools/coin_magnet_ref.webp, overdrive layout): 5 loose vortex pictures and
+# the portrait
+MAGNET_LEVELS = [(40, 440, 265, 755), (308, 440, 564, 755), (566, 440, 840, 755),
+                 (845, 440, 1116, 755), (1116, 440, 1428, 755)]
+MAGNET_PORTRAIT = (588, 790, 856, 1056)
 
 # shield strength colours, weakest -> strongest (red is always the strongest)
 SHIELD_HUES = [None, 135.0, 275.0, 32.0, 356.0]  # None = keep the art's blue
@@ -201,6 +248,80 @@ def hollow(img: Image.Image, inner: float = 0.42, outer: float = 0.9, keep: floa
     return out
 
 
+def card_cutout(img: Image.Image) -> Image.Image:
+    """The drone on a red level card: drop the dark-red fill and the frame's corner bits."""
+    import numpy as np
+    from scipy import ndimage
+    a = np.array(img).astype(np.int32)
+    r, g, b = a[..., 0], a[..., 1], a[..., 2]
+    fill = (r > 60) & (r < 200) & (g < 45) & (b < 60)
+    keep = ~fill & (a[..., 3] > 30)
+    lab, n = ndimage.label(keep)
+    h, w = keep.shape
+    m = np.zeros_like(keep)
+    for i in range(1, n + 1):
+        ys, xs = np.where(lab == i)
+        if len(ys) <= 25:
+            continue
+        cy, cx = ys.mean(), xs.mean()
+        corner = min(np.hypot(cy - y, cx - x) for y in (0, h) for x in (0, w)) < 40
+        line = ys.max() - ys.min() < 8 and xs.max() - xs.min() > 40
+        if not corner and not line:
+            m |= lab == i
+    a[..., 3] = np.where(m, a[..., 3], 0)
+    return Image.fromarray(a.astype(np.uint8))
+
+
+def dark_card_cutout(img: Image.Image) -> Image.Image:
+    """The drone on a dark-brown level card: flood the fill in from the crop's edge (the
+    visor inside, same colour, stays), drop the orange frame bits at the edges, keep the
+    piece in the middle."""
+    import numpy as np
+    from scipy import ndimage
+    c = np.array(img).astype(np.int32)
+    r, g, b = c[..., 0], c[..., 1], c[..., 2]
+    bg = ((r >= 14) & (r < 70) & (g < 40) & (b < 40) & (r > g)) | (c[..., 3] < 40)
+    lab, n = ndimage.label(bg)
+    ring = np.zeros_like(bg)
+    ring[:6] = ring[-6:] = True
+    ring[:, :6] = ring[:, -6:] = True
+    m = np.isin(lab, list(set(np.unique(lab[ring & bg])) - {0}))
+    keep = ~m & (c[..., 3] > 30)
+    band = np.zeros_like(keep)
+    band[:12] = band[-12:] = True
+    band[:, :12] = band[:, -12:] = True
+    frame = band & (((r > 120) & (b < 60) & (r > g + 40)) | ((r < 30) & (g < 20)))
+    lf, nf = ndimage.label(frame)
+    edge = set(np.unique(np.concatenate([lf[0], lf[-1], lf[:, 0], lf[:, -1]]))) - {0}
+    keep &= ~np.isin(lf, list(edge))
+    lab2, n2 = ndimage.label(keep)
+    h, w = keep.shape
+    mid = lab2[h // 2, w // 2]
+    if mid == 0 and n2:
+        mid = int(np.argmax(ndimage.sum(keep, lab2, range(1, n2 + 1)))) + 1
+    c[..., 3] = np.where(lab2 == mid, c[..., 3], 0)
+    return Image.fromarray(c.astype(np.uint8))
+
+
+def plasma_orb(side: int, col: tuple) -> Image.Image:
+    """A glowing ball: white-hot core, coloured body, soft halo (drawn additive in game)."""
+    out = Image.new("RGBA", (side, side))
+    px = out.load()
+    c = (side - 1) / 2.0
+    for y in range(side):
+        for x in range(side):
+            d = ((x - c) ** 2 + (y - c) ** 2) ** 0.5 / c
+            if d >= 1.0:
+                continue
+            core = max(0.0, 1.0 - d / 0.35)
+            body = max(0.0, 1.0 - d / 0.62)
+            halo = (1.0 - d) ** 2
+            k = min(1.0, body + core)
+            rgb = [round(col[i] * (1 - core) + 255 * core) for i in range(3)]
+            px[x, y] = (rgb[0], rgb[1], rgb[2], round(255 * min(1.0, k + halo * 0.5)))
+    return out
+
+
 def five_shot() -> Image.Image:
     """Level 5 picture: the 5-shot fan (marciano_024) bursting out of the UFO."""
     fan = trim(ma(24))
@@ -264,6 +385,56 @@ def main() -> None:
     for i, box in enumerate(OVERDRIVE_LEVELS):
         save(fit(square(trim(ref.crop(box))), 128), "overdrive_%d.png" % (i + 1))
     save(fit(trim(ref.crop(OVERDRIVE_PORTRAIT)), 200), "overdrive.png")
+
+    # --- RAPID FIRE (fire rate per level)
+    ref = Image.open(os.path.join(HERE, "fire_rate_ref.webp")).convert("RGBA")
+    for i, box in enumerate(RAPID_LEVELS):
+        save(fit(square(trim(ref.crop(box))), 128), "rapid_%d.png" % (i + 1))
+    save(fit(trim(ref.crop(RAPID_PORTRAIT)), 200), "rapid.png")
+
+    # --- SCRUB-BOTS (the helper drone, UpgradeData "orbiters")
+    ref = Image.open(os.path.join(HERE, "helper_drone_ref.webp")).convert("RGBA")
+    save(fit(trim(ref.crop(SCRUB_PORTRAIT)), 200), "scrub.png")
+    for i, (x0, x1) in enumerate(SCRUB_CARDS):
+        pic = card_cutout(ref.crop((x0 + 28, SCRUB_CARD_Y[0], x1 - 28, SCRUB_CARD_Y[1])))
+        save(fit(square(trim(pic)), 128), "scrub_%d.png" % (i + 1))
+    for i, (x0, x1) in enumerate(SCRUB_SPIN):  # same canvas for every frame: no wobble
+        f = ref.crop((x0, SCRUB_SPIN_Y[0], x1, SCRUB_SPIN_Y[1]))
+        out = Image.new("RGBA", (220, 220))
+        out.alpha_composite(f, ((220 - f.width) // 2, (220 - f.height) // 2))
+        save(out.resize((128, 128), Image.LANCZOS), "scrub_spin_%d.png" % i)
+    save(plasma_orb(48, (255, 150, 40)), "scrub_orb.png")
+
+    # --- HUNTER DRONE (boomerang blades)
+    ref = Image.open(os.path.join(HERE, "hunter_drone_ref.webp")).convert("RGBA")
+    for i, (x0, x1) in enumerate(HUNTER_CARDS):
+        pic = card_cutout(ref.crop((x0 + 34, HUNTER_CARD_Y[0], x1 - 26, HUNTER_CARD_Y[1])))
+        save(fit(square(trim(pic)), 128), "hunter_%d.png" % (i + 1))
+    save(fit(square(trim(ref.crop(HUNTER_TURN[1]))), 200), "hunter.png")
+    save(fit(trim(ref.crop(HUNTER_BLADE)), 96), "hunter_blade.png")
+    save(fit(trim(ref.crop(HUNTER_WHIRL)), 160), "hunter_whirl.png")
+    save(fit(trim(ref.crop(HUNTER_PINWHEEL)), 128), "hunter_pinwheel.png")
+
+    # --- BOMBER DRONE
+    ref = Image.open(os.path.join(HERE, "bomber_drone_ref.webp")).convert("RGBA")
+    for i, (x0, x1) in enumerate(BOMBER_CARDS):
+        pic = dark_card_cutout(ref.crop((x0 + 19, BOMBER_CARD_Y[0], x1 - 19, BOMBER_CARD_Y[1])))
+        save(fit(square(trim(pic)), 128), "bomber_%d.png" % (i + 1))
+    save(fit(square(trim(ref.crop(BOMBER_BODY))), 200), "bomber.png")
+    save(fit(trim(ref.crop(BOMBER_BOMB)), 64), "bomber_bomb.png")
+    for i, (x0, x1) in enumerate(BOMBER_BOOM_X):  # one canvas, centred: they grow in place
+        f = ref.crop((x0, BOMBER_BOOM_Y[0], x1, BOMBER_BOOM_Y[1]))
+        bb = f.getchannel("A").point(lambda a: 255 if a > 8 else 0).getbbox()
+        f = f.crop(bb)
+        out = Image.new("RGBA", BOOM_CANVAS)
+        out.alpha_composite(f, ((BOOM_CANVAS[0] - f.width) // 2, (BOOM_CANVAS[1] - f.height) // 2))
+        save(out.resize((BOOM_CANVAS[0] // 2, BOOM_CANVAS[1] // 2), Image.LANCZOS), "bomber_boom_%d.png" % i)
+
+    # --- COIN MAGNET
+    ref = Image.open(os.path.join(HERE, "coin_magnet_ref.webp")).convert("RGBA")
+    for i, box in enumerate(MAGNET_LEVELS):
+        save(fit(square(trim(ref.crop(box))), 128), "magnet_%d.png" % (i + 1))
+    save(fit(trim(ref.crop(MAGNET_PORTRAIT)), 200), "magnet.png")
 
 
 if __name__ == "__main__":

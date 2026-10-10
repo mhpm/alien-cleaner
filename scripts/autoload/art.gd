@@ -186,6 +186,8 @@ func sets_for(ids: Array) -> Array:
 		var d: Dictionary = EnemyData.TYPES.get(id, {})
 		var art := str(d.get("art", id))
 		out[art] = true
+		for extra: String in d.get("sets", []):  # sets named otherwise (shots, effects)
+			out[extra] = true
 		for k: String in _manifest:
 			if k.begins_with(art + "_") or k.begins_with(id + "_"):
 				out[k] = true

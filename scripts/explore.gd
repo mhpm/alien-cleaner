@@ -52,6 +52,11 @@ var cores: Array[ReactorCore] = []
 var core_cells := {}  # Vector2i -> true: rooms that get a reactor core
 var vented := 0
 var vats: Array[Enemy] = []  # world 6: SpecimenVats ("vats": n)
+var warp_cells: Array[WarpCell] = []  # world 7 ("warp_cells": n)
+var tanks: Array[SeedTank] = []  # world 8 ("tanks": n): seed tanks to defend
+var tanks_lost := 0
+var cells_taken := 0
+const GATE_HP := 0.8  # world 7: the boss's health once every warp cell is taken
 var vats_broken := 0
 var forge: ForgeMap  # "build": "forge" / "kit"
 var props: Array = []  # [node, solid rect]: furniture and cores (cleared with the ring)
@@ -108,13 +113,17 @@ func _setup_forge(cfg: Dictionary) -> Explore:
 
 	walls = forge.solids()
 	var n_cores := int(cfg.get("cores", 0))
+	var n_vats := int(cfg.get("vats", 0))
 	for i in forge.core_leaves.size():
 		var r := forge.leaf_rect(forge.core_leaves[i])
 		if i < n_cores:
 			_place_core(r)
-		else:
+		elif i < n_cores + n_vats:
 			_place_vat(r)
+		else:
+			_place_tank(r)
 	_place_eggs(int(cfg.get("eggs", 0)))
+	_place_warp_cells(int(cfg.get("warp_cells", 0)))
 	for f: Array in (forge.furnish if interior != "" else []):
 		if str(f[1]) == "pattern":
 			_furnish(forge.leaf_rect(int(f[0])), true)
@@ -136,6 +145,86 @@ func _place_vat(r: Rect2) -> void:
 	var v := world.spawn_enemy("specimen_vat", at, Game.enemy_mult(), 1.0, false, true)
 	if v != null:
 		vats.append(v)
+
+
+## World 8: a seed tank in the middle of hall r (solid foot, the aliens march on it).
+func _place_tank(r: Rect2) -> void:
+	var at := r.get_center() + Vector2(0, 28)
+	var t := SeedTank.new()
+	t.art = rng.randi() % 8
+	t.position = at
+	world.entities.add_child(t)
+	world.room.spawned.append(t)
+	tanks.append(t)
+	var f := SeedTank.foot(t.art, at)
+	walls.append(f)
+	props.append([t, f])
+
+
+func tank_lost(_t: SeedTank) -> void:
+	tanks_lost += 1
+	_refresh_counter()
+	world.hud.banner("SEED TANK LOST! %d LEFT" % (tanks.size() - tanks_lost), Color("ff5566"), 22, 1.2)
+
+
+## The final fight begins: every seed tank still standing heals the astronaut and pays.
+func final_harvest() -> void:
+	var alive := 0
+	for t in tanks:
+		if is_instance_valid(t) and not t.lost:
+			t.harvest()
+			alive += 1
+	if tanks.is_empty():
+		return
+	if alive > 0:
+		Game.add_coins(30 * alive)
+		world.hud.banner("HARVEST x%d! +%d%% HP" % [alive, roundi(SeedTank.HEAL * 100.0 * alive)], SeedTank.COL, 22, 1.6)
+
+
+## World 7: n warp cells in the far corners of the map: the walkable cells furthest
+## (walking) from the start, spread out, the ones inside mazes first.
+func _place_warp_cells(n: int) -> void:
+	if n <= 0:
+		return
+	var far := forge.distances(forge.start_cell())
+	var cand: Array = []
+	for c: Vector2i in far:
+		var li := forge.region[forge.idx(c)]
+		var in_maze := li >= 0 and str(forge.leaves[li].type) == "maze"
+		cand.append([int(far[c]) + (6 if in_maze else 0), c])
+	cand.sort_custom(func(a: Array, b: Array) -> bool: return a[0] > b[0])
+	var taken: Array[Vector2] = []
+	for it: Array in cand:
+		if warp_cells.size() >= n:
+			break
+		var p := forge.cell_rect(it[1]).get_center() + Vector2(0, 10)
+		var ok := world.room.is_open(p, 12.0)
+		for q in taken:
+			if q.distance_to(p) < 420.0:
+				ok = false
+		if not ok:
+			continue
+		taken.append(p)
+		var wc := WarpCell.new()
+		wc.position = p
+		world.entities.add_child(wc)
+		world.room.spawned.append(wc)
+		warp_cells.append(wc)
+
+
+func cell_taken(_c: WarpCell) -> void:
+	cells_taken += 1
+	_refresh_counter()
+	if gate_charged():
+		world.hud.banner("GATE CHARGED! BOSS -%d%% HP, NO WARP" % roundi((1.0 - GATE_HP) * 100.0), WarpCell.COL, 20, 1.8)
+		Game.add_coins(25 * warp_cells.size())
+	else:
+		world.hud.banner("WARP CELL %d/%d  -  AMBUSH!" % [cells_taken, warp_cells.size()], WarpCell.COL, 22, 1.0)
+
+
+## Every warp cell taken (false on maps without them).
+func gate_charged() -> bool:
+	return not warp_cells.is_empty() and cells_taken >= warp_cells.size()
 
 
 ## World 6: n egg clusters spread over the map (open cells, away from the start, the
@@ -526,6 +615,10 @@ func _refresh_counter() -> void:
 		counter.text += "    CORES %d/%d" % [vented, cores.size()]
 	if not vats.is_empty():
 		counter.text += "    VATS %d/%d" % [vats_broken, vats.size()]
+	if not warp_cells.is_empty():
+		counter.text += "    CELLS %d/%d" % [cells_taken, warp_cells.size()]
+	if not tanks.is_empty():
+		counter.text += "    TANKS %d/%d" % [tanks.size() - tanks_lost, tanks.size()]
 	if rescue_panel != null:
 		rescue_panel.set_count(rescued)
 

@@ -1,7 +1,10 @@
 extends Node
 ## Tiny chiptune synth for every sound effect (generated at startup) plus the music:
-## assets/music/main-music.mp3 on the title / menus, levels.mp3 in every level,
-## bosses.mp3 while a final boss is fought.
+## assets/music/main-music.mp3 on the title / menus, a track of assets/music/levels/ in
+## every level (the world's "music" in WorldData, or one picked by the world's number
+## from whatever is in the folder: new files there join on their own) and, while a
+## final boss is fought, the world's "boss_music" from assets/music/bosses/ (or
+## bosses.mp3 when it has none).
 
 const RATE := 22050
 
@@ -11,10 +14,12 @@ var next_player := 0
 var last_play: Dictionary = {}
 const MUSIC := {
 	"menu": "res://assets/music/main-music.mp3",
-	"level": "res://assets/music/levels.mp3",
 	"boss": "res://assets/music/bosses.mp3",
 }
 const MUSIC_DB := -9.0
+const LEVEL_DIR := "res://assets/music/levels/"
+const BOSS_DIR := "res://assets/music/bosses/"
+const LEVEL_EXT := ["mp3", "ogg", "wav"]
 
 var music_player: AudioStreamPlayer
 var music_track := ""
@@ -73,6 +78,12 @@ func set_music_enabled(on: bool) -> void:
 ## Plays `track` ("menu" or "level"; "" = keep the current one), fading out whatever
 ## else was on. Moving between screens that share a track does not restart it.
 func play_music(track := "") -> void:
+	if track == "level":
+		track = "level:" + level_track(Game.world_index)
+	elif track == "boss":
+		var bt := boss_track(Game.world_index)
+		if bt != "":
+			track = "level:" + bt  # "level:" = a file path, not a MUSIC key
 	if track != "":
 		if track != music_track:
 			music_track = track
@@ -83,6 +94,49 @@ func play_music(track := "") -> void:
 		return
 	if not music_player.playing:
 		_start(music_track)
+
+
+## Every level track in LEVEL_DIR (sorted). In an exported game the folder lists the
+## ".import" / ".remap" entries, so those are read back to their source names.
+func level_tracks() -> Array[String]:
+	return _tracks(LEVEL_DIR)
+
+
+## Boss tracks in BOSS_DIR (bosses.mp3, the default, stays outside it).
+func boss_tracks() -> Array[String]:
+	return _tracks(BOSS_DIR)
+
+
+## The final-boss track of world `world_idx`: its "boss_music" (a file in BOSS_DIR) if it
+## is there; "" = the default bosses.mp3.
+func boss_track(world_idx: int) -> String:
+	var want := str(WorldData.world(world_idx).get("boss_music", ""))
+	return BOSS_DIR + want if want != "" and boss_tracks().has(BOSS_DIR + want) else ""
+
+
+func _tracks(dir: String) -> Array[String]:
+	var out: Array[String] = []
+	var d := DirAccess.open(dir)
+	if d == null:
+		return out
+	for f in d.get_files():
+		var n := f.trim_suffix(".import").trim_suffix(".remap")
+		if n.get_extension().to_lower() in LEVEL_EXT and not out.has(dir + n):
+			out.append(dir + n)
+	out.sort()
+	return out
+
+
+## The level track of world `world_idx`: its "music" (a file name in LEVEL_DIR) if that
+## file is there, otherwise one of the folder's tracks picked by the world's number.
+func level_track(world_idx: int) -> String:
+	var all := level_tracks()
+	if all.is_empty():
+		return ""
+	var want := str(WorldData.world(world_idx).get("music", ""))
+	if want != "" and all.has(LEVEL_DIR + want):
+		return LEVEL_DIR + want
+	return all[posmod(world_idx, all.size())]
 
 
 func _fade_to(track: String) -> void:
@@ -100,7 +154,10 @@ func _fade_to(track: String) -> void:
 func _start(track: String) -> void:
 	if music_tween != null:
 		music_tween.kill()
-	var st: AudioStream = load(str(MUSIC[track]))
+	var path := str(MUSIC[track]) if MUSIC.has(track) else track.trim_prefix("level:")
+	if path == "" or not ResourceLoader.exists(path):
+		return
+	var st: AudioStream = load(path)
 	if st is AudioStreamMP3:
 		(st as AudioStreamMP3).loop = true
 	music_player.stream = st

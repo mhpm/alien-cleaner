@@ -49,8 +49,19 @@ Salida en `assets/rooms/<set>/build/`:
 - Esquinas extra: `extra_side` "auto" detecta si cada una es de arriba-izquierda o
   arriba-derecha por el muro que muestra; compruébalo mirando la hoja.
 
+- Tramos SIN postes que sobresalgan (sus extremos son esquinas con franjas, como w7):
+  `post_cut` = px de cada extremo que hacen de poste, `post_h` / `cap_h` = su alto; los
+  cortes entre tramos pegados se miden por las columnas de contorno oscuro.
+- Suelo: si las baldosas del kit no encajan (emblemas, decoración, muchos colores), usa
+  `floor_from` "w5" + `plain` + `floor_tint` (baldosas lisas de otro mundo a un color). El
+  usuario prefiere eso en mundos nuevos. Sin esquinas extra: `extra_src` None.
+- Colisión de las esquinas: sale sola de su dibujo (`footprint`, `corner_feet`); no pongas
+  formas fijas.
+- Pruebas que salvan horas: `tests/boss_ring_test.tscn` (el ring del jefe despejado en
+  todos los mundos) y "ningún alien dentro de un muro" en la prueba del mundo.
+
 ## 2b. Objetivo propio del mundo
-Cada mundo trae un objetivo distinto de "matar" (regla del usuario): mundo 5 núcleos que
+Usa la skill `map-objective`. Cada mundo trae un objetivo distinto de "matar" (regla del usuario): mundo 5 núcleos que
 enfriar (`ReactorCore`), mundo 6 tanques que romper (`SpecimenVat`, `Enemy.anchored`). Van en
 las áreas que elige `ForgeMap._pick_cores` (`cores` + `vats` + lo nuevo), con contador en el
 HUD (`Explore._refresh_counter`) y una recompensa que cambie la pelea final.

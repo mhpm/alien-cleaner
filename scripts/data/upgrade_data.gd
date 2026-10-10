@@ -12,7 +12,9 @@ const ART := "res://assets/ui/upgrades/"
 const KIT := "res://assets/ui/upgrades/kit/"
 const LEVELS := 5
 ## Offered on level-up right now (the others stay defined for later).
-const ACTIVE := ["overdrive", "martian", "shield"]
+const ACTIVE := ["overdrive", "martian", "shield", "slime_explode", "rapid", "orbiters", "hunter", "magnet", "bomber"]
+## RAPID FIRE: fire-rate multiplier each level adds (total x1.15, 1.32, 1.59, 1.90, 2.38).
+const RAPID_STEP := [1.15, 1.15, 1.2, 1.2, 1.25]
 
 ## Martian UFO ally per level: plasma shots per volley, seconds between volleys, extra
 ## aliens each shot chains to (level 5 = a 5-shot fan; the abduction beam is off).
@@ -33,6 +35,41 @@ const SHIELD_LV := [
 	{"hits": 4, "r": 24.0, "cd": 5.0},
 	{"hits": 5, "r": 27.0, "cd": 4.0},
 ]
+## Scrub-Bot drone per level (ScrubBot): pods = aliens shot per volley (each pod a
+## different one), rate = seconds between volleys, blast = radius the orbs pop in (0 = none),
+## spin_every = seconds between SPIN SCRUBS (0 = none), spin_orbs = orbs per spiral arm.
+const SCRUB_LV := [
+	{"pods": 1, "rate": 1.0, "blast": 0.0, "spin_every": 0, "spin_orbs": 0},
+	{"pods": 2, "rate": 0.9, "blast": 0.0, "spin_every": 0, "spin_orbs": 0},
+	{"pods": 3, "rate": 0.85, "blast": 16.0, "spin_every": 0, "spin_orbs": 0},
+	{"pods": 3, "rate": 0.8, "blast": 16.0, "spin_every": 5, "spin_orbs": 12},
+	{"pods": 4, "rate": 0.7, "blast": 20.0, "spin_every": 4, "spin_orbs": 12},
+]
+## HUNTER DRONE per level (HunterDrone + HunterBlade boomerangs): blades per throw, len =
+## loop reach, time = seconds out and back, size = blade size (hit radius 0.7x), dmg = damage
+## per cut (share of yours; each alien cut at most every 0.3 s per blade), pinwheel = every
+## n-th throw is a PINWHEEL (0 = never), ring = seconds it circles you first.
+const HUNTER_LV := [
+	{"blades": 1, "len": 95.0, "time": 1.1, "size": 13.0, "dmg": 0.55, "pinwheel": 0, "ring": 0.0},
+	{"blades": 2, "len": 100.0, "time": 1.1, "size": 13.0, "dmg": 0.55, "pinwheel": 0, "ring": 0.0},
+	{"blades": 3, "len": 110.0, "time": 1.05, "size": 16.0, "dmg": 0.65, "pinwheel": 0, "ring": 0.0},
+	{"blades": 3, "len": 115.0, "time": 1.0, "size": 16.0, "dmg": 0.7, "pinwheel": 3, "ring": 1.6},
+	{"blades": 3, "len": 125.0, "time": 0.95, "size": 18.0, "dmg": 0.75, "pinwheel": 2, "ring": 1.6},
+]
+## BOMBER DRONE per level (BomberDrone): cd = seconds between drops, radius / dmg = blast
+## (damage as a share of yours), cluster = bomblets per blast. 3 = carpet runs, 4 = mines,
+## 5 = MEGA bomb every 4th drop (BomberDrone).
+const BOMBER_LV := [
+	{"cd": 2.4, "radius": 26.0, "dmg": 1.8, "cluster": 0},
+	{"cd": 2.3, "radius": 26.0, "dmg": 1.8, "cluster": 3},
+	{"cd": 2.1, "radius": 28.0, "dmg": 2.0, "cluster": 3},
+	{"cd": 1.9, "radius": 32.0, "dmg": 2.2, "cluster": 4},
+	{"cd": 1.7, "radius": 34.0, "dmg": 2.4, "cluster": 4},
+]
+## Coin Magnet level 5: VACUUM PULSE every MAGNET_PULSE_EVERY s pulls the XP gems and
+## coins within MAGNET_PULSE_R (Player._magnet_pulse).
+const MAGNET_PULSE_EVERY := 10.0
+const MAGNET_PULSE_R := 260.0
 const SHIELD_COLORS := [Color("41a6f6"), Color("38e070"), Color("b35cff"), Color("ff9a2e"), Color("ff3344")]
 
 const UPGRADES := {
@@ -43,13 +80,16 @@ const UPGRADES := {
 	"piercing": {"name": "Piercing Suds", "desc": "Bubbles pass through one more alien.", "icon": "->", "color": Color("ffcd75"), "max": 5},
 	"freeze": {"name": "Freeze Cleaner", "desc": "+12% chance to freeze aliens solid.", "icon": "*", "color": Color("73eff7"), "max": 5},
 	"electric": {"name": "Electric Mop", "desc": "Hits chain lightning to nearby aliens (+1 jump per level).", "icon": "Z", "color": Color("41a6f6"), "max": 5},
-	"rapid": {"name": "Faster Cleaning", "desc": "+25% fire rate.", "icon": ">>", "color": Color("ff5566"), "max": 5},
+	"rapid": {"name": "Rapid Fire", "desc": "Your weapon fires faster with every level.", "icon": ">>", "color": Color("41c8ff"), "max": 5, "kit": true,
+		"levels": ["Fire rate +15%.", "Fire rate +32%.", "Fire rate +59%.", "Fire rate +90%.", "Fire rate +138%: a comet storm!"]},
 	"power": {"name": "Power Suds", "desc": "+30% cleaning damage.", "icon": "!", "color": Color("c75bd6"), "max": 5},
 	"crit": {"name": "Critical Clean", "desc": "+12% chance for 2.5x hits.", "icon": "!!", "color": Color("ef7d57"), "max": 5},
 	"speed": {"name": "Jet Boots", "desc": "+10% movement speed.", "icon": "~", "color": Color("38b764"), "max": 5},
 	"vitality": {"name": "Tough Suit", "desc": "+30 max health and heal 30.", "icon": "+", "color": Color("ffcd75"), "max": 5},
-	"orbiters": {"name": "Scrub-Bots", "desc": "One more bot orbits you, scrubbing aliens.", "icon": "o", "color": Color("41a6f6"), "max": 5},
-	"slime_explode": {"name": "Volatile Slime", "desc": "Cleaned aliens burst and hurt others. Bigger blasts per level.", "icon": "@", "color": Color("ff5566"), "max": 5},
+	"orbiters": {"name": "Scrub-Bots", "desc": "A cleaning drone hovers at your side and fires its plasma pods.", "icon": "o", "color": Color("ff9a2e"), "max": 5, "kit": true, "art": "scrub",
+		"levels": ["Drone fires a plasma pod at the nearest alien.", "Two pods, two different aliens.", "Three pods; orbs pop in small blasts.", "SPIN SCRUB: spins, spraying a spiral of orbs.", "Four pods, double spiral that shoves aliens back."]},
+	"slime_explode": {"name": "Volatile Slime", "desc": "Cleaned aliens burst in toxic slime and hurt the aliens around them.", "icon": "@", "color": Color("7dff3a"), "max": 5, "kit": true,
+		"levels": ["Cleaned aliens burst, hurting aliens nearby.", "Bigger bursts: +33% damage.", "Bursts knock aliens back.", "Huge bursts: +25% damage.", "Every 4th burst is a MEGA burst."]},
 	"air_cannon": {"name": "Air Cannon Mod", "desc": "More knockback; BLAST recharges 15% faster.", "icon": ")))", "color": Color("38b764"), "max": 5},
 	"shield": {"name": "Ion Shield", "desc": "A dome that blocks hits, grows and recharges. Red is the strongest.", "icon": "( )", "color": Color("41a6f6"), "max": 5, "kit": true,
 		"levels": ["Blue dome: blocks 1 hit.", "Green dome: bigger, blocks 2 hits.", "Purple dome: 3 hits, shoves aliens away.", "Orange dome: 4 hits, recharges faster.", "RED dome, the strongest: 5 hits and burns aliens."]},
@@ -57,7 +97,12 @@ const UPGRADES := {
 		"levels": ["Overcharged: +25% damage, +15% fire rate.", "Twin barrels: fires 2 shots side by side.", "Triple fan: 3 shots in a spread.", "Drill tips: shots pierce 2 more aliens, +15% damage.", "ROCKET NOVA: every 3s, 5 homing rockets burst out!"]},
 	"martian": {"name": "Martian UFO", "desc": "A tiny ally that orbits you and attacks with you.", "icon": "o", "color": Color("5ef07a"), "max": 5, "kit": true,
 		"levels": ["Zaps the nearest alien with plasma.", "Fires twin plasma shots.", "Shots chain to 2 more aliens.", "Triple burst, fires faster.", "Fires a fan of 5 plasma shots."]},
-	"magnet": {"name": "Coin Magnet", "desc": "Pulls coins and XP gems from further away. +1 coin per alien.", "icon": "$", "color": Color("ffcd75"), "max": 5},
+	"hunter": {"name": "Hunter Drone", "desc": "Throws boomerang blades that cut aliens out and back.", "icon": "x", "color": Color("ff3344"), "max": 5, "kit": true,
+		"levels": ["A boomerang blade cuts on the way out and back.", "Twin blades in mirrored loops.", "Three bigger blades in a fan.", "PINWHEEL: 4 blades buzz around you, then fly out.", "WHIRLWIND: the drone throws itself; slash waves!"]},
+	"bomber": {"name": "Bomber Drone", "desc": "A bomber that circles you and bombs the biggest crowd.", "icon": "B", "color": Color("ffb000"), "max": 5, "kit": true,
+		"levels": ["Drops a bomb on the biggest crowd.", "CLUSTER: blasts scatter bomblets.", "CARPET RUN: flies over a crowd dropping a line of bombs.", "Bigger blasts; misses stay as MINES.", "MEGA BOMB: every 4th drop is a nuke!"]},
+	"magnet": {"name": "Coin Magnet", "desc": "A gravity vortex that pulls coins and XP gems to you.", "icon": "$", "color": Color("41c8ff"), "max": 5, "kit": true,
+		"levels": ["Pulls coins and gems from further away.", "Wider pull.", "Even wider pull.", "+1 coin for every alien cleaned.", "VACUUM PULSE: every 10s sucks in all loot nearby."]},
 	"snack": {"name": "Space Snack", "desc": "Heal 50% of your health.", "icon": "<3", "color": Color("41a6f6"), "max": 99},
 }
 
@@ -66,12 +111,17 @@ static func is_kit(id: String) -> bool:
 	return bool(UPGRADES[id].get("kit", false))
 
 
+## File name of its art (Scrub-Bots keeps its old id "orbiters" but its kit art is "scrub").
+static func art_name(id: String) -> String:
+	return str(UPGRADES[id].get("art", id))
+
+
 static func icon(id: String) -> Texture2D:
-	return load((KIT if is_kit(id) else ART) + id + ".png")
+	return load((KIT if is_kit(id) else ART) + art_name(id) + ".png")
 
 
 static func level_tex(id: String, lv: int) -> Texture2D:
-	return load((KIT if is_kit(id) else ART) + "%s_%d.png" % [id, clampi(lv, 1, LEVELS)])
+	return load((KIT if is_kit(id) else ART) + "%s_%d.png" % [art_name(id), clampi(lv, 1, LEVELS)])
 
 
 ## Big picture of the level-up card: the shield shows its dome in that level's colour.
@@ -166,7 +216,7 @@ static func apply(id: String, s: Dictionary, lv := 1) -> void:
 		"electric":
 			s.chain = int(s.chain) + (2 if int(s.chain) == 0 else 1)
 		"rapid":
-			s.fire_interval = float(s.fire_interval) / 1.25
+			s.fire_interval = float(s.fire_interval) / float(RAPID_STEP[clampi(lv, 1, LEVELS) - 1])
 		"power":
 			s.damage = float(s.damage) * 1.3
 		"crit":
@@ -189,6 +239,10 @@ static func apply(id: String, s: Dictionary, lv := 1) -> void:
 			s.shield_lvl = lv
 		"martian":
 			s.martian = lv
+		"hunter":
+			s.hunter = lv
+		"bomber":
+			s.bomber = lv
 		"overdrive":  # boosts the equipped ARMORY weapon (GunFire copies / pierce / nova)
 			s.overdrive = lv
 			match lv:
@@ -204,7 +258,7 @@ static func apply(id: String, s: Dictionary, lv := 1) -> void:
 					s.pierce = int(s.pierce) + 2
 					s.damage = float(s.damage) * 1.15
 		"magnet":
-			s.magnet = true
+			s.magnet = lv >= 4  # +1 coin per alien from level 4 (the "+1" in its art)
 			s.magnet_lvl = lv
 		"snack":
 			s.hp = minf(float(s.hp) + float(s.max_hp) * 0.5, float(s.max_hp))

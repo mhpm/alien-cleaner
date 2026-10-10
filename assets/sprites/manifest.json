@@ -4359,5 +4359,682 @@
     "loop": true
    }
   }
+ },
+ "laser_drone": {
+  "size": [
+   118,
+   110
+  ],
+  "anchor": [
+   59,
+   110
+  ],
+  "body_h": 106.5,
+  "anims": {
+   "walk": {
+    "frames": 4,
+    "fps": 8,
+    "loop": true
+   },
+   "attack": {
+    "frames": 2,
+    "fps": 8,
+    "loop": true
+   },
+   "fire": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "death": {
+    "frames": 4,
+    "fps": 9,
+    "loop": false
+   }
+  }
+ },
+ "laser_beam": {
+  "size": [
+   128,
+   90
+  ],
+  "anchor": [
+   64,
+   45.0
+  ],
+  "body_h": 90.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "laser_orb": {
+  "size": [
+   36,
+   34
+  ],
+  "anchor": [
+   18,
+   17.0
+  ],
+  "body_h": 34.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "spider_bot": {
+  "size": [
+   136,
+   107
+  ],
+  "anchor": [
+   68,
+   107
+  ],
+  "body_h": 100.0,
+  "anims": {
+   "walk": {
+    "frames": 4,
+    "fps": 10,
+    "loop": true
+   },
+   "attack": {
+    "frames": 2,
+    "fps": 8,
+    "loop": false
+   },
+   "death": {
+    "frames": 4,
+    "fps": 9,
+    "loop": false
+   }
+  }
+ },
+ "spider_orb": {
+  "size": [
+   44,
+   43
+  ],
+  "anchor": [
+   22,
+   21.5
+  ],
+  "body_h": 43.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "gravity_sentinel": {
+  "size": [
+   124,
+   114
+  ],
+  "anchor": [
+   62,
+   114
+  ],
+  "body_h": 113.5,
+  "anims": {
+   "walk": {
+    "frames": 4,
+    "fps": 7,
+    "loop": true
+   },
+   "attack": {
+    "frames": 2,
+    "fps": 7,
+    "loop": true
+   },
+   "death": {
+    "frames": 4,
+    "fps": 9,
+    "loop": false
+   }
+  }
+ },
+ "gravity_well": {
+  "size": [
+   122,
+   109
+  ],
+  "anchor": [
+   61,
+   54.5
+  ],
+  "body_h": 109.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "gravity_orb": {
+  "size": [
+   46,
+   59
+  ],
+  "anchor": [
+   23,
+   29.5
+  ],
+  "body_h": 59.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "saw_drone": {
+  "size": [
+   132,
+   112
+  ],
+  "anchor": [
+   66,
+   112
+  ],
+  "body_h": 102.5,
+  "anims": {
+   "walk": {
+    "frames": 4,
+    "fps": 12,
+    "loop": true
+   },
+   "attack": {
+    "frames": 2,
+    "fps": 10,
+    "loop": true
+   },
+   "death": {
+    "frames": 4,
+    "fps": 9,
+    "loop": false
+   }
+  }
+ },
+ "plasma_saw": {
+  "size": [
+   62,
+   74
+  ],
+  "anchor": [
+   31,
+   37.0
+  ],
+  "body_h": 73.0,
+  "anims": {
+   "fly": {
+    "frames": 3,
+    "fps": 14,
+    "loop": true
+   }
+  }
+ },
+ "overseer": {
+  "size": [
+   160,
+   126
+  ],
+  "anchor": [
+   80,
+   126
+  ],
+  "body_h": 125.0,
+  "anims": {
+   "walk": {
+    "frames": 8,
+    "fps": 6,
+    "loop": true
+   },
+   "glow": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "stun": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "fire": {
+    "frames": 6,
+    "fps": 12,
+    "loop": false
+   },
+   "charge": {
+    "frames": 2,
+    "fps": 6,
+    "loop": true
+   },
+   "blink": {
+    "frames": 5,
+    "fps": 10,
+    "loop": false
+   },
+   "zip": {
+    "frames": 6,
+    "fps": 12,
+    "loop": true
+   },
+   "death": {
+    "frames": 7,
+    "fps": 9,
+    "loop": false
+   }
+  }
+ },
+ "overseer_ball": {
+  "size": [
+   98,
+   95
+  ],
+  "anchor": [
+   49,
+   47.5
+  ],
+  "body_h": 50.0,
+  "anims": {
+   "fly": {
+    "frames": 5,
+    "fps": 6,
+    "loop": false
+   }
+  }
+ },
+ "overseer_spark": {
+  "size": [
+   30,
+   29
+  ],
+  "anchor": [
+   15,
+   14.5
+  ],
+  "body_h": 29.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "overseer_wreck": {
+  "size": [
+   122,
+   63
+  ],
+  "anchor": [
+   61,
+   63
+  ],
+  "body_h": 63.0,
+  "anims": {
+   "pop": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   }
+  }
+ },
+ "bloom": {
+  "size": [
+   240,
+   152
+  ],
+  "anchor": [
+   120,
+   152
+  ],
+  "body_h": 150.0,
+  "anims": {
+   "walk": {
+    "frames": 6,
+    "fps": 6,
+    "loop": true
+   },
+   "angry": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "fury": {
+    "frames": 2,
+    "fps": 5,
+    "loop": true
+   },
+   "stun": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "bud": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "shoot": {
+    "frames": 2,
+    "fps": 8,
+    "loop": true
+   },
+   "summon": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "death": {
+    "frames": 6,
+    "fps": 6,
+    "loop": false
+   }
+  }
+ },
+ "bloom_seed": {
+  "size": [
+   152,
+   135
+  ],
+  "anchor": [
+   76,
+   67.5
+  ],
+  "body_h": 117.0,
+  "anims": {
+   "fly": {
+    "frames": 4,
+    "fps": 6,
+    "loop": false
+   }
+  }
+ },
+ "bloom_spore": {
+  "size": [
+   84,
+   99
+  ],
+  "anchor": [
+   42,
+   49.5
+  ],
+  "body_h": 99.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "bloom_burst": {
+  "size": [
+   158,
+   135
+  ],
+  "anchor": [
+   79,
+   67.5
+  ],
+  "body_h": 135.0,
+  "anims": {
+   "pop": {
+    "frames": 2,
+    "fps": 10,
+    "loop": false
+   }
+  }
+ },
+ "bloom_roots": {
+  "size": [
+   170,
+   118
+  ],
+  "anchor": [
+   85,
+   118
+  ],
+  "body_h": 113.0,
+  "anims": {
+   "pop": {
+    "frames": 5,
+    "fps": 10,
+    "loop": false
+   }
+  }
+ },
+ "bloom_ring": {
+  "size": [
+   234,
+   118
+  ],
+  "anchor": [
+   117,
+   118
+  ],
+  "body_h": 118.0,
+  "anims": {
+   "pop": {
+    "frames": 3,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "bloom_wreck": {
+  "size": [
+   240,
+   118
+  ],
+  "anchor": [
+   120,
+   118
+  ],
+  "body_h": 118.0,
+  "anims": {
+   "pop": {
+    "frames": 1,
+    "fps": 1,
+    "loop": false
+   }
+  }
+ },
+ "bloom_sprout": {
+  "size": [
+   104,
+   99
+  ],
+  "anchor": [
+   52,
+   99
+  ],
+  "body_h": 89.0,
+  "anims": {
+   "walk": {
+    "frames": 4,
+    "fps": 8,
+    "loop": true
+   }
+  }
+ },
+ "bio_droid": {
+  "size": [
+   126,
+   107
+  ],
+  "anchor": [
+   63,
+   107
+  ],
+  "body_h": 103.0,
+  "anims": {
+   "walk": {
+    "frames": 4,
+    "fps": 8,
+    "loop": true
+   },
+   "attack": {
+    "frames": 3,
+    "fps": 8,
+    "loop": true
+   },
+   "death": {
+    "frames": 4,
+    "fps": 9,
+    "loop": false
+   }
+  }
+ },
+ "bio_leaf": {
+  "size": [
+   100,
+   33
+  ],
+  "anchor": [
+   50,
+   16.5
+  ],
+  "body_h": 33.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "spike_bloom": {
+  "size": [
+   126,
+   100
+  ],
+  "anchor": [
+   63,
+   100
+  ],
+  "body_h": 99.0,
+  "anims": {
+   "walk": {
+    "frames": 4,
+    "fps": 7,
+    "loop": true
+   },
+   "attack": {
+    "frames": 2,
+    "fps": 6,
+    "loop": true
+   },
+   "death": {
+    "frames": 4,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "spike_orb": {
+  "size": [
+   76,
+   38
+  ],
+  "anchor": [
+   38,
+   19.0
+  ],
+  "body_h": 38.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
+ },
+ "vine_crawler": {
+  "size": [
+   120,
+   95
+  ],
+  "anchor": [
+   60,
+   95
+  ],
+  "body_h": 88.0,
+  "anims": {
+   "walk": {
+    "frames": 4,
+    "fps": 8,
+    "loop": true
+   },
+   "attack": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   },
+   "death": {
+    "frames": 4,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "spore_drone": {
+  "size": [
+   112,
+   114
+  ],
+  "anchor": [
+   56,
+   114
+  ],
+  "body_h": 106.5,
+  "anims": {
+   "walk": {
+    "frames": 4,
+    "fps": 7,
+    "loop": true
+   },
+   "attack": {
+    "frames": 3,
+    "fps": 7,
+    "loop": true
+   },
+   "death": {
+    "frames": 4,
+    "fps": 8,
+    "loop": false
+   }
+  }
+ },
+ "drone_spore": {
+  "size": [
+   54,
+   29
+  ],
+  "anchor": [
+   27,
+   14.5
+  ],
+  "body_h": 29.0,
+  "anims": {
+   "fly": {
+    "frames": 1,
+    "fps": 1,
+    "loop": true
+   }
+  }
  }
 }

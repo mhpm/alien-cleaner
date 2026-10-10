@@ -55,7 +55,7 @@ var _ai_kind := ""
 var elite := false  # tougher golden variant with a crown (final waves)
 ## Arena raiders: the DefendCore (village well, house...) this alien marches on instead
 ## of the astronaut, until he comes within LURE_BREAK (then it is his again for good).
-var lure: DefendCore
+var lure: Node2D  # marching on it instead of the astronaut (DefendCore, SeedTank): has is_resolved()
 const LURE_BREAK := 90.0
 ## ARMORY weapon effects: armor break (takes `vuln` x damage while vuln_t lasts),
 ## Cryo chill stacks (freeze at the weapon's threshold) and burn / acid damage over time
@@ -476,7 +476,7 @@ func _ai(delta: float) -> Vector2:
 func _to_player() -> Vector2:
 	var p := player().global_position
 	if lure != null:
-		if is_instance_valid(lure) and not lure.is_resolved() and p.distance_to(global_position) > LURE_BREAK:
+		if is_instance_valid(lure) and not bool(lure.call("is_resolved")) and p.distance_to(global_position) > LURE_BREAK:
 			return lure.global_position - global_position
 		lure = null
 	return p - global_position

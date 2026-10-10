@@ -24,6 +24,9 @@ extends RefCounted
 const LOOKS := {
 	"w5": {"glow": Color(1.0, 0.45, 0.15), "pit": Color("1a0b08"), "pit_in": Color(0.22, 0.05, 0.02)},
 	"w6": {"glow": Color(0.95, 0.25, 1.0), "pit": Color("140818"), "pit_in": Color(0.2, 0.04, 0.24)},
+	"w7": {"glow": Color(0.25, 0.85, 1.0), "pit": Color("050a1c"), "pit_in": Color(0.03, 0.08, 0.22)},
+	"w8": {"glow": Color(0.35, 0.95, 0.85), "pit": Color("0b1a10"), "pit_in": Color(0.06, 0.2, 0.08),
+		"sub": 2, "plain": 0.55},  # bigger tiles, often the plain one (tile 0): a calm floor
 }
 const K := 0.45  # world units per kit px (walls)
 const CW := 100.0  # cell size (world units)
@@ -42,6 +45,10 @@ var pit_col := Color("1a0b08")
 var pit_in := Color(0.22, 0.05, 0.02)
 var extra_sides: Array = []  # corner each extra block is drawn for ("tl" / "tr")
 var corner_feet := {}  # atlas name -> solid rects as shares of the picture (from its drawing)
+var stud_tex: Texture2D  # drawn at every floor tile crossing (kits with "stud": world 8)
+var stud_k := 0.0  # its size as a share of a floor tile
+var floor_sub := FLOOR_SUB  # floor tiles per cell side (LOOKS "sub")
+var plain_share := 0.0  # share of floor tiles forced to the plain tile 0 (LOOKS "plain")
 var w := 18
 var h := 14
 var origin := Vector2(MARGIN, MARGIN)
@@ -88,6 +95,8 @@ func generate(cfg: Dictionary, r: RandomNumberGenerator) -> ForgeMap:
 	glow_col = look.glow
 	pit_col = look.pit
 	pit_in = look.pit_in
+	floor_sub = int(look.get("sub", FLOOR_SUB))
+	plain_share = float(look.get("plain", 0.0))
 	var c: Array = cfg.get("cells", [18, 14])
 	w = int(c[0])
 	h = int(c[1])
@@ -103,7 +112,7 @@ func generate(cfg: Dictionary, r: RandomNumberGenerator) -> ForgeMap:
 	vwall.fill(1)
 	_split(Rect2i(0, 0, w, h))
 	start_leaf = _pick_start()
-	_pick_cores(int(cfg.get("cores", 0)) + int(cfg.get("vats", 0)))  # objective areas
+	_pick_cores(int(cfg.get("cores", 0)) + int(cfg.get("vats", 0)) + int(cfg.get("tanks", 0)))  # objective areas
 	_pick_specials(int(cfg.get("mazes", 2)))
 	for li in leaves.size():
 		_carve(li)
@@ -458,7 +467,7 @@ func _machinery() -> void:
 			var kind: String = it[0]
 			if placed >= 2 or rng.randf() > (0.6 if kind[0] == "t" else 0.4):
 				continue
-			if not walkable(c):
+			if not walkable(c) or not _has_corner_art(kind):
 				continue
 			var up := kind[0] == "t"
 			var left := kind[1] == "l"
@@ -480,11 +489,23 @@ func _machinery() -> void:
 ## one twice: [atlas name, mirrored]. Top corners also get the 10 extra blocks
 ## (tools/w5_corners_ref.webp, drawn for the top-left: mirrored on the top-right); the
 ## originals can swap sides mirrored too.
+## Is there any picture for corner `kind` (world 8 brings only top corners)?
+func _has_corner_art(kind: String) -> bool:
+	_load()
+	if kind[0] == "t" and n_extra > 0:
+		return true
+	var other := {"tl": "tr", "tr": "tl", "bl": "br", "br": "bl"}
+	return regions.has("corner_" + kind) or regions.has("corner_" + str(other[kind]))
+
+
 func _deal_corner(kind: String) -> Array:
 	if not _corner_deck.has(kind) or (_corner_deck[kind] as Array).is_empty():
 		_load()
 		var other := {"tl": "tr", "tr": "tl", "bl": "br", "br": "bl"}
-		var deck: Array = [["corner_" + kind, false], ["corner_" + str(other[kind]), true]]
+		var deck: Array = []
+		for it: Array in [["corner_" + kind, false], ["corner_" + str(other[kind]), true]]:
+			if regions.has(it[0]):  # kits may come without some of the 4 base corners
+				deck.append(it)
 		if kind[0] == "t":
 			for i in n_extra:
 				var side := str(extra_sides[i]) if i < extra_sides.size() else "tl"
@@ -553,6 +574,22 @@ func set_open(a: Vector2i, b: Vector2i, open: bool) -> void:
 		vwall[a.y * (w + 1) + maxi(a.x, b.x)] = 0 if open else 1
 	else:
 		hwall[maxi(a.y, b.y) * w + a.x] = 0 if open else 1
+
+
+## Walking distance (in cells) from c to every reachable cell.
+func distances(c: Vector2i) -> Dictionary:
+	var dist := {c: 0}
+	var q: Array[Vector2i] = [c]
+	var i := 0
+	while i < q.size():
+		var p := q[i]
+		i += 1
+		for d: Vector2i in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+			var n := p + d
+			if walkable(n) and not dist.has(n) and is_open(p, n):
+				dist[n] = int(dist[p]) + 1
+				q.append(n)
+	return dist
 
 
 ## Cells reachable from c (walking through open edges).
@@ -765,6 +802,9 @@ func _load() -> void:
 	atlas = _mip(dir + "atlas.png")
 	floor_tex = _mip(dir + "floor.png")
 	extra_sides = data.get("extra_sides", [])
+	stud_k = float(data.floor.get("stud", 0.0))
+	if stud_k > 0.0 and ResourceLoader.exists(dir + "stud.png"):
+		stud_tex = _mip(dir + "stud.png")
 	corner_feet = data.get("corner_feet", {})
 	var g := Gradient.new()
 	g.set_color(0, Color(1, 1, 1, 1))
@@ -894,8 +934,8 @@ func _place_glows() -> void:
 			var c := Vector2i(i, j)
 			if not walkable(c) or _hash(i, j, 5) % 100 > 9:
 				continue
-			var k := _hash(i, j, 6) % (FLOOR_SUB * FLOOR_SUB)
-			var p := cell_rect(c).position + Vector2(CW, CH) / FLOOR_SUB * Vector2(k % FLOOR_SUB + 1, k / FLOOR_SUB + 1)
+			var k := _hash(i, j, 6) % (floor_sub * floor_sub)
+			var p := cell_rect(c).position + Vector2(CW, CH) / floor_sub * Vector2(k % floor_sub + 1, k / floor_sub + 1)
 			glows.append([p, 26.0, 0.32])
 			glows.append([p, 7.0, 0.85])
 	# lava pits and machinery
@@ -911,7 +951,7 @@ func _place_glows() -> void:
 
 
 func draw_floor(ci: CanvasItem, cells: Rect2i) -> void:
-	var t := Vector2(CW, CH) / FLOOR_SUB
+	var t := Vector2(CW, CH) / floor_sub
 	var n := floor_cols * floor_rows
 	for j in range(cells.position.y, cells.end.y):
 		for i in range(cells.position.x, cells.end.x):
@@ -922,14 +962,30 @@ func draw_floor(ci: CanvasItem, cells: Rect2i) -> void:
 				if pit[idx(c)] == 1:  # lava far below: the Glows layer lights it up
 					ci.draw_rect(cr.grow(-10.0), pit_in)
 				continue
-			for ty in FLOOR_SUB:
-				for tx in FLOOR_SUB:
-					var k := _hash(i * FLOOR_SUB + tx, j * FLOOR_SUB + ty) % n
+			for ty in floor_sub:
+				for tx in floor_sub:
+					var gx := i * floor_sub + tx
+					var gy := j * floor_sub + ty
+					var k := _hash(gx, gy) % n
 					# plain tiles more often than cracked ones: half the picks re-roll
 					if k % 3 == 0:
-						k = _hash(i * FLOOR_SUB + tx, j * FLOOR_SUB + ty, 1) % n
+						k = _hash(gx, gy, 1) % n
+					if plain_share > 0.0 and _hash(gx, gy, 3) % 100 < int(plain_share * 100.0):
+						k = 0
 					var src := Rect2(Vector2(k % floor_cols, k / floor_cols) * floor_tile, Vector2.ONE * floor_tile)
 					ci.draw_texture_rect_region(floor_tex, Rect2(cr.position + t * Vector2(tx, ty), t), src)
+	if stud_tex != null:  # one stud per tile crossing (the tiles carry none of their own)
+		var ss := t.x * stud_k * 0.75
+		for j in range(cells.position.y, cells.end.y):
+			for i in range(cells.position.x, cells.end.x):
+				var c := Vector2i(i, j)
+				if is_void(c):
+					continue
+				var o := cell_rect(c).position
+				for ty in floor_sub:
+					for tx in floor_sub:
+						var p := o + t * Vector2(tx, ty)
+						ci.draw_texture_rect(stud_tex, Rect2(p - Vector2(ss, ss) * 0.5, Vector2(ss, ss)), false)
 	# contact shadows: under the horizontal walls, along the sides of the columns
 	var hp := post_half()
 	for j in range(cells.position.y, cells.end.y):

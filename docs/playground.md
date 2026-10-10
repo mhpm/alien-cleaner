@@ -92,3 +92,11 @@ y conservación del archivo de guardado byte por byte.
 ```powershell
 godot --headless --path . res://tests/playground_test.tscn --quit-after 600
 ```
+
+## Mejoras durante la prueba
+
+En la pausa (botón de pausa del HUD) hay una lista **UPGRADES** con todas las mejoras:
+primero las que salen al subir de nivel y debajo, en gris, las apagadas. Los botones
+**−** y **+** cambian su nivel al momento (de 0 al máximo), sin tener que subir de nivel;
+los drones aparecen o desaparecen y las estadísticas se recalculan desde cero, así que
+bajar una mejora también funciona. Prueba: `tests/playground_upgrades_test.tscn`.

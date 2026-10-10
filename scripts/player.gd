@@ -17,6 +17,10 @@ var shadow: Sprite2D
 var shield_fx: Sprite2D  # the Shield power-up bubble
 var dome: Sprite2D  # Ion Shield upgrade: coloured by the hits it has left
 var martian: MartianAlly  # Martian UFO upgrade
+var scrub: ScrubBot  # Scrub-Bots upgrade (the helper drone)
+var hunter: HunterDrone  # Hunter Drone upgrade (boomerang blades)
+var bomber: BomberDrone  # Bomber Drone upgrade
+var magnet_t := UpgradeData.MAGNET_PULSE_EVERY  # Coin Magnet level 5 vacuum pulse
 var mat: ShaderMaterial
 
 var fire_t := 0.5
@@ -164,7 +168,7 @@ func reset_for_room(pos: Vector2) -> void:
 
 
 func refresh_upgrades() -> void:
-	var own := int(Game.stats.orbiters)
+	var own := 0  # Scrub-Bots is the ScrubBot drone now; these sprites are the UFO buddies
 	var n := own + (2 if has_buff("ufo") else 0)
 	while bots.size() > n:
 		bots.pop_back().queue_free()
@@ -197,6 +201,45 @@ func refresh_upgrades() -> void:
 			martian.lv = ml
 			martian.setup(self)
 		martian.set_level(ml)
+	elif martian != null:  # taken back to 0 (playground testing)
+		martian.queue_free()
+		martian = null
+	# Scrub-Bots: the helper drone
+	var sb := int(Game.stats.get("orbiters", 0))
+	if sb > 0:
+		if scrub == null:
+			scrub = ScrubBot.new()
+			add_child(scrub)
+			scrub.lv = sb
+			scrub.setup(self)
+		scrub.set_level(sb)
+	elif scrub != null:  # taken back to 0 (playground testing)
+		scrub.queue_free()
+		scrub = null
+	# Hunter Drone: the boomerang blades
+	var hl := int(Game.stats.get("hunter", 0))
+	if hl > 0:
+		if hunter == null:
+			hunter = HunterDrone.new()
+			add_child(hunter)
+			hunter.lv = hl
+			hunter.setup(self)
+		hunter.set_level(hl)
+	elif hunter != null:  # taken back to 0 (playground testing)
+		hunter.queue_free()
+		hunter = null
+	# Bomber Drone
+	var bl := int(Game.stats.get("bomber", 0))
+	if bl > 0:
+		if bomber == null:
+			bomber = BomberDrone.new()
+			add_child(bomber)
+			bomber.lv = bl
+			bomber.setup(self)
+		bomber.set_level(bl)
+	elif bomber != null:  # taken back to 0 (playground testing)
+		bomber.queue_free()
+		bomber = null
 
 
 func _physics_process(delta: float) -> void:
@@ -265,6 +308,11 @@ func _physics_process(delta: float) -> void:
 	shield_fx.modulate.a = 0.75 + sin(t * 4.0) * 0.2
 
 	_update_bots(delta)
+	if int(Game.stats.get("magnet_lvl", 0)) >= 5:
+		magnet_t -= delta
+		if magnet_t <= 0.0:
+			magnet_t = UpgradeData.MAGNET_PULSE_EVERY
+			_magnet_pulse()
 	_animate(delta, moving, dir)
 
 
@@ -513,6 +561,21 @@ func _dome_pop() -> void:
 	dome.scale = Vector2.ONE * float(UpgradeData.SHIELD_LV[sl - 1].r) * 2.6 / 154.0
 
 
+## Coin Magnet level 5: a blue vortex pulse sucks in every gem and coin nearby.
+func _magnet_pulse() -> void:
+	var n := 0
+	for node in get_tree().get_nodes_in_group("pickups"):
+		var pk := node as Pickup
+		if pk != null and pk.kind in ["xp", "coin", "gold"] and pk.global_position.distance_to(global_position) < UpgradeData.MAGNET_PULSE_R:
+			pk.magnet = true
+			n += 1
+	Game.world.ring(global_position, 46.0, Color("41c8ff"), 0.45, 3.0)
+	Game.world.ring(global_position, 26.0, Color("bdf3ff"), 0.3, 2.0)
+	Game.world.burst(global_position + Vector2(0, BODY_Y), Color("73eff7"), 14, 90.0, 0.4, 2.0)
+	if n > 0:
+		Sfx.play("shield", 0.1, -6.0)
+
+
 func _update_bots(delta: float) -> void:
 	if bots.is_empty():
 		return
@@ -520,7 +583,7 @@ func _update_bots(delta: float) -> void:
 	var n := bots.size()
 	var now := Time.get_ticks_msec()
 	var dmg := float(Game.stats.damage) * 0.7
-	var own := int(Game.stats.orbiters)
+	var own := 0  # all sprite bots are UFO buddies (Scrub-Bots = ScrubBot)
 	for i in n:
 		var a := orbit_a + TAU * i / n
 		var ufo := i >= own  # UFO buddies are bigger: a wider orbit and reach
@@ -528,9 +591,8 @@ func _update_bots(delta: float) -> void:
 		bots[i].position = p
 		bots[i].z_index = 1 if sin(a) > 0.0 else 0
 		var wp := global_position + p
-		for node in get_tree().get_nodes_in_group("enemies"):
-			var e := node as Enemy
-			if e == null or not e.targetable:
+		for e in Game.world.enemies_near(wp, 20.0):
+			if not e.targetable:
 				continue
 			if wp.distance_to(e.hit_center()) < e.radius + (9.0 if ufo else 4.0):
 				var id := e.get_instance_id()

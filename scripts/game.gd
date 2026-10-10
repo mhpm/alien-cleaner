@@ -36,6 +36,10 @@ var follow_cam := false
 var indicators: OffscreenIndicators
 var survival: Survival  # survivor-style stage director (WorldData "survival")
 var explore: Explore  # big sectioned arena with chests (WorldData survival "explore")
+const SLIME_BURSTS_MAX := 6  # Volatile Slime bursts per physics frame
+var _burst_n := 0
+var _burst_frame := -1
+var _bursts_now := 0
 var enemy_cache: Array[Node] = []  # the "enemies" group, refreshed every physics frame
 ## Spatial hash of the aliens, rebuilt every physics frame from flat packed arrays (no
 ## per-alien Dictionary keys or Arrays): neighbour pushes and hit tests only look at
@@ -803,18 +807,43 @@ func enemy_killed(e: Enemy) -> void:
 	if bool(Game.stats.death_explode) and not boss:
 		var pos := center
 		var lv := int(Game.stats.get("explode_lvl", 1))
-		var dmg := float(Game.stats.damage) * (1.5 + 0.5 * (lv - 1))
-		var rad := 26.0 + 5.0 * (lv - 1)
+		# Volatile Slime (UpgradeData "slime_explode"): 1 burst, 2 +33%, 3 knockback,
+		# 4 +25% and bigger, 5 every 4th burst a MEGA one (twice the size, double damage)
+		var dmg: float = float(Game.stats.damage) * [1.5, 2.0, 2.0, 2.5, 2.5][clampi(lv, 1, 5) - 1]
+		var rad: float = [26.0, 31.0, 34.0, 40.0, 42.0][clampi(lv, 1, 5) - 1]
+		var mega := false
+		if lv >= 5:
+			_burst_n += 1
+			mega = _burst_n % 4 == 0
+		if mega:
+			dmg *= 2.0
+			rad *= 2.0
+		var push := 160.0 if lv >= 3 else 0.0
 		get_tree().create_timer(0.08).timeout.connect(func() -> void:
-			_slime_burst(pos, dmg, rad))
+			_slime_burst(pos, dmg, rad, push, mega))
 
 
-func _slime_burst(pos: Vector2, dmg: float, rad := 26.0) -> void:
-	ring(pos, rad, Color("a7f070"), 0.3, 2.0, true)
-	burst(pos, Color("a7f070"), 10, 80.0, 0.35, 2.0)
+func _slime_burst(pos: Vector2, dmg: float, rad := 26.0, push := 0.0, mega := false) -> void:
+	# hordes: at most SLIME_BURSTS_MAX bursts a moment (chains could set off dozens at once)
+	var now := Engine.get_physics_frames()
+	if now != _burst_frame:
+		_burst_frame = now
+		_bursts_now = 0
+	_bursts_now += 1
+	if _bursts_now > SLIME_BURSTS_MAX and not mega:
+		return
+	ring(pos, rad, Color("a7f070"), 0.3, 3.0 if mega else 2.0, true)
+	burst(pos, Color("a7f070"), 18 if mega else 8, 120.0 if mega else 80.0, 0.35, 2.0)
+	if mega:
+		burst(pos, Color(1, 1, 1, 0.8), 8, 60.0, 0.3, 2.0)
+		shake(0.25)
+		Sfx.play("pop", 0.0, -4.0)
 	for e in enemies_near(pos, rad):
 		if e.targetable and e.global_position.distance_to(pos) < rad + e.radius:
-			e.take_damage(dmg, (e.global_position - pos).normalized())
+			var d := (e.global_position - pos).normalized()
+			e.take_damage(dmg, d)
+			if push > 0.0 and not e.is_boss and not e.anchored:
+				e.knock = d * push
 
 
 func explosion(pos: Vector2, radius: float, enemy_dmg: float, player_dmg: float) -> void:

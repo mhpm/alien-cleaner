@@ -346,6 +346,7 @@ func _send_final() -> void:
 	fence = BossFence.new().setup(c, FENCE_R)
 	world.effects.add_child(fence)
 	if world.explore != null:
+		world.explore.final_harvest()  # world 8: standing seed tanks heal you
 		world.explore.clear_ring(c, FENCE_R)  # nothing solid inside the boss ring
 	world.hud.banner("FINAL BOSS!", Color("ff5566"), 40, 1.2)
 	Sfx.play_music("boss")

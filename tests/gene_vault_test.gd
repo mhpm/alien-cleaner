@@ -57,6 +57,8 @@ func _run() -> void:
 	if not eggs.is_empty():
 		# walk up to one: it cracks and hatches octolings, the nest stays
 		var egg: EggCluster = eggs[0]
+		var dmg0: float = Game.stats.damage
+		Game.stats.damage = 0.0  # the auto-fire would break the egg or clean the octolings first
 		var ep := egg.global_position
 		var n0 := w.enemy_cache.size()
 		for i in 40:  # just out of its reach: the sleeping nest, its shadow
@@ -68,6 +70,7 @@ func _run() -> void:
 			await get_tree().physics_frame
 		var octos := w.enemy_cache.filter(func(e: Variant) -> bool: return is_instance_valid(e) and (e as Enemy).type_id == "octoling")
 		_check(not is_instance_valid(egg) and octos.size() >= 2, "an egg cluster hatches octolings when you come near")
+		Game.stats.damage = dmg0
 		await _snap("egg")
 		_check(w.enemy_cache.size() >= n0, "octolings out")
 	_check(f.machines.size() > 0, "corner machinery placed")

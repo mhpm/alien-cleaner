@@ -63,10 +63,15 @@ func new_run(world_i := -1, rush := false) -> void:
 		world_index = world_i
 	room_index = 0
 	run_coins = 0
+	stats = base_stats()
+
+
+## Run stats before any upgrade (ARMORY levels and the equipped weapon included).
+func base_stats() -> Dictionary:
 	# a fresh crew member is fragile: the ARMORY's LIFE levels are what keep you alive
 	# (aliens hit relative to base_hp, so every LIFE level is real extra survival)
 	var mhp := roundf(BASE_HP * (1.0 + LIFE_STEP * int(perm.health)))
-	stats = {
+	return {
 		"max_hp": mhp, "hp": mhp, "base_hp": BASE_HP,
 		"damage": 10.0 * (1.0 + ATTACK_STEP * int(perm.power)),
 		"fire_interval": 0.42, "bullet_speed": 220.0,
@@ -74,11 +79,31 @@ func new_run(world_i := -1, rush := false) -> void:
 		"shots": 1, "spread": 0, "ricochet": 0, "pierce": 0,
 		"freeze": 0.0, "chain": 0, "crit": 0.05, "crit_mult": 2.0,
 		"orbiters": 0, "death_explode": false, "magnet": false,
-		"knockback": 60.0, "blast_cooldown": 6.0, "shield": false, "shield_lvl": 0, "martian": 0, "overdrive": 0,
+		"knockback": 60.0, "blast_cooldown": 6.0, "shield": false, "shield_lvl": 0, "martian": 0, "overdrive": 0, "hunter": 0, "bomber": 0,
 		"weapon": 1, "gun": gun, "gun_lv": gun_level(gun),
 		"hazard_mult": 1.0, "coin_bonus": 0, "room_heal": 0,
 		"infected": int(perm.infected),
 	}
+
+
+## Testing (playground): put an upgrade at any level, up or down. Rebuilds the run stats
+## from scratch and re-applies every upgrade level by level (life keeps its share).
+## Chest perks and crew gifts taken this run are not re-applied.
+func set_upgrade_level(id: String, lv: int) -> void:
+	var ratio := float(stats.hp) / maxf(float(stats.max_hp), 1.0) if not stats.is_empty() else 1.0
+	var keep_weapon := int(stats.get("weapon", 1))
+	if lv <= 0:
+		upgrades.erase(id)
+	else:
+		upgrades[id] = lv
+	stats = base_stats()
+	for u: String in upgrades:
+		for k in range(1, int(upgrades[u]) + 1):
+			UpgradeData.apply(u, stats, k)
+	if not upgrades.has("blaster"):
+		stats.weapon = keep_weapon
+	stats.hp = float(stats.max_hp) * ratio
+	hp_changed.emit()
 
 
 # ---------------------------------------------------------------- armory
@@ -267,9 +292,19 @@ const UNLOCK_ALL := "debug/worlds/unlock_all"
 
 
 func world_unlocked(i: int) -> bool:
-	if OS.is_debug_build() and bool(ProjectSettings.get_setting(UNLOCK_ALL, true)):
+	if _unlock_all():
 		return true
 	return i <= worlds_cleared
+
+
+## BOSS CHALLENGE of world i open: after clearing it, or always in debug builds (same
+## setting debug/worlds/unlock_all as world_unlocked).
+func boss_challenge_unlocked(i: int) -> bool:
+	return _unlock_all() or worlds_cleared > i
+
+
+func _unlock_all() -> bool:
+	return OS.is_debug_build() and bool(ProjectSettings.get_setting(UNLOCK_ALL, true))
 
 
 ## Crew level from lifetime XP gems: [level, progress 0..1 to the next one].

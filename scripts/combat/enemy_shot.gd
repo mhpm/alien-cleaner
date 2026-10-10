@@ -80,6 +80,23 @@ const STYLES := {
 	"nugget": {"art": "nugget_orb", "scale": 0.22, "pop": "droid_pop", "pop_s": 0.18, "tint": Color(0.6, 1.3, 1.8), "color": Color("5fd0ff"), "hit": 8.5},
 	"lantern": {"art": "lantern_bubble", "scale": 0.15, "pop": "glob_pop", "pop_s": 0.12, "tint": Color(1.5, 0.6, 1.8), "color": Color("c060ff"), "hit": 6.0},
 	# MAGMA DRAKE: fireball, crescent wave, and the meteor that bursts into fireballs (art points +x)
+	# world 7 WARP NEXUS: laser drone orb, spider bot plasma, gravity sentinel orb, plasma
+	# saw (spun in code), the overseer's fireball (grows, bursts into sparks) and its spark
+	"laser_orb": {"art": "laser_orb", "scale": 0.2, "pop": "glob_pop", "pop_s": 0.12, "tint": Color(1.6, 0.7, 1.6), "color": Color("ff4fd8"), "hit": 6.0},
+	"spider": {"art": "spider_orb", "scale": 0.2, "pop": "glob_pop", "pop_s": 0.14, "tint": Color(1.0, 1.5, 0.7), "color": Color("a7f070"), "hit": 6.5},
+	"gravity": {"art": "gravity_orb", "scale": 0.15, "pop": "glob_pop", "pop_s": 0.12, "tint": Color(0.7, 1.2, 1.7), "color": Color("5fd0ff"), "hit": 6.0},
+	"saw": {"art": "plasma_saw", "scale": 0.28, "pop": "glob_pop", "pop_s": 0.16, "tint": Color(1.6, 0.7, 1.6), "color": Color("ff4fd8"), "hit": 8.0},
+	"overseer_ball": {"art": "overseer_ball", "scale": 0.22, "pop": "glob_pop", "pop_s": 0.3, "tint": Color(1.6, 0.9, 0.5), "color": Color("ffb030"), "hit": 9.0, "grow": true, "split": 8, "split_tex": "overseer_spark"},
+	"overseer_spark": {"art": "overseer_spark", "scale": 0.3, "pop": "glob_pop", "pop_s": 0.1, "tint": Color(1.6, 0.9, 0.5), "color": Color("ffb030"), "hit": 5.5},
+	# world 8 BIODOME: Bio Droid's curving leaf dart (art points +x), Spike Bloom's pollen
+	# orb, Spore Drone's drifting spore
+	"bio_leaf": {"art": "bio_leaf", "scale": 0.2, "pop": "glob_pop", "pop_s": 0.12, "tint": Color(1.1, 1.4, 0.8), "color": Color("8cff5a"), "hit": 6.0, "home": 1.0},
+	"spike_orb": {"art": "spike_orb", "scale": 0.2, "pop": "glob_pop", "pop_s": 0.12, "tint": Color(1.5, 0.8, 1.3), "color": Color("ff6fc8"), "hit": 6.0},
+	"drone_spore": {"art": "drone_spore", "scale": 0.22, "pop": "glob_pop", "pop_s": 0.12, "tint": Color(1.2, 1.5, 0.7), "color": Color("c8ff3a"), "hit": 6.0, "home": 0.8},
+	# BLOOM COLOSSUS: a seed that slows down, swells into a flower ("grow") and bursts into a
+	# ring of spores ("split"); the spore; the slow pollen mote of its photosynthesis
+	"bloom_seed": {"art": "bloom_seed", "scale": 0.17, "pop": "bloom_burst", "pop_s": 0.2, "tint": Color.WHITE, "color": Color("ff9ad5"), "hit": 9.0, "grow": true, "drag": 1.6, "min": 0.0, "split": 6, "split_tex": "bloom_spore"},
+	"bloom_spore": {"art": "bloom_spore", "scale": 0.14, "pop": "glob_pop", "pop_s": 0.1, "tint": Color(1.2, 1.4, 0.8), "color": Color("c8ff3a"), "hit": 5.5},
 	"magma": {"art": "magma_fire", "scale": 0.15, "pop": "glob_pop", "pop_s": 0.14, "tint": Color(1.6, 0.8, 0.4), "color": Color("ff8a2a"), "hit": 6.5},
 	"magma_crescent": {"art": "magma_crescent", "scale": 0.22, "pop": "glob_pop", "pop_s": 0.16, "tint": Color(1.6, 0.8, 0.4), "color": Color("ff8a2a"), "hit": 9.0},
 	"magma_meteor": {"art": "magma_meteor", "scale": 0.24, "pop": "glob_pop", "pop_s": 0.4, "tint": Color(1.6, 0.8, 0.4), "color": Color("ff8a2a"), "hit": 12.0, "split": 10, "split_tex": "magma"},

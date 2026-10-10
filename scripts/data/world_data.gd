@@ -216,11 +216,25 @@ const GENE_START := ["mini_slime", "mini_slime", "mini_slime", "splitlet", "spli
 const GENE_MID := ["mini_slime", "mini_slime", "splitlet", "splitlet", "splitter", "jelly_pod", "octo_wizard", "tentacle_pod", "tentacle_plant", "bubble_brain", "plasma_pupil"]
 const GENE := ["mini_slime", "mini_slime", "mini_slime", "splitlet", "splitlet", "splitter", "jelly_pod", "octo_wizard", "tentacle_pod", "tentacle_plant", "bubble_brain", "plasma_pupil", "tentacle_orbiter", "eyeclops", "jelly_saucer", "goo_lantern", "bell_cruiser", "pearl_flyer"]
 const GENE_SHOOTERS := ["jelly_pod", "octo_wizard", "tentacle_pod", "bubble_brain", "plasma_pupil", "tentacle_orbiter", "jelly_saucer", "bell_cruiser"]
+## world 7 (WARP NEXUS): its 4 new drones (laser_drone, spider_bot, gravity_sentinel,
+## saw_drone) with the world-4 machines; the cloned slimelets / splitlets / jelly pods of
+## world 6 are out
+const WARP_START := ["saw_drone", "saw_drone", "spider_bot", "spider_bot", "laser_drone", "scout", "blade_drone"]
+const WARP_MID := ["saw_drone", "saw_drone", "spider_bot", "spider_bot", "laser_drone", "laser_drone", "gravity_sentinel", "scout", "blade_drone", "tesla_drone", "martian_scout", "comet_hopper"]
+const WARP := ["saw_drone", "saw_drone", "spider_bot", "spider_bot", "laser_drone", "laser_drone", "gravity_sentinel", "gravity_sentinel", "scout", "blade_drone", "tesla_drone", "martian_scout", "comet_hopper", "crab_drone", "prism_drone", "gunship", "ring_eye", "blink_saucer", "nugget_ship"]
+const WARP_SHOOTERS := ["laser_drone", "spider_bot", "gravity_sentinel", "tesla_drone", "prism_drone", "ring_eye", "nugget_ship"]
+## world 8 (BIODOME): its 4 new aliens (bio_droid, spike_bloom, vine_crawler, spore_drone)
+## with the flower pods of its boss and some world-7 drones; the gravity sentinels, laser
+## drones and martian scouts of world 7 are out
+const BIO_START := ["vine_crawler", "vine_crawler", "bio_droid", "bio_droid", "spike_bloom", "bloom_sprout", "saw_drone"]
+const BIO_MID := ["vine_crawler", "vine_crawler", "bio_droid", "bio_droid", "spike_bloom", "spore_drone", "bloom_sprout", "bloom_sprout", "saw_drone", "spider_bot", "blade_drone", "comet_hopper"]
+const BIO := ["vine_crawler", "vine_crawler", "bio_droid", "bio_droid", "spike_bloom", "spike_bloom", "spore_drone", "spore_drone", "bloom_sprout", "bloom_sprout", "saw_drone", "spider_bot", "blade_drone", "comet_hopper", "tesla_drone", "goo_lantern", "jelly_pod", "tentacle_plant"]
+const BIO_SHOOTERS := ["bio_droid", "spike_bloom", "spore_drone", "spider_bot", "tesla_drone", "jelly_pod"]
 const HIVE_ROOMS := ["hive_entry", "nest", "biolab", "sludge", "overgrown_cargo", "spires", "pods", "reactor_core"]
 
 const WORLDS := [
 	{
-		"name": "INFESTED SPACESHIP", "theme": "ship", "enemy_mult": 1.0, "difficulty": [1.0, 0.08],
+		"music": "levels.mp3", "name": "INFESTED SPACESHIP", "theme": "ship", "enemy_mult": 1.0, "difficulty": [1.0, 0.08],
 		"pic": "world_1.png", "chest": 300,
 		"rooms": [
 			# 1: survival stage - a wide arena, 15 waves of 30 s that keep getting harder.
@@ -266,7 +280,7 @@ const WORLDS := [
 		# select with a fresh crew, so the horde starts as if 2.5 minutes in ("t_offset")
 		# and every alien, boss included, is 30% stronger, faster and quicker to attack
 		# ("enemy_mult").
-		"name": "THE HIVE", "theme": "hive", "enemy_mult": 1.15, "difficulty": [1.0, 0.0],
+		"music": "levels2.mp3", "name": "THE HIVE", "theme": "hive", "enemy_mult": 1.15, "difficulty": [1.0, 0.0],
 		"pic": "world_2.png", "chest": 600,
 		"rooms": [
 			{"final": true, "survival": {
@@ -304,7 +318,7 @@ const WORLDS := [
 		# horde comes in lab-style events: containment breaches out of the floor hatches,
 		# pincers, vortexes, elite squads and crossfire rings of shooters, several per
 		# wave ("events" with "at"). Final boss: the VOID ARCHMAGE.
-		"name": "THE VOID", "theme": "void", "enemy_mult": 1.3, "difficulty": [1.0, 0.0],
+		"music": "levels3.mp3", "name": "THE VOID", "theme": "void", "enemy_mult": 1.3, "difficulty": [1.0, 0.0],
 		"pic": "world_3.png", "chest": 900,
 		"rooms": [
 			{"final": true, "survival": {
@@ -370,7 +384,7 @@ const WORLDS := [
 		# carries on from 7:00 of toughness. Its own events: DROPSHIPs crossing the screen
 		# beaming aliens down and METEOR SHOWERs (rocks on marked spots that hurt everyone,
 		# some hatch an alien). Final boss: COMMANDER ZORP.
-		"name": "ORBITAL DECK", "theme": "space", "enemy_mult": 1.45, "difficulty": [1.0, 0.0],
+		"music": "Sub UFO.mp3", "boss_music": "Sub UFO 2.mp3", "name": "ORBITAL DECK", "theme": "space", "enemy_mult": 1.45, "difficulty": [1.0, 0.0],
 		"pic": "world_4.png", "chest": 1200,
 		"rooms": [
 			{"final": true, "survival": {
@@ -453,7 +467,7 @@ const WORLDS := [
 		# on its coolant pad heals you; vent all 4 and every boss arrives with 25% less
 		# health. New aliens: Orbit Hatchling, Orbit Raider, Eye Blob Saucer (ricochet
 		# laser); mini bosses ORBIT WARDEN and THE SLIME KING; final boss MAGMA DRAKE.
-		"name": "THE FORGE", "theme": "forge", "enemy_mult": 1.6, "difficulty": [1.0, 0.0],
+		"music": "levels2.mp3", "name": "THE FORGE", "theme": "forge", "enemy_mult": 1.6, "difficulty": [1.0, 0.0],
 		"pic": "world_5.png", "chest": 1500,
 		"rooms": [
 			{"final": true, "survival": {
@@ -525,7 +539,7 @@ const WORLDS := [
 		# the final boss fights with no reinforcements). New in the waves: Slimelets and
 		# Splitlets cloned in bulk; mini bosses BLOBULUS and TOXIC ANGLER; final boss THE
 		# MOTHERSHIP (its first appearance).
-		"name": "GENE VAULT", "theme": "gene", "enemy_mult": 1.7, "difficulty": [1.0, 0.0],
+		"music": "levels3.mp3", "name": "GENE VAULT", "theme": "gene", "enemy_mult": 1.7, "difficulty": [1.0, 0.0],
 		"pic": "world_6.png", "chest": 1800,
 		"rooms": [
 			{"final": true, "survival": {
@@ -583,6 +597,147 @@ const WORLDS := [
 						{"at": 21.0, "event": "pincer", "id": "octo_wizard", "count": 8}]},
 					{"pool": GENE, "alive": 82, "rate": 5.6, "elite": 0.1, "invasion": 230, "events": [
 						{"at": 16.0, "event": "breach", "pool": GENE_MID, "count": 26, "points": 5, "label": "CONTAINMENT BREACH!"}]},
+				],
+			}},
+		],
+	},
+	{
+		# world 7: WARP NEXUS, the station that holds the warp gate: an EXPLORE map built wall
+		# by wall from its kit (ForgeMap set "w7": halls, corridors, mazes, pillared halls,
+		# holes into open space, warp machinery in the corners). Besides chests and crew, 5
+		# WARP CELLS hide in the far corners of the map: each one taken sets off a WARP
+		# AMBUSH; with all 5 the gate is charged and the final boss comes weaker and cannot
+		# warp. New aliens: Orbital Laser Drone (sweeping laser), Quantum Spider Bot (swaps
+		# with its anchor), Gravity Core Sentinel (clumps the horde and flings it), Plasma
+		# Saw Drone (pincer saws); mini bosses CLAWDOZER and ORBIT WARDEN; final boss WARP
+		# OVERSEER.
+		"music": "Sub UFO.mp3", "boss_music": "Sub UFO 2.mp3", "name": "WARP NEXUS", "theme": "warp", "enemy_mult": 1.8, "difficulty": [1.0, 0.0],
+		"pic": "world_7.png", "chest": 2100,
+		"rooms": [
+			{"final": true, "survival": {
+				"arena": Vector2i(64, 96), "duration": 450.0, "hp_per_min": 0.25,
+				"explore": {"build": "kit", "set": "w7", "cells": [18, 14], "chests": 8, "alarms": true,
+					"maze": 0.4, "mazes": 3, "warp_cells": 5},
+				"t_offset": 300.0, "boss": "overseer",
+				"boss_help": {"pool": ["saw_drone", "spider_bot", "laser_drone"], "max": 8, "every": [15.0, 7.0], "squad": 3},
+				"final": {"pool": WARP, "alive": 34, "rate": 3.0},
+				"waves": [
+					# 1-4: the drones come online one by one
+					{"pool": WARP_START, "alive": 22, "rate": 2.6, "shooters": 0.25, "events": [
+						{"at": 12.0, "event": "swarm", "id": "saw_drone", "count": 10, "label": "SAW SWARM!"}]},
+					{"pool": WARP_START, "alive": 26, "rate": 2.8, "shooters": 0.3, "events": [
+						{"at": 6.0, "event": "crossfire", "id": "laser_drone", "count": 3, "label": "LASER GRID!"},
+						{"at": 18.0, "event": "pincer", "id": "spider_bot", "count": 12}]},
+					{"pool": WARP_MID, "alive": 30, "rate": 3.0, "elite": 0.03, "events": [
+						{"at": 0.0, "event": "escort", "id": "gravity_sentinel", "minion": "saw_drone", "count": 8, "label": "GRAVITY WELL!"},
+						{"at": 16.0, "event": "breach", "pool": ["spider_bot", "saw_drone"], "count": 14, "points": 3, "label": "WARP BREACH!"}]},
+					{"pool": WARP_MID, "alive": 34, "rate": 3.2, "elite": 0.04, "event": "ring", "id": "saw_drone", "count": 14, "events": [
+						{"at": 15.0, "event": "crossfire", "pool": WARP_SHOOTERS, "count": 5}]},
+					# 5: invasion
+					{"pool": WARP_MID, "alive": 40, "rate": 3.4, "elite": 0.04, "invasion": 120, "events": [
+						{"at": 18.0, "event": "spiral", "id": "spider_bot", "count": 20, "label": "QUANTUM SWARM!"}]},
+					# 6: first mini boss
+					{"pool": WARP_MID, "alive": 26, "rate": 2.6, "elite": 0.04, "events": [
+						{"at": 4.0, "event": "boss", "id": "clawdozer", "label": "CLAWDOZER!"},
+						{"at": 22.0, "event": "swarm", "id": "saw_drone", "count": 12}]},
+					# 7-10: two events a wave
+					{"pool": WARP, "alive": 44, "rate": 3.8, "elite": 0.05, "events": [
+						{"at": 0.0, "event": "escort", "id": "gravity_sentinel", "minion": "spider_bot", "count": 8, "label": "GRAVITY WELL!"},
+						{"at": 15.0, "event": "crossfire", "id": "laser_drone", "count": 5, "label": "LASER GRID!"}]},
+					{"pool": WARP, "alive": 48, "rate": 4.0, "elite": 0.05, "events": [
+						{"at": 0.0, "event": "dropship", "pool": WARP_MID, "count": 8},
+						{"at": 15.0, "event": "breach", "pool": ["saw_drone", "spider_bot", "laser_drone"], "count": 22, "points": 4, "label": "WARP BREACH!"}]},
+					{"pool": WARP, "alive": 52, "rate": 4.2, "elite": 0.06, "event": "pincer", "id": "saw_drone", "count": 14, "events": [
+						{"at": 14.0, "event": "escort", "id": "crab_drone", "minion": "blade_drone", "count": 6, "label": "DRONE SWARM!"}]},
+					{"pool": WARP, "alive": 56, "rate": 4.4, "elite": 0.06, "invasion": 180, "events": [
+						{"at": 18.0, "event": "ring", "id": "laser_drone", "count": 6, "label": "LASER RING!"}]},
+					# 11: second mini boss
+					{"pool": WARP, "alive": 34, "rate": 3.2, "elite": 0.06, "events": [
+						{"at": 4.0, "event": "boss", "id": "orbit_warden", "label": "ORBIT WARDEN!"},
+						{"at": 18.0, "event": "crossfire", "pool": WARP_SHOOTERS, "count": 6}]},
+					# 12-15: the gate overloads
+					{"pool": WARP, "alive": 64, "rate": 4.8, "elite": 0.07, "events": [
+						{"at": 0.0, "event": "escort", "id": "gravity_sentinel", "minion": "gravity_sentinel", "count": 2, "label": "SINGULARITY!"},
+						{"at": 12.0, "event": "spiral", "pool": ["saw_drone", "spider_bot"], "count": 30},
+						{"at": 22.0, "event": "swarm", "id": "spider_bot", "count": 14}]},
+					{"pool": WARP, "alive": 70, "rate": 5.0, "elite": 0.08, "events": [
+						{"at": 0.0, "event": "crossfire", "id": "laser_drone", "count": 6, "label": "LASER GRID!"},
+						{"at": 14.0, "event": "breach", "pool": WARP_MID, "count": 32, "points": 5, "label": "GATE OVERLOAD!"}]},
+					{"pool": WARP, "alive": 76, "rate": 5.3, "elite": 0.09, "events": [
+						{"at": 0.0, "event": "dropship", "pool": WARP, "count": 10},
+						{"at": 10.0, "event": "ring", "pool": ["saw_drone", "spider_bot"], "count": 28},
+						{"at": 21.0, "event": "pincer", "id": "laser_drone", "count": 8}]},
+					{"pool": WARP, "alive": 82, "rate": 5.6, "elite": 0.1, "invasion": 230, "events": [
+						{"at": 16.0, "event": "breach", "pool": WARP_MID, "count": 26, "points": 5, "label": "GATE OVERLOAD!"}]},
+				],
+			}},
+		],
+	},
+	{
+		# world 8: BIODOME, the greenhouse station on an asteroid: an EXPLORE map built wall by
+		# wall from its kit (ForgeMap set "w8": white walls with blue lights and greenery,
+		# loose floor tiles, 10 greenhouse corner blocks). Objective: DEFEND the 5 SEED TANKS
+		# (aliens nearby march on them and gnaw at them); every tank still standing when the
+		# final fight starts heals you. Final boss BLOOM COLOSSUS. PROVISIONAL: the world-7
+		# aliens until its own enemies arrive.
+		"music": "levels2.mp3", "name": "BIODOME", "theme": "bio", "enemy_mult": 1.9, "difficulty": [1.0, 0.0],
+		"pic": "world_8.png", "chest": 2400,
+		"rooms": [
+			{"final": true, "survival": {
+				"arena": Vector2i(64, 96), "duration": 450.0, "hp_per_min": 0.25,
+				"explore": {"build": "kit", "set": "w8", "cells": [18, 14], "chests": 8, "alarms": true,
+					"maze": 0.4, "mazes": 3, "tanks": 5},
+				"t_offset": 330.0, "boss": "bloom_colossus",
+				"boss_help": {"pool": ["bloom_sprout", "bloom_sprout", "bio_droid"], "max": 8, "every": [15.0, 7.0], "squad": 3},
+				"final": {"pool": BIO, "alive": 34, "rate": 3.0},
+				"waves": [
+					# 1-4: the drones come online one by one
+					{"pool": BIO_START, "alive": 22, "rate": 2.6, "shooters": 0.25, "events": [
+						{"at": 12.0, "event": "swarm", "id": "vine_crawler", "count": 10, "label": "VINE SWARM!"}]},
+					{"pool": BIO_START, "alive": 26, "rate": 2.8, "shooters": 0.3, "events": [
+						{"at": 6.0, "event": "crossfire", "id": "spore_drone", "count": 3, "label": "SPORE STORM!"},
+						{"at": 18.0, "event": "pincer", "id": "bio_droid", "count": 12}]},
+					{"pool": BIO_MID, "alive": 30, "rate": 3.0, "elite": 0.03, "events": [
+						{"at": 0.0, "event": "escort", "id": "spike_bloom", "minion": "vine_crawler", "count": 8, "label": "THORN GARDEN!"},
+						{"at": 16.0, "event": "breach", "pool": ["bio_droid", "vine_crawler"], "count": 14, "points": 3, "label": "ROOT BREACH!"}]},
+					{"pool": BIO_MID, "alive": 34, "rate": 3.2, "elite": 0.04, "event": "ring", "id": "vine_crawler", "count": 14, "events": [
+						{"at": 15.0, "event": "crossfire", "pool": BIO_SHOOTERS, "count": 5}]},
+					# 5: invasion
+					{"pool": BIO_MID, "alive": 40, "rate": 3.4, "elite": 0.04, "invasion": 120, "events": [
+						{"at": 18.0, "event": "spiral", "id": "bio_droid", "count": 20, "label": "ROGUE GARDENERS!"}]},
+					# 6: first mini boss
+					{"pool": BIO_MID, "alive": 26, "rate": 2.6, "elite": 0.04, "events": [
+						{"at": 4.0, "event": "boss", "id": "clawdozer", "label": "CLAWDOZER!"},
+						{"at": 22.0, "event": "swarm", "id": "vine_crawler", "count": 12}]},
+					# 7-10: two events a wave
+					{"pool": BIO, "alive": 44, "rate": 3.8, "elite": 0.05, "events": [
+						{"at": 0.0, "event": "escort", "id": "spike_bloom", "minion": "bio_droid", "count": 8, "label": "THORN GARDEN!"},
+						{"at": 15.0, "event": "crossfire", "id": "spore_drone", "count": 5, "label": "SPORE STORM!"}]},
+					{"pool": BIO, "alive": 48, "rate": 4.0, "elite": 0.05, "events": [
+						{"at": 0.0, "event": "dropship", "pool": BIO_MID, "count": 8},
+						{"at": 15.0, "event": "breach", "pool": ["vine_crawler", "bio_droid", "spore_drone"], "count": 22, "points": 4, "label": "ROOT BREACH!"}]},
+					{"pool": BIO, "alive": 52, "rate": 4.2, "elite": 0.06, "event": "pincer", "id": "vine_crawler", "count": 14, "events": [
+						{"at": 14.0, "event": "escort", "id": "crab_drone", "minion": "blade_drone", "count": 6, "label": "WEED SWARM!"}]},
+					{"pool": BIO, "alive": 56, "rate": 4.4, "elite": 0.06, "invasion": 180, "events": [
+						{"at": 18.0, "event": "ring", "id": "spore_drone", "count": 6, "label": "SPORE RING!"}]},
+					# 11: second mini boss
+					{"pool": BIO, "alive": 34, "rate": 3.2, "elite": 0.06, "events": [
+						{"at": 4.0, "event": "boss", "id": "orbit_warden", "label": "ORBIT WARDEN!"},
+						{"at": 18.0, "event": "crossfire", "pool": BIO_SHOOTERS, "count": 6}]},
+					# 12-15: the gate overloads
+					{"pool": BIO, "alive": 64, "rate": 4.8, "elite": 0.07, "events": [
+						{"at": 0.0, "event": "escort", "id": "spike_bloom", "minion": "spike_bloom", "count": 2, "label": "OVERGROWTH!"},
+						{"at": 12.0, "event": "spiral", "pool": ["vine_crawler", "bio_droid"], "count": 30},
+						{"at": 22.0, "event": "swarm", "id": "bio_droid", "count": 14}]},
+					{"pool": BIO, "alive": 70, "rate": 5.0, "elite": 0.08, "events": [
+						{"at": 0.0, "event": "crossfire", "id": "spore_drone", "count": 6, "label": "SPORE STORM!"},
+						{"at": 14.0, "event": "breach", "pool": BIO_MID, "count": 32, "points": 5, "label": "DOME BREACH!"}]},
+					{"pool": BIO, "alive": 76, "rate": 5.3, "elite": 0.09, "events": [
+						{"at": 0.0, "event": "dropship", "pool": BIO, "count": 10},
+						{"at": 10.0, "event": "ring", "pool": ["vine_crawler", "bio_droid"], "count": 28},
+						{"at": 21.0, "event": "pincer", "id": "spore_drone", "count": 8}]},
+					{"pool": BIO, "alive": 82, "rate": 5.6, "elite": 0.1, "invasion": 230, "events": [
+						{"at": 16.0, "event": "breach", "pool": BIO_MID, "count": 26, "points": 5, "label": "DOME BREACH!"}]},
 				],
 			}},
 		],

@@ -303,7 +303,7 @@ func _build_boss_button() -> void:
 func _show_boss_button() -> void:
 	if boss_btn == null:
 		return
-	var open := Game.worlds_cleared > sel
+	var open := Game.boss_challenge_unlocked(sel)
 	boss_btn.visible = open
 	boss_chest.visible = false
 	if not open:

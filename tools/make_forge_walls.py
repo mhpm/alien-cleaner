@@ -15,7 +15,7 @@ Output:
   build.json  atlas regions: posts, caps, feats (interiors of the segments), filler (plain
               slab + face, tileable), shafts (tileable), corners, extra corners + their side
 
-python tools/make_forge_walls.py [w5|w6]   (world 5 THE FORGE, world 6 GENE VAULT)
+python tools/make_forge_walls.py [w5|w6|w7|w8]   (worlds 5 THE FORGE, 6 GENE VAULT, 7 WARP NEXUS, 8 BIODOME)
 """
 import json
 import os
@@ -40,6 +40,14 @@ PAD = 3
 #   corners            (x, y, w, h, corner) of the kit sheet
 #   extra              more corner blocks (top corners) from their own sheet; extra_side =
 #                      the corner they are drawn for, "auto" = found by the wall they show
+#   post_cut           (optional) the kit has no raised posts: the segments' end brackets
+#                      (this many px of each end) are the posts; post_h / cap_h = their
+#                      height and the cap's (default POST_H / CAP_H)
+#   skip_tiles         (optional) floor tiles left out [(tx, ty)], e.g. a big emblem cut in
+#                      pieces
+#   floor_from         (optional) no floor of its own: the PLAINEST tiles of another kit's
+#                      floor.png (fewest cracks / panels), all evened out to one colour
+#                      (floor_tint), so the floor fits any world's walls
 SETS = {
     "w5": {
         "src": "w5_build_kit_ref.webp",
@@ -79,6 +87,65 @@ SETS = {
                   (548, 704, 373, 338), (992, 707, 388, 335)],
         "extra_side": "auto",
     },
+    "w7": {
+        "src": "w7_build_kit_ref.webp",
+        # inside the sheet's frame; the octagon emblem in the middle is left out
+        "floor_x": [85, 165, 245, 327, 406, 488, 573, 654],
+        "floor_y": [114, 195, 274, 354, 427, 508],
+        "floor_from": "w5",  # the user's call: general plain tiles, not the kit's own
+        "floor_tint": (92, 100, 128),
+        "plain": 18,  # how many of the plainest tiles are kept
+        "glow": "none",
+        "segments": [(23, 619, 227, 116), (251, 619, 229, 116), (481, 619, 213, 116), (695, 619, 229, 116),
+                     (925, 619, 94, 116), (23, 748, 227, 116), (251, 748, 229, 116), (481, 748, 213, 116),
+                     (695, 748, 229, 116), (925, 748, 94, 116)],
+        "post_cut": 34,
+        "post_h": 116,
+        "cap_h": 58,
+        "columns": [(701, 880, 83, 134, 0.24, 0.76), (795, 880, 71, 133, 0.24, 0.76), (873, 881, 64, 132, 0.24, 0.76),
+                    (1056, 880, 59, 134, 0.24, 0.76), (1125, 880, 63, 134, 0.24, 0.76), (324, 879, 75, 134, 0.24, 0.76)],
+        "corners": [(763, 32, 309, 292, "tl"), (1097, 32, 328, 292, "tr"), (763, 336, 309, 269, "bl"),
+                    (1097, 336, 328, 268, "br")],
+        "extra_src": None,
+        "extra": [],
+        "extra_side": "tl",
+    },
+}
+SETS["w8"] = {
+    # world 8 (BIODOME): white walls with orange brackets and blue lights, greenery
+    "src": "w8_build_kit_ref.webp",
+    # the floor comes as loose tiles on its own sheet: the plain ones and those with a
+    # small sprout / vent (no big bushes, cracks or vine paths, so it tiles calmly)
+    "floor_src": "w8_floor_ref.webp",
+    "floor_boxes": [(48, 85, 160, 150), (236, 84, 163, 151), (426, 84, 164, 151), (617, 84, 162, 151),
+                    (804, 84, 170, 151), (1000, 85, 161, 150), (1189, 84, 162, 151), (1380, 84, 159, 151),
+                    (1569, 84, 159, 151), (48, 257, 160, 145), (236, 257, 163, 145), (426, 257, 164, 145),
+                    (617, 257, 162, 145), (804, 257, 170, 145), (1000, 257, 161, 145), (1189, 257, 162, 145),
+                    (1380, 257, 159, 145), (48, 421, 161, 145), (48, 590, 161, 119), (48, 729, 140, 123),
+                    (218, 729, 142, 123), (387, 729, 132, 123), (549, 730, 136, 122), (713, 730, 139, 122)],
+    "floor_inset": 1,  # thin borders already: just the outermost pixel
+    "glow": "none",
+    # rows 2-3 of the sheet (row 1 is taller; the 373 px one would squash too much)
+    "segments": [(13, 154, 131, 97), (149, 154, 148, 97), (300, 153, 140, 98), (444, 154, 181, 98),
+                 (629, 154, 212, 98), (845, 154, 142, 98), (990, 152, 123, 100), (387, 268, 129, 96),
+                 (522, 267, 191, 97), (717, 268, 261, 96), (980, 266, 134, 98)],
+    "post_cut": 22,  # the rounded end with its blue tube is the post
+    "filler_max": 256,  # white walls: the plain slab is bright
+    "post_h": 97,
+    "cap_h": 48,
+    "columns": [(14, 382, 62, 184, 0.24, 0.76), (86, 383, 62, 183, 0.24, 0.76), (157, 382, 59, 184, 0.24, 0.76),
+                (224, 382, 62, 184, 0.24, 0.76), (295, 382, 61, 184, 0.24, 0.76), (364, 382, 62, 184, 0.24, 0.76),
+                (433, 382, 61, 184, 0.24, 0.76), (575, 382, 63, 185, 0.24, 0.76), (647, 382, 62, 185, 0.24, 0.76),
+                (718, 382, 62, 184, 0.24, 0.76), (875, 382, 62, 185, 0.24, 0.76)],
+    "corners": [],  # only top corners, on their own sheet
+    "extra_src": "w8_corners_ref.webp",
+    "extra": [(14, 152, 301, 326), (334, 156, 290, 321), (639, 156, 290, 329), (943, 151, 294, 332),
+              (1253, 156, 271, 323), (15, 512, 300, 323), (333, 528, 291, 318), (639, 542, 289, 302),
+              (944, 521, 288, 326), (1246, 525, 281, 310)],
+    "extra_side": "auto",
+    # loose props saved as build/prop_<n>.png: the 14 plant tanks (world 8 SeedTank)
+    "props": [(10, 581, 70, 151), (88, 581, 70, 151), (166, 582, 76, 151), (253, 582, 76, 150),
+              (338, 582, 74, 150), (420, 581, 71, 150), (501, 581, 70, 151), (581, 582, 71, 149)],
 }
 C = SETS["w5"]
 SRC = OUT = ""
@@ -90,16 +157,89 @@ def load():
 
 # ---------------------------------------------------------------- floor
 
+def shared_floor():
+    """The plainest tiles of another kit's floor, evened out to one colour."""
+    sheet = np.array(Image.open(os.path.join(ROOT, "assets", "rooms", C["floor_from"], "build", "floor.png")).convert("RGBA")).astype(np.float32)
+    rows, cols = sheet.shape[0] // TILE, sheet.shape[1] // TILE
+    tiles = [sheet[y * TILE:(y + 1) * TILE, x * TILE:(x + 1) * TILE] for y in range(rows) for x in range(cols)]
+    inner = slice(8, TILE - 8)  # leave the grout out of the measure
+
+    def busy(t):
+        g = t[inner, inner, :3].mean(2)
+        return np.abs(np.diff(g, axis=0)).mean() + np.abs(np.diff(g, axis=1)).mean() + g.std() * 0.3
+
+    tiles.sort(key=busy)
+    keep = tiles[:C.get("plain", 18)]
+    want = np.array(C.get("floor_tint", (92, 100, 128)), np.float32)
+    out = []
+    for t in keep:
+        t = t.copy()
+        mean = t[inner, inner, :3].reshape(-1, 3).mean(0)
+        t[..., :3] = np.clip(t[..., :3] - mean + want, 0, 255)  # same colour, same light
+        out.append(t)
+    cols = 6
+    rows = len(out) // cols
+    sheet = np.zeros((rows * TILE, cols * TILE, 4), np.float32)
+    for i, t in enumerate(out[:cols * rows]):
+        y, x = divmod(i, cols)
+        sheet[y * TILE:(y + 1) * TILE, x * TILE:(x + 1) * TILE] = t
+    Image.fromarray(sheet.astype(np.uint8)).save(os.path.join(OUT, "floor.png"))
+    return {"tile": TILE, "cols": cols, "rows": rows}
+
+
+def loose_floor():
+    """Floor tiles drawn apart on their own sheet: each box cropped and set to TILE px."""
+    a = np.array(Image.open(os.path.join(ROOT, "tools", C["floor_src"])).convert("RGBA"))
+    a[a[..., 3] < 40] = 0
+    im = Image.fromarray(a)
+    tiles = []
+    k = C.get("floor_inset", 0)
+    for (x, y, w, h) in C["floor_boxes"]:
+        t = im.crop((x, y, x + w, y + h))
+        t = t.crop(t.getbbox())
+        t = t.crop((k, k, t.width - k, t.height - k))
+        flat = Image.new("RGBA", t.size, (200, 205, 218, 255))  # no see-through edges
+        flat.alpha_composite(t)
+        tiles.append(np.array(flat.resize((TILE, TILE), Image.LANCZOS)).astype(np.float32))
+    cols = max(c for c in range(6, 13) if len(tiles) % c == 0) if any(len(tiles) % c == 0 for c in range(6, 13)) else 8
+    rows = len(tiles) // cols  # only full rows
+    sheet = np.zeros((rows * TILE, cols * TILE, 4), np.float32)
+    for i, t in enumerate(tiles[:cols * rows]):
+        yy, xx = divmod(i, cols)
+        sheet[yy * TILE:(yy + 1) * TILE, xx * TILE:(xx + 1) * TILE] = t
+    Image.fromarray(sheet.astype(np.uint8)).save(os.path.join(OUT, "floor.png"))
+    out = {"tile": TILE, "cols": cols, "rows": rows}
+    if C.get("stud"):
+        cx, cy, r = C["stud"]
+        st = np.array(im.crop((cx - r, cy - r, cx + r, cy + r))).copy()
+        rgb = st[..., :3].astype(int)
+        keep = (rgb[..., 2] > rgb[..., 0] + 40) & (st[..., 3] > 100)  # cyan stone + its blue rim
+        st[~keep] = 0
+        Image.fromarray(st).save(os.path.join(OUT, "stud.png"))
+        # its size as a share of a tile (the tile is the box minus the inset on both sides)
+        out["stud"] = (2.0 * r) / (C["floor_boxes"][0][2] - 2 * k)
+    return out
+
+
 def floor(src):
+    if C.get("floor_from"):
+        return shared_floor()
+    if C.get("floor_boxes"):
+        return loose_floor()
     tiles = []
     fx, fy = C["floor_x"], C["floor_y"]
+    skip = set(tuple(t) for t in C.get("skip_tiles", []))
     for ty in range(len(fy) - 1):
         for tx in range(len(fx) - 1):
+            if (tx, ty) in skip:
+                continue
             t = Image.fromarray(src[fy[ty]:fy[ty + 1], fx[tx]:fx[tx + 1]].astype(np.uint8))
             tiles.append(np.array(t.resize((TILE, TILE), Image.LANCZOS)).astype(np.float32))
     tiles = np.array(tiles)
     r, g, b = tiles[..., 0], tiles[..., 1], tiles[..., 2]
-    if C["glow"] == "purple":
+    if C["glow"] == "none":
+        warm = np.zeros_like(r)  # nothing to clean
+    elif C["glow"] == "purple":
         warm = np.clip((r - g + 2.0) / 25.0, 0.0, 1.0)  # blue-grey floor: red ~8 under green
     else:
         warm = np.clip((r - b + 22.0) / 30.0, 0.0, 1.0)  # blue-grey floor: red ~30 under blue
@@ -107,7 +247,7 @@ def floor(src):
     soft = np.array([np.array(Image.fromarray((w * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(9))
                               .filter(ImageFilter.GaussianBlur(4))) / 255.0 for w in warm])
     cover = (warm.reshape(len(tiles), -1) > 0.5).mean(1)
-    clean = [i for i in range(len(tiles)) if cover[i] < 0.0075]
+    clean = [i for i in range(len(tiles)) if cover[i] < 0.0075] or list(range(len(tiles)))
     keep = [i for i in range(len(tiles)) if cover[i] < C.get("drop", 1.0)]  # goo-covered tiles are left out
     out = tiles.copy()
     rng = np.random.default_rng(7)
@@ -119,7 +259,9 @@ def floor(src):
         out[i, ..., :3] = tiles[i, ..., :3] * (1.0 - a) + d[..., :3] * a
     # whatever tint is left: back to the floor's blue-grey
     r, g, b = out[..., 0], out[..., 1], out[..., 2]
-    if C["glow"] == "purple":
+    if C["glow"] == "none":
+        pass
+    elif C["glow"] == "purple":
         out[..., 0] = r - np.clip(r - (g - 8.0), 0, None) * 0.9
         out[..., 2] = b - np.clip(b - (g + 42.0), 0, None) * 0.9
     else:
@@ -128,6 +270,7 @@ def floor(src):
     out[..., 3] = 255
     out = out[keep]
     cols = 9 if len(out) % 9 == 0 or len(out) < 40 else 10
+    cols = min(cols, len(out))
     rows = len(out) // cols
     out = out[:cols * rows]
     sheet = np.zeros((rows * TILE, cols * TILE, 4), np.float32)
@@ -146,7 +289,15 @@ def crop(src, x, y, w, h):
 
 def segment_parts(src):
     posts, feats, interiors = [], [], []
+    ph = C.get("post_h", POST_H)
     for (x, y, w, h) in C["segments"]:
+        if C.get("post_cut"):
+            k = C["post_cut"]
+            for p0, p1 in ((0, k), (w - k, w)):
+                posts.append(crop(src, x + p0, y, p1 - p0, ph).resize((POST_W, ph), Image.LANCZOS))
+            feats.append(crop(src, x + k, y, w - 2 * k, h))
+            interiors.append(src[y:y + h, x + k:x + w - k])
+            continue
         a = src[y:y + h, x:x + w, 3] > 100
         row = a[4]
         runs, s = [], None
@@ -171,12 +322,12 @@ def segment_parts(src):
 def filler(interiors):
     """Plain slab + face: per row, the median of the calm (grey, not glowing) pixels."""
     rows = []
-    for yy in range(92):
+    for yy in range(C.get("post_h", 92) if C.get("post_cut") else 92):
         px = []
         for it in interiors:
             if yy < it.shape[0]:
                 line = it[yy]
-                ok = (line[:, 3] > 200) & (np.abs(line[:, 0] - line[:, 1]) < 22) & (line[:, :3].max(1) < 150)
+                ok = (line[:, 3] > 200) & (np.abs(line[:, 0] - line[:, 1]) < 22) & (line[:, :3].max(1) < C.get("filler_max", 150))
                 px.extend(line[ok, :4].tolist())
         rows.append(np.median(np.array(px), 0) if len(px) > 8 else np.zeros(4))
     col = np.array(rows)
@@ -219,6 +370,8 @@ def extra_side(img):
 
 
 def extra_corners():
+    if not C.get("extra_src"):
+        return []
     src = np.array(Image.open(os.path.join(ROOT, "tools", C["extra_src"])).convert("RGBA")).astype(np.float32)
     out = []
     for (x, y, w, h) in C["extra"]:
@@ -311,7 +464,7 @@ def main():
     items = []
     for i, p in enumerate(posts):
         items.append(("post_%d" % i, p))
-        items.append(("cap_%d" % i, p.crop((0, 0, POST_W, CAP_H))))
+        items.append(("cap_%d" % i, p.crop((0, 0, POST_W, C.get("cap_h", CAP_H)))))
     for i, f in enumerate(feats):
         items.append(("feat_%d" % i, f))
     items.append(("filler", fill))
@@ -325,18 +478,25 @@ def main():
     for i, (img, _side) in enumerate(extra):
         items.append(("corner_x%d" % i, img))
         feet["corner_x%d" % i] = footprint(img)
+    for i, (x, y, w, h) in enumerate(C.get("props", [])):
+        pr = crop(src, x, y, w, h)
+        a = np.array(pr)
+        a[a[..., 3] < 40] = 0
+        pr = Image.fromarray(a)
+        pr.crop(pr.getbbox()).save(os.path.join(OUT, "prop_%d.png" % i))
     atlas, regions = pack(items, 2048)
     atlas.save(os.path.join(OUT, "atlas.png"))
     data = {
         "floor": fl,
-        "post": [POST_W, POST_H],
-        "cap_h": CAP_H,
+        "post": [POST_W, C.get("post_h", POST_H)],
+        "cap_h": C.get("cap_h", CAP_H),
         "filler_top": fill_top,
         "posts": len(posts),
         "feats": len(feats),
         "shafts": len(C["columns"]),
         "extra_corners": len(extra),
         "extra_sides": [side for _img, side in extra],
+        "props": len(C.get("props", [])),
         "corner_feet": feet,
         "regions": regions,
     }

@@ -155,6 +155,35 @@ const TYPES := {
 		"script": "res://scripts/enemies/nova_puffer.gd",
 	},
 	# world 4 drones (tools/drones_w4_ref.webp): spinning blades, crescents that curve in (enemies/blade_drone.gd)
+	# world 7 (WARP NEXUS) drones (tools/enemies_w7_ref.webp)
+	# eyeball satellite: marks a wedge and sweeps a laser across it (enemies/laser_drone.gd)
+	"laser_drone": {
+		"name": "Orbital Laser Drone", "hp": 40.0, "speed": 30.0, "damage": 11.0, "coins": 4, "cost": 3,
+		"radius": 11.0, "art": "laser_drone", "scale": 0.26, "ai": "laser_drone", "shoots": true, "sets": ["laser_beam", "laser_orb"],
+		"color": Color("ff4fd8"), "kb": 0.9,
+		"script": "res://scripts/enemies/laser_drone.gd",
+	},
+	# skitters in zigzags, plants a quantum anchor and swaps places with it (enemies/spider_bot.gd)
+	"spider_bot": {
+		"name": "Quantum Spider Bot", "hp": 34.0, "speed": 32.0, "damage": 10.0, "coins": 4, "cost": 3,
+		"radius": 10.0, "art": "spider_bot", "scale": 0.27, "ai": "spider_bot", "shoots": true, "sets": ["spider_orb"],
+		"color": Color("a7f070"), "kb": 1.0,
+		"script": "res://scripts/enemies/spider_bot.gd",
+	},
+	# drops gravity wells that clump the horde and fling it at you (enemies/gravity_sentinel.gd)
+	"gravity_sentinel": {
+		"name": "Gravity Core Sentinel", "hp": 70.0, "speed": 18.0, "damage": 12.0, "coins": 6, "cost": 4,
+		"radius": 12.0, "art": "gravity_sentinel", "scale": 0.28, "ai": "gravity_sentinel", "shoots": true, "sets": ["gravity_well", "gravity_orb"],
+		"color": Color("5fd0ff"), "kb": 0.6,
+		"script": "res://scripts/enemies/gravity_sentinel.gd",
+	},
+	# throws its two saws to your sides and slams them shut (enemies/saw_drone.gd)
+	"saw_drone": {
+		"name": "Plasma Saw Drone", "hp": 44.0, "speed": 34.0, "damage": 12.0, "coins": 4, "cost": 3,
+		"radius": 11.0, "art": "saw_drone", "scale": 0.27, "ai": "saw_drone", "sets": ["plasma_saw"],
+		"color": Color("ff4fd8"), "kb": 0.9,
+		"script": "res://scripts/enemies/saw_drone.gd",
+	},
 	"blade_drone": {
 		"name": "Cyclone Drone", "hp": 34.0, "speed": 34.0, "damage": 11.0, "coins": 3, "cost": 2,
 		"radius": 11.1, "art": "blade_drone", "scale": 0.31, "ai": "blade", "shoots": true,
@@ -504,6 +533,56 @@ const TYPES := {
 		"name": "Octoling", "hp": 16.0, "speed": 50.0, "damage": 7.0, "coins": 1, "cost": 1,
 		"radius": 7.0, "art": "octoling", "scale": 0.09, "ai": "chaser",
 		"color": Color("9b7bff"), "kb": 1.3,
+	},
+	# world 8 (BIODOME) aliens (tools/enemies_w8_ref.webp)
+	# rogue gardener: goes for the seed tanks, curving leaf darts if you come near (enemies/bio_droid.gd)
+	"bio_droid": {
+		"name": "Bio Droid", "hp": 38.0, "speed": 30.0, "damage": 10.0, "coins": 4, "cost": 3,
+		"radius": 10.0, "art": "bio_droid", "scale": 0.26, "ai": "bio_droid", "shoots": true, "sets": ["bio_leaf"],
+		"color": Color("8cff5a"), "kb": 1.0,
+		"script": "res://scripts/enemies/bio_droid.gd",
+	},
+	# roots to shoot pollen bursts and lob thorn patches (enemies/spike_bloom.gd)
+	"spike_bloom": {
+		"name": "Spike Bloom", "hp": 52.0, "speed": 20.0, "damage": 11.0, "coins": 4, "cost": 3,
+		"radius": 10.0, "art": "spike_bloom", "scale": 0.27, "ai": "spike_bloom", "shoots": true, "sets": ["spike_orb"],
+		"color": Color("ff9ad5"), "kb": 0.7,
+		"script": "res://scripts/enemies/spike_bloom.gd",
+	},
+	# whips a vine that tethers you to it (enemies/vine_crawler.gd)
+	"vine_crawler": {
+		"name": "Vine Crawler", "hp": 56.0, "speed": 26.0, "damage": 11.0, "coins": 4, "cost": 3,
+		"radius": 11.0, "art": "vine_crawler", "scale": 0.27, "ai": "vine_crawler",
+		"color": Color("4fbf3a"), "kb": 0.8,
+		"script": "res://scripts/enemies/vine_crawler.gd",
+	},
+	# rains slowing spore clouds ahead of you (enemies/spore_drone.gd)
+	"spore_drone": {
+		"name": "Spore Drone", "hp": 40.0, "speed": 24.0, "damage": 10.0, "coins": 4, "cost": 3,
+		"radius": 10.0, "art": "spore_drone", "scale": 0.25, "ai": "spore_drone", "shoots": true, "sets": ["drone_spore"],
+		"color": Color("c8ff3a"), "kb": 0.9,
+		"script": "res://scripts/enemies/spore_drone.gd",
+	},
+	# world 8 (BIODOME) final boss: overgrown greenhouse robot (enemies/boss_bloom.gd)
+	"bloom_colossus": {
+		"name": "BLOOM COLOSSUS", "hp": 3400.0, "speed": 30.0, "damage": 22.0, "coins": 130, "cost": 0,
+		"radius": 24.0, "art": "bloom", "scale": 0.36, "ai": "boss", "boss": true,
+		"color": Color("ff9ad5"), "kb": 0.0,
+		"sets": ["bloom_seed", "bloom_spore", "bloom_burst", "bloom_roots", "bloom_ring", "bloom_wreck", "bloom_sprout"],
+		"script": "res://scripts/enemies/boss_bloom.gd",
+	},
+	# its flower pods: little one-eyed runners called out of the soil
+	"bloom_sprout": {
+		"name": "Bloom Sprout", "hp": 22.0, "speed": 48.0, "damage": 9.0, "coins": 1, "cost": 1,
+		"radius": 8.0, "art": "bloom_sprout", "scale": 0.27, "ai": "chaser",
+		"color": Color("8cff5a"), "kb": 1.2,
+	},
+	# world 7 (WARP NEXUS) final boss: one-eyed rocket saucer (enemies/boss_overseer.gd)
+	"overseer": {
+		"name": "WARP OVERSEER", "hp": 3200.0, "speed": 40.0, "damage": 22.0, "coins": 120, "cost": 0,
+		"radius": 22.0, "art": "overseer", "scale": 0.44, "ai": "boss",
+		"color": Color("ffb030"), "kb": 0.0, "boss": true,
+		"script": "res://scripts/enemies/boss_overseer.gd",
 	},
 	# world 6 (GENE VAULT) final boss: the alien mothership (enemies/boss_mothership.gd)
 	"mothership": {
