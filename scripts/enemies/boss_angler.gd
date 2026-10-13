@@ -23,7 +23,6 @@ extends BossBase
 
 const CALM := ["bubbles", "lure", "dive", "mines", "bubbles", "dive", "lure"]
 const FURY := ["storm", "lure", "dive", "mines", "bubbles", "dive", "storm", "mines"]
-const FIGHT_SECS := 45.0  # mini boss: a shorter fight than the final bosses
 const BUBBLE_SPEED := 75.0
 const PULL_R := 200.0
 const PULL_SPEED := 52.0  # the astronaut walks at 80: leaning away is slower, not impossible
@@ -57,7 +56,7 @@ var second_pull := false
 
 
 func _init_ai() -> void:
-	_size_to_player(FIGHT_SECS)
+	_size_to_player()
 	state = "intro"
 	state_t = 1.4
 	Sfx.play("roar", 0.0)

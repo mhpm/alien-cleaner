@@ -80,8 +80,7 @@ func _open() -> void:
 	w.ring(at, 34.0, c, 0.4, 3.0, true)
 	w.shake(0.3)
 	Sfx.play("upgrade", 0.0)
-	w.hud.banner(str(def.name), c, 32, 1.0)
-	w.popup_text(at + Vector2(0, -16), str(def.desc), c.lightened(0.3), 13)
+	w.hud.reward(ChestData.tex(kind), str(def.name), str(def.desc), c)
 	if w.explore != null:
 		w.explore.chest_opened(self)
 	sprite.modulate = Color(0.55, 0.55, 0.65, 0.85)

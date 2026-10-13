@@ -42,6 +42,7 @@ var counter: Label
 var rescue_panel: RescuePanel  # RESCUE n/m with a figure per crew member
 var survivors: Array[Survivor] = []
 var saved_crew: Array[int] = []  # SurvivorData.CREW indices rescued, in order (pause menu)
+var opened_chests: Array[int] = []  # ChestData.CHESTS indices opened, in order (pause menu)
 var rescued := 0
 var rng := RandomNumberGenerator.new()
 var set_id := "lab"
@@ -623,8 +624,9 @@ func _refresh_counter() -> void:
 		rescue_panel.set_count(rescued)
 
 
-func chest_opened(_c: SupplyChest) -> void:
+func chest_opened(c: SupplyChest) -> void:
 	opened += 1
+	opened_chests.append(c.kind)
 	_refresh_counter()
 	if opened == chests.size():
 		world.hud.banner("ALL CHESTS FOUND!", Color("ffcd75"), 26, 1.4)

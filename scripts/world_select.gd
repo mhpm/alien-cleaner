@@ -431,16 +431,10 @@ func _refresh() -> void:
 	_show_chest()
 
 
-## First idle frame of the picked character, cropped to the drawing.
+## The picked character, cropped to the drawing.
 func _crew_tex() -> Texture2D:
 	var c := CharacterData.selected()
-	var t := c.icon() if c != null else null
-	if t == null:
-		return null
-	var at := AtlasTexture.new()
-	at.atlas = t
-	at.region = Rect2(t.get_image().get_used_rect())
-	return at
+	return c.portrait() if c != null else null
 
 
 func _short(n: int) -> String:

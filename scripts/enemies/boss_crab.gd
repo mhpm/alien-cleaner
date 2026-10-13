@@ -20,7 +20,6 @@ extends BossBase
 
 const CALM := ["cannon", "quake", "pods", "plow", "cannon", "quake", "plow", "pods"]
 const FURY := ["sentry", "quake", "plow", "cannon", "pods", "sentry", "plow", "quake", "pods"]
-const FIGHT_SECS := 45.0  # mini boss: a shorter fight than the final bosses
 const ORB_SPEED := 125.0
 const SPIKE_R := 11.0
 const RING_STEP := 32.0
@@ -47,7 +46,7 @@ var gap_angle := 0.0
 
 
 func _init_ai() -> void:
-	_size_to_player(FIGHT_SECS)
+	_size_to_player()
 	state = "intro"
 	state_t = 1.4
 	Sfx.play("roar", 0.0)

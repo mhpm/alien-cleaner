@@ -42,6 +42,7 @@ var directional := false  # the set has walk_left/right/up/down (no flip_h)
 var mut_gun := 0  # mutation gun in the hands (0 = the equipped blaster)
 var gun_len := GUN_LEN  # grip -> muzzle in astronaut frame px (x BODY_SCALE = world)
 var character: CharacterData  # null until _ready: the default astronaut
+var held: Texture2D  # a temporary weapon in the hand (hold_gun), null = the ARMORY one
 var px := BODY_SCALE  # world units per frame px of the character
 var shooting := false  # set by the Player while it fires ("shoot" pose)
 var flash: Sprite2D  # the character's muzzle flash (fire_flash)
@@ -106,16 +107,32 @@ func _in_sprite() -> bool:
 	return character != null and character.weapon == CharacterData.Weapon.IN_SPRITE
 
 
-## Re-read the equipped weapon (call after buying / equipping).
-func refresh() -> void:
+## Re-read the equipped weapon (call after buying / equipping), or show `gun_id` instead
+## (the ARMORY previews the weapon picked in its carousel).
+func refresh(gun_id := "") -> void:
 	mut_gun = 0
-	var n := GunData.index(Game.gun)
+	held = null
+	var n := GunData.index(gun_id if not gun_id.is_empty() else Game.gun)
 	var all: Array = guns_data().guns
-	_grip = _point(all[n].grip)
-	_tip = _point(all[n].tip)
+	_hold(GunFire.tex("gun_%d" % (n + 1)), _point(all[n].grip), _point(all[n].tip))
+
+
+## A temporary weapon in the hand instead of the ARMORY one (a character's ability, e.g.
+## ZED's shotgun): `grip` / `tip` in its art px. refresh() puts the ARMORY weapon back.
+func hold_gun(tex: Texture2D, grip: Vector2, tip: Vector2) -> void:
+	mut_gun = 0
+	held = tex
+	_hold(tex, grip, tip)
+
+
+## `tex` in the hand, pivoting on `grip`, as long as the ARMORY guns of its size are.
+func _hold(tex: Texture2D, grip: Vector2, tip: Vector2) -> void:
+	_grip = grip
+	_tip = tip
+	var all: Array = guns_data().guns
 	var ref := (_point(all[0].tip) - _point(all[0].grip)).length()
 	gun_len = GUN_LEN * sqrt((_tip - _grip).length() / ref)
-	gun.texture = GunFire.tex("gun_%d" % (n + 1))
+	gun.texture = tex
 	gun.offset = -_grip
 	_pose()
 
@@ -164,6 +181,7 @@ func set_mutation_gun(lv: int) -> void:
 		refresh()
 		return
 	mut_gun = lv
+	held = null
 	var info: Dictionary = MutationData.points().guns[lv - 1]
 	var grip: Array = info.grip
 	var tip: Array = info.tip
@@ -197,7 +215,8 @@ func play(anim: String) -> void:
 			var pose := _shoot_pose()
 			# walk frames that already aim: keep walking while firing to the side
 			if not (pose == "shoot" and anim == "walk" and character.walk_aims):
-				anim = pose
+				# walking while aiming up / down: its walking version (resolve falls back)
+				anim = str(CharacterData.WALK_SHOOT.get(pose, pose)) if anim != "idle" else pose
 		anim = character.resolve(anim)
 	if body.animation == anim:
 		return
@@ -297,6 +316,6 @@ func _pose() -> void:
 		flash.scale = Vector2(fs, -fs if flip else fs)
 		flash.modulate.a = 1.0 - k * 0.5
 	# only when walking up (back view) is the blaster hidden behind the body
-	var behind := body.animation == "walk_up" or body.animation == "shoot_up"
+	var behind := body.animation in [&"walk_up", &"shoot_up", &"walk_shoot_up"]
 	if (gun.get_index() < body.get_index()) != behind:
 		move_child(gun, 0 if behind else -1)

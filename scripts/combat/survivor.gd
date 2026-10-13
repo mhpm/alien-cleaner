@@ -139,7 +139,8 @@ func _rescue() -> void:
 	for c in bubbles.get_children():
 		c.queue_free()
 	say(SurvivorData.THANKS.pick_random(), Color("a7f070"), 1.8)
-	w.popup_text(at + Vector2(0, -18), "%s SAVED: %s" % [display_name if display_name != "" else def.name, def.gift], _col().lightened(0.3), 11)
+	var who := display_name if display_name != "" else str(def.name)
+	w.hud.reward(sprite.texture, "%s SAVED!" % who, str(def.gift), _col())
 	if w.explore != null:
 		w.explore.survivor_saved(self)
 	rescued.emit(self)

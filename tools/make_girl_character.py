@@ -5,7 +5,8 @@ Sheets in tools/characters/girl/<sheet>.png (transparent, pixel art drawn 5x, fr
 in equal cells left to right) -> assets/characters/girl/<anim>_<i>.png at OUT_PX px per
 art pixel, all on one shared canvas with the feet on its horizontal middle (flip_h safe),
 plus the pink PULSE BLASTER shot (assets/guns/shot_pulse_pink.png, hit_pulse_pink.png),
-her muzzle flash and the HEART SHOT heart (assets/guns/shot_heart.png, from the pickup heart).
+her muzzle flash and the HEART SHOT heart (assets/guns/shot_heart.png, from the user's
+tools/characters/girl/heart_ref.webp: cropped and shrunk to HEART_W px, crisp).
 Prints the anchor and the canvas size for assets/characters/girl/girl.tres.
 """
 import colorsys
@@ -14,12 +15,14 @@ import os
 import numpy as np
 from PIL import Image
 
+import character_frames
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "tools", "characters", "girl")
 OUT = os.path.join(ROOT, "assets", "characters", "girl")
 GUNS = os.path.join(ROOT, "assets", "guns")
-PICKUP_HEART = os.path.join(ROOT, "assets", "sprites", "enviroment", "collectibles_elements",
-                            "ChatGPT Image Sep 27, 2026, 04_45_58 PM_015.png")
+HEART_REF = os.path.join(SRC, "heart_ref.webp")
+HEART_W = 64  # px wide (its pixel art is ~24 cells across: crisp at this size)
 PX = 5  # sheet pixels per art pixel
 OUT_PX = 2.0  # frame pixels per art pixel
 # each sheet is drawn at its own size: these scales give every pose the face of the
@@ -34,66 +37,35 @@ ANIMS = {
     "shoot": ("walk_shoot", 8, [0]),
     "shoot_down": ("walk_shoot_down", 8, [0]),
     "shoot_up": ("walk_shoot_up", 8, [0]),
+    "walk_shoot_down": ("walk_shoot_down", 8, None),  # walking while aiming down
+    "walk_shoot_up": ("walk_shoot_up", 8, None),  # walking while aiming up (back view)
     "hurt": ("hurt", 2, None),
     "death": ("death", 4, None),
 }
 PINK_HUE = 0.92  # hue of her pink shots (0..1)
 
 
-def cells(sheet: str, n: int) -> list:
-    img = Image.open(os.path.join(SRC, sheet + ".png")).convert("RGBA")
-    w = img.width // n
-    out = []
-    for i in range(n):
-        c = img.crop((i * w, 0, (i + 1) * w, img.height))
-        k = OUT_PX / PX * GROW.get(sheet, GROW_OTHERS)
-        out.append(c.resize((round(c.width * k), round(c.height * k)), Image.LANCZOS))
-    return out
-
-
-def feet_x(frames: list) -> float:
-    """Middle of the boots (bottom rows) averaged over a standing sheet."""
-    xs = []
-    for f in frames:
-        a = np.array(f)[..., 3] > 128
-        ys, x = np.nonzero(a)
-        low = ys > ys.max() - 6 * OUT_PX
-        xs.append((x[low].min() + x[low].max() + 1) / 2.0)
-    return float(np.mean(xs))
-
-
 def build() -> None:
-    os.makedirs(OUT, exist_ok=True)
-    stand = cells("idle", 8)
-    plan = {}
-    for anim, (sheet, n, keep) in ANIMS.items():
-        fr = cells(sheet, n)
-        # feet: bottom of the drawings; x from the boots of the standing sheets, the idle
-        # one for the lying-down ones (hurt / death keep their cell placement)
-        bottom = max(np.nonzero(np.array(f)[..., 3] > 128)[0].max() for f in fr) + 1
-        fx = feet_x(stand) * fr[0].width / stand[0].width if anim in ("hurt", "death") else feet_x(fr)
-        plan[anim] = ([fr[k] for k in keep] if keep else fr, (fx, bottom))
-    half_w = up = down = 0.0
-    for frames, (fx, fy) in plan.values():
-        for f in frames:
-            r = np.nonzero(np.array(f)[..., 3] > 0)
-            half_w = max(half_w, fx - r[1].min(), r[1].max() + 1 - fx)
-            up = max(up, fy - r[0].min())
-            down = max(down, r[0].max() + 1 - fy)
-    half_w, up, down = int(np.ceil(half_w)) + 1, int(np.ceil(up)) + 1, int(np.ceil(down))
-    size = (half_w * 2, up + down)
-    for name in os.listdir(OUT):
-        if name.endswith(".png") and name != "muzzle_flash.png":
-            os.remove(os.path.join(OUT, name))
-    for anim, (frames, (fx, fy)) in plan.items():
-        for i, f in enumerate(frames):
-            canvas = Image.new("RGBA", size)
-            canvas.alpha_composite(f, (int(round(half_w - fx)), int(up - fy)))
-            canvas.save(os.path.join(OUT, "%s_%d.png" % (anim, i)))
-    print("anchor", (half_w, up), "canvas", size)
-    idle = np.array(Image.open(os.path.join(OUT, "idle_0.png")))[..., 3] > 128
-    ys = np.nonzero(idle)[0]
-    print("idle height", ys.max() + 1 - ys.min())
+    k = OUT_PX / PX
+    anims = {}
+    keep = {}
+    for anim, (sheet, n, frames) in ANIMS.items():
+        anims[anim] = character_frames.cells(os.path.join(SRC, sheet + ".png"), n, k * GROW.get(sheet, GROW_OTHERS))
+        if frames:
+            keep[anim] = frames
+    stand = character_frames.cells(os.path.join(SRC, "idle.png"), 8, k * GROW_OTHERS)
+    frame_plan = character_frames.plan(anims, stand, ("hurt", "death"), 6 * OUT_PX, keep)
+    anchor, size = character_frames.save(OUT, frame_plan)
+    print("anchor", anchor, "canvas", size)
+    print("idle height", character_frames.drawn_height(os.path.join(OUT, "idle_0.png")))
+
+
+def heart() -> None:
+    """Her heart (projectile, particles, button icon): the user's pixel heart, cropped."""
+    img = Image.open(HEART_REF).convert("RGBA")
+    img = img.crop(img.getbbox())
+    h = round(img.height * HEART_W / img.width)
+    img.resize((HEART_W, h), Image.LANCZOS).save(os.path.join(GUNS, "shot_heart.png"))
 
 
 def pinkify(src: str, out: str) -> None:
@@ -113,4 +85,4 @@ if __name__ == "__main__":
     pinkify(os.path.join(GUNS, "hit_pulse.png"), os.path.join(GUNS, "hit_pulse_pink.png"))
     pinkify(os.path.join(ROOT, "assets", "characters", "kid_astronaut", "muzzle_flash.png"),
             os.path.join(OUT, "muzzle_flash.png"))
-    pinkify(PICKUP_HEART, os.path.join(GUNS, "shot_heart.png"))
+    heart()

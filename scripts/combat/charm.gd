@@ -24,7 +24,7 @@ var target: Enemy
 var _look_t := 0.0
 var _bite_t := 0.0
 var _tint := Color.WHITE  # the alien's own tint, given back at the end
-var _heart: Sprite2D
+var _glow: HeartSparkles  # tiny hearts rising off it while charmed
 
 
 ## Charms `e` for `secs` (refreshes an alien already charmed). False when it cannot be
@@ -57,14 +57,11 @@ func _start() -> void:
 	enemy.add_to_group(GROUP)
 	_tint = enemy.tint
 	enemy.tint = TINT
-	_heart = Sprite2D.new()
-	_heart.texture = HeartShotAbility.heart_tex()
-	var k := 7.0 / maxf(1.0, _heart.texture.get_width())
-	_heart.scale = Vector2(k, k)
-	enemy.add_child(_heart)
+	_glow = HeartSparkles.aura(enemy, Vector2(0, -enemy.tex_h * enemy.base_scale * 0.5), enemy.radius + 2.0)
 	var w := Game.world
 	w.ring(enemy.hit_center(), 14.0, COLOR, 0.35, 2.5)
 	w.burst(enemy.hit_center(), COLOR, 14, 70.0, 0.45, 2.0)
+	HeartSparkles.burst(enemy, Vector2(0, -enemy.tex_h * enemy.base_scale * 0.5), 0.35, 14, 12.0)
 	Sfx.play("upgrade", 0.1, -6.0)
 
 
@@ -74,7 +71,6 @@ func steer(delta: float) -> Vector2:
 	if time_left <= 0.0:
 		end()
 		return Vector2.ZERO
-	_heart.position = Vector2(0, -enemy.tex_h * enemy.base_scale - 7.0 + sin(enemy.t * 6.0) * 1.5)
 	_look_t -= delta
 	_bite_t -= delta
 	if not is_instance_valid(target):
@@ -126,6 +122,6 @@ func end() -> void:
 	enemy.remove_from_group(GROUP)
 	enemy.tint = _tint
 	enemy.targetable = not enemy.dead
-	if is_instance_valid(_heart):
-		_heart.queue_free()
+	if is_instance_valid(_glow):
+		_glow.stop()
 	Game.world.burst(enemy.hit_center(), COLOR, 8, 50.0, 0.35, 1.5)

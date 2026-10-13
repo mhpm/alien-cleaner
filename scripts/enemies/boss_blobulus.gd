@@ -22,7 +22,6 @@ extends BossBase
 
 const CALM := ["bombs", "geysers", "split", "flop", "bombs", "geysers", "flop", "split"]
 const FURY := ["reaction", "bombs", "flop", "geysers", "split", "reaction", "bombs", "flop", "geysers"]
-const FIGHT_SECS := 45.0  # mini boss: a shorter fight than the final bosses
 const CHAIN_STEP := 26.0
 const CHAIN_WARN := 0.9
 const GEYSER_R := 15.0
@@ -52,7 +51,7 @@ var flop_t := 0.0
 
 
 func _init_ai() -> void:
-	_size_to_player(FIGHT_SECS)
+	_size_to_player()
 	state = "intro"
 	state_t = 1.4
 	Sfx.play("roar", 0.0)

@@ -55,6 +55,16 @@ static func tentacles(lv: int) -> Array[Texture2D]:
 	return out
 
 
+## The mutant head of the phase at gun level `lv` (or the last phase that has one): the
+## icon of the MUTATE button.
+static func head_tex(lv: int) -> Texture2D:
+	for n in range(clampi(lv, 1, MAX), 0, -1):
+		var p := PHASE_DIR % [n, n] + "head_front.png"
+		if ResourceLoader.exists(p):
+			return load(p)
+	return null
+
+
 static func level() -> int:
 	return int(Game.perm.get("infected", 0))
 

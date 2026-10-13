@@ -36,6 +36,22 @@
 [ext_resource type="Texture2D" path="res://assets/characters/girl/muzzle_flash.png" id="flash"]
 [ext_resource type="Script" path="res://scripts/data/character_data.gd" id="script"]
 [ext_resource type="Script" path="res://scripts/abilities/heart_shot_ability.gd" id="ability"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_down_0.png" id="walk_shoot_down_0"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_down_1.png" id="walk_shoot_down_1"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_down_2.png" id="walk_shoot_down_2"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_down_3.png" id="walk_shoot_down_3"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_down_4.png" id="walk_shoot_down_4"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_down_5.png" id="walk_shoot_down_5"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_down_6.png" id="walk_shoot_down_6"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_down_7.png" id="walk_shoot_down_7"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_up_0.png" id="walk_shoot_up_0"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_up_1.png" id="walk_shoot_up_1"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_up_2.png" id="walk_shoot_up_2"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_up_3.png" id="walk_shoot_up_3"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_up_4.png" id="walk_shoot_up_4"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_up_5.png" id="walk_shoot_up_5"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_up_6.png" id="walk_shoot_up_6"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_up_7.png" id="walk_shoot_up_7"]
 
 [sub_resource type="SpriteFrames" id="frames"]
 animations = [{
@@ -177,6 +193,64 @@ animations = [{
 "loop": true,
 "name": &"walk_up",
 "speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("walk_shoot_down_0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("walk_shoot_down_1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("walk_shoot_down_2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("walk_shoot_down_3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("walk_shoot_down_4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("walk_shoot_down_5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("walk_shoot_down_6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("walk_shoot_down_7")
+}],
+"loop": true,
+"name": &"walk_shoot_down",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("walk_shoot_up_0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("walk_shoot_up_1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("walk_shoot_up_2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("walk_shoot_up_3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("walk_shoot_up_4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("walk_shoot_up_5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("walk_shoot_up_6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("walk_shoot_up_7")
+}],
+"loop": true,
+"name": &"walk_shoot_up",
+"speed": 12.0
 }]
 
 [resource]
@@ -184,6 +258,7 @@ script = ExtResource("script")
 character_id = "girl"
 display_name = "Girl Astronaut"
 tagline = "HEART SHOTS charm aliens"
+accent = Color(1, 0.6, 0.85, 1)
 ability = ExtResource("ability")
 frames = SubResource("frames")
 anchor = Vector2(129, 227)

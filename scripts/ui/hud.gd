@@ -13,6 +13,7 @@ const HUD_SLICE := {"hp": [150, 50, 46, 50], "clock": [0, 0, 0, 0], "coins": [0,
 var root: Control
 var safe: Control  # top bar, touch controls and banners, kept clear of notches/rounded corners
 var controls: TouchControls
+var rewards: RewardToast  # chest perks / crew gifts, held long enough to read
 var hp_bar: Bar
 var coin_label: Label
 var weapon_label: Label
@@ -68,7 +69,10 @@ func setup(g: GameWorld) -> void:
 
 	controls = TouchControls.new()
 	safe.add_child(controls)
+	rewards = RewardToast.new()
+	safe.add_child(rewards)
 	controls.ability_pressed.connect(func() -> void: game.player.blast())
+	controls.mutate_pressed.connect(func() -> void: game.player.mutate())
 
 	# --- top bar: the user's HUD kit (tools/hud_kit_ref.webp -> make_hud_assets.py ->
 	# assets/ui/hud/), 9-sliced to these widths at TOP_H tall
@@ -297,8 +301,9 @@ func _process(delta: float) -> void:
 		run_t += delta
 	if Input.is_action_just_pressed("pause"):
 		toggle_pause()
-	var cd := float(Game.stats.blast_cooldown)
+	var cd := game.player.blast_cooldown()
 	controls.cooldown = game.player.blast_t / cd if cd > 0.0 else 0.0
+	_show_ability(game.player.ability)
 	var inf := game.player.infected
 	if not inf.unlocked():
 		controls.infect_state = 0
@@ -309,10 +314,25 @@ func _process(delta: float) -> void:
 	else:
 		controls.infect_state = 2 if inf.charge >= 1.0 else 1
 		controls.infect = inf.charge
+	if controls.infect_state > 0 and controls.mutate_icon == null:
+		controls.mutate_icon = MutationData.head_tex(maxi(1, inf.level))
 	_track_boss(delta)
 
 
+## The ability button shows the character's ability (CharacterAbility) and its meter.
+func _show_ability(ab: CharacterAbility) -> void:
+	controls.ability_icon = ab.icon() if ab != null else null
+	controls.ability_tint = ab.icon_tint() if ab != null else Color.WHITE
+	controls.ability_meter = ab.meter() if ab != null else -1.0
+	controls.meter_color = ab.meter_color() if ab != null else Color.WHITE
+
+
 # ---------------------------------------------------------------- feedback
+
+## A readable card for a reward that changes the build (chest perk, rescued crew gift).
+func reward(icon: Texture2D, title: String, text: String, color: Color) -> void:
+	rewards.show_reward(icon, title, text, color)
+
 
 func banner(text: String, color := Color.WHITE, font_size := 40, hold := 1.0) -> void:
 	banner_label.text = text

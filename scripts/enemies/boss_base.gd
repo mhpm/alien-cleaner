@@ -1,25 +1,46 @@
 class_name BossBase
 extends Enemy
-## What every final boss shares (BIG RED, HIVE QUEEN): tough whatever the build, held
-## in the BossFence, and a few helpers for their attacks.
-##  - health sized to the astronaut's damage per second when it arrives (about
-##    TARGET_SECS of steady hits, never below its own base health)
+## What every boss shares (final bosses and the mini bosses of wave events): tough
+## whatever the build, held in the BossFence, and a few helpers for their attacks.
+##  - health sized to the astronaut's damage per second when it arrives (fight_hp):
+##    a FINAL boss (the stage's own "boss") lasts about TARGET_SECS of steady hits and
+##    never less than its base health; a MINI boss lasts about MINI_SECS whatever its
+##    base health (only MINI_FLOOR of it as a floor), so an early mini boss is never as
+##    tough as the final one
 ##  - no single hit takes more than HIT_CAP of it (nukes, crits, the mutant)
 ##  - `armor` (1 = none) scales every hit: furious phases, crystal shields...
 
-const TARGET_SECS := 85.0  # seconds of the astronaut's steady damage its health lasts
+const TARGET_SECS := 85.0  # final boss: seconds of the astronaut's steady damage its health lasts
+const MINI_SECS := 45.0  # mini boss: a shorter fight
+const MINI_FLOOR := 0.2  # mini boss: never below this share of its base health (a safety net)
+## Mini bosses take less damage in their late phases (fury, desperate): on average about
+## this much of every hit, so their health is trimmed to keep the fight at MINI_SECS.
+const MINI_PHASE_ARMOR := 0.9
 const DPS_REALISM := 0.7  # shots missed, moving (slower fire), dodging
 const HIT_CAP := 0.025  # the most a single hit can take (share of max health)
 
 var armor := 1.0
 
 
-## Call first thing in _init_ai.
-func _size_to_player(secs := TARGET_SECS) -> void:
-	var need := _player_dps() * DPS_REALISM * secs
-	if need > max_hp:
-		max_hp = need
-		hp = max_hp
+## The health a boss gets: `base_hp` (its data x world x clock) against `dps` of the
+## astronaut. Pure: tests size every boss of every world with it.
+static func fight_hp(base_hp: float, dps: float, mini: bool) -> float:
+	if mini:
+		return maxf(dps * DPS_REALISM * MINI_SECS * MINI_PHASE_ARMOR, base_hp * MINI_FLOOR)
+	return maxf(dps * DPS_REALISM * TARGET_SECS, base_hp)
+
+
+## True when boss `id` is not the final boss of the running stage (a wave event).
+static func is_mini(id: String) -> bool:
+	var s := Game.world.survival if Game.world != null else null
+	return s != null and str(s.def.get("boss", "")) != id
+
+
+## Call first thing in _init_ai: sizes its health to the astronaut (fight_hp), then the
+## world objectives that weaken bosses.
+func _size_to_player() -> void:
+	max_hp = fight_hp(max_hp, _player_dps(), is_mini(type_id))
+	hp = max_hp
 	# world 5: every overheating reactor vented = the forge cooled, bosses arrive weaker
 	var ex: Explore = Game.world.explore if Game.world != null else null
 	if ex != null and ex.gate_charged():  # world 7: every warp cell taken

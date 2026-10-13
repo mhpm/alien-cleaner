@@ -544,6 +544,8 @@ func _read_input() -> void:
 	player.input_dir = v if can_move else Vector2.ZERO
 	if can_move and Input.is_action_just_pressed("ability"):
 		player.blast()
+	if can_move and Input.is_action_just_pressed("mutate"):
+		player.mutate()
 
 
 func _room_cleared() -> void:

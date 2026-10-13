@@ -1,8 +1,9 @@
 class_name Player
 extends CharacterBody2D
 ## The astronaut. Moves with the joystick, auto-aims at the nearest alien and
-## fires faster while standing still. Special ability: Air Blast (or, with the shop's
-## Infected Mode, mutate when the infection meter is full; see Infected).
+## fires faster while standing still. Ability button: Air Blast plus the character's own
+## ability (CharacterAbility); with the shop's Infected Mode a MUTATE button turns it into
+## the mutant when the infection meter is full (see Infected).
 
 const BLAST_RADIUS := 62.0
 const BODY_Y := -13.0  # world-space height of the torso
@@ -312,7 +313,7 @@ func _physics_process(delta: float) -> void:
 				fire_t = float(infected.gun().rate) * frenzy
 			else:
 				_shoot(target)
-				fire_t = GunFire.interval(s) * frenzy
+				fire_t = _fire_interval() * frenzy
 	else:
 		fire_t = maxf(fire_t - delta, 0.08)
 	if int(s.get("overdrive", 0)) >= 5 and not mutated and not locked:
@@ -390,11 +391,22 @@ func _has_los(e: Enemy) -> bool:
 	return hit.is_empty() or hit.collider is Barrel
 
 
-## The equipped ARMORY weapon (GunFire: every weapon fires its own way).
+## Seconds between shots: the equipped weapon's, or the ability's own weapon while out.
+func _fire_interval() -> float:
+	if ability != null and ability.overrides_fire():
+		return ability.fire_interval()
+	return GunFire.interval(Game.stats)
+
+
+## The equipped ARMORY weapon (GunFire: every weapon fires its own way), or the
+## character's ability weapon while it is out (CharacterAbility.overrides_fire).
 func _shoot(target: Enemy) -> void:
 	var d := _gun_dir()
 	var origin := body.to_global(body.muzzle_pos())
-	recoil = GunFire.fire(self, origin, d, target)
+	if ability != null and ability.overrides_fire():
+		recoil = ability.fire(origin, d, target)
+	else:
+		recoil = GunFire.fire(self, origin, d, target)
 	shoot_t = 0.45
 	body.fire_flash()
 	if ability != null:
@@ -429,11 +441,22 @@ func _shoot_mutant() -> void:
 	Game.world.ring(origin, 3.0 + infected.level, Color(str(g.color)), 0.1, 1.5)
 
 
+## Seconds between BLASTs: the run's blast cooldown, or the character ability's own
+## recharge when it asks for a longer one (ZED's shotgun).
+func blast_cooldown() -> float:
+	var cd := float(Game.stats.blast_cooldown)
+	return maxf(cd, ability.cooldown()) if ability != null else cd
+
+
+## MUTATE button: turns into the mutant when the infection meter is full.
+func mutate() -> void:
+	if not dead and not locked and infected.can_transform():
+		infected.transform()
+
+
+## Ability button: the Air Blast (+ the character's ability), or the mutant's roll.
 func blast() -> void:
 	if dead or locked:
-		return
-	if infected.can_transform():
-		infected.transform()
 		return
 	if infected.active:
 		infected.dash()
@@ -441,7 +464,7 @@ func blast() -> void:
 	if blast_t > 0.0:
 		return
 	var s := Game.stats
-	blast_t = float(s.blast_cooldown)
+	blast_t = blast_cooldown()
 	var w := Game.world
 	var c := global_position + Vector2(0, BODY_Y)
 	w.ring(c, BLAST_RADIUS, Color("c0f4ff"), 0.35, 4.0, true)

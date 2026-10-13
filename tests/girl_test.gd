@@ -74,6 +74,18 @@ func _run() -> void:
 		await _frames(30)
 		await _shot("shoot_" + str(pose[0]))
 	print("GIRL anim while firing: ", w.player.body.body.animation)
+	# walking while aiming up / down plays her walking aim (8 frames), standing the still pose
+	var astro := w.player.body
+	astro.shooting = true
+	for k: Array in [[-PI * 0.5, "walk_shoot_up", "shoot_up"], [PI * 0.5, "walk_shoot_down", "shoot_down"]]:
+		astro.aim = float(k[0])
+		astro.play("walk")
+		_check(astro.body.animation == StringName(k[1]) and astro.body.sprite_frames.get_frame_count(k[1]) == 8,
+			"walking while aiming plays %s (got %s)" % [k[1], astro.body.animation])
+		astro.play("idle")
+		_check(astro.body.animation == StringName(k[2]), "standing while aiming plays %s" % k[2])
+	var kid := CharacterData.load_id("kid_astronaut")
+	_check(kid.resolve("walk_shoot_up") == "shoot_up", "a character without it keeps its still pose")
 	# unlocking: clearing world 1 adds her to the crew
 	var keep_chars := Game.characters.duplicate()
 	var keep_cleared := Game.worlds_cleared

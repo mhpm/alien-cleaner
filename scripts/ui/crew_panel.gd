@@ -14,11 +14,15 @@ const CARD_X := 25.0
 const CARD_Y := 392.0
 const CARD_GAP := 22.0
 ## card art per character (the others use the kid's blue one)
-const CARDS := {"kid_astronaut": "card_kid", "girl": "card_girl"}
+const CARDS := {"kid_astronaut": "card_kid", "girl": "card_girl", "zed": "card_zed"}
 ## spots on a card (its own px): text right of the portrait, the green button
 const NAME_RECT := Rect2(458, 34, 290, 54)
 const TAG_RECT := Rect2(458, 98, 290, 40)
 const BTN_RECT := Rect2(537, 143, 205, 75)
+## Cards painted with another layout: where their name / tagline / button go instead.
+const LAYOUTS := {
+	"card_zed": {"name": Rect2(466, 30, 280, 54), "tag": Rect2(466, 92, 280, 30), "btn": Rect2(534, 124, 212, 72)},
+}
 const TITLE_RECT := Rect2(212, 128, 360, 112)  # the plate inside the header
 const GOLD := Color("ffcd75")
 const CYAN := Color("73eff7")
@@ -81,9 +85,13 @@ func _build() -> void:
 	stage = Control.new()
 	stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(stage)
-	var ids: Array = Game.CREW.keys()
-	var card_h := 250.0
-	var cards_end := CARD_Y + ids.size() * (card_h + CARD_GAP) - CARD_GAP
+	var crew: Array[CharacterData] = []
+	var cards_end := CARD_Y - CARD_GAP
+	for id: String in Game.CREW:
+		var c := CharacterData.load_id(id)
+		if c != null:
+			crew.append(c)
+			cards_end += _card_tex(id).get_height() + CARD_GAP
 	var back_y := cards_end + 40.0
 	height = back_y + 116.0
 	# the panel: the kit's big frame stretched (9-slice) behind everything
@@ -103,10 +111,10 @@ func _build() -> void:
 	title.add_theme_constant_override("outline_size", 28)
 	var bar := _tex("bar.png", Vector2((W - 432.0) * 0.5, 292))
 	_label("Pick who goes on the mission", 26, Color("e4f2ff"), Rect2(bar.position + Vector2(40, 8), Vector2(352, 64)))
-	for i in ids.size():
-		var c := CharacterData.load_id(str(ids[i]))
-		if c != null:
-			cards.append(_card(c, Vector2(CARD_X, CARD_Y + i * (card_h + CARD_GAP))))
+	var y := CARD_Y
+	for c in crew:  # stacked by each card's own height
+		cards.append(_card(c, Vector2(CARD_X, y)))
+		y += _card_tex(c.character_id).get_height() + CARD_GAP
 	# brackets hug the bottom corners of the frame
 	_tex("bracket_l.png", Vector2(0, back_y - 74))
 	_tex("bracket_r.png", Vector2(W - 108, back_y - 74))
@@ -123,6 +131,19 @@ func _build() -> void:
 	_refresh()
 
 
+## Where `what` ("name", "tag", "btn") goes on the card of `id` (LAYOUTS, else the kit's).
+func _spot(id: String, what: String) -> Rect2:
+	var own: Dictionary = LAYOUTS.get(str(CARDS.get(id, "card_kid")), {})
+	if own.has(what):
+		return own[what]
+	return {"name": NAME_RECT, "tag": TAG_RECT, "btn": BTN_RECT}[what]
+
+
+## The painted card of crew member `id` (CARDS; the kid's for anyone without one).
+func _card_tex(id: String) -> Texture2D:
+	return load(DIR + str(CARDS.get(id, "card_kid")) + ".png")
+
+
 ## One crew member's painted card with her name, tagline and the SELECT button.
 func _card(c: CharacterData, at: Vector2) -> Control:
 	var card := Control.new()
@@ -131,17 +152,16 @@ func _card(c: CharacterData, at: Vector2) -> Control:
 	card.set_meta("id", c.character_id)
 	stage.add_child(card)
 	var art := TextureRect.new()
-	art.texture = load(DIR + str(CARDS.get(c.character_id, "card_kid")) + ".png")
+	art.texture = _card_tex(c.character_id)
 	art.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.add_child(art)
 	card.size = art.texture.get_size()
 	card.pivot_offset = card.size * 0.5
 	card.set_meta("art", art)
-	var pink := c.pulse_skin == "pink"
-	card.set_meta("name", _label("", 34, Color.WHITE, NAME_RECT, card, HORIZONTAL_ALIGNMENT_LEFT))
-	card.set_meta("tag", _label("", 22, Color("ff9ad8") if pink else Color("9fd2ff"), TAG_RECT, card, HORIZONTAL_ALIGNMENT_LEFT))
-	var b := _button("", BTN_RECT, "SELECT", Color.WHITE, card)
+	card.set_meta("name", _label("", 34, Color.WHITE, _spot(c.character_id, "name"), card, HORIZONTAL_ALIGNMENT_LEFT))
+	card.set_meta("tag", _label("", 22, c.accent, _spot(c.character_id, "tag"), card, HORIZONTAL_ALIGNMENT_LEFT))
+	var b := _button("", _spot(c.character_id, "btn"), "SELECT", Color.WHITE, card)
 	b.pressed.connect(_pick.bind(c.character_id, card))
 	card.set_meta("btn", b)
 	return card
@@ -158,10 +178,10 @@ func _refresh() -> void:
 		(card.get_meta("art") as CanvasItem).modulate = Color.WHITE if open else Color(0.28, 0.28, 0.36)
 		var n: Label = card.get_meta("name")
 		n.text = c.display_name.to_upper() if open else "???"
-		n.add_theme_font_size_override("font_size", UiTheme.fit_size(UiTheme.FONT, n.text, 34, NAME_RECT.size.x))
+		n.add_theme_font_size_override("font_size", UiTheme.fit_size(UiTheme.FONT, n.text, 34, n.size.x))
 		var tg: Label = card.get_meta("tag")
 		tg.text = c.tagline if open else "Clear WORLD %d to unlock" % (int(Game.CREW[id]) + 1)
-		tg.add_theme_font_size_override("font_size", UiTheme.fit_size(UiTheme.FONT, tg.text, 22, TAG_RECT.size.x))
+		tg.add_theme_font_size_override("font_size", UiTheme.fit_size(UiTheme.FONT, tg.text, 22, tg.size.x))
 		var b: TextureButton = card.get_meta("btn")
 		var bl := b.get_child(0) as Label
 		b.disabled = chosen or not open
@@ -169,7 +189,7 @@ func _refresh() -> void:
 		bl.text = "SELECTED" if chosen else ("SELECT" if open else "LOCKED")
 		bl.add_theme_color_override("font_color", GOLD if chosen else (Color.WHITE if open else Color("94b0c2")))
 		# the grey button's frame is thick: keep the word well inside it
-		bl.add_theme_font_size_override("font_size", UiTheme.fit_size(UiTheme.FONT, bl.text, 30, BTN_RECT.size.x - 76.0))
+		bl.add_theme_font_size_override("font_size", UiTheme.fit_size(UiTheme.FONT, bl.text, 30, b.size.x - 76.0))
 		if chosen:
 			glow_card = card
 	glow.queue_redraw()

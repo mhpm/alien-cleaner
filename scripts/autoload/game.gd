@@ -73,6 +73,9 @@ func new_run(world_i := -1, rush := false) -> void:
 
 
 ## Run stats before any upgrade (ARMORY levels and the equipped weapon included).
+const BLAST_COOLDOWN := 6.0  # seconds between BLASTs for a fresh crew member
+
+
 func base_stats() -> Dictionary:
 	# a fresh crew member is fragile: the ARMORY's LIFE levels are what keep you alive
 	# (aliens hit relative to base_hp, so every LIFE level is real extra survival)
@@ -85,7 +88,7 @@ func base_stats() -> Dictionary:
 		"shots": 1, "spread": 0, "ricochet": 0, "pierce": 0,
 		"freeze": 0.0, "chain": 0, "crit": 0.05, "crit_mult": 2.0,
 		"orbiters": 0, "death_explode": false, "magnet": false,
-		"knockback": 60.0, "blast_cooldown": 6.0, "shield": false, "shield_lvl": 0, "martian": 0, "overdrive": 0, "hunter": 0, "bomber": 0,
+		"knockback": 60.0, "blast_cooldown": BLAST_COOLDOWN, "shield": false, "shield_lvl": 0, "martian": 0, "overdrive": 0, "hunter": 0, "bomber": 0,
 		"weapon": 1, "gun": gun, "gun_lv": gun_level(gun),
 		"hazard_mult": 1.0, "coin_bonus": 0, "room_heal": 0,
 		"infected": int(perm.infected),
@@ -313,7 +316,7 @@ func boss_challenge_unlocked(i: int) -> bool:
 ## The CREW (picked from the TALENTS tile): character id -> index of the world whose
 ## clear unlocks it (-1 = from the start). Clearing it shows NEW CREW MEMBER! on the
 ## victory screen (`last_crew`) and a "!" on TALENTS until the panel is opened.
-const CREW := {"kid_astronaut": -1, "girl": 0}
+const CREW := {"kid_astronaut": -1, "girl": 0, "zed": 1}
 var last_crew: Array = []  # characters unlocked by the last world clear (victory screen)
 
 

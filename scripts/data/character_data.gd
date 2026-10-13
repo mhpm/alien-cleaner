@@ -5,7 +5,8 @@ extends Resource
 ## assets/characters/<id>/<id>.tres (frames <anim>_<i>.png next to it), made with the
 ## Arena dock > Players editor (sheet import, rows -> animations, hand / muzzle).
 ## Animations: idle, walk, walk_up (back view), shoot (aiming to the side), shoot_down /
-## shoot_up (aiming down / up), hurt, death; missing ones fall back (walk_up -> walk,
+## shoot_up (aiming down / up), walk_shoot_down / walk_shoot_up (walking while aiming
+## down / up), hurt, death; missing ones fall back (walk_up -> walk, walk_shoot_* -> shoot_*,
 ## shoot_down / shoot_up -> shoot -> idle, hurt -> idle, death -> hurt). Frames share one canvas whose
 ## feet (`anchor`) sit on the horizontal middle, so flip_h is safe. The Player Spawn of an
 ## arena picks the character; empty = the default player (`default_character`, the kid
@@ -16,8 +17,11 @@ const DEFAULT_ID := "kid_astronaut"
 ## The helmeted astronaut: the only one with Infected-mode mutant sets (mutant<n>).
 const HELMET_ID := "astronaut"
 const ANIMS := ["idle", "walk", "walk_up", "shoot", "shoot_down", "shoot_up", "hurt", "death"]
-## Shoot pose -> the hand point that holds the weapon in it.
-const POSE_HANDS := {"shoot": "shoot_hand", "shoot_down": "shoot_down_hand", "shoot_up": "shoot_up_hand"}
+## Optional: walking while aiming up / down (else the still shoot_up / shoot_down pose).
+const WALK_SHOOT := {"shoot_up": "walk_shoot_up", "shoot_down": "walk_shoot_down"}
+## Shoot pose -> the hand point that holds the weapon in it (walking ones too).
+const POSE_HANDS := {"shoot": "shoot_hand", "shoot_down": "shoot_down_hand", "shoot_up": "shoot_up_hand",
+	"walk_shoot_down": "shoot_down_hand", "walk_shoot_up": "shoot_up_hand"}
 
 enum Weapon { HELD, IN_SPRITE }
 
@@ -25,6 +29,8 @@ enum Weapon { HELD, IN_SPRITE }
 @export var display_name := ""
 ## One line under the name in the CREW panel (CrewPanel).
 @export var tagline := ""
+## Its colour in menus (the CREW card's tagline).
+@export var accent := Color("9fd2ff")
 ## Its unique ability: a script extending CharacterAbility (none = no ability).
 @export var ability: Script
 @export var frames: SpriteFrames
@@ -91,6 +97,8 @@ func resolve(anim: String) -> String:
 	match anim:
 		"walk_up":
 			chain.append("walk")
+		"walk_shoot_up", "walk_shoot_down":
+			chain.append_array([anim.trim_prefix("walk_"), "shoot", "idle"])
 		"shoot_down", "shoot_up":
 			chain.append_array(["shoot", "idle"])
 		"shoot", "hurt":
@@ -103,6 +111,23 @@ func resolve(anim: String) -> String:
 			return a
 	var names := frames.get_animation_names()
 	return names[0] if names.size() > 0 else anim
+
+
+static var _portraits: Dictionary = {}  # character id -> cropped first idle frame
+
+
+## First idle frame cropped to the drawing (UI icons: the CREW tile, the ability button).
+func portrait() -> Texture2D:
+	if _portraits.has(character_id):
+		return _portraits[character_id]
+	var t := icon()
+	if t == null:
+		return null
+	var at := AtlasTexture.new()
+	at.atlas = t
+	at.region = Rect2(t.get_image().get_used_rect())
+	_portraits[character_id] = at
+	return at
 
 
 ## First idle frame (palette icons, previews).

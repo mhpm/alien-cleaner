@@ -43,7 +43,7 @@ static func fire(p: Player, origin: Vector2, d: Vector2, target: Enemy) -> float
 	var lv := int(s.gun_lv)
 	var g := GunData.gun(id)
 	var prm := GunData.params(id, lv)
-	var unit := _unit(p)
+	var unit := unit(p)
 	var dmg := unit * float(g.dmg)
 	var col := Color(str(g.color))
 	# the character's own look for the PULSE BLASTER (the girl's pink shots)
@@ -69,7 +69,7 @@ static func fire(p: Player, origin: Vector2, d: Vector2, target: Enemy) -> float
 		match str(g.kind):
 			"pulse":
 				var crit := _shots % int(prm.crit_every) == 0
-				var b := _shot("shot_pulse" if skin == "" else "shot_pulse_" + skin, o, sd, float(g.speed), dk, 14.0, 3.5, 1.2)
+				var b := shot("shot_pulse" if skin == "" else "shot_pulse_" + skin, o, sd, float(g.speed), dk, 14.0, 3.5, 1.2)
 				b.force_crit = crit
 				if skin != "":
 					b.pop_col = col
@@ -82,16 +82,16 @@ static func fire(p: Player, origin: Vector2, d: Vector2, target: Enemy) -> float
 				var n := int(prm.pellets)
 				for k in n:
 					var a := (float(k) / (n - 1) - 0.5) * float(prm.arc) + randf_range(-0.04, 0.04)
-					var b := _shot("shot_nova", o, sd.rotated(a), float(g.speed) * randf_range(0.9, 1.1), dk, 10.0, 3.0, float(prm.life))
+					var b := shot("shot_nova", o, sd.rotated(a), float(g.speed) * randf_range(0.9, 1.1), dk, 10.0, 3.0, float(prm.life))
 					b.push = float(prm.push)
 			"drill":
-				var b := _shot("bolt_drill", o + sd * 6.0, sd, float(g.speed), dk, 30.0, 4.5, 0.9)
+				var b := shot("bolt_drill", o + sd * 6.0, sd, float(g.speed), dk, 30.0, 4.5, 0.9)
 				b.pierce = 99
 				b.shred = float(prm.shred)
 				b.shred_t = float(prm.shred_t)
 				b.trail = col
 			"spark":
-				var b := _shot("shot_spark", o, sd, float(g.speed), dk, 10.0, 4.0, 1.4)
+				var b := shot("shot_spark", o, sd, float(g.speed), dk, 10.0, 4.0, 1.4)
 				b.hops = int(prm.hops)
 				b.hop_r = float(prm.hop_r)
 				b.bounces = int(prm.bounces) + int(s.ricochet)
@@ -100,7 +100,7 @@ static func fire(p: Player, origin: Vector2, d: Vector2, target: Enemy) -> float
 			"cryo":
 				for k in int(prm.flakes):
 					var a := randf_range(-0.5, 0.5) * float(prm.arc)
-					var b := _shot("flake", o, sd.rotated(a), float(g.speed) * randf_range(0.8, 1.15), dk, 7.0, 4.5, float(prm.life) * randf_range(0.85, 1.1))
+					var b := shot("flake", o, sd.rotated(a), float(g.speed) * randf_range(0.8, 1.15), dk, 7.0, 4.5, float(prm.life) * randf_range(0.85, 1.1))
 					b.pierce = 1 + int(Game.stats.pierce)
 					b.chill = int(prm.chill)
 					b.ice_t = GunData.ice_time(lv)
@@ -119,7 +119,7 @@ static func fire(p: Player, origin: Vector2, d: Vector2, target: Enemy) -> float
 				lob.unit = unit
 				Game.world.effects.add_child(lob)
 			"graviton":
-				var b := _shot("shot_grav", o + sd * 4.0, sd, float(g.speed), dk, 16.0, 6.0, float(prm.fuse))
+				var b := shot("shot_grav", o + sd * 4.0, sd, float(g.speed), dk, 16.0, 6.0, float(prm.fuse))
 				b.pierce = 99
 				b.pull_r = float(prm.pull_r)
 				b.boom_r = float(prm.boom_r)
@@ -135,7 +135,7 @@ static func fire(p: Player, origin: Vector2, d: Vector2, target: Enemy) -> float
 				var aims := _targets(o, n)
 				for k in n:
 					var a := (float(k) / maxf(1.0, n - 1.0) - 0.5) * 1.8
-					var b := _shot("rocket", o, sd.rotated(a), 70.0, dk, 12.0, 4.0, 1.8)
+					var b := shot("rocket", o, sd.rotated(a), 70.0, dk, 12.0, 4.0, 1.8)
 					b.home = aims[k % aims.size()] if not aims.is_empty() else tgt
 					b.accel = 420.0
 					b.top_speed = float(g.speed)
@@ -165,7 +165,7 @@ static func fire(p: Player, origin: Vector2, d: Vector2, target: Enemy) -> float
 
 
 ## One base hit of this run: ATTACK, blaster tier, the weapon's level, Rage.
-static func _unit(p: Player) -> float:
+static func unit(p: Player) -> float:
 	var s := Game.stats
 	var unit := float(s.damage) * float(WeaponData.tier(int(s.weapon)).dmg) * GunData.level_mult(int(s.gun_lv))
 	return unit * (2.0 if p.has_buff("rage") else 1.0)
@@ -174,10 +174,10 @@ static func _unit(p: Player) -> float:
 ## OVERDRIVE level 5: a star of 5 homing rockets bursts out of the astronaut.
 static func rocket_nova(p: Player) -> void:
 	var at := p.global_position + Vector2(0, Player.BODY_Y)
-	var unit := _unit(p)
+	var unit := unit(p)
 	var aims := _targets(at, 5)
 	for k in 5:
-		var b := _shot("rocket", at, Vector2.from_angle(-PI * 0.5 + TAU * k / 5.0), 60.0, unit * 1.2, 12.0, 4.0, 2.0)
+		var b := shot("rocket", at, Vector2.from_angle(-PI * 0.5 + TAU * k / 5.0), 60.0, unit * 1.2, 12.0, 4.0, 2.0)
 		b.home = aims[k % aims.size()] if not aims.is_empty() else null
 		b.accel = 380.0
 		b.top_speed = 210.0
@@ -191,7 +191,8 @@ static func rocket_nova(p: Player) -> void:
 	Sfx.play("rocket", 0.1, -3.0)
 
 
-static func _shot(art: String, pos: Vector2, d: Vector2, speed: float, dmg: float, length: float,
+## One projectile of art assets/guns/<art>.png (GunShot) in the world's effects.
+static func shot(art: String, pos: Vector2, d: Vector2, speed: float, dmg: float, length: float,
 		hit_r: float, life: float) -> GunShot:
 	var b := GunShot.new()
 	b.art = art

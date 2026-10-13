@@ -7,6 +7,15 @@ extends CharacterAbility
 var decoy: HoloDecoy
 
 
+## The kid himself in hologram cyan (the decoy BLAST leaves).
+func icon() -> Texture2D:
+	return player.body.character.portrait()
+
+
+func icon_tint() -> Color:
+	return HoloDecoy.HOLO
+
+
 func on_blast() -> void:
 	if decoy != null and is_instance_valid(decoy) and not decoy.is_resolved():
 		decoy.detonate()

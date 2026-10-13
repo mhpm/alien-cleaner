@@ -26,9 +26,12 @@ const C_CYAN := Color("73eff7")
 
 var stage: Control
 var labels: Dictionary = {}
-var hero: Sprite2D
 var pedestal: TextureRect
-var glow: Control
+var glow: Control  # light effects over the pedestal (additive)
+var shine: TextureRect  # the pedestal again, additive, pulsing
+var spark: CPUParticles2D
+const RING_AT := Vector2(215, 236)  # centre of the glowing ring, in pedestal px
+const BEAM := Rect2(95, 62, 250, 180)  # the light column, in pedestal px
 var demo: GunDemo
 var strip: Control  # clips the carousel
 var row: Control  # the 10 slots, slides inside the strip
@@ -40,10 +43,8 @@ var toast: Label
 var sel := "pulse"
 var first := 0  # first slot shown in the carousel
 var t := 0.0
-var hop_t := 0.0
 var drag_from := Vector2.INF
 var swipe_ms := -1000  # a swipe just scrolled the carousel: ignore the slot tap it ends on
-var motes: Array = []  # [pos, speed, life] holo motes rising from the pedestal
 
 
 func _ready() -> void:
@@ -53,7 +54,7 @@ func _ready() -> void:
 	stage.size = ART
 	add_child(stage)
 	var bg := TextureRect.new()
-	bg.texture = load(DIR + "bg.webp")
+	bg.texture = load(DIR + "bg_clean.webp")
 	bg.size = ART
 	bg.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -225,41 +226,63 @@ func _build() -> void:
 
 
 func _build_hero() -> void:
-	pedestal = _img(stage, "pedestal.png", Rect2(40, HERO_Y - 62.0, 430, 260))
-	glow = Control.new()
-	glow.position = Vector2(40, HERO_Y - 62.0)
-	glow.size = Vector2(430, 260)
-	glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# a clean holo pedestal (UI kit) on a plain background; no character, no weapon
+	pedestal = _img(stage, "pedestal_holo.png", Rect2(40, HERO_Y + 198.0 - 355.0, 430, 355))
 	var add := CanvasItemMaterial.new()
 	add.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	# its own lights breathe: the pedestal drawn again on top, additive
+	shine = _img(stage, "pedestal_holo.png", pedestal.get_rect())
+	shine.material = add
+	glow = Control.new()
+	glow.position = pedestal.position
+	glow.size = pedestal.size
+	glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	glow.material = add
 	glow.draw.connect(_draw_glow)
 	stage.add_child(glow)
-	hero = Sprite2D.new()
-	hero.texture = load(DIR + "astronaut.png")
-	hero.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	hero.centered = false
-	var ts := hero.texture.get_size()
-	hero.offset = Vector2(-ts.x * 0.5, -ts.y)  # feet at the node
-	hero.position = Vector2(258, HERO_Y)
-	hero.scale = Vector2(1.08, 1.08)
-	stage.add_child(hero)
-	_hit_area(stage, Rect2(130, HERO_Y - 350.0, 260, 360), _poke_hero)
+	# glowing specks rising out of the beam
+	var sp := CPUParticles2D.new()
+	sp.position = pedestal.position + RING_AT
+	sp.material = add
+	sp.amount = 22
+	sp.lifetime = 2.2
+	sp.preprocess = 2.0
+	sp.texture = load(DIR + "dot_on.png")
+	sp.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	sp.emission_rect_extents = Vector2(100, 8)
+	sp.scale_amount_min = 0.12
+	sp.scale_amount_max = 0.28
+	sp.direction = Vector2.UP
+	sp.spread = 6.0
+	sp.gravity = Vector2.ZERO
+	sp.initial_velocity_min = 55.0
+	sp.initial_velocity_max = 105.0
+	sp.color = Color(0.6, 0.95, 1.0, 0.9)
+	var fade := Gradient.new()
+	fade.set_color(0, Color(1, 1, 1, 0.0))
+	fade.add_point(0.2, Color(1, 1, 1, 1.0))
+	fade.set_color(1, Color(1, 1, 1, 0.0))
+	sp.color_ramp = fade
+	stage.add_child(sp)
+	spark = sp
 
 
-## Pulsing light on the pedestal's ring and holo motes rising from it.
+## Light effects: ripples spreading from the ring, light bands rising in the beam.
 func _draw_glow() -> void:
-	var c := Vector2(215, 52)
-	var p := 0.5 + 0.5 * sin(t * 2.4)
-	glow.draw_set_transform(c, 0.0, Vector2(1.0, 0.3))
-	for i in 3:
-		var r := 150.0 - i * 40.0 + p * 6.0
-		glow.draw_arc(Vector2.ZERO, r, 0.0, TAU, 48, Color(0.25, 0.6, 1.0, 0.18 + 0.12 * p), 6.0 - i)
-	glow.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	var col := GunData.color(Game.gun)
-	for m: Array in motes:
-		var a := clampf(float(m[2]), 0.0, 1.0)
-		glow.draw_circle(m[0], 3.0, Color(col, a * 0.8))
+	for i in 2:
+		var k := fposmod(t * 0.55 + i * 0.5, 1.0)
+		var rx := 55.0 + k * 125.0
+		var col := Color(0.35, 0.8, 1.0, (1.0 - k) * 0.55)
+		var pts := PackedVector2Array()
+		for j in 33:
+			var a := TAU * j / 32.0
+			pts.append(RING_AT + Vector2(cos(a) * rx, sin(a) * rx * 0.3))
+		FastDraw.polyline(glow, pts, col, 3.0)
+	for i in 4:
+		var k := fposmod(t * 0.4 + i * 0.25, 1.0)
+		var y := BEAM.end.y - k * BEAM.size.y
+		var w := BEAM.size.x * (0.6 + 0.4 * sin(k * PI))
+		glow.draw_rect(Rect2(RING_AT.x - w * 0.5, y, w, 3.0), Color(0.5, 0.9, 1.0, sin(k * PI) * 0.35))
 
 
 func _build_detail() -> void:
@@ -597,7 +620,6 @@ func _equip(id: String) -> void:
 	Game.equip_gun(id)
 	Sfx.play("shield", 0.0)
 	_toast("%s equipped!" % GunData.gun(id).name)
-	_hero_hop()
 	_refresh()
 	_show_detail(false)
 
@@ -644,17 +666,6 @@ func _back() -> void:
 	get_tree().change_scene_to_file(Game.menu_scene)
 
 
-func _poke_hero() -> void:
-	_hero_hop()
-	Sfx.play(str(GunFire.SOUNDS[str(GunData.gun(Game.gun).kind)][0]), 0.1, -6.0)
-
-
-func _hero_hop() -> void:
-	hop_t = 0.0
-	for i in 14:
-		motes.append([Vector2(215 + randf_range(-120, 120), 60 + randf_range(-20, 20)), randf_range(60, 140), 1.0])
-
-
 # ---------------------------------------------------------------- feedback
 
 ## Big centred banner (title + subtitle in the weapon's colour) with a burst of sparks.
@@ -679,7 +690,6 @@ func _celebrate(head: String, sub: String, col: Color) -> void:
 	tw.tween_interval(0.9)
 	tw.tween_property(box, "modulate:a", 0.0, 0.3)
 	tw.tween_callback(box.queue_free)
-	_hero_hop()
 
 
 func _sparkle(at: Vector2, col: Color) -> void:
@@ -727,19 +737,5 @@ func _input(event: InputEvent) -> void:
 
 func _process(delta: float) -> void:
 	t += delta
-	hop_t += delta
-	# breathing, plus a hop when a weapon is equipped (feet stay on the pedestal)
-	var b := sin(t * 2.2) * 0.012
-	var hop := 0.0
-	if hop_t < 0.35:
-		hop = sin(hop_t / 0.35 * PI) * 22.0
-	hero.position.y = HERO_Y - hop
-	hero.scale = Vector2(1.08 * (1.0 + b * 0.5), 1.08 * (1.0 + b))
-	# holo motes
-	if randf() < delta * 6.0:
-		motes.append([Vector2(215 + randf_range(-110, 110), 55 + randf_range(-14, 14)), randf_range(25, 55), 1.0])
-	for m: Array in motes:
-		m[0] = (m[0] as Vector2) + Vector2(0, -float(m[1]) * delta)
-		m[2] = float(m[2]) - delta * 0.7
-	motes = motes.filter(func(m: Array) -> bool: return float(m[2]) > 0.0)
+	shine.modulate.a = 0.12 + 0.2 * (0.5 + 0.5 * sin(t * 2.4)) + 0.05 * sin(t * 13.0)
 	glow.queue_redraw()

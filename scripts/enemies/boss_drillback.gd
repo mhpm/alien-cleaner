@@ -21,7 +21,6 @@ extends BossBase
 
 const CALM := ["dash", "fault", "bore", "boulders", "dash", "fault", "boulders", "bore"]
 const FURY := ["cavein", "dash", "bore", "fault", "boulders", "cavein", "dash", "bore", "fault"]
-const FIGHT_SECS := 45.0  # mini boss: a shorter fight than the final bosses
 const DASH_SPEED := 235.0
 const DASH_LEN := 240.0
 const DASH_HIT_R := 12.0
@@ -60,7 +59,7 @@ var dust_t := 0.0
 
 
 func _init_ai() -> void:
-	_size_to_player(FIGHT_SECS)
+	_size_to_player()
 	state = "intro"
 	state_t = 1.4
 	Sfx.play("roar", 0.0)

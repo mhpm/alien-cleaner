@@ -109,6 +109,12 @@ func _girl() -> void:
 	_check(a.charm != null and a.charm.target == null, "a removed victim is dropped, the charm goes on")
 	await _frames(int(HeartShotAbility.CHARM_TIME * 60.0))
 	_check(a.charm == null and a.targetable, "the charm wears off after %.0f s" % HeartShotAbility.CHARM_TIME)
+	# a charmed alien dies mid-burst: its hearts go with it, nothing points at them
+	var doomed := _alien(Vector2(-45, 0))
+	await _frames(25)
+	_check(Charm.apply(doomed, 3.0), "the doomed alien is charmed")
+	doomed.die()
+	await _frames(70)
 	# at most MAX_ACTIVE charmed at once
 	_clear()
 	await _frames(3)

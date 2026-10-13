@@ -21,6 +21,7 @@ func _ready() -> void:
 	sprite = AnimatedSprite2D.new()
 	sprite.sprite_frames = _heart_frames(tex)
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	sprite.scale = Vector2(base_scale, base_scale)  # its size from the first frame on
 	sprite.play("fly")
 	add_child(sprite)
 

@@ -3,8 +3,9 @@ extends MarginContainer
 ## The pause modal, built from the user's kit (tools/pause_kit_ref.webp ->
 ## python tools/make_pause_assets.py -> assets/ui/pause/): the tall neon panel, the PAUSED
 ## header, a stats strip (weapon / wave / time / coins with the kit's icons), then a
-## SCROLLING middle with the rescued crew (pink cards) and the active upgrades (cards of
-## 3 per row), and RESUME / QUIT RUN side by side at the bottom. Header, stats and buttons
+## SCROLLING middle with the character card (portrait, ability, its stats with what the
+## run added in green: RunStats), the rescued crew (pink cards), the chest perks and the
+## active upgrades (cards of 3 per row), and RESUME / QUIT RUN side by side at the bottom. Header, stats and buttons
 ## stay put; only the middle scrolls, so nothing gets squeezed whatever the run carries.
 ## Frames are drawn as 9-slices scaled down from the kit (KitPatch), so their corners keep
 ## the art's proportions at any panel size.
@@ -219,7 +220,8 @@ func _banner(text: String, w: float) -> Control:
 	return c
 
 
-## Rescued crew and active upgrades, in a scroll area (only the middle scrolls).
+## Character, rescued crew, chest perks and active upgrades, in a scroll area (only the
+## middle scrolls).
 func _middle(w: float) -> ScrollContainer:
 	var sc := ScrollContainer.new()
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -230,10 +232,17 @@ func _middle(w: float) -> ScrollContainer:
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	sc.add_child(v)
 	var ex := hud.game.explore
+	var c := hud.game.player.body.character
+	v.add_child(_banner(c.display_name.to_upper() if c != null else "YOUR CREW", w))
+	v.add_child(_character(c, w))
 	if ex != null and not ex.saved_crew.is_empty():
 		v.add_child(_banner("RESCUED CREW BONUS", w))
 		for i in ex.saved_crew:
 			v.add_child(_crew_card(i, w))
+	if ex != null and not ex.opened_chests.is_empty():
+		v.add_child(_banner("CHEST PERKS", w))
+		for k in ex.opened_chests:
+			v.add_child(_chest_card(k, w))
 	v.add_child(_banner("ACTIVE UPGRADES", w))
 	v.add_child(_upgrades(w))
 	v.add_child(hud._spacer(2))
@@ -242,8 +251,23 @@ func _middle(w: float) -> ScrollContainer:
 
 func _crew_card(i: int, w: float) -> Control:
 	var def: Dictionary = SurvivorData.CREW[i]
-	var col: Color = def.color
-	var box := KitBox.make("crew", 30, K, Vector4(10, 8, 12, 8))
+	var t := SurvivorData.tex(i, true)
+	var at := AtlasTexture.new()  # the face: the top of the happy sprite
+	at.atlas = t
+	var tw := float(t.get_width())
+	at.region = Rect2(tw * 0.08, 0, tw * 0.84, tw * 0.84)
+	return _perk_card("crew", at, str(def.name), str(def.gift), def.color, w)
+
+
+## A chest opened this run: the chest and its perk.
+func _chest_card(k: int, w: float) -> Control:
+	var def: Dictionary = ChestData.CHESTS[k]
+	return _perk_card("card", ChestData.tex(k), str(def.name), str(def.desc), def.color, w)
+
+
+## A kit card (`box`) with a framed picture, a name in `col` and what it gives.
+func _perk_card(box_name: String, pic: Texture2D, title: String, text: String, col: Color, w: float) -> Control:
+	var box := KitBox.make(box_name, 30 if box_name == "crew" else 34, K, Vector4(10, 8, 12, 8))
 	box.custom_minimum_size = Vector2(w, 0)
 	var h := HBoxContainer.new()
 	h.add_theme_constant_override("separation", 12)
@@ -260,14 +284,9 @@ func _crew_card(i: int, w: float) -> Control:
 	pf.clip_contents = true
 	pf.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var face := TextureRect.new()
-	var t := SurvivorData.tex(i, true)
-	var at := AtlasTexture.new()
-	at.atlas = t
-	var tw := float(t.get_width())
-	at.region = Rect2(tw * 0.08, 0, tw * 0.84, tw * 0.84)
-	face.texture = at
+	face.texture = pic
 	face.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	face.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	face.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED if box_name == "crew" else TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	face.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	face.position = Vector2(2, 2)
 	face.size = Vector2(42, 42)
@@ -279,16 +298,89 @@ func _crew_card(i: int, w: float) -> Control:
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	v.alignment = BoxContainer.ALIGNMENT_CENTER
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var nl := _label(str(def.name), 14, col.lightened(0.2))
+	var nl := _label(title, 14, col.lightened(0.2))
 	nl.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	v.add_child(nl)
-	var gift := UiTheme.body(str(def.gift), 12, SOFT)
+	var gift := UiTheme.body(text, 12, SOFT)
 	gift.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	gift.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	gift.custom_minimum_size = Vector2(w - 90.0, 0)
 	v.add_child(gift)
 	h.add_child(v)
 	return box
+
+
+## The character played: portrait in its colour, its ability, and its stats now with
+## what this run added (RunStats: green = better, red = worse).
+func _character(c: CharacterData, w: float) -> Control:
+	var accent := c.accent if c != null else CYAN
+	var box := KitBox.make("card", 34, K, Vector4(10, 9, 10, 9))
+	box.custom_minimum_size = Vector2(w, 0)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 8)
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.content.add_child(v)
+	var top := HBoxContainer.new()
+	top.add_theme_constant_override("separation", 10)
+	top.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.add_child(top)
+	var pf := Panel.new()
+	var psb := StyleBoxFlat.new()
+	psb.bg_color = accent.darkened(0.75)
+	psb.border_color = accent
+	psb.set_border_width_all(2)
+	psb.set_corner_radius_all(4)
+	pf.add_theme_stylebox_override("panel", psb)
+	pf.custom_minimum_size = Vector2(54, 62)
+	pf.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if c != null and c.portrait() != null:
+		var pic := _icon_rect(c.portrait(), Vector2(48, 56))
+		pic.position = Vector2(3, 3)
+		pic.size = Vector2(48, 56)
+		pic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		pf.add_child(pic)
+	top.add_child(pf)
+	var info := VBoxContainer.new()
+	info.add_theme_constant_override("separation", 3)
+	info.alignment = BoxContainer.ALIGNMENT_CENTER
+	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	top.add_child(info)
+	var ability := c.tagline if c != null and c.tagline != "" else "Air BLAST"
+	var al := _label("ABILITY", 9, CYAN)
+	al.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	info.add_child(al)
+	var ab := UiTheme.body(ability, 12, accent.lightened(0.25))
+	ab.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	ab.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	ab.custom_minimum_size = Vector2(w - 100.0, 0)
+	info.add_child(ab)
+	v.add_child(_stat_grid(RunStats.rows(Game.stats, Game.base_stats()), w - 24.0))
+	return box
+
+
+## The RunStats rows, two a line: LABEL  value  +gain.
+func _stat_grid(rows: Array[Dictionary], w: float) -> Control:
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 4)
+	grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var cw := floorf((w - 10.0) / 2.0)
+	for r: Dictionary in rows:
+		var cell := HBoxContainer.new()
+		cell.custom_minimum_size = Vector2(cw, 18)
+		cell.add_theme_constant_override("separation", 4)
+		cell.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var name_l := _label(str(r.label), 9, CYAN)
+		name_l.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		name_l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		cell.add_child(name_l)
+		cell.add_child(_label(str(r.value), 11, Color.WHITE))
+		if str(r.gain) != "":
+			cell.add_child(_label(str(r.gain), 10, RunStats.GAIN if bool(r.better) else RunStats.LOSS))
+		grid.add_child(cell)
+	return _center(grid)
 
 
 ## Every upgrade of the run, 3 cards a row (2 when only 2).
