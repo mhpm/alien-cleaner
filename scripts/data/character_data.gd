@@ -23,12 +23,16 @@ enum Weapon { HELD, IN_SPRITE }
 
 @export var character_id := ""
 @export var display_name := ""
+## One line under the name in the CREW panel (CrewPanel).
+@export var tagline := ""
+## Its unique ability: a script extending CharacterAbility (none = no ability).
+@export var ability: Script
 @export var frames: SpriteFrames
 ## Feet in frame pixels (all frames share one canvas).
 @export var anchor := Vector2.ZERO
 ## Pixels of the standing body (idle) -> scaled to `height` world units in game.
 @export var body_height := 75.0
-@export_range(8.0, 80.0, 0.5) var height := 25.5
+@export_range(8.0, 80.0, 0.5) var height := 33.0
 ## HELD = the ARMORY weapon as a separate sprite that turns toward the aim, held at
 ## `hand`. IN_SPRITE = the art already carries a gun: the "shoot" animation plays while
 ## firing and shots leave from `muzzle`.
@@ -52,6 +56,11 @@ enum Weapon { HELD, IN_SPRITE }
 ## aim), or none. `flash_size` = its length in world units.
 @export var muzzle_flash: Texture2D
 @export_range(2.0, 40.0, 0.5) var flash_size := 9.0
+## The PULSE BLASTER (base weapon) in this character's colours: its shot / impact art
+## becomes assets/guns/shot_pulse_<skin>.png / hit_pulse_<skin>.png and its muzzle flash
+## and sparks `pulse_color` ("" = the normal cyan shots).
+@export var pulse_skin := ""
+@export var pulse_color := Color("4fc3ff")
 ## Standing = the first idle frame, breathing done in code (the astronaut).
 @export var still_idle := false
 ## Little hop and sway while walking (turn off when the walk frames already bounce).
@@ -119,6 +128,14 @@ static func load_id(id: String) -> CharacterData:
 
 static func default_character() -> CharacterData:
 	return load_id(DEFAULT_ID)
+
+
+## The character the player picked for runs (Game.character), or the default one.
+static func selected() -> CharacterData:
+	var tree := Engine.get_main_loop() as SceneTree
+	var game: Node = tree.root.get_node_or_null("Game") if tree != null and not Engine.is_editor_hint() else null
+	var c: CharacterData = load_id(str(game.get("character"))) if game != null else null
+	return c if c != null else default_character()
 
 
 ## Every character in assets/characters/ (the default player first).

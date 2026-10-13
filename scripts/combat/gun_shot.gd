@@ -29,6 +29,7 @@ var top_speed := 0.0
 var smoke := false
 var trail := Color(0, 0, 0, 0)  # sparkle trail colour (alpha 0 = none)
 var pop_tex := ""  # single-frame art flashed where it ends ("" = default impact)
+var pop_col := Color(0, 0, 0, 0)  # sparks where it ends (none = the trail colour, or cyan)
 var _ring_t := 0.0
 
 static var _frames: Dictionary = {}
@@ -150,10 +151,10 @@ func _pop() -> void:
 	else:
 		var fx := pop_tex
 		if fx == "":
-			fx = {"shot_pulse": "hit_pulse", "shot_nova": "hit_pulse", "bolt_drill": "hit_drill",
+			fx = {"shot_pulse": "hit_pulse", "shot_pulse_pink": "hit_pulse_pink", "shot_nova": "hit_pulse", "bolt_drill": "hit_drill",
 				"flake": "", "shot_spark": "hit_spark"}.get(art, "")
 		if fx != "":
 			GunFx.flash(GunFire.tex(fx), global_position, 6.0 + hit_r * 2.0, 0.16, randf() * TAU)
-		var col := trail if trail.a > 0.0 else Color("9fe8ff")
+		var col := pop_col if pop_col.a > 0.0 else trail if trail.a > 0.0 else Color("9fe8ff")
 		Game.world.burst(global_position, col, 4, 40.0, 0.25, 1.5)
 	queue_free()

@@ -15,6 +15,9 @@ extends Node2D
 ## height). Characters whose art already holds a gun (CharacterData.Weapon.IN_SPRITE)
 ## hide the weapon sprite, play "shoot" while `shooting` and fire from their `muzzle`.
 
+## The playable character changed (the Player rebuilds its CharacterAbility).
+signal character_changed(c: CharacterData)
+
 const GUNS_PATH := "res://assets/guns/guns.json"
 const BODY_SCALE := 0.34  # sprite frame px -> world units (~25 units tall)
 const HAND := Vector2(6, -30)  # hands in frame px from the feet (facing right)
@@ -65,11 +68,15 @@ func _ready() -> void:
 	refresh()
 
 
-## Swap the playable character (null = the default player, the kid astronaut). Safe before or after _ready.
+## Swap the playable character (null = the one picked for runs, Game.character; the kid
+## astronaut by default). Safe before or after _ready.
 func set_character(c: CharacterData) -> void:
 	if c == null or c.frames == null:
-		c = CharacterData.default_character()
+		c = CharacterData.selected()
+	var changed := c != character
 	character = c
+	if changed:
+		character_changed.emit(c)
 	if body == null:
 		return
 	if c != null and c.frames != null:

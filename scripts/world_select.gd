@@ -8,7 +8,7 @@ extends Control
 ## gear power, XP gems and coins; the world picture with its name and longest time
 ## survived (swipe or the arrows to change world; locked until the previous one is
 ## beaten); the world chest (coins, once, after beating the world); the PLAY button; and the nav
-## bar: SHOP (crew upgrades), GEAR (suits & blasters), BATTLE, TALENTS (soon), LAB
+## bar: SHOP (crew upgrades), GEAR (suits & blasters), BATTLE, CREW (pick the character), LAB
 ## (Infected Mode).
 
 const INTRO_SCENE := "res://scenes/intro.tscn"
@@ -24,14 +24,14 @@ const BUTTONS := {
 	"shop": Rect2(12, 1482, 166, 185),
 	"gear": Rect2(190, 1482, 166, 185),
 	"battle": Rect2(368, 1457, 203, 215),
-	"talents": Rect2(583, 1482, 166, 185),
+	"crew": Rect2(583, 1482, 166, 185),
 	"lab": Rect2(761, 1482, 166, 185),
 	"plus_power": Rect2(498, 34, 42, 42),
 	"plus_gems": Rect2(688, 34, 42, 42),
 	"plus_coins": Rect2(882, 34, 42, 42),
 }
 ## bottom-nav tiles (python tools/make_nav_icons.py): frame and label are painted in the art
-const NAV := ["shop", "gear", "battle", "talents", "lab"]
+const NAV := ["shop", "gear", "battle", "crew", "lab"]
 const WORLD_RECT := Rect2(118, 398, 740, 614)
 ## BOSS CHALLENGE button (drawn in code, right of the chest): only once the world is cleared
 const BOSS_RECT := Rect2(626, 1004, 296, 176)
@@ -60,6 +60,7 @@ var arrows: Array[Button] = []
 var labels: Dictionary = {}
 var level_fill: ColorRect
 var badges: Dictionary = {}
+var crew_icon: TextureRect
 var toast: Label
 var drag_from := Vector2.INF
 var boss_btn: Button
@@ -212,7 +213,11 @@ func _build() -> void:
 
 	# the ARMORY tile is empty in the art: the equipped weapon is drawn in it
 	_nav_icon("gear", GunData.icon(Game.gun), Vector2(120, 70))
-	for id: String in ["shop", "lab", "gear"]:
+	# the CREW tile shows the character picked for runs
+	crew_icon = _tex_rect(null, Rect2(Vector2(84.0, 79.0) - Vector2(86, 80) * 0.5, Vector2(86, 80)))
+	crew_icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	(buttons.crew as Control).add_child(crew_icon)
+	for id: String in ["shop", "lab", "gear", "crew"]:
 		var bd := _label("!", 30, Color.WHITE)
 		var r: Rect2 = BUTTONS[id]
 		var dot := Panel.new()
@@ -421,7 +426,21 @@ func _refresh() -> void:
 	badges.shop.visible = MenuPanels.can_buy(SHOP_IDS)
 	badges.lab.visible = MutationData.can_buy()
 	badges.gear.visible = Game.armory_affordable()
+	badges.crew.visible = not Game.crew_new.is_empty()
+	crew_icon.texture = _crew_tex()
 	_show_chest()
+
+
+## First idle frame of the picked character, cropped to the drawing.
+func _crew_tex() -> Texture2D:
+	var c := CharacterData.selected()
+	var t := c.icon() if c != null else null
+	if t == null:
+		return null
+	var at := AtlasTexture.new()
+	at.atlas = t
+	at.region = Rect2(t.get_image().get_used_rect())
+	return at
 
 
 func _short(n: int) -> String:
@@ -515,8 +534,8 @@ func _on_button(id: String) -> void:
 			get_tree().change_scene_to_file("res://scenes/lab.tscn")
 		"gear", "plus_power":
 			get_tree().change_scene_to_file("res://scenes/armory.tscn")
-		"talents":
-			_toast("TALENTS COMING SOON!")
+		"crew":
+			CrewPanel.open(self, _refresh)
 		"plus_gems":
 			_toast("Clean aliens to collect XP gems: they raise your crew level!")
 		"battle":

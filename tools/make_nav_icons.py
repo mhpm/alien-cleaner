@@ -1,11 +1,13 @@
 """Cuts the bottom-nav tiles of the world-select screen from tools/nav_icons_ref.webp
-(SHOP, ARMORY, BATTLE, TALENTS, LAB, each with its own frame and painted label).
+(SHOP, ARMORY, BATTLE, LAB, each with its own frame and painted label).
 
 Usage: python tools/make_nav_icons.py
 -> assets/ui/world/nav/<id>.png (scaled to the size they have on the 941x1672 stage;
    sizes mirrored in scripts/world_select.gd BUTTONS), nav/bar.png (plain strip behind
    them) and lock.png (the padlock of TALENTS, used by the locked-world veil).
 ARMORY's tile is empty on purpose: world_select.gd draws the equipped weapon in it.
+The TALENTS tile became CREW (tools/make_crew_assets.py -> nav/crew.png): only its
+padlock is still cut here.
 """
 import os
 
@@ -19,7 +21,6 @@ TILES = {
     "shop": ((16, 324, 317, 661), (166, 185)),
     "gear": ((329, 324, 629, 661), (166, 185)),
     "battle": ((633, 270, 1039, 700), (203, 215)),
-    "talents": ((1043, 324, 1343, 661), (166, 185)),
     "lab": ((1356, 324, 1656, 661), (166, 185)),
 }
 LOCK = (1128, 392, 1258, 540)  # the padlock inside TALENTS

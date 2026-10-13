@@ -39,6 +39,11 @@ var menu_scene := "res://scenes/world_select.tscn"  # where the game / armory re
 ## ARMORY: weapons owned ({GunData id: level 1-3}) and the one carried into runs
 var guns: Dictionary = {"pulse": 1}
 var gun := "pulse"
+## Playable characters unlocked (CharacterData ids) and the one played in runs
+var characters: Array = [CharacterData.DEFAULT_ID]
+var character := CharacterData.DEFAULT_ID
+## characters unlocked but not yet seen in the CREW panel (the TALENTS "!" badge)
+var crew_new: Array = []
 ## coins given back for the retired gear system (shown once by the armory screen)
 var gear_refund := 0
 
@@ -251,6 +256,7 @@ func record_world(secs: float, cleared: bool) -> void:
 	best_time[k] = maxf(float(best_time.get(k, 0.0)), secs)
 	if cleared:
 		worlds_cleared = maxi(worlds_cleared, world_index + 1)
+		_unlock_crew()
 
 
 ## A BOSS CHALLENGE won in `secs`: true when it beats the world's record (saved).
@@ -304,6 +310,35 @@ func boss_challenge_unlocked(i: int) -> bool:
 	return _unlock_all() or worlds_cleared > i
 
 
+## The CREW (picked from the TALENTS tile): character id -> index of the world whose
+## clear unlocks it (-1 = from the start). Clearing it shows NEW CREW MEMBER! on the
+## victory screen (`last_crew`) and a "!" on TALENTS until the panel is opened.
+const CREW := {"kid_astronaut": -1, "girl": 0}
+var last_crew: Array = []  # characters unlocked by the last world clear (victory screen)
+
+
+func character_unlocked(id: String) -> bool:
+	return characters.has(id) or _unlock_all()
+
+
+func select_character(id: String) -> bool:
+	if not CREW.has(id) or not character_unlocked(id) or CharacterData.load_id(id) == null:
+		return false
+	character = id
+	save()
+	return true
+
+
+## Unlocks the crew members whose world has been cleared (also fixes older saves).
+func _unlock_crew() -> void:
+	last_crew = []
+	for id: String in CREW:
+		if not characters.has(id) and int(CREW[id]) < worlds_cleared:
+			characters.append(id)
+			crew_new.append(id)
+			last_crew.append(id)
+
+
 func _unlock_all() -> bool:
 	return OS.is_debug_build() and bool(ProjectSettings.get_setting(UNLOCK_ALL, true))
 
@@ -348,6 +383,9 @@ func save() -> void:
 	cfg.set_value("android", "parts", android_parts)
 	cfg.set_value("armory", "guns", guns)
 	cfg.set_value("armory", "gun", gun)
+	cfg.set_value("crew", "characters", characters)
+	cfg.set_value("crew", "character", character)
+	cfg.set_value("crew", "new", crew_new)
 	cfg.set_value("settings", "music", Sfx.music_enabled)
 	cfg.set_value("settings", "sfx", Sfx.sfx_enabled)
 	cfg.save(SAVE_PATH)
@@ -381,6 +419,14 @@ func load_save() -> void:
 			guns[k] = clampi(int(owned[k]), 1, GunData.MAX_LEVEL)
 	var g := str(cfg.get_value("armory", "gun", "pulse"))
 	gun = g if guns.has(g) else "pulse"
+	for c: String in cfg.get_value("crew", "characters", []):
+		if not characters.has(c) and CharacterData.load_id(c) != null:
+			characters.append(c)
+	crew_new = cfg.get_value("crew", "new", [])
+	_unlock_crew()
+	last_crew = []
+	var ch := str(cfg.get_value("crew", "character", CharacterData.DEFAULT_ID))
+	character = ch if characters.has(ch) or _unlock_all() else CharacterData.DEFAULT_ID
 	Sfx.music_enabled = bool(cfg.get_value("settings", "music", true))
 	Sfx.sfx_enabled = bool(cfg.get_value("settings", "sfx", true))
 	if not cfg.has_section("armory"):

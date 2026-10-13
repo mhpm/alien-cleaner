@@ -1,0 +1,202 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/characters/girl/death_0.png" id="1_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/death_1.png" id="2_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/death_2.png" id="3_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/death_3.png" id="4_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/hurt_0.png" id="5_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/hurt_1.png" id="6_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/idle_0.png" id="7_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/idle_1.png" id="8_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/idle_2.png" id="9_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/idle_3.png" id="10_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/idle_4.png" id="11_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/idle_5.png" id="12_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/idle_6.png" id="13_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/idle_7.png" id="14_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/shoot_0.png" id="15_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/shoot_down_0.png" id="16_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/shoot_up_0.png" id="17_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_0.png" id="18_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_1.png" id="19_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_2.png" id="20_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_3.png" id="21_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_4.png" id="22_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_5.png" id="23_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_6.png" id="24_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_7.png" id="25_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_up_0.png" id="26_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_up_1.png" id="27_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_up_2.png" id="28_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_up_3.png" id="29_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_up_4.png" id="30_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_up_5.png" id="31_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_up_6.png" id="32_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_up_7.png" id="33_g"]
+[ext_resource type="Texture2D" path="res://assets/characters/girl/muzzle_flash.png" id="flash"]
+[ext_resource type="Script" path="res://scripts/data/character_data.gd" id="script"]
+[ext_resource type="Script" path="res://scripts/abilities/heart_shot_ability.gd" id="ability"]
+
+[sub_resource type="SpriteFrames" id="frames"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_g")
+}],
+"loop": false,
+"name": &"death",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_g")
+}],
+"loop": false,
+"name": &"hurt",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("7_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_g")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("15_g")
+}],
+"loop": true,
+"name": &"shoot",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("16_g")
+}],
+"loop": false,
+"name": &"shoot_down",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("17_g")
+}],
+"loop": false,
+"name": &"shoot_up",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("18_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("20_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("21_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("22_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("23_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("24_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("25_g")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("26_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("27_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("28_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("29_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("30_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("31_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("32_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("33_g")
+}],
+"loop": true,
+"name": &"walk_up",
+"speed": 12.0
+}]
+
+[resource]
+script = ExtResource("script")
+character_id = "girl"
+display_name = "Girl Astronaut"
+tagline = "HEART SHOTS charm aliens"
+ability = ExtResource("ability")
+frames = SubResource("frames")
+anchor = Vector2(129, 227)
+body_height = 206.0
+height = 33.0
+hand = Vector2(40, -52)
+aim_pose = true
+shoot_hand = Vector2(54, -71)
+shoot_down_hand = Vector2(0, -53)
+shoot_up_hand = Vector2(5, -149)
+walk_aims = true
+walk_hand = Vector2(54, -71)
+muzzle = Vector2(89, -74)
+muzzle_flash = ExtResource("flash")
+pulse_skin = "pink"
+pulse_color = Color(1, 0.42, 0.78, 1)

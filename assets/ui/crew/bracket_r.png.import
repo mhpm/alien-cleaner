@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bxocpfoh6h8vb"
-path="res://.godot/imported/talents.png-8460e0194b1eeb27ef9a5a660a68aceb.ctex"
+uid="uid://v4ye52p26eur"
+path="res://.godot/imported/bracket_r.png-b06bc08e96c507e63f8d5bc968d3eaba.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/world/nav/talents.png"
-dest_files=["res://.godot/imported/talents.png-8460e0194b1eeb27ef9a5a660a68aceb.ctex"]
+source_file="res://assets/ui/crew/bracket_r.png"
+dest_files=["res://.godot/imported/bracket_r.png-b06bc08e96c507e63f8d5bc968d3eaba.ctex"]
 
 [params]
 

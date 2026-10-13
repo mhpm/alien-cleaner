@@ -46,6 +46,11 @@ static func fire(p: Player, origin: Vector2, d: Vector2, target: Enemy) -> float
 	var unit := _unit(p)
 	var dmg := unit * float(g.dmg)
 	var col := Color(str(g.color))
+	# the character's own look for the PULSE BLASTER (the girl's pink shots)
+	var ch: CharacterData = p.body.character if p.body != null else null
+	var skin := ch.pulse_skin if ch != null and str(g.kind) == "pulse" else ""
+	if skin != "":
+		col = ch.pulse_color
 	# OVERDRIVE / power-ups add copies of the whole weapon: parallel barrels ("shots")
 	# side by side and a fan ("spread"); every copy after the first hits for EXTRA_K
 	var copies: Array = []  # [muzzle offset, direction]
@@ -64,8 +69,10 @@ static func fire(p: Player, origin: Vector2, d: Vector2, target: Enemy) -> float
 		match str(g.kind):
 			"pulse":
 				var crit := _shots % int(prm.crit_every) == 0
-				var b := _shot("shot_pulse", o, sd, float(g.speed), dk, 14.0, 3.5, 1.2)
+				var b := _shot("shot_pulse" if skin == "" else "shot_pulse_" + skin, o, sd, float(g.speed), dk, 14.0, 3.5, 1.2)
 				b.force_crit = crit
+				if skin != "":
+					b.pop_col = col
 				if crit:
 					b.pierce += int(prm.crit_pierce)
 					b.trail = Color("ffe08a")

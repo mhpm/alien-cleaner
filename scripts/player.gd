@@ -5,8 +5,9 @@ extends CharacterBody2D
 ## Infected Mode, mutate when the infection meter is full; see Infected).
 
 const BLAST_RADIUS := 62.0
-const BODY_Y := -10.0  # world-space height of the torso
-const DOME_Y := -13.0  # centre of the whole astronaut (feet 0, helmet top ~-25): the Ion Shield sits here
+const BODY_Y := -13.0  # world-space height of the torso
+const DOME_Y := -17.0  # centre of the whole astronaut (feet 0, head top ~-33): the Ion Shield sits here
+const DOME_DRAW := 1.25  # the shield bubble is drawn this much bigger than its radius (covers the whole body)
 
 var input_dir := Vector2.ZERO
 var locked := false
@@ -47,6 +48,7 @@ var gun_angle := -PI * 0.5
 var recoil := 0.0
 var infected: Infected  # Infected mode: meter, mutation and its powers
 var nova_t := 1.0  # OVERDRIVE level 5: seconds to the next Rocket Nova
+var ability: CharacterAbility  # the character's unique ability (CharacterData.ability)
 
 
 func _ready() -> void:
@@ -85,7 +87,24 @@ func _ready() -> void:
 	add_child(infected)
 	move_child(infected, 0)
 	infected.setup(self)
+	body.character_changed.connect(_set_ability)
+	_set_ability(body.character)
 	refresh_upgrades()
+
+
+## The character's unique ability (CharacterData.ability), rebuilt when it changes.
+func _set_ability(c: CharacterData) -> void:
+	if ability != null:
+		ability.queue_free()
+		ability = null
+	if c == null or c.ability == null:
+		return
+	ability = c.ability.new() as CharacterAbility
+	if ability == null:
+		push_error("%s: its ability does not extend CharacterAbility" % c.character_id)
+		return
+	add_child(ability)
+	ability.setup(self)
 
 
 ## Timed power-ups (CollectibleData "buff"): kind -> seconds left. frenzy = fire rate x2.5,
@@ -378,6 +397,8 @@ func _shoot(target: Enemy) -> void:
 	recoil = GunFire.fire(self, origin, d, target)
 	shoot_t = 0.45
 	body.fire_flash()
+	if ability != null:
+		ability.on_fire(origin, d, target)
 
 
 ## The mutant's mutation gun (MutationData): its own bolt, plus the run's extra shots.
@@ -444,6 +465,8 @@ func blast() -> void:
 		if shot != null and shot.global_position.distance_to(c) < BLAST_RADIUS:
 			shot.pop()
 	squash = Vector2(1.3, 0.75)
+	if ability != null:
+		ability.on_blast()
 
 
 func take_damage(amount: float, from := Vector2.INF, hazard := false) -> void:
@@ -527,7 +550,7 @@ func _update_dome(delta: float) -> void:
 	if not dome.visible:
 		return
 	dome.texture = UpgradeData.shield_bubble(shield_hits)
-	var k := float(def.r) * 2.0 / dome.texture.get_width()
+	var k := float(def.r) * 2.0 * DOME_DRAW / dome.texture.get_width()
 	dome.scale = dome.scale.lerp(Vector2.ONE * k, 1.0 - exp(-12.0 * delta))
 	dome.modulate = Color(1, 1, 1, 0.8 + sin(t * 4.0) * 0.12)
 	if sl < 3:

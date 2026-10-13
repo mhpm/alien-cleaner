@@ -7,7 +7,8 @@ extends Control
 ## next world's access chip, the world chest) with a caption for each, then the
 ## buttons slide up. A tap skips to the end.
 ## info: time, kills, coins, gems, bonus, first (first clear), next (world unlocked),
-## chest (world chest now waiting in the world select).
+## chest (world chest now waiting in the world select), crew (character ids this clear
+## unlocked, Game.CREW: she pops in beside the buttons with NEW CREW: <name>!).
 
 const DIR := "res://assets/ui/victory/"
 const ART := Vector2(1024, 1536)
@@ -19,6 +20,9 @@ const BTN_MENU := Rect2(136, 1336, 352, 128)
 const BTN_NEXT := Rect2(506, 1330, 384, 142)
 const GOLD := Color("ffcd75")
 const CYAN := Color("73eff7")
+const PINK := Color("ff6bc7")
+const CREW_FEET := Vector2(112, 1330)  # where a newly unlocked crew member stands (art px)
+const CREW_H := 230.0  # her height on the panel (art px)
 
 signal menu_pressed
 signal next_pressed
@@ -282,6 +286,9 @@ func _show_buttons() -> void:
 	caption.text = "BANK: %d COINS" % Game.bank
 	caption.add_theme_color_override("font_color", GOLD)
 	caption.add_theme_font_size_override("font_size", 34)
+	var crew: Array = info.get("crew", [])
+	if not crew.is_empty():
+		_pop_crew(str(crew[0]))
 	for k in 2:
 		var b := buttons[k]
 		b.disabled = false
@@ -291,6 +298,32 @@ func _show_buttons() -> void:
 		tw.tween_interval(0.08 * k)
 		tw.chain().tween_property(b, "position:y", y, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		tw.tween_property(b, "modulate:a", 1.0, 0.25)
+
+
+## A crew member unlocked by this clear jumps onto the panel, waving her idle loop.
+func _pop_crew(id: String) -> void:
+	var c := CharacterData.load_id(id)
+	if c == null:
+		return
+	var holder := Node2D.new()
+	holder.position = CREW_FEET
+	stage.add_child(holder)
+	var spr := AnimatedSprite2D.new()
+	spr.sprite_frames = c.frames
+	spr.offset = c.offset()
+	spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	spr.play(c.resolve("idle"))
+	holder.add_child(spr)
+	var k := CREW_H / maxf(1.0, c.body_height)
+	holder.scale = Vector2(k, 0.0)
+	var tw := create_tween()
+	tw.tween_property(holder, "scale", Vector2(k, k), 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_burst(CREW_FEET + Vector2(0, -CREW_H * 0.5), PINK, 34, 700.0)
+	_burst(CREW_FEET + Vector2(0, -CREW_H * 0.5), Color.WHITE, 14, 450.0)
+	caption.text = "NEW CREW: %s!" % c.display_name.to_upper()
+	caption.add_theme_font_size_override("font_size", UiTheme.fit_size(UiTheme.FONT, caption.text, 34, caption.size.x))
+	caption.add_theme_color_override("font_color", PINK)
+	Sfx.play("upgrade", 0.0)
 
 
 ## Tap during the sequence: jump to the end.

@@ -254,7 +254,7 @@ static func feet(part: Image) -> Vector2:
 ## Returns the saved CharacterData (or null). Its textures are references by path: the
 ## editor imports the new PNGs in the scan this starts; reload the .tres after
 ## EditorFileSystem.filesystem_changed to see them.
-static func build(id: String, display_name: String, rows: Array, height := 25.5) -> CharacterData:
+static func build(id: String, display_name: String, rows: Array, height := 33.0) -> CharacterData:
 	var dir := CharacterData.DIR + id + "/"
 	DirAccess.make_dir_recursive_absolute(dir)
 	# one canvas for every frame: feet at the bottom middle

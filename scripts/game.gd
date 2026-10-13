@@ -652,6 +652,8 @@ func _victory() -> void:
 	info.first = first
 	info.next = first and Game.world_index + 1 < WorldData.WORLDS.size()
 	info.chest = not Game.chests.has(Game.world_index)
+	info.crew = Game.last_crew.duplicate()
+	Game.last_crew = []
 	Game.end_run()
 	info.bonus = Game.clear_bonus(first)
 	Sfx.play("victory", 0.0)

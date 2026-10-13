@@ -55,8 +55,9 @@ var _ai_kind := ""
 var elite := false  # tougher golden variant with a crown (final waves)
 ## Arena raiders: the DefendCore (village well, house...) this alien marches on instead
 ## of the astronaut, until he comes within LURE_BREAK (then it is his again for good).
-var lure: Node2D  # marching on it instead of the astronaut (DefendCore, SeedTank): has is_resolved()
-const LURE_BREAK := 90.0
+var lure: Node2D  # marching on it instead of the astronaut (DefendCore, SeedTank, HoloDecoy): has is_resolved()
+const LURE_BREAK := 90.0  # default; a lure may set its own `lure_break` (HoloDecoy: never)
+var charm: Charm  # fighting for the crew for a while (the girl's Heart Shot)
 ## ARMORY weapon effects: armor break (takes `vuln` x damage while vuln_t lasts),
 ## Cryo chill stacks (freeze at the weapon's threshold) and burn / acid damage over time
 var vuln := 1.0
@@ -214,6 +215,8 @@ func _physics_process(delta: float) -> void:
 			Game.world.burst(hit_center(), Color("c0f4ff"), 8, 50.0, 0.3, 2.0)
 	elif stun_t > 0.0:
 		stun_t -= delta
+	elif charm != null:
+		vel = charm.steer(delta)
 	elif spawn_t <= 0.0:
 		vel = _ai(delta * aggro)  # aggro > 1: attack timers and windups run faster
 		if (hit_wall or detour_t > 0.0) and not no_detour:
@@ -252,7 +255,8 @@ func _physics_process(delta: float) -> void:
 	if _far:
 		return  # nobody sees it and the astronaut is far away
 	_animate(delta)
-	_contact()
+	if charm == null:  # a charmed alien never hurts the crew
+		_contact()
 
 
 ## Crowd frames between two full updates: keep sliding with the last velocity (a
@@ -476,10 +480,16 @@ func _ai(delta: float) -> Vector2:
 func _to_player() -> Vector2:
 	var p := player().global_position
 	if lure != null:
-		if is_instance_valid(lure) and not bool(lure.call("is_resolved")) and p.distance_to(global_position) > LURE_BREAK:
+		if is_instance_valid(lure) and not bool(lure.call("is_resolved")) and p.distance_to(global_position) > _lure_break():
 			return lure.global_position - global_position
 		lure = null
 	return p - global_position
+
+
+## How close the astronaut must come to win the alien back from its lure.
+func _lure_break() -> float:
+	var r: Variant = lure.get("lure_break")
+	return float(r) if r != null else LURE_BREAK
 
 
 func _ai_chaser() -> Vector2:

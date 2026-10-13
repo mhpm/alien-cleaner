@@ -107,7 +107,7 @@ func _ready() -> void:
 	_height.min_value = 8
 	_height.max_value = 80
 	_height.step = 0.5
-	_height.tooltip_text = "How tall it stands in game (the astronaut is 25.5)"
+	_height.tooltip_text = "How tall it stands in game (the astronaut is 33)"
 	_height.value_changed.connect(func(v: float) -> void: _set_prop("height", v))
 	_weapon = _field(g, "Weapon", OptionButton.new()) as OptionButton
 	_weapon.add_item("ARMORY weapon in the hand", CharacterData.Weapon.HELD)
@@ -574,7 +574,7 @@ func _sheet_chosen(path: String) -> void:
 		_map_height.value = _cur.height
 	else:
 		_map_name.text = path.get_file().get_basename().replace("_ref", "").replace("_", " ").capitalize()
-		_map_height.value = 25.5
+		_map_height.value = 33.0
 	_map_name.editable = _reimport_id == ""
 	_map.title = "Replace frames of %s" % _cur.display_name if _reimport_id != "" else "New player from sheet"
 	_map.popup_centered()
