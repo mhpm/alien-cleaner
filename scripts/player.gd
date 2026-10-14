@@ -272,7 +272,8 @@ func _physics_process(delta: float) -> void:
 		body.modulate.a = 0.35 if fmod(invuln, 0.12) < 0.06 else 1.0
 	else:
 		body.modulate.a = 1.0
-	blast_t = maxf(blast_t - delta, 0.0)
+	if ability == null or not ability.holds_cooldown():  # an ability still in use: recharge waits
+		blast_t = maxf(blast_t - delta, 0.0)
 	_tick_buffs(delta)
 	if has_buff("frenzy"):
 		if randf() < delta * 14.0:

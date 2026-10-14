@@ -83,9 +83,17 @@ func _run() -> void:
 	_check(far > d0 + 10.0, "its pellets shove the alien back (%.0f -> %.0f)" % [d0, far])
 	await _frames(int(ShotgunAbility.DURATION * 60.0))
 	_check(w.player.body.held == null and not w.player.ability.overrides_fire(), "after %.0f s he puts it away" % ShotgunAbility.DURATION)
-	# it recharges for COOLDOWN from the draw: the button is still not ready now
+	# the recharge only starts once it is put away: COOLDOWN seconds without it
 	_check(is_equal_approx(w.player.blast_cooldown(), ShotgunAbility.COOLDOWN), "the shotgun recharges in %.0f s" % ShotgunAbility.COOLDOWN)
-	_check(w.player.blast_t > 0.0, "%.0f s after the draw it is still recharging" % ShotgunAbility.DURATION)
+	_check(w.player.blast_t > ShotgunAbility.COOLDOWN - 1.5, "right after putting it away the full recharge is still ahead (%.1f s)" % w.player.blast_t)
+	await _frames(int((ShotgunAbility.COOLDOWN - 2.0) * 60.0))
+	_check(w.player.blast_t > 0.0, "it is still recharging %.0f s later" % (ShotgunAbility.COOLDOWN - 2.0))
+	# hitstops slow the game clock: wait for it (with a margin) instead of counting frames
+	for k in 6 * 60:
+		if is_zero_approx(w.player.blast_t):
+			break
+		await get_tree().physics_frame
+	_check(is_zero_approx(w.player.blast_t), "about %.0f s after putting it away it is ready again (%.2f left)" % [ShotgunAbility.COOLDOWN, w.player.blast_t])
 	Game.character = keep
 	Game.playground_active = false
 	if failures.is_empty():

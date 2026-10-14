@@ -174,10 +174,10 @@ func _draw() -> void:
 	var pulse := 0.5 + 0.5 * sin(t * 4.0)
 	var flat := Transform2D(0.0, Vector2(1.0, 0.38), 0.0, Vector2(0, -1))
 	draw_set_transform_matrix(flat)
-	FastDraw.disc(self, Vector2.ZERO, 15.0 + pulse * 3.0, Color(c, 0.14 + 0.1 * pulse))
-	FastDraw.ring(self, Vector2.ZERO, rescue_r, Color(c, 0.5 if near else 0.22), 1.5)
+	FastDraw.disc(self, Vector2.ZERO, 20.0 + pulse * 4.0, Color(c, 0.14 + 0.1 * pulse))
+	FastDraw.ring(self, Vector2.ZERO, rescue_r, Color(c, 0.6 if near else 0.3), 2.0)
 	if progress > 0.0:
-		FastDraw.arc(self, Vector2.ZERO, rescue_r, -PI * 0.5, -PI * 0.5 + TAU * progress, Color(0.65, 1.0, 0.45, 0.95), 3.5, flat)
+		FastDraw.arc(self, Vector2.ZERO, rescue_r, -PI * 0.5, -PI * 0.5 + TAU * progress, Color(0.65, 1.0, 0.45, 0.95), 5.0, flat)
 	draw_set_transform(Vector2.ZERO)
 	if near or progress > 0.0:
 		var txt := "%d%%" % int(progress * 100.0)

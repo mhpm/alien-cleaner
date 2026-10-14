@@ -31,7 +31,7 @@ const FOLLOW := 20.0
 @export var dialogue: PackedStringArray = []
 ## Said in the dialogue box once rescued ("" = none).
 @export var thanks_line := ""
-@export_range(10.0, 120.0, 1.0) var rescue_radius := 30.0:
+@export_range(10.0, 120.0, 1.0) var rescue_radius := SurvivorData.RESCUE_R:
 	set(value):
 		rescue_radius = value
 		queue_redraw()

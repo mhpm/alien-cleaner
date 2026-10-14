@@ -28,6 +28,12 @@ func cooldown() -> float:
 	return -1.0
 
 
+## True while the ability is still in use: the button's recharge only starts counting
+## once it ends (ZED's shotgun: 10 s without it after it is put away).
+func holds_cooldown() -> bool:
+	return false
+
+
 ## True while the ability fires instead of the equipped weapon (fire / fire_interval).
 func overrides_fire() -> bool:
 	return false

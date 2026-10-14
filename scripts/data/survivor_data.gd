@@ -5,7 +5,7 @@ extends RefCounted
 ## Art: assets/sprites/survivors/<id>_sad.png / <id>_happy.png (tools/make_survivors.py).
 
 const RESCUE_TIME := 10.0  # seconds standing next to a survivor
-const RESCUE_R := 30.0  # how close (world units)
+const RESCUE_R := 40.0  # how close (world units) = its ring
 const DIR := "res://assets/sprites/survivors/"
 
 const CREW := [

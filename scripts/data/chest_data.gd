@@ -6,7 +6,7 @@ extends RefCounted
 ## `weight` = how often that chest shows up (rarer chests carry stronger perks).
 
 const OPEN_TIME := 5.0  # seconds standing next to a chest to open it
-const OPEN_R := 30.0  # how close the astronaut must stand (world units)
+const OPEN_R := 40.0  # how close the astronaut must stand (world units) = its ring
 const DIR := "res://assets/sprites/chests/"
 
 const CHESTS := [

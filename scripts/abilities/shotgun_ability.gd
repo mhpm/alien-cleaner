@@ -2,14 +2,14 @@ class_name ShotgunAbility
 extends CharacterAbility
 ## ZED's ability: BLAST draws his personal SHOTGUN (assets/guns/zed_shotgun.png) for
 ## DURATION seconds and he fires it instead of his equipped weapon: a fan of PELLETS
-## short-range pellets that shove the aliens back hard (PUSH). Then he puts it away; the
-## button recharges for COOLDOWN seconds from the draw (cooldown(): a stronger move than
-## a plain blast, so a longer wait; perks that shorten the blast shorten it too).
-## About twice his weapon's damage up close while out: a real help, 5 s out of every 10.
+## short-range pellets that shove the aliens back hard (PUSH). Then he puts it away and
+## the button recharges for COOLDOWN seconds from THAT moment (holds_cooldown: frozen
+## while it is out; cooldown(): longer than a plain blast; perks that shorten the blast
+## shorten it too). About twice his weapon's damage up close: 5 s out, then 10 s without.
 ## While mutated the mutant fires its own gun (the shotgun waits until it reverts).
 
 const DURATION := 5.0
-const COOLDOWN := 10.0  # from one draw to the next, at the base blast cooldown
+const COOLDOWN := 10.0  # without it after putting it away, at the base blast cooldown
 const PELLETS := 7
 const ARC := 0.7  # radians the fan spreads over
 const PELLET_DMG := 0.6  # x the crew's base hit, each pellet
@@ -33,6 +33,10 @@ static func gun_tex() -> Texture2D:
 
 func cooldown() -> float:
 	return COOLDOWN * float(Game.stats.blast_cooldown) / Game.BLAST_COOLDOWN
+
+
+func holds_cooldown() -> bool:
+	return time_left > 0.0
 
 
 func icon() -> Texture2D:
