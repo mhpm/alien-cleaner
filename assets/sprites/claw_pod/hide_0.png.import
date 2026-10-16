@@ -15,9 +15,9 @@ dest_files=["res://.godot/imported/hide_0.png-81d8afa6602b0c2bdaa5ae42b2f7e59a.c
 
 [params]
 
-compress/mode=0
+compress/mode=1
 compress/high_quality=false
-compress/lossy_quality=0.7
+compress/lossy_quality=0.85
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1

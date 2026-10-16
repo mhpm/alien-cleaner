@@ -15,9 +15,9 @@ dest_files=["res://.godot/imported/crack_2.png-ad9e9d569d20b73f2809aff0170c900f.
 
 [params]
 
-compress/mode=0
+compress/mode=1
 compress/high_quality=false
-compress/lossy_quality=0.7
+compress/lossy_quality=0.85
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1

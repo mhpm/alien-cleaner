@@ -15,9 +15,9 @@ dest_files=["res://.godot/imported/shoot_0.png-e9609d8a18f62df575a2fca7c0652b87.
 
 [params]
 
-compress/mode=0
+compress/mode=1
 compress/high_quality=false
-compress/lossy_quality=0.7
+compress/lossy_quality=0.85
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1

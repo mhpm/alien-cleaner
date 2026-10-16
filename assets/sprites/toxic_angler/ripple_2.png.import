@@ -15,9 +15,9 @@ dest_files=["res://.godot/imported/ripple_2.png-93560e2d05376eda40cfbd7c8604eada
 
 [params]
 
-compress/mode=0
+compress/mode=1
 compress/high_quality=false
-compress/lossy_quality=0.7
+compress/lossy_quality=0.85
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1

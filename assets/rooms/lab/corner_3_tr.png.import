@@ -15,9 +15,9 @@ dest_files=["res://.godot/imported/corner_3_tr.png-3506e4f182410a786c8cfa6e075f4
 
 [params]
 
-compress/mode=0
+compress/mode=1
 compress/high_quality=false
-compress/lossy_quality=0.7
+compress/lossy_quality=0.85
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1

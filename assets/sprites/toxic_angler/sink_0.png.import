@@ -15,9 +15,9 @@ dest_files=["res://.godot/imported/sink_0.png-60d9e90e2b7ceccb9d7ce213c13fdd6e.c
 
 [params]
 
-compress/mode=0
+compress/mode=1
 compress/high_quality=false
-compress/lossy_quality=0.7
+compress/lossy_quality=0.85
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
