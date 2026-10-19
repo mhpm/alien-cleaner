@@ -262,7 +262,7 @@ func _crew_card(i: int, w: float) -> Control:
 ## A chest opened this run: the chest and its perk.
 func _chest_card(k: int, w: float) -> Control:
 	var def: Dictionary = ChestData.CHESTS[k]
-	return _perk_card("card", ChestData.tex(k), str(def.name), str(def.desc), def.color, w)
+	return _perk_card("card", ChestData.open_tex(k), str(def.name), str(def.desc), def.color, w)
 
 
 ## A kit card (`box`) with a framed picture, a name in `col` and what it gives.

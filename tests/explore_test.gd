@@ -57,7 +57,9 @@ func _run() -> void:
 	for k: String in before:
 		if str(before[k]) != str(Game.stats[k]):
 			changed = true
-	_check(changed or str(ChestData.CHESTS[chest.kind].id) == "treasure", "Perk applied: " + str(ChestData.CHESTS[chest.kind].id))
+	var perks := w.player.get_node_or_null("ChestPerks") as ChestPerks
+	_check(changed or (perks != null and not perks.levels.is_empty()) or str(ChestData.CHESTS[chest.kind].id) == "xp",
+		"Perk applied: " + str(ChestData.CHESTS[chest.kind].id))
 	print("  opened %s -> %s" % [ChestData.CHESTS[chest.kind].name, ChestData.CHESTS[chest.kind].desc])
 	# rescue a survivor: 10 s next to them (no level-up modal may pause the clock meanwhile)
 	w.survival.process_mode = Node.PROCESS_MODE_DISABLED

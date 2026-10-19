@@ -4213,6 +4213,36 @@ fade_behind = true
 pixel_art = true
 shadow = true
 
+[node name="Toolbox2" type="Node2D" parent="Obstacles" unique_id=1992081780]
+position = Vector2(1543, 731)
+script = ExtResource("7_rid1u")
+texture = ExtResource("52_36rpc")
+width = 28.0
+footprint = Vector2(22, 8)
+blocks_bullets = true
+fade_behind = true
+pixel_art = true
+
+[node name="CrateBig2" type="Node2D" parent="Obstacles" unique_id=1621164462]
+position = Vector2(1516, 734)
+script = ExtResource("7_rid1u")
+texture = ExtResource("32_hnyld")
+width = 34.0
+footprint = Vector2(28, 10)
+blocks_bullets = true
+fade_behind = true
+pixel_art = true
+
+[node name="CrateBig3" type="Node2D" parent="Obstacles" unique_id=885188482]
+position = Vector2(2309, 767)
+script = ExtResource("7_rid1u")
+texture = ExtResource("32_hnyld")
+width = 34.0
+footprint = Vector2(28, 10)
+blocks_bullets = true
+fade_behind = true
+pixel_art = true
+
 [node name="Decorations" type="Node2D" parent="." unique_id=717804108]
 y_sort_enabled = true
 
@@ -5399,6 +5429,28 @@ patrol_points = PackedVector2Array(-80, 0, 80, 0)
 position = Vector2(928, 103)
 script = ExtResource("82_8xxbq")
 character = ExtResource("105_c4mrc")
+
+[node name="Chest" type="Node2D" parent="GameplayObjects" unique_id=352984973]
+texture_filter = 4
+position = Vector2(1543, 450)
+script = ExtResource("p25m_chest")
+
+[node name="Chest2" type="Node2D" parent="GameplayObjects" unique_id=1317209622]
+texture_filter = 4
+position = Vector2(833, 121)
+script = ExtResource("p25m_chest")
+
+[node name="Chest3" type="Node2D" parent="GameplayObjects" unique_id=1318439680]
+texture_filter = 4
+position = Vector2(998, 136)
+script = ExtResource("p25m_chest")
+chest = 2
+
+[node name="Chest4" type="Node2D" parent="GameplayObjects" unique_id=1041065751]
+texture_filter = 4
+position = Vector2(913, 156)
+script = ExtResource("p25m_chest")
+chest = 4
 
 [node name="Objectives" type="Node2D" parent="." unique_id=803824584]
 

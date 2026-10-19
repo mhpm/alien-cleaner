@@ -34,12 +34,12 @@ func scene_entry(file_basename: String) -> Entry:
 ## The OBJECTS category tree (dock/category_picker.gd): built-in categories sit under
 ## these groups; decor kits get one branch each ("Kit · Category · Sub", see tree_path).
 const GROUPS := {
-	"Gameplay": ["Gameplay", "Survivors", "Spawners", "Triggers", "Pickups"],
+	"Gameplay": ["Gameplay", "Survivors", "Chests", "Spawners", "Triggers", "Pickups"],
 	"Aliens": ["Enemies", "Placed Aliens", "Bosses"],
 	"Hazards & Decals": ["Hazards", "Environment", "Contamination", "Decals"],
 }
 ## Display order; unknown categories follow alphabetically.
-const ORDER := ["Gameplay", "Survivors", "Enemies", "Placed Aliens", "Bosses", "Spawners", "Triggers", "Hazards", "Pickups", "Environment", "Contamination"]
+const ORDER := ["Gameplay", "Survivors", "Chests", "Enemies", "Placed Aliens", "Bosses", "Spawners", "Triggers", "Hazards", "Pickups", "Environment", "Contamination"]
 
 
 class Entry:
@@ -143,6 +143,7 @@ func rebuild() -> void:
 	_scan_scenes()
 	_add_characters()
 	_add_survivors()
+	_add_chests()
 	_add_enemies()
 	_add_props()
 	_add_decals()
@@ -260,6 +261,22 @@ func _add_survivors() -> void:
 		e.icon = SurvivorData.tex(i, false)
 		e.tooltip = "%s
 Gift: %s" % [str(crew.name).capitalize(), crew.gift]
+		entries.append(e)
+
+
+## "Chests": one chest preset per ChestData chest (its closed art as the icon, its perk in
+## the tooltip), so a chest is picked by its picture. The plain chest stays in Gameplay.
+func _add_chests() -> void:
+	var base := scene_entry("chest")
+	if base == null:
+		return
+	for i in ChestData.CHESTS.size():
+		var c: Dictionary = ChestData.CHESTS[i]
+		var e := base.with_preset({"chest": i}, str(c.name).capitalize())
+		e.category = "Chests"
+		e.icon = ChestData.tex(i)
+		e.tooltip = "%s
+Perk: %s" % [str(c.name).capitalize(), c.desc]
 		entries.append(e)
 
 

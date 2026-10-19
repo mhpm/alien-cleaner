@@ -35,6 +35,7 @@ const NAV := ["shop", "gear", "battle", "crew", "lab"]
 const WORLD_RECT := Rect2(118, 398, 740, 614)
 ## BOSS CHALLENGE button (drawn in code, right of the chest): only once the world is cleared
 const BOSS_RECT := Rect2(626, 1004, 296, 176)
+const CHEST_LABEL_Y := 952.0
 ## STORY: replay the intro cinematic (WORLD 1 only), top-left over the world's picture
 const STORY_RECT := Rect2(128, 410, 196, 66)
 const RED := Color("ff4f6a")
@@ -67,7 +68,7 @@ var boss_btn: Button
 var boss_pic: TextureRect
 var boss_best: Label
 var boss_frame: NeonFrame
-var boss_chest: TextureButton
+var boss_chest: RewardChest
 
 
 func _ready() -> void:
@@ -182,14 +183,22 @@ func _build() -> void:
 
 	for id: String in BUTTONS:
 		var r: Rect2 = BUTTONS[id]
-		var b := TextureButton.new()
-		b.texture_normal = load(DIR + ("nav/%s.png" if NAV.has(id) else "btn_%s.png") % id)
-		b.ignore_texture_size = true
-		b.stretch_mode = TextureButton.STRETCH_SCALE
-		b.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-		b.position = r.position
-		b.size = r.size
-		b.pivot_offset = r.size * 0.5
+		var b: TextureButton
+		if id == "chest":  # the world's reward chest: glows while waiting, open art once taken
+			var rc := RewardChest.new()
+			rc.foot = Vector2(r.get_center().x, r.end.y)
+			rc.width = r.size.x
+			rc.set_state(RewardChest.State.LOCKED)
+			b = rc
+		else:
+			b = TextureButton.new()
+			b.texture_normal = load(DIR + ("nav/%s.png" if NAV.has(id) else "btn_%s.png") % id)
+			b.ignore_texture_size = true
+			b.stretch_mode = TextureButton.STRETCH_SCALE
+			b.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+			b.position = r.position
+			b.size = r.size
+			b.pivot_offset = r.size * 0.5
 		b.button_down.connect(_press_fx.bind(b, true))
 		b.button_up.connect(_press_fx.bind(b, false))
 		b.pressed.connect(_on_button.bind(id))
@@ -208,8 +217,9 @@ func _build() -> void:
 	labels.power = _stage_label(Rect2(406, 34, 88, 42), 32, Color.WHITE)
 	labels.gems = _stage_label(Rect2(608, 34, 76, 42), 32, Color.WHITE)
 	labels.coins = _stage_label(Rect2(796, 34, 84, 42), 32, Color.WHITE)
-	chest_label = _stage_label(Rect2(345, 952, 253, 44), 30, GREEN)
+	chest_label = _stage_label(Rect2(345, CHEST_LABEL_Y, 253, 44), 30, GREEN)
 	chest_label.add_theme_constant_override("outline_size", 12)
+	chest_label.z_index = 2  # over the chest (it sits in the band below)
 
 	# the ARMORY tile is empty in the art: the equipped weapon is drawn in it
 	_nav_icon("gear", GunData.icon(Game.gun), Vector2(120, 70))
@@ -330,14 +340,11 @@ func _build_boss_button() -> void:
 		_start(true))
 	stage.add_child(boss_btn)
 	# once the challenge is won: a golden chest perched on the card's corner (opens once for coins)
-	boss_chest = TextureButton.new()
-	boss_chest.texture_normal = load(DIR + "btn_chest.png")
-	boss_chest.ignore_texture_size = true
-	boss_chest.stretch_mode = TextureButton.STRETCH_SCALE
-	boss_chest.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	boss_chest.position = BOSS_RECT.position + Vector2(BOSS_RECT.size.x - 112.0, -62.0)
-	boss_chest.size = Vector2(100, 77)
-	boss_chest.pivot_offset = boss_chest.size * 0.5
+	boss_chest = RewardChest.new()
+	boss_chest.foot = BOSS_RECT.position + Vector2(BOSS_RECT.size.x - 62.0, 15.0)
+	boss_chest.width = 100.0
+	boss_chest.tint = Color(1.35, 1.12, 0.62)
+	boss_chest.glow_color = Color("ffcd3a")
 	boss_chest.pressed.connect(_open_boss_chest)
 	stage.add_child(boss_chest)
 
@@ -345,7 +352,7 @@ func _build_boss_button() -> void:
 func _show_boss_button() -> void:
 	if boss_btn == null:
 		return
-	var open := Game.boss_challenge_unlocked(sel)
+	var open := not _coming() and Game.boss_challenge_unlocked(sel)
 	boss_btn.visible = open
 	boss_chest.visible = false
 	if not open:
@@ -362,8 +369,7 @@ func _show_boss_button() -> void:
 	boss_frame.fill_top = Color(0.24, 0.16, 0.03, 0.92) if won else Color(0.22, 0.04, 0.1, 0.92)
 	boss_frame.queue_redraw()
 	boss_chest.visible = won
-	var taken := Game.boss_chests.has(sel)
-	boss_chest.self_modulate = Color(0.5, 0.5, 0.6) if taken else Color(1.35, 1.12, 0.62)
+	boss_chest.set_state(RewardChest.State.OPENED if Game.boss_chests.has(sel) else RewardChest.State.READY)
 
 
 func _tex_rect(tex: Texture2D, r: Rect2) -> TextureRect:
@@ -443,9 +449,20 @@ func _short(n: int) -> String:
 	return str(n)
 
 
+## A world still to be built (WorldData.UPCOMING): its picture and name, COMING SOON.
+func _coming() -> bool:
+	return not WorldData.upcoming(sel).is_empty()
+
+
+## The selected world can be played (built and unlocked).
+func _playable() -> bool:
+	return not _coming() and Game.world_unlocked(sel)
+
+
 func _show_world(fade := true) -> void:
-	var wd := WorldData.world(sel)
-	var open := Game.world_unlocked(sel)
+	var coming := _coming()
+	var wd := WorldData.upcoming(sel) if coming else WorldData.world(sel)
+	var open := _playable()
 	var tex: Texture2D = load(DIR + str(wd.pic))
 	if fade:
 		var tw := create_tween()
@@ -460,13 +477,15 @@ func _show_world(fade := true) -> void:
 	for l: Label in [title_num, title_name]:
 		l.add_theme_font_size_override("font_size", fs)
 	var secs := float(Game.best_time.get(str(sel), 0.0))
-	if Game.worlds_cleared > sel:
+	if coming:
+		best_label.text = "In development"
+	elif Game.worlds_cleared > sel:
 		best_label.text = "CLEARED!  Best:"
 	else:
 		best_label.text = "Longest Survived:"
-	best_value.text = "%dm %02ds" % [floori(secs / 60.0), int(secs) % 60] if secs > 0.0 else "0m 00s"
+	best_value.text = "" if coming else ("%dm %02ds" % [floori(secs / 60.0), int(secs) % 60] if secs > 0.0 else "0m 00s")
 	arrows[0].visible = sel > 0
-	arrows[1].visible = sel < WorldData.WORLDS.size() - 1
+	arrows[1].visible = sel < WorldData.shown_count() - 1
 	(buttons.start as TextureButton).modulate = Color.WHITE if open else Color(0.45, 0.45, 0.5)
 	_show_chest()
 	_show_boss_button()
@@ -476,30 +495,39 @@ func _show_world(fade := true) -> void:
 
 func _apply_world(tex: Texture2D, open: bool) -> void:
 	pic.texture = tex
-	pic.self_modulate = Color.WHITE if open else Color(0.22, 0.22, 0.32)
 	lock_box.visible = not open
-	lock_label.text = "Clear WORLD %d to unlock" % sel
+	if _coming():  # a sneak peek: the picture stays readable
+		pic.self_modulate = Color(0.62, 0.62, 0.72)
+		lock_label.text = "COMING SOON"
+	else:
+		pic.self_modulate = Color.WHITE if open else Color(0.22, 0.22, 0.32)
+		lock_label.text = "Clear WORLD %d to unlock" % sel
 
 
 func _show_chest() -> void:
 	if chest_label == null:
 		return
-	var b: TextureButton = buttons.chest
-	if Game.chests.has(sel):
+	var b: RewardChest = buttons.chest
+	chest_label.position.y = CHEST_LABEL_Y
+	b.visible = not _coming()
+	if _coming():
+		chest_label.text = ""
+	elif Game.chests.has(sel):
 		chest_label.text = "OPENED"
 		chest_label.add_theme_color_override("font_color", Color("94b0c2"))
-		b.self_modulate = Color(0.5, 0.5, 0.6)
+		b.set_state(RewardChest.State.OPENED)
+		chest_label.position.y = b.position.y - chest_label.size.y + 6.0  # above the open lid
 	elif Game.worlds_cleared > sel:
 		chest_label.text = "OPEN ME!"
 		chest_label.add_theme_color_override("font_color", GREEN)
-		b.self_modulate = Color.WHITE
+		b.set_state(RewardChest.State.READY)
 	else:
 		chest_label.text = ""
-		b.self_modulate = Color(0.7, 0.7, 0.8)
+		b.set_state(RewardChest.State.LOCKED)
 
 
 func _step(d: int) -> void:
-	var n := clampi(sel + d, 0, WorldData.WORLDS.size() - 1)
+	var n := clampi(sel + d, 0, WorldData.shown_count() - 1)
 	if n == sel:
 		return
 	sel = n
@@ -562,6 +590,9 @@ func _overlay_open() -> bool:
 
 ## Starts the selected world; `rush` = BOSS CHALLENGE (straight to its final boss).
 func _start(rush := false) -> void:
+	if _coming():
+		_toast("COMING SOON!")
+		return
 	if not Game.world_unlocked(sel):
 		_toast("Clear WORLD %d first!" % sel)
 		return
@@ -579,6 +610,8 @@ func _start(rush := false) -> void:
 
 
 func _open_chest() -> void:
+	if _coming():
+		return
 	if Game.chests.has(sel):
 		_toast("Already opened.")
 		return
@@ -637,7 +670,7 @@ func _toast(text: String) -> void:
 func _process(delta: float) -> void:
 	t += delta
 	var start: TextureButton = buttons.start
-	if not start.is_pressed() and Game.world_unlocked(sel):
+	if not start.is_pressed() and _playable():
 		var k := 1.0 + sin(t * 3.2) * 0.025
 		start.scale = Vector2(k, k)
 	var chest: TextureButton = buttons.chest
@@ -646,11 +679,12 @@ func _process(delta: float) -> void:
 	else:
 		chest.rotation = 0.0
 	if boss_chest.visible:
+		var rest_y := boss_chest.foot.y - boss_chest.size.y
 		if Game.boss_chests.has(sel):
 			boss_chest.rotation = 0.0
-			boss_chest.position.y = BOSS_RECT.position.y - 62.0
+			boss_chest.position.y = rest_y
 		else:  # waiting to be opened: bobs and rattles
-			boss_chest.position.y = BOSS_RECT.position.y - 62.0 + sin(t * 3.0) * 4.0
+			boss_chest.position.y = rest_y + sin(t * 3.0) * 4.0
 			boss_chest.rotation = sin(t * 11.0) * 0.07 * maxf(0.0, sin(t * 2.0))
 	var battle: TextureButton = buttons.battle
 	battle.self_modulate = Color(1, 1, 1).lerp(Color(1.3, 1.3, 1.5), 0.5 + 0.5 * sin(t * 2.5))

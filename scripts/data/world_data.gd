@@ -232,6 +232,20 @@ const BIO := ["vine_crawler", "vine_crawler", "bio_droid", "bio_droid", "spike_b
 const BIO_SHOOTERS := ["bio_droid", "spike_bloom", "spore_drone", "spider_bot", "tesla_drone", "jelly_pod"]
 const HIVE_ROOMS := ["hive_entry", "nest", "biolab", "sludge", "overgrown_cargo", "spires", "pods", "reactor_core"]
 
+## Worlds still to be built: their world-select picture is ready (tools/worlds_9_15_ref.webp
+## -> cut_world_icons.py -> make_world_select_assets.py -> assets/ui/world/world_<n>.png) and
+## a working name with what the picture shows. When a world gets built, its entry moves into
+## WORLDS (as "name" / "pic").
+const UPCOMING := {
+	9: {"name": "OVERGROWN GATE", "pic": "world_9.png", "look": "a jungle-choked gateway, flytrap mouths, a sprout in a tube"},
+	10: {"name": "INCUBATION LAB", "pic": "world_10.png", "look": "pink alien eggs in glowing tanks, a cracked one in the middle"},
+	11: {"name": "EGG FOUNDRY", "pic": "world_11.png", "look": "a robot claw sorting eggs on a hazard-striped conveyor"},
+	12: {"name": "BLOSSOM DOME", "pic": "world_12.png", "look": "a glass dome over a giant flower, eyeball blossoms"},
+	13: {"name": "DRONE HANGAR", "pic": "world_13.png", "look": "a landing pad, radio mast and red-eyed attack drones"},
+	14: {"name": "TENTACLE REACTOR", "pic": "world_14.png", "look": "a green reactor tube wrapped in purple tentacles"},
+	15: {"name": "THE ALL-SEEING CORE", "pic": "world_15.png", "look": "the giant eye core of the infestation, guarded by eye turrets"},
+}
+
 const WORLDS := [
 	{
 		"music": "levels.mp3", "name": "INFESTED SPACESHIP", "theme": "ship", "enemy_mult": 1.0, "difficulty": [1.0, 0.08],
@@ -743,6 +757,20 @@ const WORLDS := [
 		],
 	},
 ]
+
+
+## Worlds the world select pages through: the built ones, then the UPCOMING ones (shown as
+## COMING SOON).
+static func shown_count() -> int:
+	var n := WORLDS.size()
+	while UPCOMING.has(n + 1):
+		n += 1
+	return n
+
+
+## A world still to be built (index from 0, like `world`), or {} if `idx` is not one.
+static func upcoming(idx: int) -> Dictionary:
+	return UPCOMING.get(idx + 1, {}) if idx >= WORLDS.size() else {}
 
 
 static func world(idx: int) -> Dictionary:

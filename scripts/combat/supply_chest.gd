@@ -2,7 +2,8 @@ class_name SupplyChest
 extends Node2D
 ## Exploration chest (Explore): stand within ChestData.OPEN_R for OPEN_TIME to open it.
 ## A ring fills while you stay (it slowly drains when you leave, keeping most of it),
-## the chest shakes harder near the end, then bursts open and grants its ChestData perk.
+## the chest shakes harder near the end, then bursts open (its open art: lid up, the prize
+## inside glowing) and grants its ChestData perk.
 ## Y-sorted with the entities (origin = bottom of the chest).
 
 const WIDTH := 28.0  # world units
@@ -20,18 +21,9 @@ var _tick := 0.0
 func _ready() -> void:
 	add_to_group("chests")
 	sprite = Sprite2D.new()
-	sprite.texture = ChestData.tex(kind)
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-	var img := sprite.texture.get_image()
-	if img.is_compressed():
-		img.decompress()
-	img.generate_mipmaps()
-	sprite.texture = ImageTexture.create_from_image(img)
 	sprite.centered = false
-	var ts := sprite.texture.get_size()
-	var k := WIDTH / ts.x
-	sprite.scale = Vector2(k, k)
-	sprite.offset = Vector2(-ts.x * 0.5, -ts.y)
+	_show(ChestData.tex(kind))
 	add_child(sprite)
 	t = randf() * TAU
 	DarkLights.glow(self)  # chests glow in the dark to draw you exploring
@@ -64,6 +56,20 @@ func _process(delta: float) -> void:
 	sprite.position = Vector2(randf_range(-shake, shake), -absf(sin(t * 2.0)) * 1.2)
 
 
+## The chest art scaled to WIDTH, feet at the origin (mipmapped: it is drawn small).
+func _show(tex: Texture2D) -> void:
+	var img := tex.get_image()
+	if img.is_compressed():
+		img.decompress()
+	img.convert(Image.FORMAT_RGBA8)
+	img.generate_mipmaps()
+	sprite.texture = ImageTexture.create_from_image(img)
+	var ts := sprite.texture.get_size()
+	var k := WIDTH / ts.x
+	sprite.scale = Vector2(k, k)
+	sprite.offset = Vector2(-ts.x * 0.5, -ts.y)
+
+
 func _col() -> Color:
 	return ChestData.CHESTS[kind].color
 
@@ -80,13 +86,20 @@ func _open() -> void:
 	w.ring(at, 34.0, c, 0.4, 3.0, true)
 	w.shake(0.3)
 	Sfx.play("upgrade", 0.0)
-	w.hud.reward(ChestData.tex(kind), str(def.name), str(def.desc), c)
+	w.hud.reward(ChestData.open_tex(kind), str(def.name), str(def.desc), c)
 	if w.explore != null:
 		w.explore.chest_opened(self)
-	sprite.modulate = Color(0.55, 0.55, 0.65, 0.85)
+	# the lid flies up: open art, a squash and a pop, then it glows and slowly dims
+	_show(ChestData.open_tex(kind))
+	sprite.position = Vector2.ZERO
+	var rest := sprite.scale
 	var tw := sprite.create_tween()
-	tw.tween_property(sprite, "scale", sprite.scale * Vector2(1.25, 0.8), 0.08)
-	tw.tween_property(sprite, "scale", sprite.scale, 0.2).set_trans(Tween.TRANS_BACK)
+	tw.tween_property(sprite, "scale", rest * Vector2(1.25, 0.8), 0.07)
+	tw.tween_property(sprite, "scale", rest * Vector2(0.9, 1.15), 0.09)
+	tw.tween_property(sprite, "scale", rest, 0.25).set_trans(Tween.TRANS_BACK)
+	sprite.modulate = Color(1.6, 1.6, 1.6)
+	tw.parallel().tween_property(sprite, "modulate", Color.WHITE, 0.5)
+	tw.tween_property(sprite, "modulate", Color(0.75, 0.75, 0.82), 6.0)
 
 
 func _draw() -> void:
