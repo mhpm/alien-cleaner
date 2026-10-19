@@ -84,6 +84,9 @@ var grime: Array = []  # [position, texture, rotation, scale] floor stains
 var spawned: Array[Node] = []
 ## Solid areas inside an arena (Explore bulkheads): spawns and free spots avoid them.
 var blockers: Array[Rect2] = []
+## Arena maps: the floor reachable on foot (WalkMask). Set, aliens are only ever placed
+## on it (is_open / open_near), never in the void between rooms or a sealed-off pocket.
+var walk_mask: WalkMask
 var door_open := false
 var door_k := 0.0
 var door_shape: CollisionShape2D
@@ -502,6 +505,8 @@ func arena_free_spot(p: Vector2, clear := 12.0) -> Vector2:
 
 ## True when `p` is clear of every blocker (grown by `pad`).
 func is_open(p: Vector2, pad := 8.0) -> bool:
+	if walk_mask != null and not walk_mask.has(p):
+		return false
 	for r in blockers:
 		if r.grow(pad).has_point(p):
 			return false
@@ -510,7 +515,7 @@ func is_open(p: Vector2, pad := 8.0) -> bool:
 
 ## `p` if it is open, else the nearest open point around it (arena walls respected).
 func open_near(p: Vector2) -> Vector2:
-	if blockers.is_empty() or is_open(p):
+	if (blockers.is_empty() and walk_mask == null) or is_open(p):
 		return p
 	var b := bounds().grow(-14.0)
 	for ring in range(1, 12):
@@ -518,7 +523,7 @@ func open_near(p: Vector2) -> Vector2:
 			var q := (p + Vector2.from_angle(TAU * k / 8.0 + ring * 0.4) * ring * 14.0).clamp(b.position, b.end)
 			if is_open(q):
 				return q
-	return p
+	return walk_mask.nearest(p) if walk_mask != null else p
 
 
 func _draw_arena() -> void:

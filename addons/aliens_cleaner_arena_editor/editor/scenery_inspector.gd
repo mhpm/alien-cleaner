@@ -9,7 +9,7 @@ extends EditorInspectorPlugin
 const Objects := preload("object_library.gd")
 ## Properties copied to the other pieces.
 const PROPS := ["width", "tint", "footprint", "blocks_bullets", "sway", "fade_behind", "flat",
-	"bridge", "shadow", "columns", "rows", "frame_count", "fps", "play_once"]
+	"bridge", "shadow", "pixel_art", "columns", "rows", "frame_count", "fps", "play_once"]
 
 var undo: EditorUndoRedoManager
 
@@ -79,7 +79,7 @@ func _save_defaults(src: ArenaScenery) -> void:
 		return
 	var values := {
 		"width": src.width, "sway": src.sway, "fade": src.fade_behind, "flat": src.flat,
-		"bridge": src.bridge, "shadow": src.shadow, "blocks_bullets": src.blocks_bullets,
+		"bridge": src.bridge, "shadow": src.shadow, "blocks_bullets": src.blocks_bullets, "pixel": src.pixel_art,
 		"tint": src.tint.to_html(), "solid": [src.footprint.x, src.footprint.y],
 		"anim": {"columns": src.columns, "rows": src.rows, "count": src.frame_count,
 			"fps": src.fps, "loop": not src.play_once},

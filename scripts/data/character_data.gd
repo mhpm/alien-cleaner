@@ -163,6 +163,19 @@ static func selected() -> CharacterData:
 	return c if c != null else default_character()
 
 
+## Like selected(), but also in the editor: there the Game autoload does not run, so the
+## pick is read from the save (the same user:// as the game). What an arena with no
+## character of its own will play with.
+static func picked() -> CharacterData:
+	if not Engine.is_editor_hint():
+		return selected()
+	var cfg := ConfigFile.new()
+	if cfg.load("user://save.cfg") != OK:
+		return default_character()
+	var c := load_id(str(cfg.get_value("crew", "character", DEFAULT_ID)))
+	return c if c != null else default_character()
+
+
 ## Every character in assets/characters/ (the default player first).
 static func all() -> Array[CharacterData]:
 	var out: Array[CharacterData] = []

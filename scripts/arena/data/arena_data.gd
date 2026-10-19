@@ -33,6 +33,14 @@ const ENVIRONMENTS := ["Space Station", "Alien Laboratory", "The Hive", "The Voi
 @export_range(0.0, 30.0, 0.5) var start_delay := 2.0
 ## Aliens drop XP gems and the astronaut levels up (upgrade choices) like in survival.
 @export var level_ups := true
+## How close the camera is: 1 = the survival worlds' view, lower = farther (more of the
+## map on screen), higher = closer. ArenaWorld.zoom_for.
+@export_range(0.4, 2.0, 0.05) var camera_zoom := 0.8
+
+@export_group("Player")
+## What the crew member may do here: weapon, ability button (character / blast / dash /
+## none), mutation, upgrades, speed, hits to die, stealth. Defaults = the normal game.
+@export var player_rules: PlayerRules = PlayerRules.new()
 
 @export_group("Open World")
 ## Aliens that keep wandering in around the explorer all game long (0 alive = off).
@@ -50,6 +58,9 @@ const ENVIRONMENTS := ["Space Station", "Alien Laboratory", "The Hive", "The Voi
 ## The arena's main boss, if any (key of EnemyData.TYPES). Validation checks it has a way in.
 @export var boss_id := ""
 @export var objectives: Array[ObjectiveData] = []
+## Off: the waves below are kept but never play; the aliens are the ones placed by hand
+## (AlienPack), spawners, nests and roaming (e.g. an ELIMINATE mission).
+@export var waves_enabled := true
 @export var waves: Array[WaveData] = []
 ## Given when the arena is cleared.
 @export var rewards: RewardData

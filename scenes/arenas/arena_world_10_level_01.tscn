@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://bttm80gfjp8ix" path="res://scripts/arena/data/objective_data.gd" id="2_cxfqe"]
 [ext_resource type="Script" uid="uid://w8dc7u3nqbyi" path="res://scripts/arena/data/reward_data.gd" id="3_5yrf2"]
 [ext_resource type="Script" uid="uid://bop6eiw13r0ai" path="res://scripts/arena/data/spawn_entry.gd" id="4_3imcn"]
+[ext_resource type="Script" uid="uid://c3kwc5cko1r7q" path="res://scripts/arena/data/player_rules.gd" id="4_cqywy"]
 [ext_resource type="Script" uid="uid://cyns4180mx751" path="res://scripts/arena/data/arena_data.gd" id="5_j5e23"]
 [ext_resource type="Script" uid="uid://clnncbfes8eme" path="res://scripts/arena/data/wave_data.gd" id="6_kp4hf"]
 [ext_resource type="TileSet" uid="uid://c1tiwmpncnfx7" path="res://scenes/arena/terrain/arena_terrain.tres" id="7_meche"]
@@ -387,6 +388,9 @@ reward = SubResource("Resource_w56k1")
 required_object_ids = PackedStringArray()
 filter = "android"
 
+[sub_resource type="Resource" id="Resource_o03yb"]
+script = ExtResource("4_cqywy")
+
 [sub_resource type="Resource" id="Resource_fuyhp"]
 script = ExtResource("3_5yrf2")
 coins = 250
@@ -511,6 +515,8 @@ world_id = 10
 description = "A farm village at dusk. The corn started walking: keep the Old Well standing, find the villagers and stop what landed in the crop circle."
 environment = "Earth - Farm"
 start_delay = 4.0
+camera_zoom = null
+player_rules = SubResource("Resource_o03yb")
 roaming = Array[ExtResource("4_3imcn")]([SubResource("Resource_v250u"), SubResource("Resource_fbr1i"), SubResource("Resource_ifrut")])
 roaming_alive = 10
 roaming_rate = 0.5
@@ -28436,7 +28442,7 @@ flat = true
 y_sort_enabled = true
 
 [node name="PlayerSpawn" type="Node2D" parent="GameplayObjects" unique_id=422630628]
-position = Vector2(1244, 2228)
+position = Vector2(1280, 2148)
 script = ExtResource("251_iy62x")
 character = ExtResource("252_awf0a")
 

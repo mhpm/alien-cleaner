@@ -20,6 +20,7 @@
 [ext_resource type="Texture2D" uid="uid://bwmd8xmg75al" path="res://assets/characters/kid_astronaut/walk_2.png" id="18_qsff4"]
 [ext_resource type="Texture2D" uid="uid://dqto582si7ylp" path="res://assets/characters/kid_astronaut/walk_3.png" id="19_fud5m"]
 [ext_resource type="Script" uid="uid://62bejkh4jfqx" path="res://scripts/data/character_data.gd" id="20_iii8i"]
+[ext_resource type="Script" uid="uid://dgvxsomywny4j" path="res://scripts/abilities/decoy_ability.gd" id="ability"]
 [ext_resource type="Texture2D" uid="uid://bsv5id4ljxrd1" path="res://assets/characters/kid_astronaut/idle_4.png" id="idle_4"]
 [ext_resource type="Texture2D" uid="uid://duta2sjnx8g7j" path="res://assets/characters/kid_astronaut/idle_5.png" id="idle_5"]
 [ext_resource type="Texture2D" uid="uid://dgd3y24lea28u" path="res://assets/characters/kid_astronaut/idle_6.png" id="idle_6"]
@@ -28,7 +29,6 @@
 [ext_resource type="Texture2D" uid="uid://d14q1saggh7l8" path="res://assets/characters/kid_astronaut/walk_5.png" id="walk_5"]
 [ext_resource type="Texture2D" uid="uid://den3vydld3j0r" path="res://assets/characters/kid_astronaut/walk_6.png" id="walk_6"]
 [ext_resource type="Texture2D" uid="uid://du8s4fcdw6j3c" path="res://assets/characters/kid_astronaut/walk_7.png" id="walk_7"]
-[ext_resource type="Script" path="res://scripts/abilities/decoy_ability.gd" id="ability"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_gkatc"]
 animations = [{
@@ -155,7 +155,6 @@ ability = ExtResource("ability")
 frames = SubResource("SpriteFrames_gkatc")
 anchor = Vector2(146, 215)
 body_height = 200.0
-height = 33.0
 hand = Vector2(38, -55)
 aim_pose = true
 shoot_hand = Vector2(42, -68)

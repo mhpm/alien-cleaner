@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/prototype/pixel25d_prototype.gd" id="1"]
+
+[node name="RescueOps" type="Node"]
+script = ExtResource("1")
+arena = "res://scenes/arenas/arena_proto_rescue.tscn"
+test = false
+compare = false

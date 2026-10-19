@@ -53,6 +53,12 @@ func start() -> void:
 
 ## How many objects / events an objective without a target count waits for.
 func _count_for(od: ObjectiveData) -> int:
+	if od.type == ObjectiveData.Type.ELIMINATE:  # every alien of the packs (or of the named ones)
+		var n := 0
+		for o in director.objects_of("AlienPack"):
+			if od.required_object_ids.is_empty() or od.required_object_ids.has(o.object_id):
+				n += (o as AlienPack).count
+		return maxi(1, n)
 	if not od.required_object_ids.is_empty():
 		return od.required_object_ids.size()
 	match od.type:

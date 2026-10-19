@@ -10,6 +10,7 @@ signal spawner_for_wave(wave_id: String)
 const Timeline := preload("wave_timeline.gd")
 
 var _timeline: Control
+var _enabled: CheckBox
 
 
 func _property() -> String:
@@ -26,6 +27,13 @@ func _build_header() -> void:
 	add_child(_timeline)
 	var row := HBoxContainer.new()
 	add_child(row)
+	# waves or not: off keeps the list but plays none (aliens placed by hand, spawners...)
+	_enabled = CheckBox.new()
+	_enabled.text = "Waves on"
+	_enabled.tooltip_text = "Off: no wave plays. Use Placed Aliens (OBJECTS > Aliens), spawners and nests,
+e.g. with an ELIMINATE mission (MISSIONS)."
+	_enabled.toggled.connect(_set_enabled)
+	row.add_child(_enabled)
 	var add := Button.new()
 	add.text = "Add Wave"
 	add.icon = EditorInterface.get_editor_theme().get_icon("Add", "EditorIcons")
@@ -92,7 +100,21 @@ func wave_size(w: WaveData) -> int:
 	return n
 
 
+func _set_enabled(on: bool) -> void:
+	if arena == null or arena.data == null or arena.data.waves_enabled == on:
+		return
+	undo.create_action("Waves on" if on else "Waves off", UndoRedo.MERGE_DISABLE, arena)
+	undo.add_do_property(arena.data, "waves_enabled", on)
+	undo.add_undo_property(arena.data, "waves_enabled", not on)
+	undo.add_do_method(self, "refresh")
+	undo.add_undo_method(self, "refresh")
+	undo.commit_action()
+
+
 func _after_refresh() -> void:
+	if _enabled != null:
+		_enabled.set_pressed_no_signal(arena == null or arena.data == null or arena.data.waves_enabled)
+		_enabled.disabled = arena == null or arena.data == null
 	if _timeline != null:
 		_timeline.set("page", self)
 		_timeline.queue_redraw()

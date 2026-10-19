@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://bsviw7rsghqq0"]
+
+[ext_resource type="Script" uid="uid://dwhylayslkena" path="res://scripts/arena/components/security_camera.gd" id="1_fu32o"]
+[ext_resource type="Script" uid="uid://bop6eiw13r0ai" path="res://scripts/arena/data/spawn_entry.gd" id="2_niy07"]
+[ext_resource type="Texture2D" uid="uid://smtacf46388j" path="res://assets/arena/pixel25d/cam_8dir.png" id="3_fu32o"]
+
+[sub_resource type="Resource" id="Resource_frsxk"]
+script = ExtResource("2_niy07")
+enemy_id = "runner"
+weight = 60.0
+
+[sub_resource type="Resource" id="Resource_mc3jb"]
+script = ExtResource("2_niy07")
+weight = 40.0
+
+[node name="SecurityCamera" type="Node2D" unique_id=1901844779]
+script = ExtResource("1_fu32o")
+mount_height = 14.0
+view_range = 140.0
+alarm_squad = Array[ExtResource("2_niy07")]([SubResource("Resource_frsxk"), SubResource("Resource_mc3jb")])
+views = 8
+view_lens = PackedVector2Array(11.7, -15, 8.4, -14.8, 0.1, -15, -8.3, -14.6, -12.5, -15.3, -8.7, -21.8, 0.1, -22, 14, -20.8)
+texture = ExtResource("3_fu32o")
+width = 33.0
+pixel_art = true
+columns = 8

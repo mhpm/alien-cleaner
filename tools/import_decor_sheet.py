@@ -70,7 +70,7 @@ def main():
     kit_path = os.path.join(kit_dir, "kit.json")
     kit = {"name": args.kit.capitalize(), "items": []}
     if os.path.exists(kit_path):
-        with open(kit_path) as f:
+        with open(kit_path, encoding="utf-8") as f:
             kit = json.load(f)
     by_file = {i["file"]: i for i in kit.get("items", [])}
 
@@ -94,8 +94,8 @@ def main():
         }
         print("  %-28s %4dx%-4d px -> %5.1f units" % (rel, w_px, h_px, width))
     kit["items"] = list(by_file.values())
-    with open(kit_path, "w") as f:
-        json.dump(kit, f, indent=1)
+    with open(kit_path, "w", encoding="utf-8") as f:
+        json.dump(kit, f, indent=1, ensure_ascii=False)
     print("%d pieces -> %s (kit.json updated)" % (len(comps), os.path.normpath(cat_dir)))
 
 

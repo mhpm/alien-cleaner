@@ -18,7 +18,7 @@ func _parse_begin(object: Object) -> void:
 	b.tooltip_text = "Import a sheet, animations, size, weapon; \"Use in this arena\" sets the character below"
 	b.pressed.connect(func() -> void: open.call())
 	var info := Label.new()
-	info.text = "Plays: " + (sp.character.display_name if sp.character != null else "Astronaut (default)")
+	info.text = "Plays: " + (sp.character.display_name if sp.character != null else sp.shown_character().display_name + " (picked in CREW: set Character to lock one)")
 	info.modulate = Color(1, 1, 1, 0.55)
 	info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var v := VBoxContainer.new()

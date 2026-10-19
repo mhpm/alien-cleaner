@@ -48,6 +48,11 @@ static var _sway_mat: ShaderMaterial
 @export var flat := false
 ## A bridge: the solid terrain under it (water) becomes walkable while playing.
 @export var bridge := false
+## Pixel art: drawn with nearest filtering, no mipmaps (crisp pixels on the grid).
+@export var pixel_art := false:
+	set(value):
+		pixel_art = value
+		_refresh()
 ## A soft round shadow at the base (trees).
 @export var shadow := false:
 	set(value):
@@ -95,8 +100,8 @@ func _refresh() -> void:
 	if sprite == null:
 		sprite = Sprite2D.new()
 		sprite.centered = false
-		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 		add_child(sprite, false, Node.INTERNAL_MODE_FRONT)
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST if pixel_art else CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	sprite.texture = texture
 	sprite.flip_h = flip_h
 	sprite.modulate = tint
@@ -120,6 +125,11 @@ func _refresh() -> void:
 	else:
 		sprite.material = null
 	queue_redraw()
+
+
+## Plain decoration: no details, so it does not redraw on every selection change.
+func _redraws_on_selection() -> bool:
+	return false
 
 
 func arena_layer() -> String:

@@ -117,6 +117,5 @@ character_id = "astronaut"
 display_name = "Astronaut"
 frames = SubResource("SpriteFrames_5w55o")
 anchor = Vector2(46, 80)
-height = 33.0
 hand = Vector2(10, -29)
 still_idle = true

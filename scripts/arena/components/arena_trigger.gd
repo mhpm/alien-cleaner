@@ -6,7 +6,7 @@ extends ArenaObject
 ##   REACH_LOCATION  just reports "location_reached" (mission / extraction zones; shown)
 ##   MESSAGE         dialogue box with `speaker` + `message` (dialogue trigger)
 ##   START_WAVE      starts the waves whose wave_id is in `targets` (wave trigger)
-##   START_SPAWNERS  starts the EnemySpawners in `targets`
+##   START_SPAWNERS  starts the EnemySpawners in `targets` (and brings in AlienPacks there)
 ##   ACTIVATE_HAZARDS switches on the HazardAreas in `targets`
 ##   OPEN_DOOR       opens the ArenaDoors in `targets` (door trigger)
 ##   ACTIVATE        a console: stay inside `hold_time` seconds -> "activated"
@@ -125,6 +125,8 @@ func _fire() -> void:
 			for o in _targets():
 				if o is EnemySpawner:
 					(o as EnemySpawner).start()
+				elif o is AlienPack:
+					(o as AlienPack).appear_now()
 		Action.ACTIVATE_HAZARDS:
 			for o in _targets():
 				if o is HazardArea:

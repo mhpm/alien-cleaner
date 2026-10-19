@@ -7,6 +7,9 @@ extends GameWorld
 ## A Survival director runs with its clock off: it gives XP gems, level-ups and the
 ## alien damage scaling, while the arena's own waves decide what spawns.
 
+## Camera2D zoom of the survival worlds (scenes/game.tscn); ArenaData.camera_zoom scales it.
+const BASE_ZOOM := 1.1
+
 var arena: Arena
 var director: ArenaDirector
 var _clear_color := Color()
@@ -22,6 +25,7 @@ func _ready() -> void:
 
 
 func _exit_tree() -> void:
+	AlienMind.senses = 1.0
 	if _clear_color != Color():
 		RenderingServer.set_default_clear_color(_clear_color)
 	super._exit_tree()
@@ -50,17 +54,24 @@ func _start_room() -> void:
 		player.body.set_character((o as PlayerSpawn).character)
 		break
 	player.reset_for_room(spawn)
+	camera.zoom = Vector2.ONE * zoom_for(data, BASE_ZOOM)
 	_camera_setup()
 	camera.reset_smoothing()
+	# what the crew member may do here (PlayerRules)
+	var rules := data.player_rules
+	player.rules = rules if rules != null and not rules.is_default() else null
+	player.body.unarmed = not player.armed()
+	AlienMind.senses = rules.alien_senses if rules != null else 1.0
+	var level_ups := data.level_ups and (rules == null or rules.upgrades)
 	survival = Survival.new()
 	survival.setup(self, {"waves": [], "boss": "", "hp_per_min": 0.0, "t_offset": 0.0})
-	if not data.level_ups:
+	if not level_ups:
 		survival.choosing = true  # XP gems still drop, but no upgrade choices
 	add_child(survival)
 	# its clock stays off (the arena's waves decide what spawns); after add_child, because
 	# entering the tree re-enables _physics_process
 	survival.set_physics_process(false)
-	hud.enable_survival(data.level_ups)
+	hud.enable_survival(level_ups)
 	hud.weapon_label.visible = false  # the wave line needs the room; objectives sit below it
 	hud.controls.enabled = true
 	hud.room_label.text = "00:00"
@@ -79,13 +90,28 @@ func _start_room() -> void:
 	state_t = 1.4
 	var title: String = data.display_name if not data.display_name.is_empty() else str(arena.name)
 	hud.banner(title.to_upper(), Color("73eff7"), 26, 1.2)
-	hud.set_wave_text("%s · %s" % [data.environment.to_upper(), data.difficulty_name().to_upper()])
+	var line := "%s · %s" % [data.environment.to_upper(), data.difficulty_name().to_upper()]
+	if player.rules != null:  # the arena's own rules, said up front ("NO WEAPON · DASH")
+		line += " · " + player.rules.summary()
+	hud.set_wave_text(line)
+
+
+## Aliens only ever appear on floor the astronaut can walk to (Room.walk_mask): built
+## from where the astronaut stands once the director has brought the arena's walls and
+## props to life (their bodies reach the physics space a couple of frames later).
+func _build_walk_mask(start: Vector2) -> void:
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	if not is_inside_tree() or arena == null:
+		return
+	room.walk_mask = WalkMask.new().build(arena, room.bounds(), start, get_world_2d().direct_space_state)
 
 
 func _begin_fight() -> void:
 	super._begin_fight()
 	if director != null and not director.finished and director.objectives == null:
 		director.start()
+		_build_walk_mask(player.global_position)
 
 
 func _physics_process(delta: float) -> void:
@@ -105,6 +131,12 @@ func enemy_killed(e: Enemy) -> void:
 	super.enemy_killed(e)
 	if director != null and director.objectives != null:
 		director.on_enemy_killed(e)
+
+
+## The camera zoom an arena asks for, on top of `base` (BASE_ZOOM for the normal render,
+## 1.0 for the pixel render where 1 = one art pixel per screen pixel).
+static func zoom_for(d: ArenaData, base: float) -> float:
+	return base * (d.camera_zoom if d != null else 1.0)
 
 
 func on_player_died() -> void:

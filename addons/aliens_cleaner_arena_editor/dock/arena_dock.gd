@@ -9,6 +9,7 @@ signal new_arena_requested(cfg: Dictionary)
 signal duplicate_requested(world: int, level: int)
 signal repair_requested
 signal settings_requested
+signal rules_requested
 signal players_requested
 signal refit_requested(cfg: Dictionary)
 signal entry_armed(entry: RefCounted)
@@ -34,6 +35,7 @@ const TileLibrary := preload("tile_library_dialog.gd")
 const SheetImport := preload("sheet_import_dialog.gd")
 const ObjectImport := preload("object_import_dialog.gd")
 const ObjectEdit := preload("object_edit_dialog.gd")
+const CategoryPicker := preload("category_picker.gd")
 const Objects := preload("../editor/object_library.gd")
 const Factory := preload("../editor/arena_factory.gd")
 const SEVERITY_ICONS := ["NodeInfo", "NodeWarning", "StatusError"]
@@ -51,7 +53,7 @@ var _arena_sections: Array[Control] = []
 var _grid_size: OptionButton
 var _snap: CheckBox
 var _grid_visible: CheckBox
-var _category: OptionButton
+var _category: CategoryPicker  # the OBJECTS category, picked from a tree
 var _search: LineEdit
 var _items: ItemList
 var _placing: Label
@@ -102,6 +104,11 @@ func setup(palette_catalog: RefCounted, grid: RefCounted, undo: EditorUndoRedoMa
 	var players := _button("Players", "CharacterBody2D", func() -> void: players_requested.emit())
 	players.tooltip_text = "Playable characters: import a sheet, animations, size, weapon; pick who plays this arena"
 	files.add_child(players)
+	var rules := _button("Player Rules", "Skeleton2D", func() -> void: rules_requested.emit())
+	rules.tooltip_text = "What the player may do here: weapon, ability button (character / blast / dash / none),
+mutation, upgrades, speed, hits to die, stealth (opens them in the Inspector)"
+	files.add_child(rules)
+	_arena_sections.append(rules)
 	var repair := _button("", "Tools", func() -> void: repair_requested.emit())
 	repair.tooltip_text = "Add any missing standard layer"
 	files.add_child(repair)
@@ -121,6 +128,19 @@ func setup(palette_catalog: RefCounted, grid: RefCounted, undo: EditorUndoRedoMa
 	row.add_child(_snap)
 	_grid_visible = _check("Grid", grid.visible)
 	row.add_child(_grid_visible)
+	# how much each object shows on the map: crowded maps stay readable on "Selected"
+	var giz := OptionButton.new()
+	for g: String in ["Gizmos: Selected", "Gizmos: All", "Gizmos: None"]:
+		giz.add_item(g)
+	giz.select(ArenaObject.gizmo_mode())
+	giz.tooltip_text = "Ranges, sight cones, patrol paths and captions:
+Selected = only on the selected objects, All = on every object, None = icons only."
+	giz.item_selected.connect(func(i: int) -> void:
+		ArenaObject.set_gizmo_mode(i)
+		if _arena != null:
+			for o in _arena.objects():
+				o.queue_redraw())
+	row.add_child(giz)
 
 	var tl := _section("PAINT", true)
 	var pick := _button("Select", "ToolSelect", func() -> void:
@@ -214,32 +234,30 @@ Only the cells you paint change (Ctrl+Z undoes a stroke)."
 	add_child(_import)
 	object_edit = ObjectEdit.new()
 	add_child(object_edit)
-	object_edit.edited.connect(func(_c: String) -> void:
-		var keep := _category.get_item_text(_category.selected) if _category.selected >= 0 else ""
-		reload_palette()
-		for k in _category.item_count:
-			if _category.get_item_text(k) == keep:
-				_category.select(k)
-				_refresh_items())
+	object_edit.edited.connect(func(_c: String) -> void: reload_palette())  # keeps the shown category
 	_import.imported.connect(func(category: String) -> void:
 		reload_palette()
-		for k in _category.item_count:
-			if _category.get_item_text(k) == category:
-				_category.select(k)
-				_refresh_items())
+		_category.select_category(category)
+		_refresh_items())
 	reload_palette()
 	set_arena(null)
 
 
 func _build_objects(objects: VBoxContainer) -> void:
+	# the category tree gets its own full-width row: its path ("Farm › Buildings › Barns")
+	# is long, and the list of categories keeps growing with every decor kit
+	_category = CategoryPicker.new()
+	_category.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_category.build(_scale)
+	_category.category_selected.connect(func(_c: String) -> void:
+		_search.text = ""  # picking a category leaves a search over every category
+		_refresh_items())
+	objects.add_child(_category)
 	var filter := HBoxContainer.new()
 	objects.add_child(filter)
-	_category = OptionButton.new()
-	_category.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_category.item_selected.connect(func(_i: int) -> void: _refresh_items())
-	filter.add_child(_category)
 	_search = LineEdit.new()
-	_search.placeholder_text = "Search..."
+	_search.placeholder_text = "Search all..."
+	_search.tooltip_text = "Search every category by name (empty: the chosen category)"
 	_search.clear_button_enabled = true
 	_search.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_search.text_changed.connect(func(_t: String) -> void: _refresh_items())
@@ -319,12 +337,7 @@ func set_dialogue_target(trigger: Node) -> void:
 
 func reload_palette() -> void:
 	catalog.rebuild()
-	var keep := _category.get_item_text(_category.selected) if _category.selected >= 0 else ""
-	_category.clear()
-	for c: String in catalog.categories():
-		_category.add_item(c)
-		if c == keep:
-			_category.select(_category.item_count - 1)
+	_category.set_categories(catalog.categories(), catalog.counts())  # keeps the shown one
 	_refresh_items()
 	if decor != null:
 		decor.refresh_entries()
@@ -341,6 +354,9 @@ func set_arena(arena: Arena) -> void:
 		var d := arena.data
 		_arena_label.text = str(arena.name) if d == null else "%s  ·  W%d-L%d  ·  %s" % [
 			d.display_name if d.display_name != "" else str(arena.name), d.world_id, d.level_id, d.difficulty_name()]
+		if d != null and d.player_rules != null and not d.player_rules.is_default():
+			_arena_label.text += "
+RULES: " + d.player_rules.summary()  # the arena's PlayerRules at a glance
 		_arena_label.tooltip_text = "" if d == null else "%s · %s" % [d.arena_id, d.environment]
 	missions.set_arena(arena)
 	waves.set_arena(arena)
@@ -394,10 +410,8 @@ func show_report(report: ArenaReport) -> void:
 
 ## Category of the palette shown now, as a kit category ("Earth · Trees" -> "Trees").
 func _current_kit_category() -> String:
-	if _category.selected < 0:
-		return "Misc"
-	var c := _category.get_item_text(_category.selected)
-	return c.get_slice(" · ", 1) if c.contains(" · ") else "Misc"
+	var c := _category.current()
+	return c.substr(c.find(" · ") + 3) if c.contains(" · ") else "Misc"
 
 
 ## The imported objects selected in the palette (their picture paths).
@@ -459,11 +473,15 @@ Copies already placed in arenas lose their picture." % [
 func _refresh_items() -> void:
 	_items.clear()
 	_shown.clear()
-	if _category.selected < 0:
+	var searching := not _search.text.strip_edges().is_empty()
+	if _category.current().is_empty() and not searching:
 		return
-	for e in catalog.in_category(_category.get_item_text(_category.selected), _search.text):
+	# a search looks through every category; otherwise the chosen one is shown
+	var found: Array = catalog.search(_search.text) if searching else catalog.in_category(_category.current())
+	for e in found:
 		var i := _items.add_item(e.name, e.icon)
-		_items.set_item_tooltip(i, e.tooltip)
+		_items.set_item_tooltip(i, ("%s
+%s" % [CategoryPicker.SEP.join(catalog.tree_path(e.category)), e.tooltip]) if searching else e.tooltip)
 		_shown.append(e)
 	_placing.text = ""
 

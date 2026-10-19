@@ -44,6 +44,8 @@ var meter_color := Color.WHITE
 var infect_state := 0  # 0 locked, 1 charging, 2 ready to mutate, 3 mutated
 var infect := 0.0  # meter (charging) or mutation time left (mutated), 0..1
 var mutate_icon: Texture2D
+var ability_hidden := false  # PlayerRules: no ability button at all
+var ability_label := ""  # a word under the button ("DASH")
 var joy_touch := -1
 var joy_center := Vector2.ZERO
 var joy_knob := Vector2.ZERO
@@ -76,7 +78,7 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		var te := event as InputEventScreenTouch
 		if te.pressed:
-			if te.position.distance_to(_btn_center()) <= BTN_R + TOUCH_PAD:
+			if not ability_hidden and te.position.distance_to(_btn_center()) <= BTN_R + TOUCH_PAD:
 				if cooldown <= 0.0:
 					btn_flash = 1.0
 				ability_pressed.emit()
@@ -120,7 +122,8 @@ func _draw() -> void:
 		return
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	_draw_joystick()
-	_draw_ability()
+	if not ability_hidden:
+		_draw_ability()
 	if infect_state > 0:
 		_draw_mutate()
 
@@ -165,6 +168,8 @@ func _draw_ability() -> void:
 		FastDraw.disc(self, b, BTN_R + 10.0 * (1.0 - btn_flash), Color(1, 1, 1, btn_flash * 0.5))
 	if mutated:
 		_label(b + Vector2(0, BTN_R + 14.0), "ROLL", MAG)
+	elif not ability_label.is_empty():
+		_label(b + Vector2(0, BTN_R + 14.0), ability_label, Color(0.75, 0.95, 1.0))
 
 
 ## The MUTATE button: mutant head, magenta meter / time-left ring, MUTATE! when full.

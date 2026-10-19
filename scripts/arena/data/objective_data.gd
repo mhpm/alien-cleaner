@@ -7,19 +7,22 @@ extends Resource
 ## A new objective type = a script that extends ObjectiveData and overrides
 ## `progress_for` / `tick` / `fails_on` (pick Type.CUSTOM), no other code changes.
 
-enum Type { SURVIVE, DESTROY, RESCUE, COLLECT, REACH_LOCATION, DEFEND, BOSS, ACTIVATE, ESCORT, KILL, CLEAR_WAVES, CUSTOM }
+## ELIMINATE: every alien placed by hand (AlienPack) killed; with required_object_ids only
+## those packs. (New types go at the end: saved arenas store the number.)
+enum Type { SURVIVE, DESTROY, RESCUE, COLLECT, REACH_LOCATION, DEFEND, BOSS, ACTIVATE, ESCORT, KILL, CLEAR_WAVES, CUSTOM, ELIMINATE }
 
 ## Which event each type counts (SURVIVE / DEFEND count seconds instead).
 const EVENTS := {
 	Type.DESTROY: "nest_destroyed", Type.RESCUE: "survivor_rescued", Type.COLLECT: "item_collected",
 	Type.REACH_LOCATION: "location_reached", Type.BOSS: "boss_defeated", Type.ACTIVATE: "activated",
 	Type.ESCORT: "escort_delivered", Type.KILL: "enemy_killed", Type.CLEAR_WAVES: "wave_cleared",
+	Type.ELIMINATE: "placed_alien_killed",
 }
 ## Which arena objects an objective of each type is about (for counts, validation, the guide arrow).
 const OBJECT_CLASSES := {
 	Type.DESTROY: "AlienNest", Type.RESCUE: "ArenaSurvivor", Type.COLLECT: "AndroidPart",
 	Type.REACH_LOCATION: "ArenaTrigger", Type.BOSS: "BossTrigger", Type.ACTIVATE: "ArenaTrigger",
-	Type.ESCORT: "ArenaSurvivor", Type.DEFEND: "DefendCore",
+	Type.ESCORT: "ArenaSurvivor", Type.DEFEND: "DefendCore", Type.ELIMINATE: "AlienPack",
 }
 
 @export var objective_id := "main"
@@ -101,6 +104,8 @@ func label(target: int) -> String:
 			return "Clean %d %s" % [target, filter if not filter.is_empty() else "aliens"]
 		Type.CLEAR_WAVES:
 			return "Clear %d wave%s" % [target, "s" if target != 1 else ""]
+		Type.ELIMINATE:
+			return "Eliminate %d alien%s" % [target, "s" if target != 1 else ""]
 	return objective_id.capitalize()
 
 

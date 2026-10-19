@@ -217,8 +217,15 @@ func _open_world_test() -> void:
 	check(director.find_child("SceneryFader", true, false) != null, "open world: see-through scenery fader running")
 	var trees := world.entities.get_children().filter(func(n: Node) -> bool: return n is ArenaScenery)
 	check(trees.size() > 200, "open world: %d scenery pieces sorted with the entities" % trees.size())
+	world.player.fire_t = 1e9  # hold fire: these checks count the horde, the explorer must not thin it out
 	_teleport(Vector2(1280, 1720))  # open ground south of the village (the start is by the creek)
-	check(await _until(func() -> bool: return director.horde._mine.size() >= 4, 16.0), "open world: roaming aliens arrive around the explorer (%d)" % director.horde._mine.size())
+	# arrivals, not survivors: the (invincible) explorer keeps shooting the ones that came
+	var arrived := func() -> int:
+		var n := 0
+		for st in director.horde.streams:
+			n += st.sent
+		return n
+	check(await _until(func() -> bool: return arrived.call() >= 4, 16.0), "open world: roaming aliens arrive around the explorer (%d)" % arrived.call())
 	# run to the far side of the map: the roaming horde must follow (leash)
 	var far := Vector2(300, 2400)
 	_teleport(far)
@@ -229,6 +236,7 @@ func _open_world_test() -> void:
 		if is_instance_valid(en) and en.global_position.distance_to(far) < 600.0:
 			near += 1
 	check(near >= 3, "open world: the horde was walked back near the explorer (%d near)" % near)
+	world.player.fire_t = 0.5
 	# the river blocks, the bridge on the road lets you across (walk north for 1.5 s)
 	for o in director.horde._mine.keys():
 		if is_instance_valid(o):

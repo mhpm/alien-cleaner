@@ -305,7 +305,14 @@ func _process(delta: float) -> void:
 	controls.cooldown = game.player.blast_t / cd if cd > 0.0 else 0.0
 	_show_ability(game.player.ability)
 	var inf := game.player.infected
-	if not inf.unlocked():
+	# what this arena lets the button do (PlayerRules): hidden, a DASH, or the usual
+	var mode := game.player.button_mode()
+	controls.ability_hidden = mode == PlayerRules.AbilityButton.NONE
+	controls.ability_label = "DASH" if mode == PlayerRules.AbilityButton.DASH else ""
+	if mode != PlayerRules.AbilityButton.CHARACTER:
+		controls.ability_icon = null
+		controls.ability_meter = -1.0
+	if not inf.unlocked() or (game.player.rules != null and not game.player.rules.mutation):
 		controls.infect_state = 0
 	elif inf.active or inf.transforming or inf.reverting:
 		controls.infect_state = 3

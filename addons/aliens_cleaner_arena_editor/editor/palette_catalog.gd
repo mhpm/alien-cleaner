@@ -31,8 +31,15 @@ func scene_entry(file_basename: String) -> Entry:
 		if e.kind == "scene" and e.scene_path.get_file().get_basename() == file_basename:
 			return e
 	return null
+## The OBJECTS category tree (dock/category_picker.gd): built-in categories sit under
+## these groups; decor kits get one branch each ("Kit · Category · Sub", see tree_path).
+const GROUPS := {
+	"Gameplay": ["Gameplay", "Survivors", "Spawners", "Triggers", "Pickups"],
+	"Aliens": ["Enemies", "Placed Aliens", "Bosses"],
+	"Hazards & Decals": ["Hazards", "Environment", "Contamination", "Decals"],
+}
 ## Display order; unknown categories follow alphabetically.
-const ORDER := ["Gameplay", "Survivors", "Enemies", "Bosses", "Spawners", "Triggers", "Hazards", "Pickups", "Environment", "Contamination"]
+const ORDER := ["Gameplay", "Survivors", "Enemies", "Placed Aliens", "Bosses", "Spawners", "Triggers", "Hazards", "Pickups", "Environment", "Contamination"]
 
 
 class Entry:
@@ -104,6 +111,7 @@ class Entry:
 				sc.bridge = bool(scenery.get("bridge", false))
 				sc.shadow = bool(scenery.get("shadow", false))
 				sc.blocks_bullets = bool(scenery.get("blocks_bullets", false))
+				sc.pixel_art = bool(scenery.get("pixel", false))
 				if scenery.has("tint"):
 					sc.tint = Color(str(scenery.tint))
 				var anim: Dictionary = scenery.get("anim", {})
@@ -155,6 +163,45 @@ func categories() -> Array[String]:
 	return out
 
 
+## Where a category sits in the OBJECTS tree: ["Aliens", "Bosses"] for a built-in one,
+## ["Farm", "Buildings", "Barns"] for the kit category "Farm · Buildings · Barns" (" · " and
+## "/" nest deeper; a lowercase folder name gets its first letter capitalised).
+static func tree_path(category: String) -> PackedStringArray:
+	for group: String in GROUPS:
+		if (GROUPS[group] as Array).has(category):
+			return PackedStringArray([group, category])
+	var out := PackedStringArray()
+	for part in category.split(" · ", false):
+		for sub in part.split("/", false):
+			var name := sub.strip_edges()
+			if name.is_empty():
+				continue
+			name = name.left(1).to_upper() + name.substr(1)
+			if out.is_empty() or out[out.size() - 1] != name:
+				out.append(name)
+	return out if not out.is_empty() else PackedStringArray([category])
+
+
+## Objects per category.
+func counts() -> Dictionary:
+	var out := {}
+	for e in entries:
+		out[e.category] = int(out.get(e.category, 0)) + 1
+	return out
+
+
+## Every object whose name or tooltip matches, in any category (the palette's search box).
+func search(text: String) -> Array[Entry]:
+	var out: Array[Entry] = []
+	var q := text.strip_edges().to_lower()
+	if q.is_empty():
+		return out
+	for e in entries:
+		if e.name.to_lower().contains(q) or e.tooltip.to_lower().contains(q) or e.category.to_lower().contains(q):
+			out.append(e)
+	return out
+
+
 func in_category(category: String, search := "") -> Array[Entry]:
 	var out: Array[Entry] = []
 	var q := search.strip_edges().to_lower()
@@ -198,8 +245,8 @@ func _scan_scenes() -> void:
 			entries.append(e)
 
 
-## "Player · <name>": the Player Spawn preset with that character (the plain spawn = the
-## astronaut). Placing one where a spawn exists swaps it (placement_tool).
+## "Player · <name>": the Player Spawn preset with that character, the default one
+## too (an empty spawn plays whoever is picked in CREW). Placing one where a spawn exists swaps it (placement_tool).
 ## "Survivors": one Survivor preset per crew member (SurvivorData.CREW: face and gift).
 ## The plain Survivor stays in Gameplay (crew picked in the Inspector).
 func _add_survivors() -> void:
@@ -231,6 +278,19 @@ func _add_enemies() -> void:
 			e.tooltip = "Spawner of %s (\"%s\").\nInspector: count, rhythm, radius, and + Add alien to mix kinds." % [
 				ArenaArt.enemy_name(id).capitalize(), id]
 			entries.append(e)
+	# "Placed Aliens": an AlienPack per alien (there until killed; calm until they see you)
+	var pack := scene_entry("alien_pack")
+	if pack != null:
+		for id in ArenaArt.enemy_ids(false):
+			var e := pack.with_preset({"enemy_id": id}, ArenaArt.enemy_name(id).capitalize())
+			e.category = "Placed Aliens"
+			e.icon = ArenaArt.enemy_icon(id)
+			e.width = 24.0
+			e.anchor_feet = true
+			e.tooltip = "%s placed by hand: stays until killed.
+Inspector: how many, calm behaviour (guard, wander, patrol, sleep),
+senses and when it appears (start, near, trigger, camera alarm)." % 				ArenaArt.enemy_name(id).capitalize()
+			entries.append(e)
 	var boss := scene_entry("boss_trigger")
 	if boss != null:
 		for id in ArenaArt.enemy_ids(true):
@@ -252,11 +312,11 @@ func _add_characters() -> void:
 	var added: Array[Entry] = []
 	for c in CharacterData.all():
 		var label := "Player · " + (c.display_name if c.display_name != "" else c.character_id)
-		var e := base
+		# every entry names its character (an empty one would play whoever is picked in CREW)
+		var e: Entry = base.with_preset({"character": c}, label)
 		if c.is_default():
-			base.name = label
+			entries[at] = e
 		else:
-			e = base.with_preset({"character": c}, label)
 			added.append(e)
 		e.tooltip = "%s
 One per arena: placing it replaces the current Player Spawn.

@@ -81,6 +81,7 @@ func _enter_tree() -> void:
 	dock.duplicate_requested.connect(_duplicate_arena)
 	dock.repair_requested.connect(_repair)
 	dock.settings_requested.connect(_settings)
+	dock.rules_requested.connect(_rules)
 	dock.players_requested.connect(open_players)
 	dock.refit_requested.connect(_refit)
 	dock.entry_armed.connect(_arm)
@@ -505,6 +506,44 @@ func _settings() -> void:
 	if arena.data == null:
 		_repair()
 	EditorInterface.edit_resource(arena.data)
+	_show_inspector()
+
+
+## The arena's PlayerRules straight in the Inspector (made, with undo, if it has none).
+func _rules() -> void:
+	var arena := _arena()
+	if arena == null:
+		return
+	if arena.data == null:
+		_repair()
+	if arena.data.player_rules == null:
+		var ur := get_undo_redo()
+		ur.create_action("Add player rules", UndoRedo.MERGE_DISABLE, arena)
+		ur.add_do_property(arena.data, "player_rules", PlayerRules.new())
+		ur.add_undo_property(arena.data, "player_rules", null)
+		ur.commit_action()
+	EditorInterface.edit_resource(arena.data.player_rules)
+	_show_inspector()
+	if not arena.data.player_rules.changed.is_connected(dock.set_arena.bind(arena)):
+		arena.data.player_rules.changed.connect(dock.set_arena.bind(arena))  # the summary follows edits
+
+
+## Brings the Inspector tab to the front (it shares a dock with the Arena tab, so
+## edit_resource alone would load it out of sight).
+func _show_inspector() -> void:
+	var child: Node = EditorInterface.get_inspector()
+	var node := child.get_parent()
+	while node != null:
+		if node is TabContainer:
+			var tabs := node as TabContainer
+			var idx := tabs.get_tab_idx_from_control(child as Control)
+			if idx >= 0:
+				tabs.current_tab = idx
+			return
+		if node is TabBar:
+			return
+		child = node
+		node = node.get_parent()
 
 
 func _edit_terrain(layer_name: String) -> void:

@@ -273,7 +273,7 @@ def main():
     for i, piece in enumerate(tiles["cliffs"][1]):
         piece = piece.resize((piece.width // 2, piece.height // 2), Image.LANCZOS)
         add("plateau_%d" % (i + 1), "Cliffs", "f", (0.95, 0.55), piece)
-    with open(os.path.join(KIT, "kit.json"), "w") as f:
+    with open(os.path.join(KIT, "kit.json"), "w", encoding="utf-8") as f:
         json.dump({"name": "Earth", "items": items}, f, indent=1)
     cats = {}
     for it in items:

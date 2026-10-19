@@ -40,6 +40,7 @@ var form := "player"
 var body_scale := BODY_SCALE
 var directional := false  # the set has walk_left/right/up/down (no flip_h)
 var mut_gun := 0  # mutation gun in the hands (0 = the equipped blaster)
+var unarmed := false  # no weapon in the hand (PlayerRules.weapon off)
 var gun_len := GUN_LEN  # grip -> muzzle in astronaut frame px (x BODY_SCALE = world)
 var character: CharacterData  # null until _ready: the default astronaut
 var held: Texture2D  # a temporary weapon in the hand (hold_gun), null = the ARMORY one
@@ -302,7 +303,7 @@ func _pose() -> void:
 		h = character.walk_hand
 	var hand := Vector2(h.x * facing, h.y * (1.0 - land + breath))
 	gun.position = hand * px + Vector2(0, hop) - dir * recoil * px
-	gun.visible = body.animation != "death" and (form == "player" or _custom() or mut_gun > 0) \
+	gun.visible = not unarmed and body.animation != "death" and (form == "player" or _custom() or mut_gun > 0) \
 		and (mut_gun > 0 or not _in_sprite())
 	flash.visible = flash_t > 0.0 and body.animation != "death"
 	if flash.visible:

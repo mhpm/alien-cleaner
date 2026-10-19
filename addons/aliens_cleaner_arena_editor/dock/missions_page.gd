@@ -12,6 +12,7 @@ const ICONS := {
 	ObjectiveData.Type.BOSS: "Skull", ObjectiveData.Type.ACTIVATE: "Unlock",
 	ObjectiveData.Type.ESCORT: "Path2D", ObjectiveData.Type.KILL: "GPUParticles2D",
 	ObjectiveData.Type.CLEAR_WAVES: "AnimationPlayer", ObjectiveData.Type.CUSTOM: "Script",
+	ObjectiveData.Type.ELIMINATE: "AnimatedSprite2D",
 }
 
 var _type: OptionButton

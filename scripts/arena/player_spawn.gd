@@ -3,7 +3,7 @@ class_name PlayerSpawn
 extends ArenaObject
 ## Where the player appears when the arena starts (origin = feet). One per arena.
 ## `character` = who plays it (CharacterData, made in the dock > Players); empty = the
-## astronaut.
+## crew member picked in CREW (the editor shows that one too, read from the save).
 
 const ICON := "res://assets/sprites/player/idle_0.png"
 const ICON_ANCHOR := Vector2(46, 80)  # feet in the frame (assets/sprites/manifest.json)
@@ -23,11 +23,18 @@ func arena_layer() -> String:
 
 
 func palette_icon() -> Texture2D:
-	return load(ICON)
+	var c := shown_character()
+	return c.icon() if c != null and c.icon() != null else load(ICON)
 
 
 func palette_width() -> float:
-	return 92.0 * ICON_SCALE
+	var c := shown_character()
+	return c.icon().get_width() * c.px_scale() if c != null and c.icon() != null else 92.0 * ICON_SCALE
+
+
+## Who will play: the chosen character, or when empty the one picked in CREW.
+func shown_character() -> CharacterData:
+	return character if character != null else CharacterData.picked()
 
 
 func validate_arena(report: ArenaReport, arena: Arena) -> void:
@@ -40,7 +47,7 @@ func _draw_editor() -> void:
 	draw_set_transform(Vector2(0, 0), 0.0, Vector2(1.0, 0.5))
 	draw_arc(Vector2.ZERO, 14.0, 0.0, TAU, 32, COLOR, 1.5)
 	draw_set_transform(Vector2.ZERO)
-	var c := character
+	var c := shown_character()
 	if c != null and c.icon() != null:
 		var t := c.icon()
 		draw_texture_rect(t, Rect2(-c.anchor * c.px_scale(), Vector2(t.get_size()) * c.px_scale()), false)
@@ -48,5 +55,9 @@ func _draw_editor() -> void:
 		if _icon == null:
 			_icon = load(ICON)
 		draw_texture_rect(_icon, Rect2(-ICON_ANCHOR * ICON_SCALE, Vector2(_icon.get_size()) * ICON_SCALE), false)
-	var who := c.display_name.to_upper() if c != null and c.display_name != "" else ""
+	var who := (c.display_name.to_upper() if c != null and c.display_name != "" else "") 		+ ("" if character != null else " (PICKED CREW)")
 	_editor_label("PLAYER SPAWN" + ("  ·  " + who if who != "" else ""), Vector2(0, 12), COLOR)
+	var arena := Arena.of(self)
+	var rules := arena.data.player_rules if arena != null and arena.data != null else null
+	if rules != null and not rules.is_default():  # the arena's PlayerRules, at a glance
+		_editor_label(rules.summary(), Vector2(0, 21), Color(1.0, 0.75, 0.35), 7)

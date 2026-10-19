@@ -403,7 +403,7 @@ func _use_in_arena() -> void:
 		_status.text = "This arena has no Player Spawn (OBJECTS > Gameplay > Player Spawn)."
 		return
 	var sp := spawns[0] as PlayerSpawn
-	var value: CharacterData = null if _cur.is_default() else _cur
+	var value: CharacterData = _cur  # the default one too: an empty spawn plays the CREW pick
 	undo.create_action("Player: %s" % _cur.display_name, UndoRedo.MERGE_DISABLE, arena)
 	undo.add_do_property(sp, "character", value)
 	undo.add_undo_property(sp, "character", sp.character)

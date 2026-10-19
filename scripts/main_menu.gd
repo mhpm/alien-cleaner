@@ -10,6 +10,7 @@ extends Control
 ## Only PLAY and settings remain here: shop, gear and the rest live on the world select.
 
 const WORLD_SCENE := "res://scenes/world_select.tscn"
+const RESCUE_SCENE := "res://scenes/rescue_ops.tscn"
 const ART_SIZE := Vector2(720, 1280)
 const MAIN := "res://assets/ui/main/image_%03d.png"
 const TITLE := "res://assets/ui/title/"
@@ -172,6 +173,13 @@ func _build() -> void:
 		Sfx.play("select", 0.0)
 		_play_arena())
 	stage.add_child(arena_btn)
+	var rescue_btn := UiTheme.button("RESCUE OPS", Color("41a6f6"), 22, Vector2(180, 52))
+	rescue_btn.name = "RescueOpsButton"
+	rescue_btn.position = Vector2(20, 176)
+	rescue_btn.pressed.connect(func() -> void:
+		Sfx.play("select", 0.0)
+		_play_rescue())
+	stage.add_child(rescue_btn)
 
 	play_btn = _button(_tex(34), Vector2(360, 1140), 1.0, _play)
 	play_btn.material = shine_mat
@@ -641,6 +649,13 @@ func _play_arena() -> void:
 	ArenaSession.invincible = false
 	ArenaSession.start_wave = 0
 	get_tree().change_scene_to_file(ArenaSession.PLAY_SCENE)
+
+
+## RESCUE OPS: the unarmed stealth-rescue mission on the pixel 2.5D lab, in pixel render
+## (scenes/rescue_ops.tscn); its MAIN MENU button comes back here.
+func _play_rescue() -> void:
+	Game.menu_scene = "res://scenes/main_menu.tscn"
+	get_tree().change_scene_to_file(RESCUE_SCENE)
 
 
 func _open_settings() -> void:

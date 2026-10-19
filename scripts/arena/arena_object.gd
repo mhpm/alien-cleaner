@@ -9,6 +9,15 @@ extends Node2D
 ##   - `activate(director)`: called once when the arena starts playing (ArenaDirector),
 ##   - `validate_arena`: report their own problems.
 
+## How much each gizmo shows while editing (dock GRID > Gizmos), so a map with dozens
+## of aliens, spawners and hazards stays readable:
+##   SELECTED  ranges, cones, paths and captions only on the selected objects (default)
+##   ALL       every object's details
+##   NONE      only the icons and shapes
+enum Gizmos { SELECTED, ALL, NONE }
+const GIZMOS_SETTING := "aliens_cleaner/arena_editor/gizmos"
+static var _gizmos := -1
+
 ## Name other objects and objectives use to point at this one ("nest_a", "door_1").
 @export var object_id := "":
 	set(value):
@@ -20,6 +29,58 @@ func _ready() -> void:
 	if Engine.is_editor_hint():
 		set_notify_transform(true)
 		queue_redraw()
+		var sel := _editor_selection()
+		if sel != null and _redraws_on_selection():  # SELECTED gizmos follow the selection
+			sel.connect("selection_changed", queue_redraw)
+
+
+## Override (false): pieces with no details to show (scenery) skip the selection signal.
+func _redraws_on_selection() -> bool:
+	return true
+
+
+static func gizmo_mode() -> int:
+	if _gizmos < 0:
+		_gizmos = Gizmos.SELECTED
+		var ei := _editor()
+		if ei != null:
+			var es: Object = ei.call("get_editor_settings")
+			if es.call("has_setting", GIZMOS_SETTING):
+				_gizmos = int(es.call("get_setting", GIZMOS_SETTING))
+	return _gizmos
+
+
+## The dock's choice (remembered in the editor settings).
+static func set_gizmo_mode(mode: int) -> void:
+	_gizmos = mode
+	var ei := _editor()
+	if ei != null:
+		ei.call("get_editor_settings").call("set_setting", GIZMOS_SETTING, mode)
+
+
+## Draw this object's details (ranges, cones, paths, captions) now?
+func show_details() -> bool:
+	match gizmo_mode():
+		Gizmos.ALL:
+			return true
+		Gizmos.NONE:
+			return false
+	var sel := _editor_selection()
+	if sel == null:
+		return true  # no editor selection to ask (game, tests): show everything, as before
+	return (sel.call("get_selected_nodes") as Array).has(self)
+
+
+## (EditorInterface reached by name: this script also runs in the exported game.)
+static func _editor() -> Object:
+	if not Engine.is_editor_hint() or not Engine.has_singleton("EditorInterface"):
+		return null
+	return Engine.get_singleton("EditorInterface")
+
+
+static func _editor_selection() -> Object:
+	var ei := _editor()
+	return ei.call("get_selection") if ei != null else null
 
 
 func _draw() -> void:
@@ -76,14 +137,26 @@ func focus_point() -> Vector2:
 
 ## Small caption under an editor gizmo.
 func _editor_label(text: String, at: Vector2, color: Color, size := 8) -> void:
+	if not show_details():
+		return
 	var font := ThemeDB.fallback_font
 	var w := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
 	draw_string_outline(font, at - Vector2(w * 0.5, 0), text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, 3, Color(0, 0, 0, 0.75))
 	draw_string(font, at - Vector2(w * 0.5, 0), text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, color)
 
 
+## A tiny always-visible tag (a pack's size): shown even when details are collapsed.
+func _badge(text: String, at: Vector2, color: Color) -> void:
+	var font := ThemeDB.fallback_font
+	var w := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 7).x
+	draw_rect(Rect2(at - Vector2(2, 7), Vector2(w + 4, 9)), Color(0, 0, 0, 0.7))
+	draw_string(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 7, color.lightened(0.3))
+
+
 ## Dashed circle (radii: spawn, rescue, blast...).
 func _dashed_circle(r: float, color: Color, width := 1.0, dashes := 32) -> void:
+	if not show_details():
+		return
 	for i in dashes:
 		var a := TAU * i / dashes
 		draw_arc(Vector2.ZERO, r, a, a + TAU / dashes * 0.55, 4, color, width)

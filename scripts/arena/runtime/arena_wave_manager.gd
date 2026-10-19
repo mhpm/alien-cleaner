@@ -30,6 +30,8 @@ var _gated: Dictionary = {}  # wave ids that wait for a trigger
 func setup(d: ArenaDirector) -> ArenaWaveManager:
 	director = d
 	name = "Waves"
+	if not d.data.waves_enabled:
+		return self  # waves switched off (ArenaData.waves_enabled): none play
 	for w in d.data.waves:
 		if w != null:
 			waves.append(w)

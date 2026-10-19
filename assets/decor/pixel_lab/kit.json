@@ -1,0 +1,1955 @@
+{
+ "name": "Pixel Lab",
+ "items": [
+  {
+   "file": "walls/wall_a.png",
+   "category": "Walls",
+   "width": 88.0,
+   "solid": [
+    88.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "walls/wall_b.png",
+   "category": "Walls",
+   "width": 86.0,
+   "solid": [
+    86.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "walls/wall_s.png",
+   "category": "Walls",
+   "width": 31.0,
+   "solid": [
+    31.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "walls/wall_c.png",
+   "category": "Walls",
+   "width": 82.0,
+   "solid": [
+    82.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "walls/wall_d.png",
+   "category": "Walls",
+   "width": 78.0,
+   "solid": [
+    78.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "lab/tube_big.png",
+   "category": "Lab",
+   "width": 42.0,
+   "solid": [
+    36.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "lab/tube_tall.png",
+   "category": "Lab",
+   "width": 30.0,
+   "solid": [
+    24.0,
+    9.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "lab/tube_mid.png",
+   "category": "Lab",
+   "width": 23.0,
+   "solid": [
+    17.0,
+    7.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "lab/tube_s.png",
+   "category": "Lab",
+   "width": 16.0,
+   "solid": [
+    10.0,
+    6.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "lab/tube_s2.png",
+   "category": "Lab",
+   "width": 18.0,
+   "solid": [
+    12.0,
+    6.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "lab/tube_dark.png",
+   "category": "Lab",
+   "width": 17.0,
+   "solid": [
+    11.0,
+    6.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "lab/tube_s3.png",
+   "category": "Lab",
+   "width": 18.0,
+   "solid": [
+    12.0,
+    6.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "lab/cell_blue.png",
+   "category": "Lab",
+   "width": 17.0,
+   "solid": [
+    11.0,
+    6.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "lab/machine.png",
+   "category": "Lab",
+   "width": 46.0,
+   "solid": [
+    40.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "lab/rack_a.png",
+   "category": "Lab",
+   "width": 19.0,
+   "solid": [
+    13.0,
+    6.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "lab/rack_b.png",
+   "category": "Lab",
+   "width": 19.0,
+   "solid": [
+    13.0,
+    6.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "lab/rack_c.png",
+   "category": "Lab",
+   "width": 17.0,
+   "solid": [
+    11.0,
+    6.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "office/locker_a.png",
+   "category": "Office",
+   "width": 18.0,
+   "solid": [
+    12.0,
+    6.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "office/locker_b.png",
+   "category": "Office",
+   "width": 16.0,
+   "solid": [
+    10.0,
+    6.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "office/locker_c.png",
+   "category": "Office",
+   "width": 16.0,
+   "solid": [
+    10.0,
+    6.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "lab/console_big.png",
+   "category": "Lab",
+   "width": 39.0,
+   "solid": [
+    33.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "lab/terminal_a.png",
+   "category": "Lab",
+   "width": 24.0,
+   "solid": [
+    18.0,
+    7.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "office/desk_pc.png",
+   "category": "Office",
+   "width": 36.0,
+   "solid": [
+    30.0,
+    11.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": true,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "office/desk_lab.png",
+   "category": "Office",
+   "width": 32.0,
+   "solid": [
+    26.0,
+    10.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "lab/terminal_b.png",
+   "category": "Lab",
+   "width": 29.0,
+   "solid": [
+    23.0,
+    9.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "lab/printer.png",
+   "category": "Lab",
+   "width": 26.0,
+   "solid": [
+    20.0,
+    8.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "office/desk_papers.png",
+   "category": "Office",
+   "width": 32.0,
+   "solid": [
+    26.0,
+    10.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "lab/terminal_c.png",
+   "category": "Lab",
+   "width": 27.0,
+   "solid": [
+    21.0,
+    8.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "storage/toolbox.png",
+   "category": "Storage",
+   "width": 28.0,
+   "solid": [
+    22.0,
+    8.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "office/desk_cups.png",
+   "category": "Office",
+   "width": 31.0,
+   "solid": [
+    25.0,
+    9.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "storage/box_a.png",
+   "category": "Storage",
+   "width": 23.0,
+   "solid": [
+    17.0,
+    7.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "storage/box_b.png",
+   "category": "Storage",
+   "width": 22.0,
+   "solid": [
+    16.0,
+    7.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "storage/box_c.png",
+   "category": "Storage",
+   "width": 18.0,
+   "solid": [
+    12.0,
+    6.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "storage/box_s.png",
+   "category": "Storage",
+   "width": 14.0,
+   "solid": [
+    8.0,
+    6.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "storage/box_xs.png",
+   "category": "Storage",
+   "width": 12.0,
+   "solid": [
+    8.0,
+    6.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "storage/crate_a.png",
+   "category": "Storage",
+   "width": 24.0,
+   "solid": [
+    18.0,
+    7.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "storage/crate_b.png",
+   "category": "Storage",
+   "width": 27.0,
+   "solid": [
+    21.0,
+    8.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "storage/crate_big.png",
+   "category": "Storage",
+   "width": 34.0,
+   "solid": [
+    28.0,
+    10.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "storage/case.png",
+   "category": "Storage",
+   "width": 24.0,
+   "solid": [
+    18.0,
+    7.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "storage/tank_pair.png",
+   "category": "Storage",
+   "width": 29.0,
+   "solid": [
+    23.0,
+    9.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "storage/crate_c.png",
+   "category": "Storage",
+   "width": 30.0,
+   "solid": [
+    24.0,
+    9.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "storage/crate_blue.png",
+   "category": "Storage",
+   "width": 20.0,
+   "solid": [
+    14.0,
+    6.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "storage/crate_s.png",
+   "category": "Storage",
+   "width": 17.0,
+   "solid": [
+    11.0,
+    6.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "storage/cabinet_a.png",
+   "category": "Storage",
+   "width": 26.0,
+   "solid": [
+    20.0,
+    8.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "storage/cabinet_b.png",
+   "category": "Storage",
+   "width": 25.0,
+   "solid": [
+    19.0,
+    8.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "storage/barrel.png",
+   "category": "Storage",
+   "width": 17.0,
+   "solid": [
+    11.0,
+    6.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "pipes_barriers/pipe_valve.png",
+   "category": "Pipes & Barriers",
+   "width": 90.0,
+   "solid": [
+    84.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "pipes_barriers/pipe_bend.png",
+   "category": "Pipes & Barriers",
+   "width": 32.0,
+   "solid": [
+    26.0,
+    10.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "pipes_barriers/pipe_drop.png",
+   "category": "Pipes & Barriers",
+   "width": 27.0,
+   "solid": [
+    21.0,
+    8.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "pipes_barriers/pipe_tall.png",
+   "category": "Pipes & Barriers",
+   "width": 20.0,
+   "solid": [
+    14.0,
+    6.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "pipes_barriers/barrier_a.png",
+   "category": "Pipes & Barriers",
+   "width": 41.0,
+   "solid": [
+    35.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "pipes_barriers/barrier_b.png",
+   "category": "Pipes & Barriers",
+   "width": 49.0,
+   "solid": [
+    43.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "pipes_barriers/rail_a.png",
+   "category": "Pipes & Barriers",
+   "width": 76.0,
+   "solid": [
+    72.0,
+    8.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "pipes_barriers/rail_b.png",
+   "category": "Pipes & Barriers",
+   "width": 82.0,
+   "solid": [
+    78.0,
+    8.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "floor/trench.png",
+   "category": "Floor",
+   "width": 133.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "floor/vent_a.png",
+   "category": "Floor",
+   "width": 28.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "floor/vent_b.png",
+   "category": "Floor",
+   "width": 28.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "floor/vent_c.png",
+   "category": "Floor",
+   "width": 28.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "floor/vent_x.png",
+   "category": "Floor",
+   "width": 31.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "floor/grate_red.png",
+   "category": "Floor",
+   "width": 29.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "floor/hazard_a.png",
+   "category": "Floor",
+   "width": 21.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "floor/hazard_b.png",
+   "category": "Floor",
+   "width": 17.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "floor/hazard_c.png",
+   "category": "Floor",
+   "width": 17.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "floor/goo_s.png",
+   "category": "Floor",
+   "width": 14.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "floor/goo_a.png",
+   "category": "Floor",
+   "width": 28.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "floor/goo_b.png",
+   "category": "Floor",
+   "width": 24.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "floor/goo_c.png",
+   "category": "Floor",
+   "width": 25.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "floor/goo_d.png",
+   "category": "Floor",
+   "width": 36.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "floor/goo_e.png",
+   "category": "Floor",
+   "width": 41.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "floor/goo_xs.png",
+   "category": "Floor",
+   "width": 16.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "floor/goo_xs2.png",
+   "category": "Floor",
+   "width": 20.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "floor/rubble.png",
+   "category": "Floor",
+   "width": 36.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "floor/rocks.png",
+   "category": "Floor",
+   "width": 25.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "floor/rocks_s.png",
+   "category": "Floor",
+   "width": 18.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "office/plant_a.png",
+   "category": "Office",
+   "width": 25.0,
+   "solid": [
+    19.0,
+    8.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "office/plant_b.png",
+   "category": "Office",
+   "width": 26.0,
+   "solid": [
+    20.0,
+    8.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "office/plant_c.png",
+   "category": "Office",
+   "width": 25.0,
+   "solid": [
+    19.0,
+    8.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "office/plant_d.png",
+   "category": "Office",
+   "width": 25.0,
+   "solid": [
+    19.0,
+    8.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "lights/light_white.png",
+   "category": "Lights",
+   "width": 23.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "lights/light_blue.png",
+   "category": "Lights",
+   "width": 22.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "lights/light_red.png",
+   "category": "Lights",
+   "width": 23.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "cameras/cam_mount.png",
+   "category": "Cameras",
+   "width": 27.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "cameras/cam_wall.png",
+   "category": "Cameras",
+   "width": 24.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "cameras/cam_dome.png",
+   "category": "Cameras",
+   "width": 18.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "cameras/cam_mini.png",
+   "category": "Cameras",
+   "width": 12.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "cameras/cam_mini2.png",
+   "category": "Cameras",
+   "width": 12.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "walls/side_wall.png",
+   "category": "Walls",
+   "width": 32.0,
+   "solid": [
+    32.0,
+    32.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "walls/side_wall_end.png",
+   "category": "Walls",
+   "width": 32.0,
+   "solid": [
+    32.0,
+    32.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_walls/m_wall.png",
+   "category": "Maze · Walls",
+   "width": 128.0,
+   "solid": [
+    128.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_walls/m_wall_goo.png",
+   "category": "Maze · Walls",
+   "width": 96.0,
+   "solid": [
+    96.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_walls/m_wall_b.png",
+   "category": "Maze · Walls",
+   "width": 82.0,
+   "solid": [
+    82.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_walls/m_corner.png",
+   "category": "Maze · Walls",
+   "width": 74.0,
+   "solid": [
+    74.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_walls/m_corner_b.png",
+   "category": "Maze · Walls",
+   "width": 86.0,
+   "solid": [
+    86.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_walls/m_pillars.png",
+   "category": "Maze · Walls",
+   "width": 48.0,
+   "solid": [
+    48.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_walls/m_pillars_s.png",
+   "category": "Maze · Walls",
+   "width": 40.0,
+   "solid": [
+    40.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_walls/m_block.png",
+   "category": "Maze · Walls",
+   "width": 31.0,
+   "solid": [
+    31.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_walls/m_low_a.png",
+   "category": "Maze · Walls",
+   "width": 30.0,
+   "solid": [
+    30.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_walls/m_low_b.png",
+   "category": "Maze · Walls",
+   "width": 30.0,
+   "solid": [
+    30.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_barriers/m_rail.png",
+   "category": "Maze · Barriers",
+   "width": 47.0,
+   "solid": [
+    41.0,
+    8.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "maze_barriers/m_rail_s.png",
+   "category": "Maze · Barriers",
+   "width": 33.0,
+   "solid": [
+    27.0,
+    8.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "maze_barriers/m_rail_bend.png",
+   "category": "Maze · Barriers",
+   "width": 30.0,
+   "solid": [
+    24.0,
+    8.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "maze_barriers/m_bench.png",
+   "category": "Maze · Barriers",
+   "width": 37.0,
+   "solid": [
+    31.0,
+    8.0
+   ],
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "maze_lab/m_stairs.png",
+   "category": "Maze · Lab",
+   "width": 118.0,
+   "solid": [
+    112.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_lab/m_tank_double.png",
+   "category": "Maze · Lab",
+   "width": 83.0,
+   "solid": [
+    77.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_lab/m_tank_side.png",
+   "category": "Maze · Lab",
+   "width": 50.0,
+   "solid": [
+    44.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_lab/m_desk.png",
+   "category": "Maze · Lab",
+   "width": 52.0,
+   "solid": [
+    46.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_storage/m_lockers.png",
+   "category": "Maze · Storage",
+   "width": 42.0,
+   "solid": [
+    36.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_storage/m_crate.png",
+   "category": "Maze · Storage",
+   "width": 26.0,
+   "solid": [
+    20.0,
+    8.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_storage/m_crate_hazard.png",
+   "category": "Maze · Storage",
+   "width": 31.0,
+   "solid": [
+    25.0,
+    9.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_storage/m_crate_yellow.png",
+   "category": "Maze · Storage",
+   "width": 33.0,
+   "solid": [
+    27.0,
+    10.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_storage/m_crate_stack.png",
+   "category": "Maze · Storage",
+   "width": 45.0,
+   "solid": [
+    39.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_storage/m_crate_red.png",
+   "category": "Maze · Storage",
+   "width": 28.0,
+   "solid": [
+    22.0,
+    8.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_storage/m_crate_striped.png",
+   "category": "Maze · Storage",
+   "width": 29.0,
+   "solid": [
+    23.0,
+    9.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_storage/m_machine.png",
+   "category": "Maze · Storage",
+   "width": 31.0,
+   "solid": [
+    25.0,
+    9.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_debris/m_rubble_blocks.png",
+   "category": "Maze · Debris",
+   "width": 42.0,
+   "solid": [
+    36.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_debris/m_rubble.png",
+   "category": "Maze · Debris",
+   "width": 47.0,
+   "solid": [
+    41.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_debris/m_rubble_b.png",
+   "category": "Maze · Debris",
+   "width": 37.0,
+   "solid": [
+    31.0,
+    11.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_debris/m_goo_big.png",
+   "category": "Maze · Debris",
+   "width": 38.0,
+   "solid": [
+    32.0,
+    11.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  },
+  {
+   "file": "maze_floor/m_plate.png",
+   "category": "Maze · Floor",
+   "width": 36.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "maze_floor/m_plate_hazard.png",
+   "category": "Maze · Floor",
+   "width": 34.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "maze_floor/m_grate.png",
+   "category": "Maze · Floor",
+   "width": 37.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "maze_floor/m_plate_big.png",
+   "category": "Maze · Floor",
+   "width": 39.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "cameras/m_cam.png",
+   "category": "Cameras",
+   "width": 22.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "cameras/m_cam_b.png",
+   "category": "Cameras",
+   "width": 22.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "cameras/m_sentry.png",
+   "category": "Cameras",
+   "width": 37.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "shadows/shadow_m.png",
+   "category": "Shadows",
+   "width": 28.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "shadows/shadow_l.png",
+   "category": "Shadows",
+   "width": 44.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "shadows/shadow_s.png",
+   "category": "Shadows",
+   "width": 18.0,
+   "solid": null,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": true
+  },
+  {
+   "file": "walls/wall_shadow.png",
+   "category": "Walls",
+   "width": 32.0,
+   "solid": [
+    32.0,
+    12.0
+   ],
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": true
+  }
+ ]
+}

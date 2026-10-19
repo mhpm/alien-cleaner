@@ -125,6 +125,12 @@ static func _objectives(arena: Arena, report: ArenaReport, objects: Array[ArenaO
 			ObjectiveData.Type.CLEAR_WAVES:
 				if arena.data.waves.is_empty():
 					report.error("%s (CLEAR_WAVES): the arena has no waves." % tag, arena)
+				elif not arena.data.waves_enabled:
+					report.error("%s (CLEAR_WAVES): waves are switched off (WAVES > Waves on); use ELIMINATE for placed aliens." % tag, arena)
+			ObjectiveData.Type.ELIMINATE:
+				var packs := objects.filter(func(o: ArenaObject) -> bool: return o is AlienPack)
+				if packs.is_empty():
+					report.error("%s (ELIMINATE): no Alien Pack to eliminate (OBJECTS > Aliens > Placed Aliens)." % tag, arena)
 			ObjectiveData.Type.ESCORT:
 				if not objects.any(func(o: ArenaObject) -> bool: return o is ArenaSurvivor and not (o as ArenaSurvivor).escort_to.is_empty()):
 					report.error("%s (ESCORT): no survivor has escort_to set." % tag, arena)
@@ -211,13 +217,15 @@ static func peak_alive(arena: Arena, objects: Array[ArenaObject]) -> Dictionary:
 	for o in objects:
 		if o is AlienNest:
 			always += (o as AlienNest).max_enemies
+		elif o is AlienPack:
+			always += (o as AlienPack).alive_cap()
 		elif o is EnemySpawner:
 			var sp := o as EnemySpawner
 			if sp.enabled and not wave_ids.has(sp.wave_id) and (sp.auto_start or sp.trigger_required):
 				always += sp.max_alive
 	var best := 0
 	var best_name := "no waves"
-	if data != null:
+	if data != null and data.waves_enabled:
 		for w: WaveData in data.waves:
 			if w == null:
 				continue

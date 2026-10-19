@@ -30,8 +30,11 @@ func global_rect() -> Rect2:
 	return Rect2(global_position, size)
 
 
+## Edges included: a wall standing with its feet on the bottom edge is inside
+## (Rect2.has_point leaves the right and bottom edges out).
 func contains(global_point: Vector2, margin := 0.0) -> bool:
-	return global_rect().grow(-margin).has_point(global_point)
+	var r := global_rect().grow(-margin)
+	return global_point.x >= r.position.x and global_point.y >= r.position.y 		and global_point.x <= r.end.x and global_point.y <= r.end.y
 
 
 func clamp_point(global_point: Vector2, margin := 0.0) -> Vector2:

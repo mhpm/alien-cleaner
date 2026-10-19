@@ -50,6 +50,12 @@ var recoil := 0.0
 var infected: Infected  # Infected mode: meter, mutation and its powers
 var nova_t := 1.0  # OVERDRIVE level 5: seconds to the next Rocket Nova
 var ability: CharacterAbility  # the character's unique ability (CharacterData.ability)
+## What this arena lets the crew member do (weapon, ability button, speed...); null = all.
+var rules: PlayerRules
+const DASH_SPEED := 290.0  # PlayerRules DASH: the evasive burst
+const DASH_TIME := 0.2
+var _dash_t := 0.0
+var _dash_v := Vector2.ZERO
 
 
 func _ready() -> void:
@@ -285,7 +291,13 @@ func _physics_process(delta: float) -> void:
 	sticky_t = maxf(sticky_t - delta, 0.0)
 	if sticky_t > 0.0:
 		slow *= sticky_mult  # stuck in Bean Cruiser goo (or an arena hazard)
-	velocity = dir * float(s.move_speed) * slow * (1.45 if has_buff("boots") else 1.0) * infected.speed_mult() + knock
+	var speed_k := rules.speed_mult if rules != null else 1.0
+	velocity = dir * float(s.move_speed) * slow * speed_k * (1.45 if has_buff("boots") else 1.0) * infected.speed_mult() + knock
+	if _dash_t > 0.0:  # PlayerRules DASH
+		_dash_t -= delta
+		velocity = _dash_v
+		if randf() < 0.6:
+			Game.world.burst(global_position + Vector2(0, BODY_Y), Color(0.75, 0.95, 1.0, 0.7), 1, 20.0, 0.25, 2.0)
 	var dash_v := infected.dash_velocity()
 	if dash_v != Vector2.INF:
 		velocity = dash_v
@@ -304,7 +316,7 @@ func _physics_process(delta: float) -> void:
 	gun_angle = lerp_angle(gun_angle, aim_dir.angle(), 1.0 - exp(-28.0 * delta))
 
 	var mutated := infected.active or infected.transforming or infected.reverting
-	var can_fire := not mutated or (infected.active and infected.dash_t <= 0.0)
+	var can_fire := (not mutated or (infected.active and infected.dash_t <= 0.0)) and armed()
 	if target != null and not locked and can_fire:
 		fire_t -= delta * (1.0 if not moving else 0.6)
 		if fire_t <= 0.0:
@@ -317,7 +329,7 @@ func _physics_process(delta: float) -> void:
 				fire_t = _fire_interval() * frenzy
 	else:
 		fire_t = maxf(fire_t - delta, 0.08)
-	if int(s.get("overdrive", 0)) >= 5 and not mutated and not locked:
+	if int(s.get("overdrive", 0)) >= 5 and not mutated and not locked and armed():
 		nova_t -= delta
 		if nova_t <= 0.0 and target != null:
 			nova_t = GunFire.NOVA_EVERY
@@ -444,13 +456,27 @@ func _shoot_mutant() -> void:
 
 ## Seconds between BLASTs: the run's blast cooldown, or the character ability's own
 ## recharge when it asks for a longer one (ZED's shotgun).
+## The arena allows the weapon (PlayerRules.weapon).
+func armed() -> bool:
+	return rules == null or rules.weapon
+
+
+## What the ability button does here (PlayerRules.Button).
+func button_mode() -> int:
+	return rules.ability_button if rules != null else PlayerRules.AbilityButton.CHARACTER
+
+
 func blast_cooldown() -> float:
+	if button_mode() == PlayerRules.AbilityButton.DASH:
+		return rules.dash_cooldown
 	var cd := float(Game.stats.blast_cooldown)
 	return maxf(cd, ability.cooldown()) if ability != null else cd
 
 
 ## MUTATE button: turns into the mutant when the infection meter is full.
 func mutate() -> void:
+	if rules != null and not rules.mutation:
+		return
 	if not dead and not locked and infected.can_transform():
 		infected.transform()
 
@@ -462,7 +488,10 @@ func blast() -> void:
 	if infected.active:
 		infected.dash()
 		return
-	if blast_t > 0.0:
+	if blast_t > 0.0 or button_mode() == PlayerRules.AbilityButton.NONE:
+		return
+	if button_mode() == PlayerRules.AbilityButton.DASH:
+		_escape_dash()
 		return
 	var s := Game.stats
 	blast_t = blast_cooldown()
@@ -489,8 +518,20 @@ func blast() -> void:
 		if shot != null and shot.global_position.distance_to(c) < BLAST_RADIUS:
 			shot.pop()
 	squash = Vector2(1.3, 0.75)
-	if ability != null:
+	if ability != null and button_mode() == PlayerRules.AbilityButton.CHARACTER:
 		ability.on_blast()
+
+
+## PlayerRules DASH: a quick burst where you are going (or aiming), briefly untouchable.
+func _escape_dash() -> void:
+	var d := input_dir if input_dir.length() > 0.2 else aim_dir
+	_dash_v = d.normalized() * DASH_SPEED
+	_dash_t = DASH_TIME
+	invuln = maxf(invuln, DASH_TIME + 0.15)
+	blast_t = blast_cooldown()
+	squash = Vector2(1.25, 0.8)
+	Sfx.play("dash", 0.08)
+	Game.world.burst(global_position + Vector2(0, BODY_Y), Color(0.75, 0.95, 1.0), 10, 90.0, 0.3, 2.0)
 
 
 func take_damage(amount: float, from := Vector2.INF, hazard := false) -> void:
@@ -516,6 +557,8 @@ func take_damage(amount: float, from := Vector2.INF, hazard := false) -> void:
 	if hazard:
 		amount *= float(s.get("hazard_mult", 1.0))
 	amount *= infected.damage_taken_mult()
+	if rules != null and rules.hits_to_die > 0:  # fragile: every hit costs the same share
+		amount = float(s.max_hp) / float(rules.hits_to_die)
 	s.hp = maxf(0.0, float(s.hp) - amount)
 	Game.hp_changed.emit()
 	flash_t = 0.15

@@ -1,57 +1,57 @@
-[gd_resource type="Resource" script_class="CharacterData" format=3]
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://daumd10dcevbl"]
 
-[ext_resource type="Texture2D" path="res://assets/characters/girl/death_0.png" id="1_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/death_1.png" id="2_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/death_2.png" id="3_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/death_3.png" id="4_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/hurt_0.png" id="5_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/hurt_1.png" id="6_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/idle_0.png" id="7_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/idle_1.png" id="8_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/idle_2.png" id="9_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/idle_3.png" id="10_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/idle_4.png" id="11_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/idle_5.png" id="12_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/idle_6.png" id="13_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/idle_7.png" id="14_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/shoot_0.png" id="15_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/shoot_down_0.png" id="16_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/shoot_up_0.png" id="17_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_0.png" id="18_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_1.png" id="19_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_2.png" id="20_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_3.png" id="21_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_4.png" id="22_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_5.png" id="23_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_6.png" id="24_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_7.png" id="25_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_up_0.png" id="26_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_up_1.png" id="27_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_up_2.png" id="28_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_up_3.png" id="29_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_up_4.png" id="30_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_up_5.png" id="31_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_up_6.png" id="32_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_up_7.png" id="33_g"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/muzzle_flash.png" id="flash"]
-[ext_resource type="Script" path="res://scripts/data/character_data.gd" id="script"]
-[ext_resource type="Script" path="res://scripts/abilities/heart_shot_ability.gd" id="ability"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_down_0.png" id="walk_shoot_down_0"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_down_1.png" id="walk_shoot_down_1"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_down_2.png" id="walk_shoot_down_2"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_down_3.png" id="walk_shoot_down_3"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_down_4.png" id="walk_shoot_down_4"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_down_5.png" id="walk_shoot_down_5"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_down_6.png" id="walk_shoot_down_6"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_down_7.png" id="walk_shoot_down_7"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_up_0.png" id="walk_shoot_up_0"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_up_1.png" id="walk_shoot_up_1"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_up_2.png" id="walk_shoot_up_2"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_up_3.png" id="walk_shoot_up_3"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_up_4.png" id="walk_shoot_up_4"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_up_5.png" id="walk_shoot_up_5"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_up_6.png" id="walk_shoot_up_6"]
-[ext_resource type="Texture2D" path="res://assets/characters/girl/walk_shoot_up_7.png" id="walk_shoot_up_7"]
+[ext_resource type="Texture2D" uid="uid://wxh4ttlnrcyi" path="res://assets/characters/girl/death_0.png" id="1_g"]
+[ext_resource type="Texture2D" uid="uid://be83ixwdjl377" path="res://assets/characters/girl/death_1.png" id="2_g"]
+[ext_resource type="Texture2D" uid="uid://vmi8n2d1edpu" path="res://assets/characters/girl/death_2.png" id="3_g"]
+[ext_resource type="Texture2D" uid="uid://kmxv1sddcpav" path="res://assets/characters/girl/death_3.png" id="4_g"]
+[ext_resource type="Texture2D" uid="uid://bk1buuoinpvhw" path="res://assets/characters/girl/hurt_0.png" id="5_g"]
+[ext_resource type="Texture2D" uid="uid://bj155ggsakshy" path="res://assets/characters/girl/hurt_1.png" id="6_g"]
+[ext_resource type="Texture2D" uid="uid://cyl005ko16j5m" path="res://assets/characters/girl/idle_0.png" id="7_g"]
+[ext_resource type="Texture2D" uid="uid://bbl2skv2sy2jw" path="res://assets/characters/girl/idle_1.png" id="8_g"]
+[ext_resource type="Texture2D" uid="uid://dtkfw060o8isk" path="res://assets/characters/girl/idle_2.png" id="9_g"]
+[ext_resource type="Texture2D" uid="uid://cw08frjf3bl86" path="res://assets/characters/girl/idle_3.png" id="10_g"]
+[ext_resource type="Texture2D" uid="uid://c3xa4jjxpieop" path="res://assets/characters/girl/idle_4.png" id="11_g"]
+[ext_resource type="Texture2D" uid="uid://5yjjdxieo2rt" path="res://assets/characters/girl/idle_5.png" id="12_g"]
+[ext_resource type="Texture2D" uid="uid://d347iqyftgoqp" path="res://assets/characters/girl/idle_6.png" id="13_g"]
+[ext_resource type="Texture2D" uid="uid://cxnlts2arnupi" path="res://assets/characters/girl/idle_7.png" id="14_g"]
+[ext_resource type="Texture2D" uid="uid://d22lofftosa3a" path="res://assets/characters/girl/shoot_0.png" id="15_g"]
+[ext_resource type="Texture2D" uid="uid://bwa1xgry81jm7" path="res://assets/characters/girl/shoot_down_0.png" id="16_g"]
+[ext_resource type="Texture2D" uid="uid://b53j2ux21k2nj" path="res://assets/characters/girl/shoot_up_0.png" id="17_g"]
+[ext_resource type="Texture2D" uid="uid://bbl30mmmyimkk" path="res://assets/characters/girl/walk_0.png" id="18_g"]
+[ext_resource type="Texture2D" uid="uid://ddbhfdnwbmki8" path="res://assets/characters/girl/walk_1.png" id="19_g"]
+[ext_resource type="Texture2D" uid="uid://cwqc7r7qq2ckg" path="res://assets/characters/girl/walk_2.png" id="20_g"]
+[ext_resource type="Texture2D" uid="uid://b56n0bi7n6vj7" path="res://assets/characters/girl/walk_3.png" id="21_g"]
+[ext_resource type="Texture2D" uid="uid://btqwoow80y3l4" path="res://assets/characters/girl/walk_4.png" id="22_g"]
+[ext_resource type="Texture2D" uid="uid://baco6448i3xf1" path="res://assets/characters/girl/walk_5.png" id="23_g"]
+[ext_resource type="Texture2D" uid="uid://4ut5yyknxwng" path="res://assets/characters/girl/walk_6.png" id="24_g"]
+[ext_resource type="Texture2D" uid="uid://bron8pto18gq5" path="res://assets/characters/girl/walk_7.png" id="25_g"]
+[ext_resource type="Texture2D" uid="uid://bt2w3x0oyr72l" path="res://assets/characters/girl/walk_up_0.png" id="26_g"]
+[ext_resource type="Texture2D" uid="uid://d30qlr8gyy2tp" path="res://assets/characters/girl/walk_up_1.png" id="27_g"]
+[ext_resource type="Texture2D" uid="uid://ddjc2o0vmkg1l" path="res://assets/characters/girl/walk_up_2.png" id="28_g"]
+[ext_resource type="Texture2D" uid="uid://d3dgstdekuag2" path="res://assets/characters/girl/walk_up_3.png" id="29_g"]
+[ext_resource type="Texture2D" uid="uid://ocxrardxsxnh" path="res://assets/characters/girl/walk_up_4.png" id="30_g"]
+[ext_resource type="Texture2D" uid="uid://0mvl7juwj6oa" path="res://assets/characters/girl/walk_up_5.png" id="31_g"]
+[ext_resource type="Texture2D" uid="uid://wig76dubd3q0" path="res://assets/characters/girl/walk_up_6.png" id="32_g"]
+[ext_resource type="Texture2D" uid="uid://brpy3alfvoce1" path="res://assets/characters/girl/walk_up_7.png" id="33_g"]
+[ext_resource type="Script" uid="uid://bocjftf57boxd" path="res://scripts/abilities/heart_shot_ability.gd" id="ability"]
+[ext_resource type="Texture2D" uid="uid://dpsehf803xvld" path="res://assets/characters/girl/muzzle_flash.png" id="flash"]
+[ext_resource type="Script" uid="uid://62bejkh4jfqx" path="res://scripts/data/character_data.gd" id="script"]
+[ext_resource type="Texture2D" uid="uid://b42fg3fjcnf7c" path="res://assets/characters/girl/walk_shoot_down_0.png" id="walk_shoot_down_0"]
+[ext_resource type="Texture2D" uid="uid://pqfbi8motepl" path="res://assets/characters/girl/walk_shoot_down_1.png" id="walk_shoot_down_1"]
+[ext_resource type="Texture2D" uid="uid://cbxbnktx28eb8" path="res://assets/characters/girl/walk_shoot_down_2.png" id="walk_shoot_down_2"]
+[ext_resource type="Texture2D" uid="uid://bke4kolc1cq24" path="res://assets/characters/girl/walk_shoot_down_3.png" id="walk_shoot_down_3"]
+[ext_resource type="Texture2D" uid="uid://sy10bxce0hh7" path="res://assets/characters/girl/walk_shoot_down_4.png" id="walk_shoot_down_4"]
+[ext_resource type="Texture2D" uid="uid://d2y15v2ydo4wb" path="res://assets/characters/girl/walk_shoot_down_5.png" id="walk_shoot_down_5"]
+[ext_resource type="Texture2D" uid="uid://cw4s0u4um156x" path="res://assets/characters/girl/walk_shoot_down_6.png" id="walk_shoot_down_6"]
+[ext_resource type="Texture2D" uid="uid://xs6uac3xriwf" path="res://assets/characters/girl/walk_shoot_down_7.png" id="walk_shoot_down_7"]
+[ext_resource type="Texture2D" uid="uid://b5be5lalten0a" path="res://assets/characters/girl/walk_shoot_up_0.png" id="walk_shoot_up_0"]
+[ext_resource type="Texture2D" uid="uid://b7vrnshp1ugst" path="res://assets/characters/girl/walk_shoot_up_1.png" id="walk_shoot_up_1"]
+[ext_resource type="Texture2D" uid="uid://ig2xp7gwxlqt" path="res://assets/characters/girl/walk_shoot_up_2.png" id="walk_shoot_up_2"]
+[ext_resource type="Texture2D" uid="uid://b88oi0njaop7h" path="res://assets/characters/girl/walk_shoot_up_3.png" id="walk_shoot_up_3"]
+[ext_resource type="Texture2D" uid="uid://cd6d2frlujjka" path="res://assets/characters/girl/walk_shoot_up_4.png" id="walk_shoot_up_4"]
+[ext_resource type="Texture2D" uid="uid://dlciv1ofehuns" path="res://assets/characters/girl/walk_shoot_up_5.png" id="walk_shoot_up_5"]
+[ext_resource type="Texture2D" uid="uid://b3bdo4ebuoogq" path="res://assets/characters/girl/walk_shoot_up_6.png" id="walk_shoot_up_6"]
+[ext_resource type="Texture2D" uid="uid://df8granlirkid" path="res://assets/characters/girl/walk_shoot_up_7.png" id="walk_shoot_up_7"]
 
 [sub_resource type="SpriteFrames" id="frames"]
 animations = [{
@@ -68,7 +68,7 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("4_g")
 }],
-"loop": false,
+"loop": 0,
 "name": &"death",
 "speed": 8.0
 }, {
@@ -79,7 +79,7 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("6_g")
 }],
-"loop": false,
+"loop": 0,
 "name": &"hurt",
 "speed": 10.0
 }, {
@@ -108,7 +108,7 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("14_g")
 }],
-"loop": true,
+"loop": 1,
 "name": &"idle",
 "speed": 6.0
 }, {
@@ -116,7 +116,7 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("15_g")
 }],
-"loop": true,
+"loop": 1,
 "name": &"shoot",
 "speed": 12.0
 }, {
@@ -124,7 +124,7 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("16_g")
 }],
-"loop": false,
+"loop": 0,
 "name": &"shoot_down",
 "speed": 8.0
 }, {
@@ -132,7 +132,7 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("17_g")
 }],
-"loop": false,
+"loop": 0,
 "name": &"shoot_up",
 "speed": 8.0
 }, {
@@ -161,37 +161,8 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("25_g")
 }],
-"loop": true,
+"loop": 1,
 "name": &"walk",
-"speed": 12.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("26_g")
-}, {
-"duration": 1.0,
-"texture": ExtResource("27_g")
-}, {
-"duration": 1.0,
-"texture": ExtResource("28_g")
-}, {
-"duration": 1.0,
-"texture": ExtResource("29_g")
-}, {
-"duration": 1.0,
-"texture": ExtResource("30_g")
-}, {
-"duration": 1.0,
-"texture": ExtResource("31_g")
-}, {
-"duration": 1.0,
-"texture": ExtResource("32_g")
-}, {
-"duration": 1.0,
-"texture": ExtResource("33_g")
-}],
-"loop": true,
-"name": &"walk_up",
 "speed": 12.0
 }, {
 "frames": [{
@@ -219,7 +190,7 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("walk_shoot_down_7")
 }],
-"loop": true,
+"loop": 1,
 "name": &"walk_shoot_down",
 "speed": 12.0
 }, {
@@ -248,8 +219,37 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("walk_shoot_up_7")
 }],
-"loop": true,
+"loop": 1,
 "name": &"walk_shoot_up",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("26_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("27_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("28_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("29_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("30_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("31_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("32_g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("33_g")
+}],
+"loop": 1,
+"name": &"walk_up",
 "speed": 12.0
 }]
 
@@ -263,7 +263,6 @@ ability = ExtResource("ability")
 frames = SubResource("frames")
 anchor = Vector2(129, 227)
 body_height = 206.0
-height = 33.0
 hand = Vector2(40, -52)
 aim_pose = true
 shoot_hand = Vector2(54, -71)

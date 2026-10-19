@@ -58,6 +58,9 @@ var elite := false  # tougher golden variant with a crown (final waves)
 var lure: Node2D  # marching on it instead of the astronaut (DefendCore, SeedTank, HoloDecoy): has is_resolved()
 const LURE_BREAK := 90.0  # default; a lure may set its own `lure_break` (HoloDecoy: never)
 var charm: Charm  # fighting for the crew for a while (the girl's Heart Shot)
+## Placed arena aliens (AlienPack): unaware of the astronaut until they notice him; the
+## mind moves them meanwhile (guard, wander, patrol, sleep) and they never attack.
+var mind: AlienMind
 ## ARMORY weapon effects: armor break (takes `vuln` x damage while vuln_t lasts),
 ## Cryo chill stacks (freeze at the weapon's threshold) and burn / acid damage over time
 var vuln := 1.0
@@ -217,6 +220,8 @@ func _physics_process(delta: float) -> void:
 		stun_t -= delta
 	elif charm != null:
 		vel = charm.steer(delta)
+	elif mind != null and spawn_t <= 0.0 and mind.tick(delta):
+		vel = mind.steer(delta)
 	elif spawn_t <= 0.0:
 		vel = _ai(delta * aggro)  # aggro > 1: attack timers and windups run faster
 		if (hit_wall or detour_t > 0.0) and not no_detour:
@@ -255,8 +260,10 @@ func _physics_process(delta: float) -> void:
 	if _far:
 		return  # nobody sees it and the astronaut is far away
 	_animate(delta)
-	if charm == null:  # a charmed alien never hurts the crew
+	if charm == null and (mind == null or mind.is_alert()):  # charmed / unaware: never hurts the crew
 		_contact()
+	elif mind != null and not mind.is_alert() and player().global_position.distance_to(global_position) < radius + 5.0:
+		mind.alert()  # bumped into it
 
 
 ## Crowd frames between two full updates: keep sliding with the last velocity (a
@@ -357,6 +364,8 @@ func take_damage(amount: float, dir := Vector2.ZERO, crit := false) -> void:
 	if dir != Vector2.ZERO:
 		knock += dir.normalized() * float(Game.stats.knockback) * float(def.kb) * minf(1.0, dir.length())
 	Game.world.popup_damage(hit_center() + Vector2(randf_range(-4, 4), -6), amount, crit)
+	if mind != null:
+		mind.on_hurt()
 	if hp <= 0.0:
 		die()
 

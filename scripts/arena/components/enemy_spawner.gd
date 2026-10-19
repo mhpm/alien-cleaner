@@ -187,7 +187,8 @@ func validate_arena(report: ArenaReport, arena: Arena) -> void:
 
 func _draw_editor() -> void:
 	var c := COLOR if enabled else Color(0.5, 0.5, 0.5)
-	draw_circle(Vector2.ZERO, spawn_radius, Color(c, 0.06))
+	if show_details():
+		draw_circle(Vector2.ZERO, spawn_radius, Color(c, 0.06))
 	_dashed_circle(spawn_radius, c, 1.5)
 	if activation_range > 0.0:
 		_dashed_circle(activation_range, Color(c, 0.3), 1.0, 64)
