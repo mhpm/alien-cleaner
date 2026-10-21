@@ -75,15 +75,16 @@ func _draw_beam() -> void:
 	_beam.visible = true
 	_beam.global_position = from
 	_beam.rotation = aim.angle()
-	_beam.scale = Vector2(BEAM_LEN / _beam.texture.get_width(), 0.35 * (0.6 + 0.4 * k))
+	var end := Game.world.wall_cut(from, from + aim * BEAM_LEN)  # stops at the wall
+	_beam.scale = Vector2(from.distance_to(end) / _beam.texture.get_width(), 0.35 * (0.6 + 0.4 * k))
 	_beam.modulate.a = 0.5 + 0.5 * k
 	var p := player()
 	if not _hit and not p.dead:
 		var c := p.global_position + Vector2(0, Player.BODY_Y)
-		var q := Geometry2D.get_closest_point_to_segment(c, from, from + aim * BEAM_LEN)
+		var q := Geometry2D.get_closest_point_to_segment(c, from, end)
 		if q.distance_to(c) < BEAM_HIT:
 			_hit = true
-			p.take_damage(contact_damage * 1.2, q)
+			p.take_damage(contact_damage * 1.2, from)
 			Game.world.burst(q, Color("ff4fd8"), 8, 60.0, 0.25, 2.0)
 
 

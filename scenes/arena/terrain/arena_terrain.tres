@@ -1,19 +1,21 @@
-[gd_resource type="TileSet" format=3 uid="uid://c1tiwmpncnfx7"]
+[gd_resource type="TileSet" format=3]
 
-[ext_resource type="Texture2D" uid="uid://dprapnssu1uyy" path="res://assets/arena/floor_atlas.png" id="1_75r5u"]
-[ext_resource type="Texture2D" uid="uid://bfq8htiaqqqi6" path="res://assets/arena/lab_floor_atlas.png" id="2_6afea"]
-[ext_resource type="Texture2D" uid="uid://ct7o3axrmssko" path="res://assets/arena/terrain/earth_infested_edges.png" id="3_odtcq"]
-[ext_resource type="Texture2D" uid="uid://d4aco1i5eoame" path="res://assets/arena/terrain/void_floor.png" id="3_orwo2"]
-[ext_resource type="Texture2D" uid="uid://cokf16ggwgb6e" path="res://assets/arena/terrain/walls.png" id="4_3al8f"]
-[ext_resource type="Texture2D" uid="uid://cpiw6o1l8d0fe" path="res://assets/arena/terrain/custom/11_farm_grass.png" id="4_iw2la"]
-[ext_resource type="Texture2D" uid="uid://433aijaitine" path="res://assets/arena/terrain/contamination.png" id="5_1uqpl"]
-[ext_resource type="Texture2D" uid="uid://cy44awvg3rkcj" path="res://assets/arena/terrain/custom/12_farm_dirt_patches.png" id="5_tfjpi"]
-[ext_resource type="Texture2D" uid="uid://xyk0bov3m4aj" path="res://assets/arena/terrain/custom/13_terrain.png" id="6_dbvgo"]
-[ext_resource type="Texture2D" uid="uid://dspkn7vqbv52l" path="res://assets/arena/terrain/earth_grass.png" id="7_iw2la"]
-[ext_resource type="Texture2D" uid="uid://blbo5cj6qt7ic" path="res://assets/arena/terrain/earth_roads.png" id="8_tfjpi"]
-[ext_resource type="Texture2D" uid="uid://bkpjbsmjwpn6v" path="res://assets/arena/terrain/earth_mud.png" id="9_dbvgo"]
-[ext_resource type="Texture2D" uid="uid://bvwfyfgkb0xak" path="res://assets/arena/terrain/earth_water_edges.png" id="10_862jk"]
-[ext_resource type="Texture2D" uid="uid://bw5w1hyutsyo" path="res://assets/arena/terrain/earth_path_edges.png" id="11_3jagu"]
+[ext_resource type="Texture2D" path="res://assets/arena/floor_atlas.png" id="1_75r5u"]
+[ext_resource type="Texture2D" path="res://assets/arena/lab_floor_atlas.png" id="2_6afea"]
+[ext_resource type="Texture2D" path="res://assets/arena/terrain/earth_infested_edges.png" id="3_odtcq"]
+[ext_resource type="Texture2D" path="res://assets/arena/terrain/void_floor.png" id="3_orwo2"]
+[ext_resource type="Texture2D" path="res://assets/arena/terrain/walls.png" id="4_3al8f"]
+[ext_resource type="Texture2D" path="res://assets/arena/terrain/custom/11_farm_grass.png" id="4_iw2la"]
+[ext_resource type="Texture2D" path="res://assets/arena/terrain/contamination.png" id="5_1uqpl"]
+[ext_resource type="Texture2D" path="res://assets/arena/terrain/custom/12_farm_dirt_patches.png" id="5_tfjpi"]
+[ext_resource type="Texture2D" path="res://assets/arena/terrain/custom/13_terrain.png" id="6_dbvgo"]
+[ext_resource type="Texture2D" path="res://assets/arena/terrain/biodome_floor.png" id="7_862jk"]
+[ext_resource type="Texture2D" path="res://assets/arena/terrain/earth_grass.png" id="7_iw2la"]
+[ext_resource type="Texture2D" path="res://assets/arena/terrain/warp_floor.png" id="8_3jagu"]
+[ext_resource type="Texture2D" path="res://assets/arena/terrain/earth_roads.png" id="8_tfjpi"]
+[ext_resource type="Texture2D" path="res://assets/arena/terrain/earth_mud.png" id="9_dbvgo"]
+[ext_resource type="Texture2D" path="res://assets/arena/terrain/earth_water_edges.png" id="10_862jk"]
+[ext_resource type="Texture2D" path="res://assets/arena/terrain/earth_path_edges.png" id="11_3jagu"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7vlvw"]
 resource_name = "Space · Ship plates"
@@ -1829,6 +1831,226 @@ texture_region_size = Vector2i(64, 64)
 7:11/2 = 2
 7:11/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
 
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_w40er"]
+resource_name = "Biodome · Biodome floor"
+texture = ExtResource("7_862jk")
+texture_region_size = Vector2i(64, 64)
+0:0/next_alternative_id = 3
+0:0/0 = 0
+0:0/1 = 1
+0:0/2 = 2
+0:0/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+1:0/next_alternative_id = 3
+1:0/0 = 0
+1:0/1 = 1
+1:0/2 = 2
+1:0/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+2:0/next_alternative_id = 3
+2:0/0 = 0
+2:0/1 = 1
+2:0/2 = 2
+2:0/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+3:0/next_alternative_id = 3
+3:0/0 = 0
+3:0/1 = 1
+3:0/2 = 2
+3:0/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+4:0/next_alternative_id = 3
+4:0/0 = 0
+4:0/1 = 1
+4:0/2 = 2
+4:0/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+5:0/next_alternative_id = 3
+5:0/0 = 0
+5:0/1 = 1
+5:0/2 = 2
+5:0/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+6:0/next_alternative_id = 3
+6:0/0 = 0
+6:0/1 = 1
+6:0/2 = 2
+6:0/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+7:0/next_alternative_id = 3
+7:0/0 = 0
+7:0/1 = 1
+7:0/2 = 2
+7:0/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+8:0/next_alternative_id = 3
+8:0/0 = 0
+8:0/1 = 1
+8:0/2 = 2
+8:0/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+9:0/next_alternative_id = 3
+9:0/0 = 0
+9:0/1 = 1
+9:0/2 = 2
+9:0/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+10:0/next_alternative_id = 3
+10:0/0 = 0
+10:0/1 = 1
+10:0/2 = 2
+10:0/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+11:0/next_alternative_id = 3
+11:0/0 = 0
+11:0/1 = 1
+11:0/2 = 2
+11:0/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+0:1/next_alternative_id = 3
+0:1/0 = 0
+0:1/1 = 1
+0:1/2 = 2
+0:1/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+1:1/next_alternative_id = 3
+1:1/0 = 0
+1:1/1 = 1
+1:1/2 = 2
+1:1/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+2:1/next_alternative_id = 3
+2:1/0 = 0
+2:1/1 = 1
+2:1/2 = 2
+2:1/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+3:1/next_alternative_id = 3
+3:1/0 = 0
+3:1/1 = 1
+3:1/2 = 2
+3:1/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+4:1/next_alternative_id = 3
+4:1/0 = 0
+4:1/1 = 1
+4:1/2 = 2
+4:1/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+5:1/next_alternative_id = 3
+5:1/0 = 0
+5:1/1 = 1
+5:1/2 = 2
+5:1/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+6:1/next_alternative_id = 3
+6:1/0 = 0
+6:1/1 = 1
+6:1/2 = 2
+6:1/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+7:1/next_alternative_id = 3
+7:1/0 = 0
+7:1/1 = 1
+7:1/2 = 2
+7:1/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+8:1/next_alternative_id = 3
+8:1/0 = 0
+8:1/1 = 1
+8:1/2 = 2
+8:1/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+9:1/next_alternative_id = 3
+9:1/0 = 0
+9:1/1 = 1
+9:1/2 = 2
+9:1/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+10:1/next_alternative_id = 3
+10:1/0 = 0
+10:1/1 = 1
+10:1/2 = 2
+10:1/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+11:1/next_alternative_id = 3
+11:1/0 = 0
+11:1/1 = 1
+11:1/2 = 2
+11:1/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_i3v44"]
+resource_name = "Warp Nexus · Warp floor"
+texture = ExtResource("8_3jagu")
+texture_region_size = Vector2i(64, 64)
+0:0/next_alternative_id = 3
+0:0/0 = 0
+0:0/1 = 1
+0:0/2 = 2
+0:0/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+1:0/next_alternative_id = 3
+1:0/0 = 0
+1:0/1 = 1
+1:0/2 = 2
+1:0/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+2:0/next_alternative_id = 3
+2:0/0 = 0
+2:0/1 = 1
+2:0/2 = 2
+2:0/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+3:0/next_alternative_id = 3
+3:0/0 = 0
+3:0/1 = 1
+3:0/2 = 2
+3:0/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+4:0/next_alternative_id = 3
+4:0/0 = 0
+4:0/1 = 1
+4:0/2 = 2
+4:0/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+5:0/next_alternative_id = 3
+5:0/0 = 0
+5:0/1 = 1
+5:0/2 = 2
+5:0/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+0:1/next_alternative_id = 3
+0:1/0 = 0
+0:1/1 = 1
+0:1/2 = 2
+0:1/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+1:1/next_alternative_id = 3
+1:1/0 = 0
+1:1/1 = 1
+1:1/2 = 2
+1:1/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+2:1/next_alternative_id = 3
+2:1/0 = 0
+2:1/1 = 1
+2:1/2 = 2
+2:1/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+3:1/next_alternative_id = 3
+3:1/0 = 0
+3:1/1 = 1
+3:1/2 = 2
+3:1/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+4:1/next_alternative_id = 3
+4:1/0 = 0
+4:1/1 = 1
+4:1/2 = 2
+4:1/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+5:1/next_alternative_id = 3
+5:1/0 = 0
+5:1/1 = 1
+5:1/2 = 2
+5:1/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+0:2/next_alternative_id = 3
+0:2/0 = 0
+0:2/1 = 1
+0:2/2 = 2
+0:2/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+1:2/next_alternative_id = 3
+1:2/0 = 0
+1:2/1 = 1
+1:2/2 = 2
+1:2/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+2:2/next_alternative_id = 3
+2:2/0 = 0
+2:2/1 = 1
+2:2/2 = 2
+2:2/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+3:2/next_alternative_id = 3
+3:2/0 = 0
+3:2/1 = 1
+3:2/2 = 2
+3:2/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+4:2/next_alternative_id = 3
+4:2/0 = 0
+4:2/1 = 1
+4:2/2 = 2
+4:2/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+5:2/next_alternative_id = 3
+5:2/0 = 0
+5:2/1 = 1
+5:2/2 = 2
+5:2/2/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_iw2la"]
 resource_name = "Space · Void lab"
 texture = ExtResource("3_orwo2")
@@ -3421,3 +3643,5 @@ sources/7 = SubResource("TileSetAtlasSource_3jagu")
 sources/11 = SubResource("TileSetAtlasSource_862jk")
 sources/12 = SubResource("TileSetAtlasSource_rm1lr")
 sources/13 = SubResource("TileSetAtlasSource_j5ku7")
+sources/14 = SubResource("TileSetAtlasSource_w40er")
+sources/15 = SubResource("TileSetAtlasSource_i3v44")

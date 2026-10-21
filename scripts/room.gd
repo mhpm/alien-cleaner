@@ -87,6 +87,7 @@ var blockers: Array[Rect2] = []
 ## Arena maps: the floor reachable on foot (WalkMask). Set, aliens are only ever placed
 ## on it (is_open / open_near), never in the void between rooms or a sealed-off pocket.
 var walk_mask: WalkMask
+var _solid_query: PhysicsShapeQueryParameters2D  # is_open on walk-mask maps
 var door_open := false
 var door_k := 0.0
 var door_shape: CollisionShape2D
@@ -505,8 +506,19 @@ func arena_free_spot(p: Vector2, clear := 12.0) -> Vector2:
 
 ## True when `p` is clear of every blocker (grown by `pad`).
 func is_open(p: Vector2, pad := 8.0) -> bool:
-	if walk_mask != null and not walk_mask.has(p):
-		return false
+	if walk_mask != null:
+		if not walk_mask.has(p):
+			return false
+		# the mask works in whole cells: a point of an open cell may still sit inside a
+		# thin wall (a column, a post) that misses the cell's centre
+		if _solid_query == null:
+			_solid_query = PhysicsShapeQueryParameters2D.new()
+			_solid_query.shape = CircleShape2D.new()
+			_solid_query.collision_mask = 1 | PropData.LAYER_BODIES_ONLY
+		(_solid_query.shape as CircleShape2D).radius = clampf(pad, 2.0, 12.0)
+		_solid_query.transform = Transform2D(0.0, p)
+		if not get_world_2d().direct_space_state.intersect_shape(_solid_query, 1).is_empty():
+			return false
 	for r in blockers:
 		if r.grow(pad).has_point(p):
 			return false

@@ -70,6 +70,7 @@ func setup(g: GameWorld) -> void:
 	controls = TouchControls.new()
 	safe.add_child(controls)
 	rewards = RewardToast.new()
+	rewards.process_mode = Node.PROCESS_MODE_PAUSABLE  # a card waits while you choose (level up, pause)
 	safe.add_child(rewards)
 	controls.ability_pressed.connect(func() -> void: game.player.blast())
 	controls.mutate_pressed.connect(func() -> void: game.player.mutate())
@@ -155,6 +156,7 @@ func setup(g: GameWorld) -> void:
 	banner_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	banner_label.pivot_offset = Vector2(180, 35)
 	banner_label.modulate.a = 0.0
+	banner_label.process_mode = Node.PROCESS_MODE_PAUSABLE  # "CREW RESCUED" waits behind a modal
 	safe.add_child(banner_label)
 
 	fade = ColorRect.new()
@@ -350,7 +352,7 @@ func banner(text: String, color := Color.WHITE, font_size := 40, hold := 1.0) ->
 		banner_tween.kill()
 	banner_label.scale = Vector2(0.3, 0.3)
 	banner_label.modulate.a = 1.0
-	banner_tween = create_tween()
+	banner_tween = banner_label.create_tween()  # pausable: it waits while a modal is open
 	banner_tween.tween_property(banner_label, "scale", Vector2.ONE, 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	banner_tween.tween_interval(hold)
 	banner_tween.tween_property(banner_label, "modulate:a", 0.0, 0.3)
@@ -447,6 +449,7 @@ func _open_overlay(kind: String, dim := 0.65) -> VBoxContainer:
 	get_tree().paused = true
 	overlay = Control.new()
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.z_index = OVERLAY_Z  # over everything: reward cards, banners, the HUD
 	root.add_child(overlay)
 	root.move_child(overlay, fade.get_index())
 	var bg := ColorRect.new()
@@ -461,6 +464,23 @@ func _open_overlay(kind: String, dim := 0.65) -> VBoxContainer:
 	overlay.modulate.a = 0.0
 	create_tween().tween_property(overlay, "modulate:a", 1.0, 0.2)
 	return box
+
+
+## The modal's content shrunk (never grown) to fit the safe area: landscape screens are
+## too short for the level-up cards or the WIPED OUT panel.
+func _fit_overlay(box: Control) -> void:
+	await get_tree().process_frame  # its layout is done (runs while paused too)
+	if not is_instance_valid(box) or not box.is_inside_tree():
+		return
+	var avail := UiTheme.safe_rect(root).size * 0.96
+	var need := box.get_combined_minimum_size()
+	if need.x <= 0.0 or need.y <= 0.0:
+		return
+	var k := minf(1.0, minf(avail.x / need.x, avail.y / need.y))
+	box.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	box.grow_vertical = Control.GROW_DIRECTION_BOTH
+	box.pivot_offset = box.size * 0.5
+	box.scale = Vector2(k, k)
 
 
 func _close_overlay() -> void:
@@ -484,6 +504,7 @@ func _center(c: Control) -> CenterContainer:
 ## an energy link runs into the level you would take, which powers on with a gold tag.
 
 const KIT := "res://assets/ui/upgrades/kit/"
+const OVERLAY_Z := 50  # modals draw over the reward cards (z 5) and everything else
 const CARD_SIZE := Vector2(340, 140)
 const CELL := 36.0
 const LINK_W := 6.0
@@ -510,6 +531,7 @@ func show_upgrades(ids: Array[String], _title := "LEVEL UP", _sub := "Choose an 
 		box.add_child(_center(card))
 		_cards.append(card)
 	Sfx.play("upgrade", 0.0, -6.0)
+	_fit_overlay(box)
 
 
 func _upgrade_card(id: String, delay: float) -> Button:
@@ -931,14 +953,17 @@ func _neon_button(text: String, col: Color, sz: Vector2, fs: int, icon: Texture2
 
 
 func show_game_over() -> void:
+	rewards.clear()
 	var box := _open_overlay("gameover", 0.8)
 	box.add_child(_center(GameOverPanel.build(self, _restart, _to_menu)))
+	_fit_overlay(box)
 
 
 ## "WORLD n CLEARED!" (VictoryScreen): stats and rewards, animated.
 func show_victory(info: Dictionary) -> void:
 	_close_overlay()
 	overlay_kind = "victory"
+	rewards.clear()
 	controls.enabled = false
 	get_tree().paused = true
 	var v := VictoryScreen.new()
@@ -950,6 +975,7 @@ func show_victory(info: Dictionary) -> void:
 		Game.room_index = 0
 		get_tree().reload_current_scene())
 	overlay = v
+	v.z_index = OVERLAY_Z
 	root.add_child(v)
 	root.move_child(v, fade.get_index())
 

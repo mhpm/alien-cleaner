@@ -34,10 +34,19 @@ window/size/window_height_override=711
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/handheld/orientation=1
+window/size/viewport_width.pc=640
+window/size/viewport_height.pc=360
+window/size/window_width_override.pc=1280
+window/size/window_height_override.pc=720
 
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/aliens_cleaner_arena_editor/plugin.cfg", "res://addons/godot_mcp/plugin.cfg")
+
+[game]
+
+camera/zoom_scale=1.0
+camera/zoom_scale.pc=0.7
 
 [gui]
 

@@ -25,6 +25,7 @@ var objectives: ArenaObjectives
 var dialogue: ArenaDialogue
 var horde: ArenaHorde
 var finished := false
+var map_only := false  # start_map(): the arena is only the map of a survival world
 var waves_skip := 0  # PLAY ARENA "start at wave": waves before it are skipped
 var elapsed := 0.0
 var kills := 0
@@ -78,6 +79,27 @@ func start() -> void:
 	waves.start()
 
 
+## The arena is only the MAP of a survival world (WorldData "explore": {"map": ...}):
+## its objects come alive (scenery, chests, survivors, seed tanks, hazards, doors...)
+## but its waves, missions and clock stay off - the world's Survival runs the fight.
+func start_map() -> void:
+	map_only = true
+	_all = arena.objects()
+	for o in _all:
+		if not o.object_id.is_empty():
+			_by_id[o.object_id] = o
+	dialogue = ArenaDialogue.new()
+	dialogue.hud = world.hud
+	world.hud.safe.add_child(dialogue)
+	for o in _all.duplicate():
+		o.activate(self)
+	for o in _all:
+		o.tree_exited.connect(func() -> void:
+			if not is_instance_valid(o) or o.is_queued_for_deletion():
+				_all.erase(o))
+	_open_world()
+
+
 ## Big maps: see-through tall scenery and, when it does not fit on screen, the minimap.
 func _open_world() -> void:
 	var tall := _all.filter(func(o: ArenaObject) -> bool: return o is ArenaScenery and (o as ArenaScenery).fade_behind)
@@ -129,8 +151,10 @@ func fire(kind: String, subject := "", tags := PackedStringArray()) -> void:
 	if finished:
 		return
 	event_fired.emit(kind, subject, tags)
-	objectives.on_event(kind, subject, tags)
-	waves.on_event(kind, subject, tags)
+	if objectives != null:
+		objectives.on_event(kind, subject, tags)
+	if waves != null:
+		waves.on_event(kind, subject, tags)
 
 
 func on_enemy_killed(e: Enemy) -> void:
@@ -193,7 +217,7 @@ func main_objectives_done() -> void:
 
 
 func exit_reached(_x: ArenaExit) -> void:
-	if not objectives.main_done() and not _extracting:
+	if objectives == null or not objectives.main_done() and not _extracting:
 		return
 	finish(true, "")
 
@@ -211,7 +235,7 @@ func finish(won: bool, reason: String) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if finished or world.state != "survive":
+	if map_only or finished or world.state != "survive":
 		return
 	elapsed += delta
 	var s := world.survival

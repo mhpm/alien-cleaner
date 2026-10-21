@@ -35,7 +35,7 @@ func _ai(delta: float) -> Vector2:
 					_start_blink()
 				else:
 					_casts += 1
-					if _casts % 2 == 1:
+					if _casts % 2 == 1 or not sees_player():  # the rune needs to see you; the orb stops at walls
 						state = "orb"
 						state_t = ORB_TIME
 						alert.visible = true

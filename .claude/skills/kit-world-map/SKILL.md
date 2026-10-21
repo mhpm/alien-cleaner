@@ -1,9 +1,15 @@
 ---
 name: kit-world-map
-description: Construye el mapa de un mundo de Alien Cleanup Crew a partir de un KIT de piezas que manda el usuario (suelo, tramos de muro, columnas, esquinas de maquinaria, decoración), como el mundo 5 THE FORGE (ForgeMap). Úsalo cuando el usuario pase una hoja de elementos de escenario para armar un mundo, pida corregir/mejorar muros o salas, pida pasillos/laberintos, o mande más piezas (esquinas, muros) para un mundo existente.
+description: Referencia de cómo están hechos los mapas ForgeMap de los mundos 5-7 de Alien Cleanup Crew (kit de atlas con postes, tramos, columnas y esquinas; trazado BSP de salas, pasillos y laberintos; make_forge_walls.py). Úsalo para entender, corregir o convertir esos kits y para ajustar el trazado del laberinto que usa el constructor de arenas. Para hacer el mapa de un mundo usa arena-world-map (regla del usuario - todos los mapas son escenas del Arena Editor).
 ---
 
 # Mapa de mundo armado con un kit
+
+> **Desde el mundo 8 el mapa de un mundo es una escena del Arena Editor** (regla del
+> usuario): usa la skill `arena-world-map` (+ `arena-decor-kit`). Lo de abajo (`ForgeMap`,
+> `make_forge_walls.py`) describe cómo están hechos los mundos 5-7 y sirve para entender o
+> convertir esos kits; `ForgeMap` sigue siendo el generador del trazado que usa el
+> constructor de arenas, pero ya no se dibuja en la partida.
 
 Referencia viva: `tools/make_forge_walls.py` (recorte, una entrada por kit en `SETS`) +
 `scripts/data/forge_map.gd` (trazado y dibujo, `LOOKS[set]`) + `Explore._setup_forge` +

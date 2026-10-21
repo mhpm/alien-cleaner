@@ -17,6 +17,7 @@ var _tip: AnimatedSprite2D
 
 
 func _ready() -> void:
+	length = global_position.distance_to(Game.world.wall_cut(global_position, global_position + dir * length))  # stops at a wall
 	_tip = Art.make_anim("plant_glob", 0.16)
 	_tip.play("fly")
 	add_child(_tip)

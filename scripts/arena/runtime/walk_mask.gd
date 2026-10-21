@@ -18,16 +18,24 @@ var rows := 0
 var _ok := PackedByteArray()  # 1 = reachable floor
 var _cells: PackedVector2Array = []  # centres of the reachable cells (for nearest())
 var reachable := 0
+## Per cell: bits 0-3 = the step right / left / down / up was tested, bits 4-7 = it is
+## open (no solid between the two centres). Kept for flow().
+var _edges := PackedByteArray()
+const DIRS: Array[Vector2i] = [Vector2i.RIGHT, Vector2i.LEFT, Vector2i.DOWN, Vector2i.UP]
 
 
 ## `arena`: the playing Arena (its terrain gives the floor), `bounds`: the room in world
 ## units, `start`: the player spawn. Physics must already hold the arena's bodies.
-func build(arena: Arena, bounds: Rect2, start: Vector2, space: PhysicsDirectSpaceState2D) -> WalkMask:
+## `flow_edges`: also test every step between two reachable cells, for flow() (survival
+## worlds on an arena map: the aliens' way round the walls); costs more rays.
+func build(arena: Arena, bounds: Rect2, start: Vector2, space: PhysicsDirectSpaceState2D, flow_edges := false) -> WalkMask:
 	origin = bounds.position
 	cols = maxi(1, ceili(bounds.size.x / cell))
 	rows = maxi(1, ceili(bounds.size.y / cell))
 	_ok.resize(cols * rows)
 	_ok.fill(0)
+	_edges.resize(cols * rows)
+	_edges.fill(0)
 	var layers: Array[TileMapLayer] = []
 	for layer_name: String in Arena.TERRAIN:
 		var l := arena.get_layer(layer_name) as TileMapLayer
@@ -61,14 +69,14 @@ func build(arena: Arena, bounds: Rect2, start: Vector2, space: PhysicsDirectSpac
 	while head < queue.size():
 		var c := queue[head]
 		head += 1
-		for d: Vector2i in [Vector2i.RIGHT, Vector2i.LEFT, Vector2i.DOWN, Vector2i.UP]:
-			var n := c + d
+		for k in 4:
+			var n := c + DIRS[k]
 			if n.x < 0 or n.y < 0 or n.x >= cols or n.y >= rows:
 				continue
 			var i := n.y * cols + n.x
-			if _ok[i] == 1 or stand[i] == 0:
+			if stand[i] == 0 or (_ok[i] == 1 and not flow_edges):
 				continue
-			if _blocked(space, centre(c.x, c.y), centre(n.x, n.y)):
+			if not _step_open(space, c, k) or _ok[i] == 1:
 				continue
 			_ok[i] = 1
 			queue.append(n)
@@ -76,6 +84,59 @@ func build(arena: Arena, bounds: Rect2, start: Vector2, space: PhysicsDirectSpac
 	for c in queue:
 		_cells.append(centre(c.x, c.y))
 	return self
+
+
+## Can one walk from cell c one step in DIRS[k]: tested once per pair, cached both ways.
+func _step_open(space: PhysicsDirectSpaceState2D, c: Vector2i, k: int) -> bool:
+	var i := c.y * cols + c.x
+	if _edges[i] & (1 << k):
+		return (_edges[i] & (16 << k)) != 0
+	var n := c + DIRS[k]
+	var j := n.y * cols + n.x
+	var back := k ^ 1  # right <-> left, down <-> up
+	var open := not _blocked(space, centre(c.x, c.y), centre(n.x, n.y))
+	_edges[i] |= (1 << k) | ((16 << k) if open else 0)
+	_edges[j] |= (1 << back) | ((16 << back) if open else 0)
+	return open
+
+
+## Way around the walls to `goal`: for every reachable cell, the centre of the next cell
+## on a shortest walk to the goal's cell (Vector2.ZERO = the goal's cell or unreachable).
+## Index with cell_index().
+func flow(goal: Vector2) -> PackedVector2Array:
+	var out := PackedVector2Array()
+	out.resize(cols * rows)
+	var g := _cell_of(goal)
+	if g.x < 0 or _ok[g.y * cols + g.x] == 0:  # a goal on something solid (a seed tank's foot)
+		g = _cell_of(nearest(goal))
+	if g.x < 0 or _ok[g.y * cols + g.x] == 0:
+		return out
+	var seen := PackedByteArray()
+	seen.resize(cols * rows)
+	seen[g.y * cols + g.x] = 1
+	var queue: Array[Vector2i] = [g]
+	var head := 0
+	while head < queue.size():
+		var c := queue[head]
+		head += 1
+		var ci := c.y * cols + c.x
+		for k in 4:
+			if (_edges[ci] & (16 << k)) == 0:
+				continue
+			var n := c + DIRS[k]
+			var ni := n.y * cols + n.x
+			if seen[ni] == 1 or _ok[ni] == 0:
+				continue
+			seen[ni] = 1
+			out[ni] = centre(c.x, c.y)
+			queue.append(n)
+	return out
+
+
+## Index of the cell under `p` in flow()'s array (-1 outside).
+func cell_index(p: Vector2) -> int:
+	var c := _cell_of(p)
+	return c.y * cols + c.x if c.x >= 0 else -1
 
 
 func centre(x: int, y: int) -> Vector2:

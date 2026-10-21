@@ -1,6 +1,7 @@
 extends Node
-## World 8 BIODOME: the explore map from the w8 kit (loose floor tiles, only top corner
-## blocks) and its 5 SEED TANKS (aliens nearby march on them, gnaw them, a lost tank
+## World 8 BIODOME: its map is the Arena Editor scene arena_world_08_level_01.tscn (Explore
+## "map": walls, corners and floor of the w8 kit placed by hand, its chests, survivors and
+## Player Spawn; the walk mask and the aliens' way round the walls) and its 5 SEED TANKS (aliens nearby march on them, gnaw them, a lost tank
 ## counts, the standing ones heal you when the final fight starts). In a window it saves
 ## user://bio_test_<tag>.png:
 ##   Godot --path . res://tests/biodome_test.tscn [-- --overview]
@@ -32,34 +33,61 @@ func _snap(tag: String) -> void:
 		img.save_png("user://bio_test_%s.png" % tag)
 
 
-func _walkable(f: ForgeMap) -> int:
-	var n := 0
-	for b in f.blocked:
-		if b == 0:
-			n += 1
-	return n
+## Open floor 60-80 from `at` with nothing solid in between (the alien sees you).
+func _in_sight(w: GameWorld, at: Vector2) -> Vector2:
+	var space := w.get_world_2d().direct_space_state
+	for k in 16:
+		var q := at + Vector2.from_angle(TAU * k / 16.0) * (70.0 if k % 2 == 0 else 60.0)
+		if not w.room.is_open(q, 14.0):
+			continue
+		var ray := PhysicsRayQueryParameters2D.create(at, q, 1 | PropData.LAYER_BODIES_ONLY)
+		if space.intersect_ray(ray).is_empty():
+			return q
+	return w.room.open_near(at + Vector2(60, -40))
+
+
+## Following the flow field from `p` gets to the astronaut's cell (round the walls).
+func _flows_home(w: GameWorld, p: Vector2) -> bool:
+	var mask := w.room.walk_mask
+	var goal := mask.cell_index(w.player.global_position)
+	for step in 400:
+		var c := mask.cell_index(p)
+		if c == goal:
+			return true
+		var t := w.explore.flow_to[c] if c >= 0 else Vector2.ZERO
+		if t == Vector2.ZERO:
+			return false
+		p = t
+	return false
 
 
 func _run() -> void:
 	Game.playground_active = true
+	Game.gun = "pulse"  # not the saved one: a stunning gun (Tesla) would pin the aliens down
 	Game.new_run(7)
 	var w := (load("res://scenes/game.tscn") as PackedScene).instantiate() as GameWorld
 	add_child(w)
 	await _frames(5)
 	var ex := w.explore
-	_check(ex != null and ex.forge != null and ex.forge.set_id == "w8", "World 8 builds its map from the w8 kit")
-	if ex == null or ex.forge == null:
+	_check(ex != null and ex.arena != null and ex.forge == null, "World 8 plays its Arena Editor map")
+	if ex == null or ex.arena == null:
 		_finish()
 		return
-	var f := ex.forge
-	_check(f.reach(f.start_cell()).size() == _walkable(f), "every cell reachable from the start")
-	_check(w.room.is_open(ex.start), "the astronaut starts on open floor")
 	_check(ex.tanks.size() == 5, "5 seed tanks (got %d)" % ex.tanks.size())
-	var bottom := 0
-	for m: Array in f.machines:
-		if str(m[1])[0] == "b":
-			bottom += 1
-	_check(f.machines.size() > 0 and bottom == 0, "only top corner blocks (the kit has no bottom ones)")
+	_check(ex.chests.size() == 8, "8 chests (got %d)" % ex.chests.size())
+	_check(ex.survivors.size() == 5, "5 survivors (got %d)" % ex.survivors.size())
+	_check(ex.director.objects_of("ArenaScenery").size() > 150, "the walls and corners came alive (%d)" % ex.director.objects_of("ArenaScenery").size())
+	await _frames(5)
+	var mask := w.room.walk_mask
+	_check(mask != null and mask.reachable > 1500, "a walk mask of the reachable floor (%d cells)" % (mask.reachable if mask != null else 0))
+	_check(w.room.is_open(ex.start), "the astronaut starts on open floor")
+	for t in ex.tanks:
+		_check(w.room.is_open(w.room.open_near(t.global_position + Vector2(0, 40))), "floor in front of each tank")
+	for ch in ex.chests:
+		_check(mask.has(ch.global_position), "chest %s on reachable floor" % ch.name)
+	await _frames(25)  # the flow field follows the astronaut
+	var far := ex.tanks[0].global_position + Vector2(0, 50)
+	_check(_flows_home(w, w.room.open_near(far)), "an alien far off finds its way round the walls")
 	w.player.invuln = 99999.0
 	w.survival.choosing = true
 	w.survival.set_physics_process(false)
@@ -85,8 +113,10 @@ func _run() -> void:
 	w.player.global_position = w.room.open_near(tp + Vector2(0, 90))
 	await _frames(20)
 	await _snap("tank")
+	w.player.global_position = w.room.open_near(tp + Vector2(0, 260))  # leave them to it
+	await _frames(30)
 	tank.hp = 0.5
-	await _frames(40)
+	await _frames(60)
 	_check(tank.lost and ex.tanks_lost == 1, "a tank at 0 is lost: TANKS 4/5")
 	await _snap("tank_lost")
 	for n in w.enemy_cache:
@@ -109,19 +139,19 @@ func _run() -> void:
 func _enemies(w: GameWorld, ex: Explore) -> void:
 	var dmg0: float = Game.stats.damage
 	Game.stats.damage = 0.0
-	var at := w.room.open_near(w.player.global_position)
+	var at := w.room.open_near(ex.start)  # the roomy start hall: no wall between them and you
 	for id: String in ["bio_droid", "spike_bloom", "vine_crawler", "spore_drone"]:
 		for n in w.enemy_cache:
 			if is_instance_valid(n):
 				(n as Enemy).queue_free()
 		await _frames(2)
-		var e := w.spawn_enemy(id, w.room.open_near(at + Vector2(60, -40)))
+		var e := w.spawn_enemy(id, _in_sight(w, at))
 		e.max_hp = 1e6
 		e.hp = e.max_hp
 		e.state_t = 0.05
 		var hp0 := float(Game.stats.hp)
 		w.player.invuln = 0.0
-		for i in 200:
+		for i in 320:
 			w.player.global_position = at
 			if is_instance_valid(e):
 				e.lure = null  # a seed tank close by would draw it away: we test its attack
@@ -145,10 +175,20 @@ func _enemies(w: GameWorld, ex: Explore) -> void:
 			(n as Enemy).queue_free()
 	await _frames(2)
 	w.player.global_position = w.room.open_near(tank.global_position + Vector2(0, 400))
-	var d := w.spawn_enemy("bio_droid", w.room.open_near(tank.global_position + Vector2(160, 0)))
+	var from := w.room.open_near(tank.global_position + Vector2(160, 0))
+	for k in 16:  # open floor 140-220 away, clear of the other tanks' feet
+		var q := w.room.open_near(tank.global_position + Vector2.from_angle(TAU * k / 16.0) * 180.0)
+		var clear := w.room.is_open(q, 14.0) and w.get_world_2d().direct_space_state.intersect_ray(
+				PhysicsRayQueryParameters2D.create(q, tank.global_position + Vector2(0, 20), 1 | PropData.LAYER_BODIES_ONLY)).is_empty()
+		for t3 in ex.tanks:
+			clear = clear and t3.global_position.distance_to(q) > 70.0
+		if clear and q.distance_to(tank.global_position) > 140.0:
+			from = q
+			break
+	var d := w.spawn_enemy("bio_droid", from)
 	var d0 := d.global_position.distance_to(tank.global_position)
 	await _frames(240)
-	_check(is_instance_valid(d) and d.global_position.distance_to(tank.global_position) < d0 * 0.5, "the Bio Droid heads for a seed tank")
+	_check(is_instance_valid(d) and d.global_position.distance_to(tank.global_position) < d0 * 0.5, "the Bio Droid heads for a seed tank (%.0f -> %.0f)" % [d0, d.global_position.distance_to(tank.global_position)])
 	Game.stats.damage = dmg0
 
 
@@ -217,7 +257,7 @@ func _overview(w: GameWorld) -> void:
 	var cam := w.camera
 	var keep := cam.zoom
 	var lim := [cam.limit_left, cam.limit_top, cam.limit_right, cam.limit_bottom]
-	var sz := w.explore.forge.size()
+	var sz := w.room.bounds().size
 	var v := get_viewport().get_visible_rect().size
 	cam.limit_left = -10000
 	cam.limit_top = -10000
@@ -236,9 +276,10 @@ func _overview(w: GameWorld) -> void:
 	cam.limit_top = lim[1]
 	cam.limit_right = lim[2]
 	cam.limit_bottom = lim[3]
-	var f := w.explore.forge
-	for i in mini(3, f.machines.size()):
-		w.player.global_position = w.room.open_near(f.cell_rect(f.machines[i][0]).get_center() + Vector2(0, 90))
+	var corners := w.explore.director.objects_of("ArenaScenery").filter(func(o: ArenaObject) -> bool:
+		return (o as ArenaScenery).texture.resource_path.contains("/corners/"))
+	for i in mini(3, corners.size()):
+		w.player.global_position = w.room.open_near(corners[i].global_position + Vector2(0, 60))
 		await _frames(30)
 		await _snap("corner_%d" % i)
 	w.hud.visible = true

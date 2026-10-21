@@ -5,6 +5,15 @@ description: Añade a un mapa EXPLORE de Alien Cleanup Crew un objeto de mapa co
 
 # Objeto u objetivo en el mapa
 
+> **Mapas hechos en el Arena Editor** (mundo 8 en adelante, skill `arena-world-map`): el
+> objetivo es un componente del editor que el usuario coloca y mueve
+> (`scripts/arena/components/arena_seed_tank.gd`, `arena_reactor_core.gd`,
+> `arena_warp_cell.gd`, `arena_anchored_alien.gd`): en `activate` crea el objeto de juego,
+> su pie con `ArenaObjectiveBody.make(foot)` y llama a `w.explore.add_<x>()` (lista +
+> `props` para el ring del jefe + contador). Escena en `scenes/arena/palette/gameplay/` y
+> caso nuevo en `tests/map_objectives_test.gd`. Lo de abajo (colocar desde `Explore` con
+> `ForgeMap`) es como se hicieron los mundos 5-7.
+
 Ejemplos vivos (cópialos según el tipo):
 | Tipo | Ejemplo | Archivo |
 |---|---|---|

@@ -616,9 +616,10 @@ const WORLDS := [
 		],
 	},
 	{
-		# world 7: WARP NEXUS, the station that holds the warp gate: an EXPLORE map built wall
-		# by wall from its kit (ForgeMap set "w7": halls, corridors, mazes, pillared halls,
-		# holes into open space, warp machinery in the corners). Besides chests and crew, 5
+		# world 7: WARP NEXUS, the station that holds the warp gate. Its map is an Arena Editor
+		# scene edited by hand (scenes/arenas/arena_world_07_level_01.tscn, made once by
+		# tools/build_warp_arena.tscn with the user's kit assets/decor/warp_nexus/: halls,
+		# corridors, mazes, pits onto space, the great warp gate). Besides chests and crew, 5
 		# WARP CELLS hide in the far corners of the map: each one taken sets off a WARP
 		# AMBUSH; with all 5 the gate is charged and the final boss comes weaker and cannot
 		# warp. New aliens: Orbital Laser Drone (sweeping laser), Quantum Spider Bot (swaps
@@ -630,8 +631,7 @@ const WORLDS := [
 		"rooms": [
 			{"final": true, "survival": {
 				"arena": Vector2i(64, 96), "duration": 450.0, "hp_per_min": 0.25,
-				"explore": {"build": "kit", "set": "w7", "cells": [18, 14], "chests": 8, "alarms": true,
-					"maze": 0.4, "mazes": 3, "warp_cells": 5},
+				"explore": {"map": "res://scenes/arenas/arena_world_07_level_01.tscn"},
 				"t_offset": 300.0, "boss": "overseer",
 				"boss_help": {"pool": ["saw_drone", "spider_bot", "laser_drone"], "max": 8, "every": [15.0, 7.0], "squad": 3},
 				"final": {"pool": WARP, "alive": 34, "rate": 3.0},
@@ -688,19 +688,19 @@ const WORLDS := [
 		],
 	},
 	{
-		# world 8: BIODOME, the greenhouse station on an asteroid: an EXPLORE map built wall by
-		# wall from its kit (ForgeMap set "w8": white walls with blue lights and greenery,
-		# loose floor tiles, 10 greenhouse corner blocks). Objective: DEFEND the 5 SEED TANKS
+		# world 8: BIODOME, the greenhouse station on an asteroid. Its map is an Arena Editor
+		# scene, edited by hand in Godot (scenes/arenas/arena_world_08_level_01.tscn: the w8
+		# kit as palette pieces - white walls with blue lights and greenery, floor tiles, 10
+		# greenhouse corner blocks - plus its Seed Tanks, Chests, Survivors and Player Spawn;
+		# made once by tools/build_biodome_arena.tscn). Objective: DEFEND the SEED TANKS
 		# (aliens nearby march on them and gnaw at them); every tank still standing when the
-		# final fight starts heals you. Final boss BLOOM COLOSSUS. PROVISIONAL: the world-7
-		# aliens until its own enemies arrive.
+		# final fight starts heals you. Final boss BLOOM COLOSSUS.
 		"music": "levels2.mp3", "name": "BIODOME", "theme": "bio", "enemy_mult": 1.9, "difficulty": [1.0, 0.0],
 		"pic": "world_8.png", "chest": 2400,
 		"rooms": [
 			{"final": true, "survival": {
 				"arena": Vector2i(64, 96), "duration": 450.0, "hp_per_min": 0.25,
-				"explore": {"build": "kit", "set": "w8", "cells": [18, 14], "chests": 8, "alarms": true,
-					"maze": 0.4, "mazes": 3, "tanks": 5},
+				"explore": {"map": "res://scenes/arenas/arena_world_08_level_01.tscn"},
 				"t_offset": 330.0, "boss": "bloom_colossus",
 				"boss_help": {"pool": ["bloom_sprout", "bloom_sprout", "bio_droid"], "max": 8, "every": [15.0, 7.0], "squad": 3},
 				"final": {"pool": BIO, "alive": 34, "rate": 3.0},

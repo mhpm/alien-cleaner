@@ -58,7 +58,7 @@ func _ai(delta: float) -> Vector2:
 ## A spore cloud rained ahead of where the astronaut is walking.
 func _cloud() -> void:
 	_clouds.assign(_clouds.filter(func(n: Variant) -> bool: return is_instance_valid(n)))
-	if _clouds.size() >= MAX_CLOUDS:
+	if _clouds.size() >= MAX_CLOUDS or not sees_player():  # no cloud on you through a wall
 		_puff(_to_player())
 		return
 	var w := Game.world

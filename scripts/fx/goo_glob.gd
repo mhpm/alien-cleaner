@@ -29,6 +29,9 @@ var shadow: Sprite2D
 
 
 func _ready() -> void:
+	var stop := Game.world.wall_cut(from, to)
+	if not stop.is_equal_approx(to):  # lobbed at a wall: it splats against it, never lands beyond
+		to = stop.move_toward(from, 6.0)
 	global_position = from
 	shadow = Sprite2D.new()
 	shadow.texture = Art.tex("shadow")

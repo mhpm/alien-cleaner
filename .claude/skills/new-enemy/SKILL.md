@@ -16,7 +16,8 @@ Referencias vivas (léelas antes de escribir, copian el estilo exacto del proyec
 1. **Tamaño**: igual o mayor que el astronauta (~25 unidades de alto; objetivo 26-31 para enemigos, ~45-60 para jefes). Ajusta `scale` = altura deseada / `body_h` del manifest.
 2. **Ataque creativo e inteligente**, cada enemigo con su rol propio (predice tu camino, se esconde tras otros, reacciona a que le disparen, atrae, deja rastro...). No sirve "dispara en línea recta". Si el arte trae poses/proyectiles, deja que inspiren los ataques (una pose de guiño → "ven aquí", anillos de ondas → buceo con géiseres, minas girando → lanzarlas).
 3. **Contrajuego claro**: todo ataque avisa (`Telegraph` círculo/línea, anillo, pose) y se puede esquivar. Los jefes tienen una ventana de daño tras sus ataques fuertes (agotado/mareado con `armor` > 1).
-4. Explica al usuario el contrajuego de cada ataque al terminar.
+4. **Ningún ataque atraviesa muros**: proyectiles = `EnemyShot` (ya revientan en la capa 1); rayos/látigos/carriles se recortan con `Game.world.wall_cut(origen, fin)` y dañan con `from` = su origen; lo que se lanza sobre el jugador (runas, círculos, nubes) solo si `sees_player()`. Ver `CLAUDE.md` y `tests/wall_block_test.tscn`.
+5. Explica al usuario el contrajuego de cada ataque al terminar.
 5. Prefiere las hojas separadas del usuario; corta con `tools/cut_sheet_enemies.py` (NO uses `scripts/split_items.py`).
 
 ## 1. Guardar y analizar la hoja

@@ -18,7 +18,10 @@ extends Node2D
 ## middle of n rooms instead of the RoomKit pieces; venting them all = forge_cooled),
 ## "build": "forge" (world 5: no room paintings, ForgeMap builds halls, corridors, mazes
 ## and pits wall by wall from the forge kit on a "cells": [w, h] lattice; `rooms` are its
-## areas and the aliens get a flow field to walk around the walls, flow_dir)}.
+## areas and the aliens get a flow field to walk around the walls, flow_dir),
+## "map": "res://scenes/arenas/....tscn" (an Arena Editor scene IS the map, made and
+## edited by hand in Godot: its terrain, walls and scenery, PlayerSpawn = the start,
+## Chests, Survivors and Seed Tanks placed in it; the other keys are then ignored)}.
 
 const SEAM := 6.0  # black gap between two rooms (world units)
 const COOLED_HP := 0.75  # bosses' health once every reactor core is vented
@@ -64,6 +67,13 @@ var props: Array = []  # [node, solid rect]: furniture and cores (cleared with t
 var ring := Vector3.ZERO  # final fight arena cleared on a painted map: x, y, radius
 var nav_cell := -1  # the astronaut's cell the flow field leads to
 var flow_to := PackedVector2Array()
+var arena: Arena  # "map": the Arena Editor scene playing as the map
+var director: ArenaDirector  # brings its objects to life (start_map)
+var _flow_t := 0.0
+var _clear_color := Color()
+const FLOW_EVERY := 0.3  # arena maps: the flow field follows the astronaut this often at most
+const MAX_GOALS := 12
+var _goal_flows := {}  # goal cell -> flow field to it (flow_dir_to)
 
 
 func setup(w: GameWorld, cfg: Dictionary) -> Explore:
@@ -76,6 +86,8 @@ func setup(w: GameWorld, cfg: Dictionary) -> Explore:
 	has_zero = bool(cfg.get("zero", true))
 	show_behind_parent = true
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	if cfg.has("map"):
+		return _setup_map(str(cfg.map))
 	if str(cfg.get("build", "")) in ["forge", "kit"]:
 		return _setup_forge(cfg)
 	var rs := LabRoomData.ROOM
@@ -138,6 +150,101 @@ func _setup_forge(cfg: Dictionary) -> Explore:
 	_hide_chests(int(cfg.get("chests", 8)), int(cfg.get("survivors", 5)))
 	_build_counter()
 	return self
+
+
+## The map is an Arena Editor scene (scenes/arenas/): everything in it was placed by hand.
+## Its bounds become the arena, its objects come alive through an ArenaDirector in map-only
+## mode (no waves, missions or clock: Survival runs the fight) and the counters pick up
+## its chests, survivors and seed tanks. The walk mask (spawns on reachable floor, the
+## aliens' way around the walls) is built once the bodies are in the physics space.
+func _setup_map(path: String) -> Explore:
+	has_zero = false
+	zero_cell = Vector2i(-1, -1)
+	var packed := load(path) as PackedScene if ResourceLoader.exists(path) else null
+	if packed == null:
+		push_error("Explore: no arena map at \"%s\"" % path)
+		_build_collision()
+		_build_counter()
+		return self
+	arena = packed.instantiate() as Arena
+	var b := arena.get_bounds()
+	var rect := Rect2(b.position, b.size) if b != null else Rect2(0, 0, 1024, 1024)
+	_resize_arena(rect.size)
+	arena.position = -rect.position
+	world.add_child(arena)
+	world.move_child(arena, 0)
+	start = rect.get_center() - rect.position
+	for o in arena.objects("PlayerSpawn"):
+		start = o.global_position
+		break
+	var data := arena.data
+	if data != null:
+		_clear_color = ProjectSettings.get_setting("rendering/environment/defaults/default_clear_color")
+		RenderingServer.set_default_clear_color(data.background)
+		if data.ambient != Color.WHITE:
+			var light := CanvasModulate.new()
+			light.color = data.ambient
+			arena.add_child(light)
+	director = ArenaDirector.new().setup(world, arena)
+	add_child(director)
+	director.start_map()
+	for o in director.objects_of("ArenaChest"):
+		var ch := (o as ArenaChest).supply_chest()
+		if ch != null:
+			chests.append(ch)
+			world.room.spawned.append(ch)
+	for o in director.objects_of("ArenaSurvivor"):
+		var sv := (o as ArenaSurvivor).survivor
+		if sv != null:
+			survivors.append(sv)
+	_build_collision()
+	_build_counter()
+	_build_walk_mask.call_deferred()
+	return self
+
+
+## Arena maps: the floor the aliens may appear on and walk around the walls (WalkMask),
+## once the arena's bodies reach the physics space.
+func _build_walk_mask() -> void:
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	if not is_inside_tree() or arena == null:
+		return
+	world.room.walk_mask = WalkMask.new().build(arena, world.room.bounds(), world.player.global_position,
+			world.get_world_2d().direct_space_state, true)
+	nav_cell = -1
+	_goal_flows.clear()
+
+
+## An ArenaSeedTank of the map came alive: count it (HUD, harvest) and clear it with the ring.
+func add_tank(t: SeedTank) -> void:
+	tanks.append(t)
+	props.append([t, SeedTank.foot(t.art, t.global_position)])
+	if counter != null:
+		_refresh_counter()
+
+
+## An ArenaReactorCore of the map came alive (its body is its own): counted, put away
+## (not freed) by the boss ring.
+func add_core(c: ReactorCore) -> void:
+	cores.append(c)
+	props.append([c, ReactorCore.foot(c.global_position)])
+	if counter != null:
+		_refresh_counter()
+
+
+## An ArenaAnchoredAlien specimen vat of the map came alive.
+func add_vat(v: Enemy) -> void:
+	vats.append(v)
+	if counter != null:
+		_refresh_counter()
+
+
+## An ArenaWarpCell of the map came alive.
+func add_warp_cell(c: WarpCell) -> void:
+	warp_cells.append(c)
+	if counter != null:
+		_refresh_counter()
 
 
 ## World 6: a specimen vat in the middle of hall r (an anchored Enemy: shoot it down).
@@ -269,8 +376,21 @@ func _furnish_one(r: Rect2) -> void:
 		_kit_piece(k, at, rng.randf() < 0.5)
 
 
-func _physics_process(_delta: float) -> void:
-	if forge == null or world.player == null:
+func _physics_process(delta: float) -> void:
+	if world.player == null:
+		return
+	if arena != null:
+		_flow_t -= delta
+		var mask := world.room.walk_mask
+		if mask == null or _flow_t > 0.0:
+			return
+		var mc := mask.cell_index(world.player.global_position)
+		if mc >= 0 and mc != nav_cell and mask.has(world.player.global_position):
+			nav_cell = mc
+			flow_to = mask.flow(world.player.global_position)
+			_flow_t = FLOW_EVERY
+		return
+	if forge == null:
 		return
 	var c := forge.cell_at(world.player.global_position)
 	if c >= 0 and c != nav_cell and forge.blocked[c] == 0:
@@ -278,12 +398,39 @@ func _physics_process(_delta: float) -> void:
 		flow_to = forge.flow(c)
 
 
+## Way round the walls to a fixed spot (the lure an alien marches on: a seed tank, a
+## decoy): one flow field per goal cell, kept (they do not move) up to MAX_GOALS.
+func flow_dir_to(p: Vector2, goal: Vector2) -> Vector2:
+	var gi := _cell_index(goal)
+	var c := _cell_index(p)
+	if gi < 0 or c < 0 or c == gi:
+		return Vector2.ZERO
+	if not _goal_flows.has(gi):
+		if _goal_flows.size() >= MAX_GOALS:
+			_goal_flows.clear()
+		_goal_flows[gi] = forge.flow(gi) if forge != null else world.room.walk_mask.flow(goal)
+	var t: Vector2 = (_goal_flows[gi] as PackedVector2Array)[c]
+	return Vector2.ZERO if t == Vector2.ZERO else (t - p).normalized()
+
+
+func _cell_index(p: Vector2) -> int:
+	if forge != null:
+		return forge.cell_at(p)
+	var mask := world.room.walk_mask
+	return mask.cell_index(p) if arena != null and mask != null else -1
+
+
+## Do the aliens get a way around the walls here (ForgeMap or arena map).
+func has_flow() -> bool:
+	return forge != null or arena != null
+
+
 ## Where an alien at `p` should head to reach the astronaut around the walls (ZERO: go
 ## straight, it is in the astronaut's cell or there is no map).
 func flow_dir(p: Vector2) -> Vector2:
 	if flow_to.is_empty():
 		return Vector2.ZERO
-	var c := forge.cell_at(p)
+	var c := _cell_index(p)
 	if c < 0 or c == nav_cell:
 		return Vector2.ZERO
 	var t := flow_to[c]
@@ -488,6 +635,41 @@ func _doors(c: Vector2i, r: Rect2, rm: Dictionary) -> void:
 			plates.append(Rect2(r.position + o.position, o.size))
 
 
+## Arena maps: the solid scenery (walls, columns, corners, planters) and wall tiles inside
+## the ring go, and floor is laid where the ring reaches past the map's floor.
+func _clear_map_ring(c: Vector2, r: float) -> void:
+	for o in director.objects_of("ArenaScenery"):
+		var sc := o as ArenaScenery
+		if sc.footprint.x <= 0.0 or sc.footprint.y <= 0.0:
+			continue
+		var gp := sc.global_position
+		var q := Rect2(gp.x - sc.footprint.x * 0.5, gp.y - sc.footprint.y, sc.footprint.x, sc.footprint.y)
+		if (c.clamp(q.position, q.end) - c).length() < r + 6.0:
+			sc.queue_free()
+	for o in director.objects_of("ArenaBlocker"):
+		var q2 := (o as ArenaBlocker).rect()
+		if (c.clamp(q2.position, q2.end) - c).length() < r + 6.0:
+			o.queue_free()
+	var walls_layer := arena.get_layer("Walls") as TileMapLayer
+	var floor_layer := arena.get_layer("Floor") as TileMapLayer
+	if floor_layer != null:
+		var mid := floor_layer.local_to_map(floor_layer.to_local(c))
+		var src := floor_layer.get_cell_source_id(mid)
+		var at := floor_layer.get_cell_atlas_coords(mid)
+		var reach := ceili((r + 12.0) / Arena.TILE)
+		for y in range(-reach, reach + 1):
+			for x in range(-reach, reach + 1):
+				var cell := mid + Vector2i(x, y)
+				var p := floor_layer.to_global(floor_layer.map_to_local(cell))
+				if p.distance_to(c) > r + 12.0:
+					continue
+				if src != -1 and floor_layer.get_cell_source_id(cell) == -1:
+					floor_layer.set_cell(cell, src, at)
+				if walls_layer != null:
+					walls_layer.erase_cell(walls_layer.local_to_map(walls_layer.to_local(p)))
+	_build_walk_mask.call_deferred()
+
+
 ## The final boss fight (Survival._send_final): nothing solid inside its fence. Walls,
 ## furniture, machinery, pits and vats within (c, r) go; a ForgeMap rebuilds that part of
 ## the map as open floor, a painted map gets a disc of floor drawn over it. Reactor cores
@@ -514,12 +696,15 @@ func clear_ring(c: Vector2, r: float) -> void:
 			e.dead = true
 			e.remove_from_group("enemies")
 			e.queue_free()
-	if forge != null:
+	if arena != null:
+		_clear_map_ring(c, r)
+	elif forge != null:
 		forge.clear_circle(c, r)
 		walls = forge.solids()
 		for p: Array in props:
 			walls.append(p[1])
 		nav_cell = -1  # the flow field follows the new floor
+		_goal_flows.clear()
 	else:
 		walls = walls.filter(func(q: Rect2) -> bool: return not hits.call(q))
 		ring = Vector3(c.x, c.y, r)
@@ -678,6 +863,13 @@ func survivor_saved(s: Survivor) -> void:
 
 
 func _exit_tree() -> void:
+	if _clear_color != Color():
+		RenderingServer.set_default_clear_color(_clear_color)
+	if arena != null and is_instance_valid(arena):
+		if director != null:
+			for o in director.objects_of("ArenaObject"):
+				o.queue_free()  # scenery that joined the entities
+		arena.queue_free()
 	if counter != null and is_instance_valid(counter):
 		counter.queue_free()
 	if rescue_panel != null and is_instance_valid(rescue_panel):
@@ -687,6 +879,8 @@ func _exit_tree() -> void:
 # ---------------------------------------------------------------- drawing
 
 func _draw() -> void:
+	if arena != null:
+		return  # the arena scene draws the map
 	if forge != null:
 		draw_rect(Rect2(Vector2.ZERO, Vector2(world.room.room_w, world.room.room_h)), ForgeMap.VOID)
 		return  # ForgeMap's chunks draw the rest

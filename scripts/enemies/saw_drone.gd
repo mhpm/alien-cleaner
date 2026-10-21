@@ -91,7 +91,7 @@ func _slam(delta: float) -> void:
 		var c := p.global_position + Vector2(0, Player.BODY_Y)
 		if not _hit and not p.dead and s.global_position.distance_to(c) < SAW_HIT + 6.0:
 			_hit = true
-			p.take_damage(contact_damage * 1.3, s.global_position)
+			p.take_damage(contact_damage * 1.3, hit_center())  # thrown by the drone: no pincer through a wall
 			Game.world.burst(c, Color("ff4fd8"), 10, 70.0, 0.25, 2.0)
 	if state_t <= 0.0:
 		Game.world.burst(mid, Color("ff4fd8"), 14, 90.0, 0.3, 2.0)

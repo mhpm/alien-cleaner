@@ -82,6 +82,8 @@ func _update_arc(delta: float) -> void:
 			if d < best:
 				best = d
 				_link = e
+	if _link != null and fmod(t, 0.25) < delta and Game.world.wall_between(hit_center(), _link.hit_center()):
+		_link = null  # no arc through a wall
 	_arc.visible = _link != null
 	if _link == null:
 		return

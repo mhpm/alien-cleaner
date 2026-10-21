@@ -1,6 +1,6 @@
 ---
 name: new-world
-description: Crea un MUNDO completo de Alien Cleanup Crew cuando el usuario manda el paquete de un mundo nuevo (kit de muros/suelo/esquinas, icono, enemigos y/o jefe). Orquesta en orden el mapa (kit-world-map), los enemigos y el jefe (new-enemy), el objetivo propio del mundo (map-objective), los datos de oleadas, el icono, la prueba y el rendimiento (world-performance). Úsalo con frases como "crea el mundo N", "aquí tienes los assets del nivel N".
+description: Crea un MUNDO completo de Alien Cleanup Crew cuando el usuario manda el paquete de un mundo nuevo (kit de muros/suelo/esquinas, icono, enemigos y/o jefe). Orquesta en orden el mapa (arena-world-map, una escena del Arena Editor), los enemigos y el jefe (new-enemy), el objetivo propio del mundo (map-objective), los datos de oleadas, el icono, la prueba y el rendimiento (world-performance). Úsalo con frases como "crea el mundo N", "aquí tienes los assets del nivel N".
 ---
 
 # Mundo nuevo (de principio a fin)
@@ -19,10 +19,15 @@ Carga las skills que se citan en cada paso cuando llegues a él.
 - Si faltan piezas (sin enemigos nuevos, sin jefe), dilo al terminar; no lo ocultes.
 - Avisa al usuario de vez en cuando en qué paso vas: el trabajo es largo.
 
-## 1. Mapa → skill `kit-world-map`
-- Kit con la misma estructura que w5/w6/w7: solo una entrada en `SETS` de
-  `tools/make_forge_walls.py` + `ForgeMap.LOOKS[set]`. Suelo: por defecto `floor_from` "w5"
-  (baldosas lisas de un color; el usuario lo prefirió en el mundo 7) salvo que pida las suyas.
+## 1. Mapa → skills `arena-world-map` + `arena-decor-kit`
+- **Regla del usuario (desde el mundo 8): el mapa es una escena del Arena Editor**
+  (`scenes/arenas/arena_world_NN_level_01.tscn`) que el usuario edita a mano, conectada con
+  `"explore": {"map": ...}`; nunca un mapa generado en código al jugar. `ForgeMap` solo se
+  usa una vez, dentro del constructor, para el trazado del laberinto.
+- Kit: hojas del usuario → `assets/decor/<mundo>/` (`arena-decor-kit`); constructor =
+  subclase de `tools/arena_map_builder.gd` (copia `build_biodome_arena.gd`).
+- Pasillos amplios pero laberinto (memoria `wide-corridors`), arte sin estirar.
+- Objetivo del mundo como objeto del editor (`ArenaSeedTank`, `ArenaReactorCore`...).
 
 ## 2. Enemigos y jefe → skill `new-enemy`
 - Una sola hoja con varios enemigos: una entrada por enemigo en `cut_sheet_enemies.py`.
@@ -40,7 +45,7 @@ Carga las skills que se citan en cada paso cuando llegues a él.
 ## 4. Datos (`world_data.gd`)
 - Pools `<TEMA>_START / _MID / <TEMA> / _SHOOTERS` arriba del archivo (copia los del mundo 7).
 - Entrada en `WORLDS` copiando la del mundo anterior: `enemy_mult` +0.1, `t_offset` +30,
-  `chest` +300, `pic`, `explore` con `build: kit`, `set`, `cells`, objetivo; 15 oleadas,
+  `chest` +300, `pic`, `"explore": {"map": "res://scenes/arenas/..."}`; 15 oleadas,
   invasiones en 5/10/15, mini jefes en 6 y 11, eventos con `label` propios del tema;
   `boss_help` con aliens del mundo.
 - Música: `"music": "<archivo>"` en la entrada del mundo, eligiendo de `assets/music/levels/` (el usuario va añadiendo pistas; analiza duración/energía con ffmpeg + numpy si hace falta y no repitas la del mundo anterior).
@@ -48,7 +53,7 @@ Carga las skills que se citan en cada paso cuando llegues a él.
 - En builds debug todos los mundos ya salen desbloqueados (`Game.world_unlocked`).
 
 ## 5. Prueba `tests/<mundo>_test.tscn` (copia `warp_nexus_test.gd`)
-- Mapa del kit correcto, inicio libre, objetivo colocado y funcionando, cada enemigo nuevo
+- Mapa de la escena (`ex.arena`), inicio libre, objetivo colocado y funcionando, cada enemigo nuevo
   atacando (dales `max_hp = 1e6`: el autodisparo los mata antes de verlos), cada movimiento
   del jefe forzado con `_next_move`, fases (`hp` al 45% y 15%), muerte.
 - Capturas en ventana (`--resolution 900x1600`, `-- --overview`); haz tiras con PIL y míralas

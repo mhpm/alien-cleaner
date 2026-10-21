@@ -31,6 +31,14 @@ func show_reward(icon: Texture2D, title: String, text: String, color: Color) -> 
 		_next()
 
 
+## Drops the queue and the card showing (the run is over: WIPED OUT, victory).
+func clear() -> void:
+	_queue.clear()
+	if _card != null and is_instance_valid(_card):
+		_card.queue_free()
+	_card = null
+
+
 func _next() -> void:
 	if _queue.is_empty():
 		_card = null
