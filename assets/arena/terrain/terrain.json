@@ -191,6 +191,20 @@
 				"from": "C:/Users/miche/Documents/alien-cleaner/assets/arena/terrain/Cartoon Grass and Dirt Tileset.png",
 				"seamless": true
 			}
+		},
+		{
+			"id": 14,
+			"name": "Biodome floor",
+			"group": "Biodome",
+			"path": "res://assets/arena/terrain/biodome_floor.png",
+			"fill": 1
+		},
+		{
+			"id": 15,
+			"name": "Warp floor",
+			"group": "Warp Nexus",
+			"path": "res://assets/arena/terrain/warp_floor.png",
+			"fill": 1
 		}
 	]
 }

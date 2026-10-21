@@ -84,6 +84,7 @@ func _ready() -> void:
 	get_tree().paused = false
 	if Game.stats.is_empty():
 		Game.new_run()
+	camera.zoom *= zoom_scale()
 	player = Player.new()
 	entities.add_child(player)
 	# frame the painted room art exactly (it is authored for a portrait phone)
@@ -322,6 +323,29 @@ func near_solid(p: Vector2) -> bool:
 	var expires := now + SOLID_TTL + (c.x * 7 + c.y * 13) % 200  # staggered refreshes
 	_solid_cells[c] = expires if hit else -expires
 	return hit
+
+
+## Extra camera zoom for this platform: project setting `game/camera/zoom_scale`
+## (1 = normal; below 1 = further away). PC overrides it with `.pc`.
+static func zoom_scale() -> float:
+	var v: Variant = ProjectSettings.get_setting_with_override("game/camera/zoom_scale")
+	return float(v) if v != null else 1.0
+
+
+## Where the segment a -> b first runs into a wall (layer 1: walls, solid pieces that
+## stop bullets), or b if nothing is in the way. Enemy beams, lashes and lanes stop
+## there: no attack goes through a wall. Low fences (bodies only) let them pass, like bullets.
+func wall_cut(a: Vector2, b: Vector2) -> Vector2:
+	if a.is_equal_approx(b):
+		return b
+	var q := PhysicsRayQueryParameters2D.create(a, b, EnemyShot.WORLD_MASK)
+	var hit := get_world_2d().direct_space_state.intersect_ray(q)
+	return b if hit.is_empty() else Vector2(hit.position)
+
+
+## True when a wall stands between a and b (an attack from a cannot reach b).
+func wall_between(a: Vector2, b: Vector2) -> bool:
+	return not wall_cut(a, b).is_equal_approx(b)
 
 
 ## World-space size of what the camera shows (depends on the camera zoom and screen).
@@ -966,7 +990,7 @@ func telegraph_line(pos: Vector2, dir: Vector2, length: float, width: float, dur
 	tg.kind = "line"
 	tg.position = pos
 	tg.dir = dir
-	tg.length = length
+	tg.length = pos.distance_to(wall_cut(pos, pos + dir.normalized() * length))  # the lane stops at the wall, like the attack
 	tg.width = width
 	tg.dur = dur
 	decals.add_child(tg)

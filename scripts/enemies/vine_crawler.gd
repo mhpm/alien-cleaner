@@ -55,7 +55,7 @@ func _ai(delta: float) -> Vector2:
 				alert.visible = false
 				_whip()
 		"miss":
-			_draw_vine(hit_center() + aim * WHIP_LEN * clampf(state_t / 0.3, 0.0, 1.0))
+			_draw_vine(Game.world.wall_cut(hit_center(), hit_center() + aim * WHIP_LEN * clampf(state_t / 0.3, 0.0, 1.0)))
 			if state_t <= 0.0:
 				_vine.visible = false
 				state = "creep"
@@ -96,8 +96,9 @@ func _hold(delta: float) -> void:
 	if _chew_t <= 0.0:
 		_chew_t = CHEW_EVERY
 		p.take_damage(contact_damage * 0.25, global_position)
-	if state_t <= 0.0 or p.dead or _tether_hp - hp >= max_hp * TETHER_BREAK:
-		if _tether_hp - hp >= max_hp * TETHER_BREAK:
+	var cut := Game.world.wall_between(hit_center(), p.global_position + Vector2(0, Player.BODY_Y))
+	if state_t <= 0.0 or p.dead or cut or _tether_hp - hp >= max_hp * TETHER_BREAK:
+		if cut or _tether_hp - hp >= max_hp * TETHER_BREAK:
 			Game.world.popup_text(hit_center() + Vector2(0, -20), "SNAP!", Color.WHITE, 11)
 		_vine.visible = false
 		state = "creep"

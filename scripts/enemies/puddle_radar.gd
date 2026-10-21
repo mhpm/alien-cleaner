@@ -40,7 +40,7 @@ func _ai(delta: float) -> Vector2:
 	if _ping >= 0.0:
 		_ping += PING_SPEED * delta
 		_ring.queue_redraw()
-		if to_p.length() <= _ping and to_p.length() >= _ping - PING_SPEED * delta * 1.5:
+		if to_p.length() <= _ping and to_p.length() >= _ping - PING_SPEED * delta * 1.5 and sees_player():
 			_strike()
 			_ping = -1.0
 		elif _ping > PING_R:

@@ -13,6 +13,7 @@ var width := 9.0
 var damage := 12.0
 var t := 0.0
 var _tick := 0.0
+var _reach := 0.0  # length up to the first wall (the beam stops there)
 
 
 func _ready() -> void:
@@ -32,12 +33,14 @@ func _process(delta: float) -> void:
 		return
 	global_position = o
 	angle += spin * delta
+	var far := global_position + Vector2.from_angle(angle) * length
+	_reach = global_position.distance_to(Game.world.wall_cut(global_position, far))
 	_tick -= delta
 	if _tick <= 0.0:
 		_tick = 0.1
 		_hurt()
 	if randf() < 0.6:  # sparks along the beam
-		var at := global_position + Vector2.from_angle(angle) * randf_range(10.0, length)
+		var at := global_position + Vector2.from_angle(angle) * randf_range(minf(10.0, _reach), _reach)
 		Game.world.burst(at, Color("ff4fd8"), 1, 25.0, 0.25, 1.5)
 	queue_redraw()
 
@@ -51,7 +54,7 @@ func _hurt() -> void:
 	if p.dead or _k() < 0.6:
 		return
 	var body := p.global_position + Vector2(0, Player.BODY_Y)
-	var end := global_position + Vector2.from_angle(angle) * length
+	var end := global_position + Vector2.from_angle(angle) * _reach
 	var near := Geometry2D.get_closest_point_to_segment(body, global_position, end)
 	if near.distance_to(body) < width * 0.5 + 4.0:
 		p.take_damage(damage, global_position)
@@ -59,7 +62,7 @@ func _hurt() -> void:
 
 func _draw() -> void:
 	var k := _k()
-	var d := Vector2.from_angle(angle) * length
+	var d := Vector2.from_angle(angle) * _reach
 	draw_line(Vector2.ZERO, d, Color(0.85, 0.2, 1.0, 0.25 * k), width * 2.4)
 	draw_line(Vector2.ZERO, d, Color(0.9, 0.3, 1.0, 0.6 * k), width * 1.3)
 	draw_line(Vector2.ZERO, d, Color(1.0, 0.85, 1.0, 0.95 * k), width * 0.5)

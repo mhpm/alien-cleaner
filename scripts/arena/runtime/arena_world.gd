@@ -136,7 +136,7 @@ func enemy_killed(e: Enemy) -> void:
 ## The camera zoom an arena asks for, on top of `base` (BASE_ZOOM for the normal render,
 ## 1.0 for the pixel render where 1 = one art pixel per screen pixel).
 static func zoom_for(d: ArenaData, base: float) -> float:
-	return base * (d.camera_zoom if d != null else 1.0)
+	return base * (d.camera_zoom if d != null else 1.0) * GameWorld.zoom_scale()
 
 
 func on_player_died() -> void:

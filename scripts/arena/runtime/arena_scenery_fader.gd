@@ -35,10 +35,11 @@ func _process(delta: float) -> void:
 	if _t <= 0.0 and not _grid.is_empty():
 		_t = CHECK
 		_check()
-	for s: ArenaScenery in _faded.keys():
-		if not is_instance_valid(s) or s.sprite == null:
-			_faded.erase(s)
+	for k: Variant in _faded.keys():  # untyped: a piece freed meanwhile (the boss ring) stays a key
+		if not is_instance_valid(k) or (k as ArenaScenery).sprite == null:
+			_faded.erase(k)
 			continue
+		var s := k as ArenaScenery
 		# back to the piece's own opacity (its tint), not always 1
 		var want: float = ArenaScenery.FADE_ALPHA * s.tint.a if _faded[s] else s.tint.a
 		s.sprite.modulate.a = move_toward(s.sprite.modulate.a, want, delta * SPEED)
@@ -48,9 +49,12 @@ func _process(delta: float) -> void:
 
 func _check() -> void:
 	var p := world.player.global_position + Vector2(0, -10)  # the astronaut's middle
-	for s: ArenaScenery in _faded.keys():
-		_faded[s] = false
+	for k: Variant in _faded.keys():
+		_faded[k] = false
 	var c := Vector2i((p / CELL).floor())
-	for s: ArenaScenery in _grid.get(c, []):
-		if is_instance_valid(s) and p.y < s.global_position.y - 2.0 and s.cover_rect().has_point(p):
+	for k: Variant in _grid.get(c, []):
+		if not is_instance_valid(k):
+			continue
+		var s := k as ArenaScenery
+		if p.y < s.global_position.y - 2.0 and s.cover_rect().has_point(p):
 			_faded[s] = true

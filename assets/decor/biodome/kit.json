@@ -1,0 +1,1285 @@
+{
+ "name": "Biodome",
+ "items": [
+  {
+   "category": "Walls",
+   "width": 109.52,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    115.52,
+    41.37
+   ],
+   "file": "walls/wall_0.png"
+  },
+  {
+   "category": "Walls",
+   "width": 109.52,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    115.52,
+    41.37
+   ],
+   "file": "walls/wall_1.png"
+  },
+  {
+   "category": "Walls",
+   "width": 109.52,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    115.52,
+    41.65
+   ],
+   "file": "walls/wall_2.png"
+  },
+  {
+   "category": "Walls",
+   "width": 109.52,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    115.52,
+    41.65
+   ],
+   "file": "walls/wall_3.png"
+  },
+  {
+   "category": "Walls",
+   "width": 109.52,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    115.52,
+    42.73
+   ],
+   "file": "walls/wall_4.png"
+  },
+  {
+   "category": "Walls",
+   "width": 24.34,
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    36.34,
+    104.59
+   ],
+   "file": "walls/column_0.png"
+  },
+  {
+   "category": "Walls",
+   "width": 24.34,
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    36.34,
+    104.59
+   ],
+   "file": "walls/column_1.png"
+  },
+  {
+   "category": "Walls",
+   "width": 24.68,
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    36.68,
+    104.59
+   ],
+   "file": "walls/column_2.png"
+  },
+  {
+   "category": "Walls",
+   "width": 24.68,
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    36.68,
+    104.59
+   ],
+   "file": "walls/column_3.png"
+  },
+  {
+   "category": "Walls",
+   "width": 40.56,
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    52.56,
+    104.92
+   ],
+   "file": "walls/column_4.png"
+  },
+  {
+   "category": "Junctions",
+   "width": 103.77,
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    93.4,
+    51.87
+   ],
+   "file": "junctions/cross.png"
+  },
+  {
+   "category": "Junctions",
+   "width": 120.0,
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    108.0,
+    51.87
+   ],
+   "file": "junctions/cross_box.png"
+  },
+  {
+   "category": "Junctions",
+   "width": 79.44,
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    71.49,
+    35.75
+   ],
+   "file": "junctions/corner_top_right.png"
+  },
+  {
+   "category": "Junctions",
+   "width": 79.77,
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    71.8,
+    35.59
+   ],
+   "file": "junctions/corner_top_right_b.png"
+  },
+  {
+   "category": "Junctions",
+   "width": 80.79,
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    72.71,
+    31.79
+   ],
+   "file": "junctions/corner_bottom_left.png"
+  },
+  {
+   "category": "Tanks",
+   "width": 54.6,
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    43.68,
+    19.11
+   ],
+   "file": "tanks/tank_big.png"
+  },
+  {
+   "category": "Tanks",
+   "width": 22.5,
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    18.0,
+    7.87
+   ],
+   "file": "tanks/tank_tube.png"
+  },
+  {
+   "category": "Tanks",
+   "width": 73.8,
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    59.04,
+    22.0
+   ],
+   "file": "tanks/dome.png"
+  },
+  {
+   "category": "Planters",
+   "width": 37.2,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    29.76,
+    13.02
+   ],
+   "file": "planters/planter_flowers.png"
+  },
+  {
+   "category": "Planters",
+   "width": 37.5,
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    30.0,
+    13.12
+   ],
+   "file": "planters/planter_corner_palm.png"
+  },
+  {
+   "category": "Planters",
+   "width": 35.1,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    28.08,
+    12.29
+   ],
+   "file": "planters/planter_wide.png"
+  },
+  {
+   "category": "Planters",
+   "width": 35.1,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    28.08,
+    12.29
+   ],
+   "file": "planters/planter_low.png"
+  },
+  {
+   "category": "Planters",
+   "width": 27.9,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    22.32,
+    9.76
+   ],
+   "file": "planters/planter_small.png"
+  },
+  {
+   "category": "Planters",
+   "width": 43.5,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    34.8,
+    15.22
+   ],
+   "file": "planters/planter_rail.png"
+  },
+  {
+   "category": "Planters",
+   "width": 39.6,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    31.68,
+    13.86
+   ],
+   "file": "planters/planter_long.png"
+  },
+  {
+   "category": "Plants",
+   "width": 22.5,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    18.0,
+    7.87
+   ],
+   "file": "plants/pot_purple.png"
+  },
+  {
+   "category": "Plants",
+   "width": 24.0,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    19.2,
+    8.4
+   ],
+   "file": "plants/pot_palm.png"
+  },
+  {
+   "category": "Plants",
+   "width": 17.1,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    13.68,
+    6.0
+   ],
+   "file": "plants/pot_tall.png"
+  },
+  {
+   "category": "Plants",
+   "width": 23.1,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    18.48,
+    8.08
+   ],
+   "file": "plants/pot_pink.png"
+  },
+  {
+   "category": "Plants",
+   "width": 21.9,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    17.52,
+    7.66
+   ],
+   "file": "plants/pot_bush.png"
+  },
+  {
+   "category": "Plants",
+   "width": 23.1,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    18.48,
+    8.08
+   ],
+   "file": "plants/pot_fern.png"
+  },
+  {
+   "category": "Plants",
+   "width": 20.7,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    16.56,
+    7.24
+   ],
+   "file": "plants/pot_blossom.png"
+  },
+  {
+   "category": "Plants",
+   "width": 21.3,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    17.04,
+    7.46
+   ],
+   "file": "plants/pot_leafy.png"
+  },
+  {
+   "category": "Plants",
+   "width": 20.1,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    16.08,
+    7.03
+   ],
+   "file": "plants/pot_small_fern.png"
+  },
+  {
+   "category": "Plants",
+   "width": 15.6,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    12.48,
+    6.0
+   ],
+   "file": "plants/pot_tiny_purple.png"
+  },
+  {
+   "category": "Plants",
+   "width": 16.2,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    12.96,
+    6.0
+   ],
+   "file": "plants/pot_tiny_green.png"
+  },
+  {
+   "category": "Plants",
+   "width": 15.3,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    12.24,
+    6.0
+   ],
+   "file": "plants/pot_tiny_violet.png"
+  },
+  {
+   "category": "Plants",
+   "width": 24.6,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    19.68,
+    8.61
+   ],
+   "file": "plants/pot_hanging.png"
+  },
+  {
+   "category": "Plants",
+   "width": 19.8,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    15.84,
+    6.93
+   ],
+   "file": "plants/pot_round.png"
+  },
+  {
+   "category": "Plants",
+   "width": 22.5,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    18.0,
+    7.87
+   ],
+   "file": "plants/pot_cascade.png"
+  },
+  {
+   "category": "Plants",
+   "width": 42.0,
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    33.6,
+    14.7
+   ],
+   "file": "plants/palm_box.png"
+  },
+  {
+   "category": "Plants",
+   "width": 34.5,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    27.6,
+    12.07
+   ],
+   "file": "plants/bush_box.png"
+  },
+  {
+   "category": "Plants",
+   "width": 34.5,
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "file": "plants/vine_arch.png"
+  },
+  {
+   "category": "Plants",
+   "width": 31.2,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    24.96,
+    10.92
+   ],
+   "file": "plants/purple_box.png"
+  },
+  {
+   "category": "Plants",
+   "width": 27.3,
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    21.84,
+    9.55
+   ],
+   "file": "plants/vine_pillar.png"
+  },
+  {
+   "category": "Plants",
+   "width": 20.7,
+   "sway": false,
+   "fade": true,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    16.56,
+    7.24
+   ],
+   "file": "plants/vine_column.png"
+  },
+  {
+   "category": "Machines",
+   "width": 57.0,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    45.6,
+    19.95
+   ],
+   "file": "machines/console_bank.png"
+  },
+  {
+   "category": "Machines",
+   "width": 20.1,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    16.08,
+    7.03
+   ],
+   "file": "machines/console_a.png"
+  },
+  {
+   "category": "Machines",
+   "width": 20.1,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    16.08,
+    7.03
+   ],
+   "file": "machines/console_b.png"
+  },
+  {
+   "category": "Machines",
+   "width": 18.3,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    14.64,
+    6.41
+   ],
+   "file": "machines/console_c.png"
+  },
+  {
+   "category": "Machines",
+   "width": 21.0,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    16.8,
+    7.35
+   ],
+   "file": "machines/server_rack.png"
+  },
+  {
+   "category": "Machines",
+   "width": 12.9,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    10.32,
+    6.0
+   ],
+   "file": "machines/terminal_vine.png"
+  },
+  {
+   "category": "Machines",
+   "width": 14.7,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    11.76,
+    6.0
+   ],
+   "file": "machines/terminal.png"
+  },
+  {
+   "category": "Machines",
+   "width": 16.5,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    13.2,
+    6.0
+   ],
+   "file": "machines/capsule.png"
+  },
+  {
+   "category": "Machines",
+   "width": 22.8,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    18.24,
+    7.98
+   ],
+   "file": "machines/analyzer.png"
+  },
+  {
+   "category": "Machines",
+   "width": 15.3,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    12.24,
+    6.0
+   ],
+   "file": "machines/canister_vine.png"
+  },
+  {
+   "category": "Machines",
+   "width": 13.8,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    11.04,
+    6.0
+   ],
+   "file": "machines/holo_sign.png"
+  },
+  {
+   "category": "Machines",
+   "width": 18.0,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    14.4,
+    6.3
+   ],
+   "file": "machines/printer.png"
+  },
+  {
+   "category": "Machines",
+   "width": 19.2,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    15.36,
+    6.72
+   ],
+   "file": "machines/camera.png"
+  },
+  {
+   "category": "Machines",
+   "width": 25.5,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    20.4,
+    8.92
+   ],
+   "file": "machines/scanner.png"
+  },
+  {
+   "category": "Machines",
+   "width": 43.5,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    34.8,
+    15.22
+   ],
+   "file": "machines/hydro_rack.png"
+  },
+  {
+   "category": "Machines",
+   "width": 40.5,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    32.4,
+    14.17
+   ],
+   "file": "machines/cart.png"
+  },
+  {
+   "category": "Storage",
+   "width": 20.1,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    16.08,
+    7.03
+   ],
+   "file": "storage/crate.png"
+  },
+  {
+   "category": "Storage",
+   "width": 19.8,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    15.84,
+    6.93
+   ],
+   "file": "storage/locker.png"
+  },
+  {
+   "category": "Storage",
+   "width": 9.0,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    7.2,
+    6.0
+   ],
+   "file": "storage/locker_narrow.png"
+  },
+  {
+   "category": "Storage",
+   "width": 12.9,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    10.32,
+    6.0
+   ],
+   "file": "storage/locker_tall.png"
+  },
+  {
+   "category": "Storage",
+   "width": 18.0,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    14.4,
+    6.3
+   ],
+   "file": "storage/crate_screen.png"
+  },
+  {
+   "category": "Storage",
+   "width": 20.1,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    16.08,
+    7.03
+   ],
+   "file": "storage/medkit.png"
+  },
+  {
+   "category": "Storage",
+   "width": 15.6,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    12.48,
+    6.0
+   ],
+   "file": "storage/canister.png"
+  },
+  {
+   "category": "Storage",
+   "width": 13.5,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    10.8,
+    6.0
+   ],
+   "file": "storage/cylinder.png"
+  },
+  {
+   "category": "Furniture",
+   "width": 50.7,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    40.56,
+    17.74
+   ],
+   "file": "furniture/bench.png"
+  },
+  {
+   "category": "Furniture",
+   "width": 10.8,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    6.48,
+    5.0
+   ],
+   "file": "furniture/lamp.png"
+  },
+  {
+   "category": "Furniture",
+   "width": 6.9,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    4.14,
+    5.0
+   ],
+   "file": "furniture/bollard.png"
+  },
+  {
+   "category": "Furniture",
+   "width": 14.1,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    11.28,
+    6.0
+   ],
+   "file": "furniture/device.png"
+  },
+  {
+   "category": "Pipes",
+   "width": 27.3,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    21.84,
+    9.55
+   ],
+   "file": "pipes/pipe_arch.png"
+  },
+  {
+   "category": "Pipes",
+   "width": 9.0,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    7.2,
+    6.0
+   ],
+   "file": "pipes/pipe_stub.png"
+  },
+  {
+   "category": "Pipes",
+   "width": 31.8,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    25.44,
+    11.13
+   ],
+   "file": "pipes/pipe_long.png"
+  },
+  {
+   "category": "Pipes",
+   "width": 23.7,
+   "sway": false,
+   "fade": false,
+   "flat": false,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": true,
+   "pixel": false,
+   "solid": [
+    18.96,
+    8.29
+   ],
+   "file": "pipes/pipe_bend.png"
+  },
+  {
+   "category": "Floor",
+   "width": 15.6,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": false,
+   "file": "floor/vent_round.png"
+  },
+  {
+   "category": "Floor",
+   "width": 17.1,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": false,
+   "file": "floor/grate.png"
+  },
+  {
+   "category": "Floor",
+   "width": 16.5,
+   "sway": false,
+   "fade": false,
+   "flat": true,
+   "bridge": false,
+   "shadow": false,
+   "blocks_bullets": false,
+   "pixel": false,
+   "file": "floor/fan_vent.png"
+  }
+ ]
+}

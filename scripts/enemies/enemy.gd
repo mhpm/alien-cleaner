@@ -168,19 +168,28 @@ func player() -> Player:
 	return Game.world.player
 
 
-## Mazes (Explore.flow_dir, world 5): an alien that bumped into a wall while coming for
-## the astronaut follows the way around it for DETOUR_TIME instead of pushing on.
+## No wall between this alien and the astronaut: attacks cast right on the astronaut
+## (runes, pings, clouds) need it, so nothing reaches through a wall.
+func sees_player() -> bool:
+	return not Game.world.wall_between(global_position, player().global_position)
+
+
+## Mazes (Explore.flow_dir, worlds 5-8): an alien that bumped into a wall while coming for
+## the astronaut (or marching on its lure: Explore.flow_dir_to) follows the way around it
+## for DETOUR_TIME instead of pushing on.
 func _detour(vel: Vector2, delta: float) -> Vector2:
 	if hit_wall:
 		detour_t = DETOUR_TIME
 	detour_t -= delta
 	var ex := Game.world.explore
-	if is_boss or ex == null or ex.forge == null:
+	if is_boss or ex == null or not ex.has_flow():
 		return vel
 	var sp := vel.length()
-	if sp < 1.0 or vel.dot(player().global_position - global_position) <= 0.0:
+	var marching := lure != null and is_instance_valid(lure)  # on a seed tank, a decoy...
+	var goal := lure.global_position if marching else player().global_position
+	if sp < 1.0 or vel.dot(goal - global_position) <= 0.0:
 		return vel
-	var f := ex.flow_dir(global_position)
+	var f := ex.flow_dir_to(global_position, goal) if marching else ex.flow_dir(global_position)
 	return vel if f == Vector2.ZERO else f * sp
 
 

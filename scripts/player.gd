@@ -538,6 +538,9 @@ func take_damage(amount: float, from := Vector2.INF, hazard := false) -> void:
 	if dead or invuln > 0.0 or has_buff("shield") or has_buff("star") or infected.untouchable():
 		return
 	var w := Game.world
+	if from.is_finite() and w.wall_between(from, global_position):
+		return  # a wall stands between the attack and the astronaut: it never goes through
+
 	if shield_hits > 0 and not hazard:
 		var col: Color = UpgradeData.SHIELD_COLORS[shield_hits - 1]
 		shield_hits -= 1

@@ -78,7 +78,7 @@ func _update_ray() -> void:
 	if not is_instance_valid(_orb):
 		return
 	var a := hit_center() + Vector2(face * 6.0, 0)
-	var b := _orb.global_position
+	var b := Game.world.wall_cut(a, _orb.global_position)  # a wall cuts the tether ray
 	_ray.visible = true
 	_ray.points = PackedVector2Array([a, b])
 	_ray.default_color = Color(0.4, 0.9, 1.0, 0.65 + 0.35 * sin(t * 40.0))
@@ -88,7 +88,7 @@ func _update_ray() -> void:
 		var q := Geometry2D.get_closest_point_to_segment(c, a, b)
 		if q.distance_to(c) < RAY_HIT:
 			_ray_cd = RAY_CD
-			p.take_damage(contact_damage * 0.7, q)
+			p.take_damage(contact_damage * 0.7, a)
 			Game.world.burst(q, Color("5fd8ff"), 6, 50.0, 0.25, 1.5)
 
 
